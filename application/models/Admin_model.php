@@ -1,0 +1,984 @@
+<?php
+
+class Admin_model extends CI_Model
+{
+  public function __construct()
+  {
+    parent::__construct();
+  }
+  public function get_users()
+  {
+    return $this->db->get('users')->result_array();
+  }
+
+  public function insert_user($data = array())
+  {
+    $log = $this->db->insert('users', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+
+  function table_by_user($tablename, $users_id)
+  {
+    return $this->db->get_where($tablename, array('users_id' => $users_id))->result_array();
+  }
+
+
+  function table_by_doctor($tablename, $doctor_id)
+  {
+    return $this->db->get_where($tablename, array('doctor_id' => $doctor_id))->result_array();
+  }
+
+  function single_tooth($where)
+  {
+    return $this->db->get_where('tooth', $where)->result_array();
+  }
+
+  public function delete_user($data = array())
+  {
+    return $this->db->delete('users', array('id' => $data['id']));
+  }
+  public function get_customers_by_users_id($id)
+  {
+    return $this->db->get_where('customers', array('users_id' => $id))->result_array();
+  }
+
+  public function get_balance_sheet_by_users_id($id)
+  {
+    return $this->db->get_where('balance_sheet', array('users_id' => $id))->result_array();
+  }
+  public function get_loan_by_users_id($id)
+  {
+    return $this->db->get_where('loan', array('users_id' => $id))->result_array();
+  }
+
+  public function get_customers()
+  {
+    return $this->db->query("SELECT customers.*, users.fname AS 'firstname', users.lname AS 'lastname' FROM customers INNER JOIN users ON customers.users_id = users.id  ORDER BY customers.id DESC")->result_array();
+  }
+
+  public function insert_customer($data = array())
+  {
+    $log = $this->db->insert('customers', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function get_balance_sheet_by_customer_id($id)
+  {
+    return $this->db->get_where('balance_sheet', array('customers_id' => $id))->result_array();
+  }
+
+  public function delete_customer($where = array())
+  {
+    return $this->db->delete('customers', $where);
+  }
+  public function single_customer($where = array())
+  {
+    return $this->db->get_where('customers', $where)->result_array();
+  }
+
+  public function update_customer($data, $id)
+  {
+    return $this->db->update('customers', $data, array('id' => $id));
+  }
+
+  public function user_by_customer_id($id)
+  {
+    return $this->db->query("SELECT users.fname, users.lname FROM `customers` INNER JOIN users ON customers.users_id = users.id WHERE customers.id = $id")->result_array();
+  }
+
+  public function user_by_balance_id($id)
+  {
+    return $this->db->query("SELECT users.fname, users.lname FROM `balance_sheet` INNER JOIN users ON balance_sheet.users_id = users.id WHERE balance_sheet.id = $id")->result_array();
+  }
+
+  public function get_balance_sheet()
+  {
+    $date = $this->mylibrary->getCurrentShamsiDate()['date'];
+    return $this->db->query("SELECT `balance_sheet`.*, users.fname AS 'firstname', users.lname AS 'lastname', customers.name, customers.fname FROM `balance_sheet` INNER JOIN `users` ON balance_sheet.users_id = users.id INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE DATE(`balance_sheet`.`shamsi`) BETWEEN DATE('" . $date . "') AND DATE('" . $date . "')  
+        ORDER BY `balance_sheet`.`id` DESC")->result_array();
+  }
+
+  function get_single_balance_with_join($id)
+  {
+    return $this->db->query("SELECT `balance_sheet`.id, balance_sheet.cr, balance_sheet.dr, balance_sheet.shamsi, balance_sheet.remarks, CONCAT(users.fname, ' - ' ,users.lname) AS 'user', customers.name, customers.lname , customers.type FROM `balance_sheet` INNER JOIN customers ON balance_sheet.customers_id = customers.id INNER JOIN users ON balance_sheet.users_id = users.id WHERE balance_sheet.id = '$id'")->result_array();
+  }
+
+  public function get_report_balance_sheet($extra = null)
+  {
+    if (is_null($extra)) {
+      $extra = "DATE(shamsi) = DATE('" . $this->mylibrary->getCurrentShamsiDate()['date'] . "')";
+    }
+
+    return $this->db->query("SELECT `balance_sheet`.*,  CONCAT(customers.name, ' - ', customers.lname) AS 'customer_name', CONCAT(users.fname, ' - ', users.lname) AS 'user_name' FROM `balance_sheet` INNER JOIN `customers` ON balance_sheet.customers_id = customers.id INNER JOIN `users` ON `balance_sheet`.users_id = users.id WHERE " . $extra . " ORDER BY `balance_sheet`.`shamsi` ASC;")->result_array();
+  }
+
+
+  public function get_tooth_income($extra = null)
+  {
+    if (is_null($extra)) {
+      $extra = "DATE(tooth.create_date) = DATE('" . $this->mylibrary->getCurrentShamsiDate()['date'] . "')";
+    }
+
+    return $this->db->query("SELECT tooth.name AS 'tooth_name', tooth.location, tooth.services, tooth.price, tooth.root_number, tooth.create_date, tooth.details, patient.name, patient.lname, patient.gender FROM `tooth` INNER JOIN patient ON tooth.patient_id = patient.id WHERE " . $extra . " ORDER BY `tooth`.`create_date` ASC;")->result_array();
+  }
+
+
+  public function get_turns_paid($extra = null)
+  {
+    if (is_null($extra)) {
+      $extra = "DATE(date) = DATE('" . $this->mylibrary->getCurrentShamsiDate()['date'] . "')";
+    }
+
+    return $this->db->query("SELECT `turn`.*, patient.name,  patient.gender,patient.lname, patient.serial_id FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id WHERE " . $extra . " ORDER BY `turn`.`date` ASC;")->result_array();
+  }
+
+  public function get_labs_expenses($extra = 1)
+  {
+    if (is_null($extra) || $extra == '') {
+      $extra = 1;
+    }
+    return $this->db->query("SELECT `labs`.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.name, patient.lname, patient.gender FROM `labs` INNER JOIN patient ON labs.patient_id = patient.id INNER JOIN customers ON labs.customers_id = customers.id WHERE " . $extra . "  
+    ORDER BY `labs`.`give_date` ASC")->result_array();
+  }
+
+
+  public function get_patient_balance_report($extra = 1)
+  {
+    if (is_null($extra) || $extra == '') {
+      $extra = 1;
+    }
+    return $this->db->query("SELECT patient.id, patient.name, patient.remarks, patient.lname, patient.gender, patient.serial_id, patient.phone1, patient.create, patient.status FROM `patient` WHERE " . $extra . " ORDER BY `create` DESC")->result_array();
+  }
+
+  public function insert_receipt($data = array())
+  {
+    $log = $this->db->insert('balance_sheet', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function get_customer_balance($customer_id = null)
+  {
+    return $this->db->query("SELECT SUM(cr) AS 'cr', SUM(dr) AS 'dr', currency FROM `balance_sheet` WHERE customers_id = '$customer_id' GROUP BY currency;")->result_array();
+  }
+
+  public function customer_by_balance_id($id = null)
+  {
+    return $this->db->query("SELECT customers.name, customers.fname, customers.page FROM `balance_sheet` INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE balance_sheet.id = $id")->result_array();
+  }
+
+  function balance_by_id($id = null)
+  {
+    return $this->db->get_where("balance_sheet", $id)->result_array();
+  }
+  public function delete_balance($where)
+  {
+    return $this->db->delete('balance_sheet', $where);
+  }
+  public function single_balance($where = array())
+  {
+    return $this->db->get_where('balance_sheet', $where)->result_array();
+  }
+
+  public function get_loan()
+  {
+    return $this->db->query("SELECT loan.*, users.fname, users.lname FROM `loan` INNER JOIN users ON loan.users_id = users.id")->result_array();
+  }
+
+  public function update_balance($data, $id)
+  {
+    return $this->db->update('balance_sheet', $data, array('id' => $id));
+  }
+
+  public function insert_loan($data = array())
+  {
+    $log = $this->db->insert('loan', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+  public function delete_loan($where = array())
+  {
+    return $this->db->delete('loan', $where);
+  }
+  public function single_loan($where = array())
+  {
+    return $this->db->get_where('loan', $where)->result_array();
+  }
+
+  public function update_loan($data = array(), $id = null)
+  {
+    return $this->db->update('loan', $data, array('id' => $id));
+  }
+
+  public function user_by_loan_id($id)
+  {
+    return $this->db->query("SELECT users.fname, users.lname FROM `loan` INNER JOIN users ON loan.users_id = users.id WHERE loan.id = $id")->result_array();
+  }
+
+  public function sum_loan()
+  {
+    return $this->db->query("SELECT SUM(price) AS 'sum_price', currency FROM `loan` GROUP BY currency ORDER BY currency ASC;")->result_array();
+  }
+  public function users_dr_balance()
+  {
+    return $this->db->query("SELECT customers.name, customers.fname, `balance_sheet`.currency, SUM(`balance_sheet`.cr) AS 'sum_cr', SUM(`balance_sheet`.dr) AS 'sum_dr' FROM balance_sheet INNER JOIN customers ON balance_sheet.customers_id = customers.id GROUP BY balance_sheet.customers_id, balance_sheet.currency  ORDER BY balance_sheet.customers_id DESC;")->result_array();
+  }
+
+  public function balance_currency()
+  {
+    return $this->db->query("SELECT SUM(cr) AS 'cr', SUM(dr) AS 'dr', balance_sheet.currency FROM balance_sheet GROUP BY currency;")->result_array();
+  }
+
+
+  public function single_user($id)
+  {
+    return $this->db->get_where('users', array('id' => $id))->result_array();
+  }
+
+  public function update_user($data = array(), $id)
+  {
+    return $this->db->update('users', $data, array('id' => $id));
+  }
+
+  function update_password($data = array(), $user_id){
+    return $this->db->update('users', $data, array('id' => $user_id));
+  }
+
+  public function change_user_status($status, $where = array())
+  {
+    return $this->db->update('users', array('status' => $status), $where);
+  }
+
+  public function count_balance()
+  {
+    $date = $this->mylibrary->getCurrentShamsiDate()['date'];
+    return $this->db->query("SELECT * FROM `balance_sheet` WHERE shamsi = '$date'")->result_array();
+  }
+
+  // Start Services
+
+  public function get_services($department = null)
+  {
+    if (is_null($department)) {
+      return $this->db->get('services')->result_array();
+    } else {
+      return $this->db->get_where('services', array('department' => $department))->result_array();
+    }
+  }
+
+  public function delete_service($where = array())
+  {
+    return $this->db->delete('services', $where);
+  }
+
+  public function insert_service($data = array())
+  {
+    $log = $this->db->insert('services', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function single_service($where = array())
+  {
+    return $this->db->get_where('services', $where)->result_array();
+  }
+
+  // End Services
+
+
+  // Start Endo has Services
+  
+  public function insert_endo_has_services($data){
+    return $this->db->insert('endo_has_services', $data);
+  }
+  public function get_endo_has_service($where = array()){
+    return $this->db->get_where('endo_has_services', $where)->result_array();
+  }
+  // End Endo has Services
+
+  // Start restorative services
+  public function insert_restorative_has_services($data)
+  {
+    return $this->db->insert('restorative_has_services', $data);
+  }
+  public function get_restorative_has_service($where = array())
+  {
+    return $this->db->get_where('restorative_has_services', $where)->result_array();
+  }
+  // End restorative services
+
+  // Start prosthodontics services
+
+  public function insert_prosthodontics_has_services($data)
+  {
+    return $this->db->insert('prosthodontics_has_services', $data);
+  }
+
+  // end prosthodontics services
+
+  public function get_patients($status = 'p')
+  {
+    return $this->db->query("SELECT `patient`.*, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `patient` INNER JOIN users ON patient.doctor_id = users.id WHERE patient.status = '$status' ORDER BY patient.create DESC")->result_array();
+  }
+
+	public function get_patients_extra($extra = null)
+	{
+		return $this->db->query("SELECT `patient`.*, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `patient` INNER JOIN users ON patient.doctor_id = users.id WHERE ". $extra ." ORDER BY patient.create DESC")->result_array();
+	}
+
+
+  function get_patients_for_report()
+  {
+    return $this->db->query("SELECT id, name, lname, serial_id, gender FROM `patient` WHERE status != 'b' ORDER BY `id`  DESC")->result_array();
+  }
+
+  public function update_service($data = array(), $id)
+  {
+    return $this->db->update('services', $data, array('id' => $id));
+  }
+
+
+  // Start Categories
+
+
+  public function insert_categories($data = array())
+  {
+    $log = $this->db->insert('categories', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function delete_categories($where = array())
+  {
+    return $this->db->delete('categories', $where);
+  }
+
+  public function table_by_category($tablename, $categories_id)
+  {
+    return $this->db->get_where($tablename, array('categories_id' => $categories_id))->result_array();
+  }
+
+  public function get_categories()
+  {
+    return $this->db->get('categories')->result_array();
+  }
+
+  function categories_by_type($type)
+  {
+    return $this->db->get_where('categories', array('type' => $type))->result_array();
+  }
+
+  public function single_category($id)
+  {
+    return $this->db->get_where('categories', array('id' => $id))->result_array();
+  }
+
+  public function update_categories($data = array(), $id)
+  {
+    return $this->db->update('categories', $data, array('id' => $id));
+  }
+
+  // End Categories
+
+
+  // Start Basic_information_teeth
+
+  function insert_basic_information_teeth($data = array())
+  {
+    $log = $this->db->insert('basic_information_teeth', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function teeth_basic_information_list($department)
+  {
+    return $this->db->query("SELECT `basic_information_teeth`.*, categories.name AS 'category_name' FROM `basic_information_teeth` INNER JOIN categories ON categories.id = basic_information_teeth.categories_id WHERE basic_information_teeth.department = '$department'")->result_array();
+  }
+
+  public function single_basic_teeth_info($where)
+  {
+    return $this->db->get_where('basic_information_teeth', $where)->result_array();
+  }
+
+  public function single_basic_teeth_info_with_category($id)
+  {
+    return $this->db->query("SELECT basic_information_teeth.*, categories.name AS 'category_name' FROM basic_information_teeth INNER JOIN categories ON basic_information_teeth.categories_id = categories.id WHERE basic_information_teeth.id = '$id'")->result_array();
+  }
+
+  public function update_basic_information_teeth($data = array(), $id)
+  {
+    return $this->db->update('basic_information_teeth', $data, array('id' => $id));
+  }
+
+  public function check_basic_info($id, $department = 'endo'){
+    return $this->db->get_where($department . '_has_basic_information_teeth', array('basic_information_teeth_id' => $id))->result_array();
+  }
+
+  public function delete_basic_teeth_info($where = array()){
+    return $this->db->delete('basic_information_teeth', $where);
+  }
+
+
+  // End Basic_information_teeth
+
+  public function get_accounts()
+  {
+    return $this->db->query("SELECT `customers`.*, users.fname, users.role, users.lname AS 'lastname' FROM `customers` INNER JOIN users ON customers.users_id = users.id")->result_array();
+  }
+
+  public function get_lab_account($type = 'l')
+  {
+    return $this->db->get_where('customers', array('type' => $type))->result_array();
+  }
+
+  function labs_patient_id($id)
+  {
+    return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name' FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id WHERE labs.patient_id = '$id' ORDER BY labs.give_date ASC")->result_array();
+  }
+
+
+  public function get_account_with_no_user()
+  {
+    return $this->db->get('customers')->result_array();
+  }
+
+  public function delete_account($where = array())
+  {
+    return $this->db->delete('customers', $where);
+  }
+
+  public function account_receipts($id)
+  {
+    return $this->db->get_where('balance_sheet', array('customers_id' => $id))->result_array();
+  }
+
+  public function insert_account($data = array())
+  {
+    $log = $this->db->insert('customers', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function single_account($where = array())
+  {
+    return $this->db->get_where('customers', $where)->result_array();
+  }
+
+  public function update_account($data = array(), $id)
+  {
+    return $this->db->update('customers', $data, array('id' => $id));
+  }
+
+  public function single_account_with_user($id)
+  {
+    return $this->db->query("SELECT `customers`.*, users.fname, users.lname AS 'lastname', users.role FROM `customers` INNER JOIN users ON customers.users_id = users.id WHERE customers.id = '$id'")->result_array();
+  }
+
+
+  public function get_receipts()
+  {
+    $ci = get_instance();
+    $date = $ci->mylibrary->getCurrentShamsiDate()['date'];
+    return $this->db->query("SELECT `balance_sheet`.*, users.fname AS 'firstname', users.lname AS 'lastname', users.role, customers.name, customers.lname, customers.type FROM `balance_sheet` INNER JOIN `users` ON balance_sheet.users_id = users.id INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE DATE(`balance_sheet`.`shamsi`) BETWEEN DATE('" . $date . "') AND DATE('" . $date . "')  
+    ORDER BY `balance_sheet`.`id` DESC")->result_array();
+  }
+
+
+  public function get_turns($date = null)
+  {
+    if (is_null($date)) {
+      return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.status = 'p' ORDER BY turn.hour ASC")->result_array();
+    } else {
+      return $this->db->query("SELECT turn.*, patient.name, patient.phone1, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.status = 'p' AND turn.date = '$date' ORDER BY turn.hour ASC")->result_array();
+    }
+  }
+
+  public function get_turns_where($where)
+  {
+    return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.status = 'p' " . $where)->result_array();
+  }
+
+
+  public function get_turns_phonebook($date = null)
+  {
+    $ci = get_instance();
+    $today = $ci->mylibrary->getCurrentShamsiDate()['date'];
+    if (is_null($date)) {
+      return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) < DATE('$today') ORDER BY `turn`.`hour` ASC")->result_array();
+    } else {
+      return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) < DATE('$today') AND turn.date = '$date' ORDER BY `turn`.`hour` ASC")->result_array();
+    }
+  }
+
+
+  public function get_turns_page($date = null)
+  {
+    $ci = get_instance();
+    $today = $ci->mylibrary->getCurrentShamsiDate()['date'];
+    if (is_null($date)) {
+      return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) >= DATE('$today') ORDER BY `turn`.`hour` ASC")->result_array();
+    } else {
+      return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) >= DATE('$today') AND turn.date = '$date' ORDER BY `turn`.`hour` ASC")->result_array();
+    }
+  }
+
+
+  public function get_turns_extra($extra = null)
+  {
+    return $this->db->query("SELECT turn.*, patient.name, patient.phone1, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.status = 'p' " . $extra . " ORDER BY `turn`.`hour` ASC")->result_array();
+  }
+
+
+  public function single_turn($where = array())
+  {
+    return $this->db->get_where('turn', $where)->result_array();
+  }
+
+  function insert_turn($data = array())
+  {
+    return $this->db->insert('turn', $data);
+  }
+
+  public function update_turn($data = array(), $id)
+  {
+    return $this->db->update('turn', $data, array('id' => $id));
+  }
+
+  public function insert_turn_form($data = array())
+  {
+    $log = $this->db->insert('turn', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function delete_turn($where = array())
+  {
+    return $this->db->delete('turn', $where);
+  }
+
+  public function delete_lab($where = array())
+  {
+    return $this->db->delete('labs', $where);
+  }
+
+  function insert_lab($data)
+  {
+    $log = $this->db->insert('labs', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  function update_lab($data = array(), $where)
+  {
+    return $this->db->update('labs', $data, $where);
+  }
+
+  public function single_lab($where = array())
+  {
+    return $this->db->get_where('labs', $where)->result_array();
+  }
+
+  function single_lab_print($id)
+  {
+    return $this->db->query("SELECT `labs`.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.name, patient.lname, patient.serial_id, patient.gender FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id INNER JOIN patient ON labs.patient_id = patient.id WHERE labs.id = '$id'")->result_array();
+  }
+
+  function check_turns($date, $doctor = null, $time = null)
+  {
+    if (is_null($doctor)) {
+      return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.date = '$date' AND turn.status = 'p'  ORDER BY turn.hour ASC")->result_array();
+    } elseif (!is_null($time)) {
+      return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.date = '$date' AND turn.doctor_id = '$doctor' AND turn.hour = '$time'  AND turn.status = 'p' ORDER BY turn.hour ASC")->result_array();
+    } else {
+      return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.date = '$date' AND turn.doctor_id = '$doctor' AND turn.status = 'p'  ORDER BY turn.hour ASC")->result_array();
+    }
+  }
+
+  function turn_after_payment($turnId)
+  {
+    return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.id = '$turnId'  ORDER BY turn.hour ASC")->result_array();
+  }
+
+
+  function turn_by_patient($where = array())
+  {
+    return $this->db->get_where('turn', $where)->result_array();
+  }
+
+  function turns_factor($id)
+  {
+    return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' (', users.lname, ')') AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.id = '$id'")->result_array();
+  }
+
+
+  function change_status_turn($status, $data = array())
+  {
+    return $this->db->update('turn', array('status' => $status), $data);
+  }
+
+
+
+
+  function get_serial($date)
+  {
+    $result = $this->db->query("SELECT serial_id FROM `patient` WHERE serial_id LIKE '$date%' ORDER BY serial_id DESC")->result_array();
+
+    if (count($result) !== 0) {
+      return $result[0]['serial_id'];
+    } else {
+      return $date . '0';
+    }
+  }
+
+  public function delete_receipt($where = array())
+  {
+    return $this->db->delete('balance_sheet', $where);
+  }
+
+  public function insert_patient($data = array())
+  {
+    $log = $this->db->insert('patient', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+
+  public function profile_patient($id)
+  {
+    return $this->db->query("SELECT `patient`.*, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name FROM `patient` INNER JOIN users ON patient.doctor_id = users.id WHERE patient.id = '$id'")->result_array();
+  }
+
+  public function list_insert_tooth_basic_information($category_name, $department = 'restorative')
+  {
+    return $this->db->query("SELECT id, name FROM `basic_information_teeth` WHERE categories_id IN (SELECT id from categories WHERE name = '$category_name') AND department = '$department'")->result_array();
+  }
+
+  function get_teeth_by_id($id)
+  {
+    return $this->db->get_where('tooth', array('patient_id' => $id))->result_array();
+  }
+
+  function get_teeth_by_id_with_diagnose($id)
+  {
+    return $this->db->query("
+		SELECT `tooth`.*,
+		   endo.services               AS 'endo_services',
+		   restorative.services        AS 'restorative_services',
+		   prosthodontics.services        AS 'prosthodontics_services',
+		   GROUP_CONCAT(diagnose.name) AS 'diagnose'
+		FROM `tooth`
+			 LEFT JOIN endo ON tooth.id = endo.tooth_id
+			 LEFT JOIN restorative ON tooth.id = restorative.tooth_id
+			 LEFT JOIN prosthodontics ON tooth.id = prosthodontics.tooth_id
+			 INNER JOIN tooth_has_diagnose ON tooth.id = tooth_has_diagnose.tooth_id
+			 INNER JOIN diagnose ON tooth_has_diagnose.diagnose_id = diagnose.id
+		WHERE tooth.patient_id = '$id'
+		GROUP BY tooth.id
+		")->result_array();
+  }
+
+  function delete_tooth($where = array())
+  {
+    return $this->db->delete('tooth', $where);
+  }
+
+  function insert_tooth($data = array())
+  {
+    $log = $this->db->insert('tooth', $data);
+    $id = $this->db->insert_id();
+    return array($log, $id);
+  }
+
+  function  update_tooth($data = array(), $id)
+  {
+    return $this->db->update('tooth', $data, array('id' => $id));
+  }
+
+  // Start Endo
+
+  public function insert_endo($data = array())
+  {
+    $log = $this->db->insert('endo', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function insert_endo_basic_info($data = array())
+  {
+    $log = $this->db->insert('endo_has_basic_information_teeth', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  function single_endo_by_tooth_id($tooth_id){
+    return $this->db->get_where('endo', array('tooth_id' => $tooth_id))->result_array();
+  }
+
+  function endo_basic_information_by_id($id){
+    return $this->db->query("SELECT endo_has_basic_information_teeth.*, categories.name AS 'category_name' FROM `endo_has_basic_information_teeth` INNER JOIN basic_information_teeth ON endo_has_basic_information_teeth.basic_information_teeth_id = basic_information_teeth.id INNER JOIN categories ON basic_information_teeth.categories_id = categories.id WHERE endo_has_basic_information_teeth.endo_id = '$id'")->result_array();
+  }
+
+  // End Endo
+
+
+  // Start restorative
+
+  public function insert_restorative($data = array())
+  {
+    $log = $this->db->insert('restorative', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  public function insert_restorative_basic_info($data = array())
+  {
+    $log = $this->db->insert('restorative_has_basic_information_teeth', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  function single_restorative_by_tooth_id($tooth_id)
+  {
+    return $this->db->get_where('restorative', array('tooth_id' => $tooth_id))->result_array();
+  }
+
+  function restorative_basic_information_by_id($id)
+  {
+    return $this->db->query("SELECT restorative_has_basic_information_teeth.*, categories.name AS 'category_name' FROM `restorative_has_basic_information_teeth` INNER JOIN basic_information_teeth ON restorative_has_basic_information_teeth.basic_information_teeth_id = basic_information_teeth.id INNER JOIN categories ON basic_information_teeth.categories_id = categories.id WHERE restorative_has_basic_information_teeth.restorative_id = '$id'")->result_array();
+  }
+
+  // End restorative
+
+  // Start prosthodontics
+
+  public function insert_prosthodontics($data = array())
+  {
+    $log = $this->db->insert('prosthodontics', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+  public function insert_prosthodontics_basic_info($data = array())
+  {
+    $log = $this->db->insert('prosthodontics_has_basic_information_teeth', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  function single_prosthodontic_by_tooth_id($tooth_id)
+  {
+    return $this->db->get_where('prosthodontics', array('tooth_id' => $tooth_id))->result_array();
+  }
+
+  function prosthodontics_basic_information_by_id($id)
+  {
+    return $this->db->query("SELECT prosthodontics_has_basic_information_teeth.Prosthodontics_id, GROUP_CONCAT(prosthodontics_has_basic_information_teeth.basic_information_teeth_id) AS 'basic_information_teeth_id', categories.name AS 'category_name' FROM `prosthodontics_has_basic_information_teeth` INNER JOIN basic_information_teeth ON prosthodontics_has_basic_information_teeth.basic_information_teeth_id = basic_information_teeth.id INNER JOIN categories ON basic_information_teeth.categories_id = categories.id WHERE prosthodontics_has_basic_information_teeth.prosthodontics_id = '$id' GROUP BY category_name")->result_array();
+  }
+
+  // End prosthodontics
+
+  function get_turn_by_id($id)
+  {
+    return $this->db->get_where('turn', array('patient_id' => $id))->result_array();
+  }
+
+  function update_patient($data, $id)
+  {
+    return $this->db->update('patient', $data, array('id' => $id));
+  }
+
+  function turns_by_patient_id($patient_id)
+  {
+    return $this->db->query("SELECT `turn`.*, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name FROM `turn` INNER JOIN users ON turn.doctor_id = users.id WHERE turn.patient_id = '$patient_id'")->result_array();
+  }
+
+  function table_by_patient($tablename, $patient_id)
+  {
+    return $this->db->get_where($tablename, array('patient_id' => $patient_id))->result_array();
+  }
+
+  function delete_patient($where = array())
+  {
+    return $this->db->delete('patient', $where);
+  }
+
+  function get_doctors()
+  {
+    return $this->db->get_where('users', array('role' => 'D', 'status' => 'A'))->result_array();
+  }
+
+
+
+  public function get_medicines()
+  {
+    return $this->db->get('medicine')->result_array();
+  }
+
+  function delete_medicine($where)
+  {
+    return $this->db->delete('medicine', $where);
+  }
+
+  function single_medicine($where)
+  {
+    return $this->db->get_where('medicine', $where)->result_array();
+  }
+
+  function check_medicine_from_prescription($medicine_id)
+  {
+    return $this->db->query("SELECT * FROM `prescription` WHERE medicine_1 = '$medicine_id' OR medicine_2 = '$medicine_id' OR medicine_3 = '$medicine_id' OR medicine_4 = '$medicine_id' OR medicine_5 = '$medicine_id'")->result_array();
+  }
+
+  public function insert_medicine($data = array())
+  {
+    $log = $this->db->insert('medicine', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  function update_medicine($data = array(), $id)
+  {
+    return $this->db->update('medicine', $data, array('id' => $id));
+  }
+  // End Medicine
+
+
+  // Start Diagnoses
+
+  function get_diagnoses()
+  {
+    return $this->db->get('diagnose')->result_array();
+  }
+
+  function tooth_has_diagnose($id, $type = 'diagnose')
+  {
+    if ($type == 'diagnose') {
+      return $this->db->get_where('tooth_has_diagnose', array('diagnose_id' => $id))->result_array();
+    } else {
+      return $this->db->get_where('tooth_has_diagnose', array('tooth_id' => $id))->result_array();
+    }
+  }
+
+  function delete_diagnose($where)
+  {
+    return $this->db->delete('diagnose', $where);
+  }
+
+  public function insert_diagnose($data = array())
+  {
+    $log = $this->db->insert('diagnose', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  function single_diagnose($where)
+  {
+    return $this->db->get_where('diagnose', $where)->result_array();
+  }
+
+  public function update_diagnose($data = array(), $id)
+  {
+    return $this->db->update('diagnose', $data, array('id' => $id));
+  }
+
+  public function insert_tooth_has_diagnose($array = array())
+  {
+    return $this->db->insert('tooth_has_diagnose', $array);
+  }
+
+  // End Diagnoses
+
+  // start prescription
+
+
+  function single_prescription($where)
+  {
+    return $this->db->get_where('prescription', $where)->result_array();
+  }
+
+  function list_prescription_patient($patient_id)
+  {
+    return $this->db->query("SELECT prescription.id, CONCAT(users.fname, ' - ', users.lname) AS 'user_name', date_time FROM `prescription` INNER JOIN users ON prescription.users_id = users.id WHERE prescription.patient_id = '$patient_id'")->result_array();
+  }
+
+  public function insert_prescription($data = array())
+  {
+    $log = $this->db->insert('prescription', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  function single_prescription_print($id)
+  {
+    return $this->db->query("SELECT `prescription`.*, patient.name, patient.lname, patient.address, patient.age FROM `prescription` INNER JOIN patient ON prescription.patient_id = patient.id WHERE prescription.id = '$id'")->result_array();
+  }
+  // end prescription
+
+
+  // Start Files
+  function get_files_by_patient($id)
+  {
+    return $this->db->get_where('files', array('patient_id' => $id))->result_array();
+  }
+
+  public function insert_files($data = array())
+  {
+    $log = $this->db->insert('files', $data);
+    $id = $this->db->insert_id();
+
+    return array($log, $id);
+  }
+
+  function file_by_id($id)
+  {
+    return $this->db->get_where('files', array('id' => $id))->result_array();
+  }
+  function delete_file($where)
+  {
+    return $this->db->delete('files', $where);
+  }
+
+  // End Files
+
+
+  // start home page
+
+  function find_sum_price_tooth($date = null)
+  {
+    return $this->db->query("SELECT SUM(price) AS sum_price FROM `tooth` WHERE DATE(create_date) = '$date' ORDER BY `tooth`.`create_date`  DESC")->result_array();
+  }
+
+  function find_sum_paid_turn($date = null)
+  {
+    return $this->db->query("SELECT SUM(cr) AS 'sum_cr' FROM `turn` WHERE DATE(pay_date) = '$date'")->result_array();
+  }
+
+  function find_sum_dr_balance_sheet($date = null)
+  {
+    return $this->db->query("SELECT SUM(dr) AS sum_dr FROM `balance_sheet` WHERE DATE(shamsi) = '$date'")->result_array();
+  }
+
+  // end home page
+}
