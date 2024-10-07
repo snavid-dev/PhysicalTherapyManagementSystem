@@ -5,6 +5,8 @@ class Dentist
   public function __construct()
   {
   }
+
+
   public function currency()
   {
     $currency = array(
