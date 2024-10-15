@@ -20,5 +20,3 @@ self.addEventListener('fetch', function (event) {
     })
   );
 });
-
-// new feature about pwa will be added
