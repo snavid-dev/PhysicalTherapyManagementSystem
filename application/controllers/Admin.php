@@ -5503,4 +5503,14 @@ class Admin extends CI_Controller
 
 		print_r(json_encode($data));
 	}
+
+	function render($file_path, $data = null)
+	{
+		if (!is_null($data)){
+			return $this->load->view($file_path, $data);
+		}else{
+			return $this->load->view($file_path);
+		}
+	}
+
 }
