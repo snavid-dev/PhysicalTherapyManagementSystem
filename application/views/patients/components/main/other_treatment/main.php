@@ -400,8 +400,16 @@
 			</div>
 		</div>
 		<div class="col-md-7">
+			<input id="g32CounterValue"
+				   name="r_width2" class="form-control">
 
+			<input id="g32Location"
+				   name="r_width2" class="form-control">
 		</div>
 	</div>
 
 </div>
+
+<!--here is the scripts-->
+<?php
+$ci->render("patients/components/main/other_treatment/teethChart_functoins_js.php");
