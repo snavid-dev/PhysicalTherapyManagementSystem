@@ -81,6 +81,18 @@ class Admin extends CI_Controller
 		$this->load->view('footer');
 	}
 
+	public function user_role()
+	{
+		$data['title'] = $this->lang('users');
+		$data['page'] = "users";
+		$data['users'] = $this->Admin_model->get_users();
+		$data['script_single_patient_assets'] = ['assets/js/users.js'];
+
+		$this->load->view('header', $data);
+		$this->load->view('users/user_role', $data);
+		$this->load->view('footer');
+	}
+
 	public function lock()
 	{
 		$data['title'] = $this->lang('users');
