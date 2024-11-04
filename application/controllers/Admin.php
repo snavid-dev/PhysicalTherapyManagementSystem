@@ -77,7 +77,7 @@ class Admin extends CI_Controller
 		$data['script_single_patient_assets'] = ['assets/js/users.js'];
 
 		$this->load->view('header', $data);
-		$this->load->view('users/index', $data);
+		$this->load->view('users/users', $data);
 		$this->load->view('footer');
 	}
 
