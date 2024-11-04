@@ -13,20 +13,11 @@
 				</div>
 			</div>
 
-			<!--			columns area-->
-			<div class="row">
-				<div class="col-sm-12 col-md-4" style="border: 2px solid limegreen">
-					<h1>Here is div1</h1>
-				</div>
-
-				<div class="col-sm-12 col-md-4" style="border: 2px solid red">
-					<h1>Here is div1</h1>
-				</div>
-
-				<div class="col-sm-12 col-md-4" style="border: 2px solid blue">
-					<h1>Here is div1</h1>
-				</div>
-			</div>
+			<!--columns area start-->
+			<?php
+			$ci->render('users/components/permissions_group_column.php');
+			?>
+			<!--columns area end-->
 
 		</div>
 	</div>
