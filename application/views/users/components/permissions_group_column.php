@@ -279,4 +279,6 @@
 		// return toggleStates; // Return the states if you want to use it further
 	}
 
+// 	its just a fucking test
+
 </script>
