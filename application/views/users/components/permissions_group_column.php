@@ -3,43 +3,28 @@
 <div class="row" id="permissionContainer" style="margin-top: 50px">
 
 
-	<div class="col-sm-12 col-md-3" id="permissionContainer1">
+	<div class="col-sm-12 col-md-3" id="turnsPermission">
 		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="myDetails1">
+			<details class="customAccordion__details pointerEventsDisable" id="turnsDetails">
 				<summary class="customAccordion__summary">
-					Permission 1
+					Turns
 				</summary>
 				<div class="customAccordion__content">
 					<div class="customAccordion__permissions">
+
 						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
+							<input role="switch" type="checkbox" class="switch-input" id="turns_insert" />
+							<label class="switch-input-label">insert</label>
 						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
+
 					</div>
 
 					<div class="customHr"></div>
 
-					<button class="customSaveBTN" id="savePermissionBTN" onclick="setupSaveButton('savePermissionBTN', 'permission1', 'myDetails1', 'permissionContainer1');"> Save </button>
+					<button class="customSaveBTN" id="savePermissionBTN" onclick="setupSaveButton('savePermissionBTN', 'turns_Checkbox', 'turnsDetails', 'turnsPermission'); trackToggleStates('turnsPermission')"> Save </button>
+<!--					<button id="savePermissionBTN" onclick="console.log(trackToggleStates('turnsPermission')); alert('clicked')">-->
+<!--						saveX-->
+<!--					</button>-->
 
 				</div>
 			</details>
@@ -48,7 +33,7 @@
 			?>
 
 			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="permission1" onclick="setupCheckboxLogging('permission1','myDetails1', 'permissionContainer1')" >
+				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="turns_Checkbox" onclick="setupCheckboxLogging('turns_Checkbox','turnsDetails', 'turnsPermission')" >
 				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
 					<path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
 						  pathLength="575.0541381835938" class="custom-checkbox-path">
@@ -60,43 +45,38 @@
 
 	</div>
 
-	<div class="col-sm-12 col-md-3" id="permissionContainer2">
+	<div class="col-sm-12 col-md-3" id="receiptsPermission">
 		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="myDetails2">
+			<details class="customAccordion__details pointerEventsDisable" id="receiptsDetails">
 				<summary class="customAccordion__summary">
-					Permission 2
+					receipts
 				</summary>
 				<div class="customAccordion__content">
 					<div class="customAccordion__permissions">
+
 						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
+							<input role="switch" type="checkbox" class="switch-input" id="receipts_insert" />
+							<label class="switch-input-label">insert</label>
 						</div>
+
 						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
+							<input role="switch" type="checkbox" class="switch-input" id="receipts_update" />
+							<label class="switch-input-label">update</label>
 						</div>
+
 						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
+							<input role="switch" type="checkbox" class="switch-input" id="receipts_delete" />
+							<label class="switch-input-label">delete</label>
 						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
+
 					</div>
 
 					<div class="customHr"></div>
 
-					<button class="customSaveBTN" id="savePermissionBTN2" onclick="setupSaveButton('savePermissionBTN2', 'permission2', 'myDetails2', 'permissionContainer2');"> Save </button>
+					<button class="customSaveBTN" id="savePermissionBTN" onclick="setupSaveButton('savePermissionBTN', 'receipts_Checkbox', 'receiptsDetails', 'receiptsPermission'); trackToggleStates('receiptsPermission')"> Save </button>
+					<!--					<button id="savePermissionBTN" onclick="console.log(trackToggleStates('turnsPermission')); alert('clicked')">-->
+					<!--						saveX-->
+					<!--					</button>-->
 
 				</div>
 			</details>
@@ -105,7 +85,7 @@
 			?>
 
 			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="permission2" onclick="setupCheckboxLogging('permission2','myDetails2', 'permissionContainer2')" >
+				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="receipts_Checkbox" onclick="setupCheckboxLogging('receipts_Checkbox','receiptsDetails', 'receiptsPermission')" >
 				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
 					<path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
 						  pathLength="575.0541381835938" class="custom-checkbox-path">
@@ -117,176 +97,7 @@
 
 	</div>
 
-	<div class="col-sm-12 col-md-3" id="permissionContainer3">
-		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="myDetails3">
-				<summary class="customAccordion__summary">
-					Permission 3
-				</summary>
-				<div class="customAccordion__content">
-					<div class="customAccordion__permissions">
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-					</div>
 
-					<div class="customHr"></div>
-
-					<button class="customSaveBTN" id="savePermissionBTN3" onclick="setupSaveButton('savePermissionBTN3', 'permission3', 'myDetails3', 'permissionContainer3');"> Save </button>
-
-				</div>
-			</details>
-			<?php
-			//			$ci->render('users/components/custom_checkBox.php');
-			?>
-
-			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="permission3" onclick="setupCheckboxLogging('permission3','myDetails3', 'permissionContainer3')" >
-				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
-					<path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
-						  pathLength="575.0541381835938" class="custom-checkbox-path">
-					</path>
-				</svg>
-			</label>
-
-		</div>
-
-	</div>
-
-	<div class="col-sm-12 col-md-3" id="permissionContainer4">
-		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="myDetails4">
-				<summary class="customAccordion__summary">
-					Permission 4
-				</summary>
-				<div class="customAccordion__content">
-					<div class="customAccordion__permissions">
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-					</div>
-
-					<div class="customHr"></div>
-
-					<button class="customSaveBTN" id="savePermissionBTN4" onclick="setupSaveButton('savePermissionBTN4', 'permission4', 'myDetails4', 'permissionContainer4');"> Save </button>
-
-				</div>
-			</details>
-			<?php
-			//			$ci->render('users/components/custom_checkBox.php');
-			?>
-
-			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="permission4" onclick="setupCheckboxLogging('permission4','myDetails4', 'permissionContainer4')" >
-				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
-					<path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
-						  pathLength="575.0541381835938" class="custom-checkbox-path">
-					</path>
-				</svg>
-			</label>
-
-		</div>
-
-	</div>
-
-	<div class="col-sm-12 col-md-3" id="permissionContainer5">
-		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="myDetails5">
-				<summary class="customAccordion__summary">
-					Permission 5
-				</summary>
-				<div class="customAccordion__content">
-					<div class="customAccordion__permissions">
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="switchId" />
-							<label class="switch-input-label">permission1</label>
-						</div>
-					</div>
-
-					<div class="customHr"></div>
-
-					<button class="customSaveBTN" id="savePermissionBTN5" onclick="setupSaveButton('savePermissionBTN5', 'permission5', 'myDetails5', 'permissionContainer5');"> Save </button>
-
-				</div>
-			</details>
-			<?php
-			//			$ci->render('users/components/custom_checkBox.php');
-			?>
-
-			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="permission5" onclick="setupCheckboxLogging('permission5','myDetails5', 'permissionContainer5')" >
-				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
-					<path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
-						  pathLength="575.0541381835938" class="custom-checkbox-path">
-					</path>
-				</svg>
-			</label>
-
-		</div>
-
-	</div>
 
 
 
@@ -409,7 +220,6 @@
 
 </script>
 
-
 <script>
 	document.addEventListener("DOMContentLoaded", function() {
 		// Select all permission checkboxes
@@ -439,5 +249,34 @@
 			});
 		});
 	});
+
+</script>
+
+<script>
+	function trackToggleStates(category_id) {
+		// store the toggle states
+		const toggleStates = {};
+
+		//permission containers
+		const permissionContainers = document.querySelectorAll(`[id^="${category_id}"]`); //remember this shit It may be usable for future
+
+		permissionContainers.forEach(container => {
+			const containerId = container.id;
+			toggleStates[containerId] = []; // I copy this form stackoverflow (remember)
+
+			// Find all switch checkbox
+			const switches = container.querySelectorAll('.switch-input');
+
+			switches.forEach((input, index) => {
+				if (input.checked) {
+					// store the switches with theri ID
+					toggleStates[containerId].push({switchId: input.id });
+				}
+			});
+		});
+
+		console.log(toggleStates); // Print the toggle states to the console
+		// return toggleStates; // Return the states if you want to use it further
+	}
 
 </script>
