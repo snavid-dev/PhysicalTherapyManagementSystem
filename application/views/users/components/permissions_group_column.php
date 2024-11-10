@@ -22,9 +22,6 @@
 					<div class="customHr"></div>
 
 					<button class="customSaveBTN" id="savePermissionBTN" onclick="setupSaveButton('savePermissionBTN', 'turns_Checkbox', 'turnsDetails', 'turnsPermission'); trackToggleStates('turnsPermission')"> Save </button>
-<!--					<button id="savePermissionBTN" onclick="console.log(trackToggleStates('turnsPermission')); alert('clicked')">-->
-<!--						saveX-->
-<!--					</button>-->
 
 				</div>
 			</details>
@@ -73,10 +70,12 @@
 
 					<div class="customHr"></div>
 
-					<button class="customSaveBTN" id="savePermissionBTN" onclick="setupSaveButton('savePermissionBTN', 'receipts_Checkbox', 'receiptsDetails', 'receiptsPermission'); trackToggleStates('receiptsPermission')"> Save </button>
-					<!--					<button id="savePermissionBTN" onclick="console.log(trackToggleStates('turnsPermission')); alert('clicked')">-->
-					<!--						saveX-->
-					<!--					</button>-->
+					<div class="permissionContainer_footer">
+<!--						<button class="customSaveBTN" id="savePermissionBTN" onclick="setupSaveButton('savePermissionBTN', 'receipts_Checkbox', 'receiptsDetails', 'receiptsPermission'); trackToggleStates('receiptsPermission')"> Save </button>-->
+						<button class="btn btn-primary" onclick="toggleAllToggles('receiptsPermission')"> Select all </button>
+						<button class="btn btn-success" id="savePermissionBTN" onclick="setupSaveButton('savePermissionBTN', 'receipts_Checkbox', 'receiptsDetails', 'receiptsPermission'); trackToggleStates('receiptsPermission')"> Save </button>
+					</div>
+
 
 				</div>
 			</details>
@@ -208,6 +207,7 @@
 			checkbox.addEventListener('change', function () {
 				if (this.checked) {
 					openDetails(detailsTagId, permissionContainer1);
+					
 				} else {
 					closeDetails(detailsTagId, permissionContainer1);
 				}
@@ -278,5 +278,57 @@
 		console.log(toggleStates); // Print the toggle states to the console
 		// return toggleStates; // Return the states if you want to use it further
 	}
+
+
+	// function toggleAllToggles(sectionId, toggleState) {
+	// 	// Find the section element by its ID
+	// 	const section = document.getElementById(sectionId);
+	//
+	// 	if (!section) {
+	// 		console.warn(`Section with ID ${sectionId} not found.`);
+	// 		return;
+	// 	}
+	//
+	// 	// Get all checkboxes within the section
+	// 	const checkboxes = section.querySelectorAll('.switch-input');
+	//
+	// 	// Toggle each checkbox based on the provided state
+	// 	checkboxes.forEach(checkbox => {
+	// 		checkbox.checked = toggleState;
+	// 	});
+	//
+	// 	console.log(`All toggles in ${sectionId} are now ${toggleState ? 'ON' : 'OFF'}.`);
+	// }
+
+
+	let toggleState = true; // Global state to track the toggle status
+
+	function toggleAllToggles(sectionId) {
+		// Find the section element by its ID
+		const section = document.getElementById(sectionId);
+
+		if (!section) {
+			console.warn(`Section with ID ${sectionId} not found.`);
+			return;
+		}
+
+		// Get all checkboxes within the section
+		const checkboxes = section.querySelectorAll('.switch-input');
+
+		// Toggle each checkbox based on the global state
+		checkboxes.forEach(checkbox => {
+			checkbox.checked = toggleState;
+		});
+
+		// Log the state change
+		console.log(`All toggles in ${sectionId} are now ${toggleState ? 'ON' : 'OFF'}.`);
+
+		// Toggle the state for the next click
+		toggleState = !toggleState;
+	}
+
+
+
+
 
 </script>
