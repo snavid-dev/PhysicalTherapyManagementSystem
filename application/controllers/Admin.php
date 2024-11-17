@@ -5,6 +5,7 @@ class Admin extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->library('Auth');
 		$this->language->startup('fa');
 		$this->load->model('Admin_model');
 		if (!$this->session->userdata($this->mylibrary->hash_session('logged_in'))) {
@@ -52,6 +53,7 @@ class Admin extends CI_Controller
 
 	public function index()
 	{
+		$this->auth->require_permission('View Appointments');
 		$data['title'] = $this->lang('home');;
 		$data['page'] = "home";
 		$data['patients'] = $this->Admin_model->get_patients();
@@ -5518,9 +5520,9 @@ class Admin extends CI_Controller
 
 	function render($file_path, $data = null)
 	{
-		if (!is_null($data)){
+		if (!is_null($data)) {
 			return $this->load->view($file_path, $data);
-		}else{
+		} else {
 			return $this->load->view($file_path);
 		}
 	}
