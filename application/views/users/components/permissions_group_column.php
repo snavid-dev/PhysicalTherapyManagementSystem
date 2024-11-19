@@ -1,267 +1,74 @@
 <?php $ci = get_instance(); ?>
 
+
 <div class="row" id="permissionContainer" style="margin-top: 50px">
 
+	<?php
+	foreach ($permissions as $category):
+		?>
+		<div class="col-sm-12 col-md-3 permissionDev" id="<?= $category['category_id'] ?>">
+			<div id="customAccordion">
+				<details class="customAccordion__details pointerEventsDisable"
+						 id="details<?= $category['category_id'] ?>">
+					<summary class="customAccordion__summary">
+						<?= $category['category_name'] ?>
+					</summary>
+					<div class="customAccordion__content">
+						<div class="customAccordion__permissions">
 
-	<div class="col-sm-12 col-md-3 permissionDev" id="receiptsPermission">
-		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="receiptsDetails">
-				<summary class="customAccordion__summary">
-					receipts
-				</summary>
-				<div class="customAccordion__content">
-					<div class="customAccordion__permissions">
+							<?php
+							foreach ($category['permissions'] as $permission):
+								?>
+								<div class="switch flex_switch">
+									<input role="switch" type="checkbox" class="switch-input"
+										   value="<?= $permission['permission_id'] ?>"/>
+									<label class="switch-input-label"><?= $permission['permission_name'] ?></label>
+								</div>
+							<?php
+							endforeach;
+							?>
 
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="receipts_insert" value="insert"/>
-							<label class="switch-input-label">insert</label>
 						</div>
 
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="receipts_update" value="update"/>
-							<label class="switch-input-label">update</label>
+						<div class="customHr"></div>
+
+						<div class="permissionContainer_footer">
+							<button class="btn btn-primary"
+									onclick="toggleAllToggles(<?= $category['category_id'] ?>)"> Select all
+							</button>
+							<button class="btn btn-primary" id="PermissionCancel<?= $category['category_id'] ?>"
+									onclick='setupCancelButton("PermissionCancel<?= $category['category_id'] ?>","checkbox<?= $category['category_id'] ?>","details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>")'>
+								cancel
+							</button>
+							<button class="btn btn-success" id="savePermissionBTN_<?= $category['category_id'] ?>"
+									onclick='setupSaveButton("savePermissionBTN_<?= $category['category_id'] ?>", "checkbox<?= $category['category_id'] ?>", "details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>"); trackToggleStates("<?= $category['category_id'] ?>")'>
+								Save
+							</button>
 						</div>
 
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="receipts_delete" value="delete"/>
-							<label class="switch-input-label">delete</label>
-						</div>
 
 					</div>
-
-					<div class="customHr"></div>
-
-					<div class="permissionContainer_footer">
-						<!--						<button class="customSaveBTN" id="savePermissionBTN" onclick="setupSaveButton('savePermissionBTN', 'receipts_Checkbox', 'receiptsDetails', 'receiptsPermission'); trackToggleStates('receiptsPermission')"> Save </button>-->
-						<button class="btn btn-primary" onclick="toggleAllToggles('receiptsPermission')"> Select all
-						</button>
-						<!--						setupCancelButton(cancelButtonId, checkboxId, detailsTagId, permissionContainer1)-->
-						<button class="btn btn-primary" id="receiptsPermissionCancel"
-								onclick="setupCancelButton('receiptsPermissionCancel','receipts_Checkbox','receiptsDetails', 'receiptsPermission')">
-							cancel
-						</button>
-						<button class="btn btn-success" id="savePermissionBTN_recepts"
-								onclick="setupSaveButton('savePermissionBTN_recepts', 'receipts_Checkbox', 'receiptsDetails', 'receiptsPermission'); trackToggleStates('receiptsPermission')">
-							Save
-						</button>
-					</div>
+				</details>
 
 
-				</div>
-			</details>
-			<?php
-			//			$ci->render('users/components/custom_checkBox.php');
-			?>
+				<label class="custom-checkbox-container" style="margin-top: 16px">
+					<input type="checkbox" class="custom-checkbox-input permissionCheckBox"
+						   id="checkbox<?= $category['category_id'] ?>"
+						   onclick='setupCheckboxLogging("checkbox<?= $category['category_id'] ?>","details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>")'>
+					<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
+						<path
+							d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+							pathLength="575.0541381835938" class="custom-checkbox-path">
+						</path>
+					</svg>
+				</label>
 
-			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="receipts_Checkbox"
-					   onclick="setupCheckboxLogging('receipts_Checkbox','receiptsDetails', 'receiptsPermission')">
-				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
-					<path
-						d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
-						pathLength="575.0541381835938" class="custom-checkbox-path">
-					</path>
-				</svg>
-			</label>
+			</div>
 
 		</div>
-
-	</div>
-
-	<div class="col-sm-12 col-md-3 permissionDev" id="callLogPermission">
-		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="callLogDetails">
-				<summary class="customAccordion__summary">
-					Call Log
-				</summary>
-				<div class="customAccordion__content">
-					<div class="customAccordion__permissions">
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="callLog_insert"/>
-							<label class="switch-input-label">insert</label>
-						</div>
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="callLog_update"/>
-							<label class="switch-input-label">update</label>
-						</div>
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="callLog_delete"/>
-							<label class="switch-input-label">delete</label>
-						</div>
-
-					</div>
-
-					<div class="customHr"></div>
-
-					<div class="permissionContainer_footer">
-						<button class="btn btn-primary" onclick="toggleAllToggles('callLogPermission')"> Select all
-						</button>
-						<button class="btn btn-primary" id="callLogPermissionCancel"
-								onclick="setupCancelButton('callLogPermissionCancel','callLog_Checkbox','callLogDetails', 'callLogPermission')">
-							cancel
-						</button>
-						<button class="btn btn-success" id="savePermissionBTN_callLog"
-								onclick="setupSaveButton('savePermissionBTN_callLog', 'callLog_Checkbox', 'callLogDetails', 'callLogPermission'); trackToggleStates('callLogPermission')">
-							Save
-						</button>
-					</div>
-
-
-				</div>
-			</details>
-			<?php
-			//			$ci->render('users/components/custom_checkBox.php');
-			?>
-
-			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="callLog_Checkbox"
-					   onclick="setupCheckboxLogging('callLog_Checkbox','callLogDetails', 'callLogPermission')">
-				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
-					<path
-						d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
-						pathLength="575.0541381835938" class="custom-checkbox-path">
-					</path>
-				</svg>
-			</label>
-
-		</div>
-	</div>
-
-	<div class="col-sm-12 col-md-3 permissionDev" id="turnsPermission">
-		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="turnsDetails">
-				<summary class="customAccordion__summary">
-					Turns
-				</summary>
-				<div class="customAccordion__content">
-					<div class="customAccordion__permissions">
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="turns_insert"/>
-							<label class="switch-input-label">insert</label>
-						</div>
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="turns_update"/>
-							<label class="switch-input-label">update</label>
-						</div>
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" id="turns_delete"/>
-							<label class="switch-input-label">delete</label>
-						</div>
-
-					</div>
-
-					<div class="customHr"></div>
-
-					<div class="permissionContainer_footer">
-						<button class="btn btn-primary" onclick="toggleAllToggles('turnsPermission')"> Select all
-						</button>
-						<button class="btn btn-primary" id="turnsPermissionCancel"
-								onclick="setupCancelButton('turnsPermissionCancel','turns_Checkbox','turnsDetails', 'turnsPermission')">
-							cancel
-						</button>
-						<button class="btn btn-success" id="savePermissionBTN_turns"
-								onclick="setupSaveButton('savePermissionBTN_turns', 'turns_Checkbox', 'turnsDetails', 'turnsPermission'); trackToggleStates('turnsPermission')">
-							Save
-						</button>
-					</div>
-
-
-				</div>
-			</details>
-			<?php
-			//			$ci->render('users/components/custom_checkBox.php');
-			?>
-
-			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="turns_Checkbox"
-					   onclick="setupCheckboxLogging('turns_Checkbox','turnsDetails', 'turnsPermission')">
-				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
-					<path
-						d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
-						pathLength="575.0541381835938" class="custom-checkbox-path">
-					</path>
-				</svg>
-			</label>
-
-		</div>
-
-	</div>
-
-	<div class="col-sm-12 col-md-3 permissionDev" id="patientsPermission">
-<!--		1-->
-		<div id="customAccordion">
-			<details class="customAccordion__details pointerEventsDisable" id="patientsDetails">
-				<summary class="customAccordion__summary">
-					Patients
-				</summary>
-				<div class="customAccordion__content">
-					<div class="customAccordion__permissions">
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" value="1"/>
-							<label class="switch-input-label">insert</label>
-						</div>
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" value="2"/>
-							<label class="switch-input-label">update</label>
-						</div>
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" value="3"/>
-							<label class="switch-input-label">delete</label>
-						</div>
-
-						<div class="switch flex_switch">
-							<input role="switch" type="checkbox" class="switch-input" value="4"/>
-							<label class="switch-input-label">list</label>
-						</div>
-
-					</div>
-
-					<div class="customHr"></div>
-
-					<div class="permissionContainer_footer">
-						<button class="btn btn-primary" onclick="toggleAllToggles('patientsPermission')"> Select all
-						</button>
-						<button class="btn btn-primary" id="patientsPermissionCancel"
-								onclick="setupCancelButton('patientsPermissionCancel','patients_Checkbox','patientsDetails', 'patientsPermission')">
-							cancel
-						</button>
-						<button class="btn btn-success" id="savePermissionBTN_patients"
-								onclick="setupSaveButton('savePermissionBTN_patients', 'patients_Checkbox', 'patientsDetails', 'patientsPermission'); trackToggleStates('patientsPermission')">
-							Save
-						</button>
-					</div>
-
-
-				</div>
-			</details>
-			<?php
-			//			$ci->render('users/components/custom_checkBox.php');
-			?>
-
-			<label class="custom-checkbox-container" style="margin-top: 16px">
-				<input type="checkbox" class="custom-checkbox-input permissionCheckBox" id="patients_Checkbox"
-					   onclick="setupCheckboxLogging('patients_Checkbox','patientsDetails', 'patientsPermission')">
-				<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
-					<path
-						d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
-						pathLength="575.0541381835938" class="custom-checkbox-path">
-					</path>
-				</svg>
-			</label>
-
-		</div>
-
-	</div>
-
+	<?php
+	endforeach;
+	?>
 
 </div>
 
@@ -399,27 +206,27 @@
 
 		if (cancelButton) {
 			// cancelButton.addEventListener("click", function () {
-				if (checkbox) {
-					checkbox.checked = false;
-					checkbox.dispatchEvent(new Event("change"));
-				}
+			if (checkbox) {
+				checkbox.checked = false;
+				checkbox.dispatchEvent(new Event("change"));
+			}
 
-				if (detailsTag) {
-					detailsTag.removeAttribute("open");
-					detailsTag.classList.add("pointerEventsDisable");
-				}
+			if (detailsTag) {
+				detailsTag.removeAttribute("open");
+				detailsTag.classList.add("pointerEventsDisable");
+			}
 
-				if (permissionContainer) {
-					permissionContainer.classList.remove("col-md-12");
-					permissionContainer.classList.add("col-md-3");
-				}
+			if (permissionContainer) {
+				permissionContainer.classList.remove("col-md-12");
+				permissionContainer.classList.add("col-md-3");
+			}
 
-				clearDisablePermissions();
+			clearDisablePermissions();
 
-				if (section) {
-					const toggles = section.querySelectorAll(".switch-input");
-					toggles.forEach(toggle => (toggle.checked = false));
-				}
+			if (section) {
+				const toggles = section.querySelectorAll(".switch-input");
+				toggles.forEach(toggle => (toggle.checked = false));
+			}
 			// });
 		} else {
 			console.error(`Button with ID ${cancelButtonId} not found.`);
@@ -439,7 +246,7 @@
 		toggleState = !toggleState;
 	}
 
-		function trackToggleStates(categoryId) {
+	function trackToggleStates(categoryId) {
 		// Create an array to store values of checked switches
 		const activeSwitchValues = [];
 
@@ -461,7 +268,6 @@
 		console.log(activeSwitchValues); // Print the list of active switch values to the console
 		return activeSwitchValues; // Return the list if you want to use it further
 	}
-
 
 
 	let toggleState = true; // Global state to track the toggle status
