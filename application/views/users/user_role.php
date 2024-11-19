@@ -51,33 +51,40 @@
 			toggledStatesByCategory[categoryId] = toggledSwitchValues;
 		});
 
-		// Log or handle the collected toggled states as needed
-		console.log(toggledStatesByCategory);
-		console.log(roleName);
-		// return toggledStatesByCategory;
+		// Transform the object to the desired array format
+		const resultArray = Object.entries(toggledStatesByCategory).map(([key, value]) => ({
+			category_id: parseInt(key, 10), // Convert key to integer if necessary
+			permissions: value.map(Number)  // Ensure values are numbers
+		}));
+
+		// Log or handle the transformed result as needed
+		// console.log(resultArray);
+		// console.log(roleName);
+		// return resultArray;
+		$.ajax({
+			url: '<?= base_url() ?>Roles/insert_role',
+			type: 'POST',
+			data: {
+				role_name: 'Doctor',
+				categories: [
+					{ category_id: 1, permissions: [1, 2] },
+					{ category_id: 2, permissions: [3, 4] }
+				]
+			},
+			dataType: 'json',
+			success: function(response) {
+				if (response.status === 'success') {
+					alert('Role and permissions added successfully!');
+				} else {
+					alert('Error: ' + response.message);
+				}
+			},
+			error: function() {
+				alert('An error occurred while processing the request.');
+			}
+		});
 	}
 
-	$.ajax({
-		url: '<?= base_url() ?>Roles/insert_role',
-		type: 'POST',
-		data: {
-			role_name: 'Doctor',
-			categories: [
-				{ category_id: 1, permissions: [1, 2] },
-				{ category_id: 2, permissions: [3, 4] }
-			]
-		},
-		dataType: 'json',
-		success: function(response) {
-			if (response.status === 'success') {
-				alert('Role and permissions added successfully!');
-			} else {
-				alert('Error: ' + response.message);
-			}
-		},
-		error: function() {
-			alert('An error occurred while processing the request.');
-		}
-	});
+
 </script>
 

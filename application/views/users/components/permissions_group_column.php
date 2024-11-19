@@ -265,7 +265,7 @@
 			});
 		});
 
-		console.log(activeSwitchValues); // Print the list of active switch values to the console
+		// console.log(activeSwitchValues); // Print the list of active switch values to the console
 		return activeSwitchValues; // Return the list if you want to use it further
 	}
 
