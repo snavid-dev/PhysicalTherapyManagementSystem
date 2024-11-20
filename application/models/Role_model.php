@@ -14,6 +14,11 @@ class Role_model extends CI_Model
 		return $this->db->get('roles')->result();
 	}
 
+	public function get_role($id)
+	{
+		return $this->db->get_where('roles', array('id' => $id))->result();
+	}
+
 	public function assign_permission($role_id, $permission_id)
 	{
 		return $this->db->insert('role_permissions', [
