@@ -11,21 +11,9 @@ class Roles extends CI_Controller
 
 	public function insert_role()
 	{
-		// Read raw input stream
-		$rawData = file_get_contents("php://input");
-
-		// Decode JSON data into an associative array
-		$data = json_decode($rawData, true);
-		// Validate data
-		if (empty($data['role_name']) || empty($data['categories'])) {
-			echo json_encode(['status' => 'error', 'message' => 'Invalid input.']);
-			return;
-		}
-
 		// Get data from AJAX request
-		$roleName = $data['role_name'];
-		$categories = $data['categories'];
-
+		$roleName = $this->input->post('role_name');
+		$categories = $this->input->post('categories'); // This is expected to be an array
 
 		// Validate inputs
 		if (empty($roleName) || empty($categories)) {
