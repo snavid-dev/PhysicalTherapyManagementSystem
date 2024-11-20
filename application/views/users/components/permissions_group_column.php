@@ -14,16 +14,19 @@
 						<?= $category['category_name'] ?>
 					</summary>
 					<div class="customAccordion__content">
-						<div class="customAccordion__permissions">
+						<div class="row" style="row-gap: 20px">
 
 							<?php
 							foreach ($category['permissions'] as $permission):
 								?>
+							<div class="col-sm-12 col-md-4">
 								<div class="switch flex_switch">
 									<input role="switch" type="checkbox" class="switch-input"
 										   value="<?= $permission['permission_id'] ?>"/>
 									<label class="switch-input-label"><?= $permission['permission_name'] ?></label>
 								</div>
+							</div>
+
 							<?php
 							endforeach;
 							?>
@@ -36,6 +39,11 @@
 							<button class="btn btn-primary"
 									onclick="toggleAllToggles(<?= $category['category_id'] ?>)"> Select all
 							</button>
+
+							<button class="btn btn-primary" id="echo1"
+									onclick="initializeToggleFunctionality('echo1', '1')"> Select All
+							</button>
+
 							<button class="btn btn-primary" id="PermissionCancel<?= $category['category_id'] ?>"
 									onclick='setupCancelButton("PermissionCancel<?= $category['category_id'] ?>","checkbox<?= $category['category_id'] ?>","details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>")'>
 								cancel
@@ -233,17 +241,69 @@
 		}
 	}
 
-	function toggleAllToggles(sectionId) {
-		const section = document.getElementById(sectionId);
+	// function toggleAllToggles(sectionId) {
+	// 	const section = document.getElementById(sectionId);
+	//
+	// 	if (!section) {
+	// 		console.warn(`Section with ID ${sectionId} not found.`);
+	// 		return;
+	// 	}
+	//
+	// 	const checkboxes = section.querySelectorAll(".switch-input");
+	// 	checkboxes.forEach(checkbox => (checkbox.checked = toggleState));
+	// 	toggleState = !toggleState;
+	// }
 
-		if (!section) {
-			console.warn(`Section with ID ${sectionId} not found.`);
-			return;
-		}
+	// function setupToggleButton(buttonId, containerId) {
+	// 	const selectAllButton = document.getElementById(buttonId);
+	// 	const specificDiv = document.getElementById(containerId);
+	// 	const toggles = specificDiv.querySelectorAll(".switch-input");
+	//
+	// 	// Function to update button text based on toggle states
+	// 	function updateButtonText() {
+	// 		const allChecked = Array.from(toggles).every(toggle => toggle.checked);
+	// 		selectAllButton.textContent = allChecked ? "Deselect All" : "Select All";
+	// 	}
+	//
+	// 	// Handle button click to toggle all checkboxes
+	// 	selectAllButton.addEventListener("click", function () {
+	// 		const shouldSelectAll = selectAllButton.textContent === "Select All";
+	// 		toggles.forEach(toggle => (toggle.checked = shouldSelectAll));
+	// 		selectAllButton.textContent = shouldSelectAll ? "Deselect All" : "Select All";
+	// 	});
+	//
+	// 	// Add event listeners to each toggle to update the button text on manual selection
+	// 	toggles.forEach(toggle => {
+	// 		toggle.addEventListener("change", updateButtonText);
+	// 	});
+	//
+	// 	// Initial setup for button text
+	// 	updateButtonText();
+	// }
 
-		const checkboxes = section.querySelectorAll(".switch-input");
-		checkboxes.forEach(checkbox => (checkbox.checked = toggleState));
-		toggleState = !toggleState;
+	function initializeToggleFunctionality(buttonId, containerId) {
+		const toggleContainer = document.getElementById(containerId);
+		const selectAllButton = document.getElementById(buttonId);
+		const toggles = toggleContainer.querySelectorAll('.switch-input');
+
+		const allSelected = Array.from(toggles).every(toggle => toggle.checked);
+
+		toggles.forEach(toggle => {
+			toggle.checked = !allSelected;
+		});
+
+		updateButtonText(selectAllButton, !allSelected);
+
+		toggles.forEach(toggle => {
+			toggle.addEventListener('change', () => {
+				const allSelected = Array.from(toggles).every(toggle => toggle.checked);
+				updateButtonText(selectAllButton, allSelected);
+			});
+		});
+	}
+
+	function updateButtonText(button, allSelected) {
+		button.textContent = allSelected ? 'Deselect All' : 'Select All';
 	}
 
 	function trackToggleStates(categoryId) {
