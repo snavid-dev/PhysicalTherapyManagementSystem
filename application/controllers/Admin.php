@@ -73,13 +73,15 @@ class Admin extends CI_Controller
 
 	public function users()
 	{
+		$this->load->model('Role_model');
 		$data['title'] = $this->lang('users');
 		$data['page'] = "users";
 		$data['users'] = $this->Admin_model->get_users();
+		$data['user_roles'] = $this->Role_model->get_all_roles();
 		$data['script_single_patient_assets'] = ['assets/js/users.js'];
 
 		$this->load->view('header', $data);
-		$this->load->view('users/users', $data);
+		$this->load->view('users/index', $data);
 		$this->load->view('footer');
 	}
 
@@ -92,7 +94,6 @@ class Admin extends CI_Controller
 		$this->load->model('Permission_model');
 
 		$data['permissions'] = $this->Permission_model->get_permissions_with_categories();
-
 
 
 		$this->load->view('header', $data);
@@ -151,6 +152,7 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('lname', 'lname', 'trim|required', array('required' => $this->lang('insert user lname error')));
 		$this->form_validation->set_rules('username', 'username', 'trim|required|is_unique[users.username]', array('required' => $this->lang('insert user username error'), 'is_unique' => $this->lang('insert user username unique error')));
 		$this->form_validation->set_rules('role', 'role', 'trim|required', array('required' => $this->lang('insert user role error')));
+		$this->form_validation->set_rules('user_role', 'user_role', 'trim|required', array('required' => $this->lang('insert user role error')));
 		$this->form_validation->set_rules('status', 'status', 'trim|required', array('required' => $this->lang('insert user status error')));
 		$this->form_validation->set_rules('password', 'password', 'trim|required', array('required' => $this->lang('insert user password error')));
 		$this->form_validation->set_rules('confirm', 'confirm', 'trim|required|matches[password]', array('required' => $this->lang('insert user confirm error'), 'matches' => $this->lang('insert user confirm matches error')));
@@ -168,6 +170,7 @@ class Admin extends CI_Controller
 				'fname' => $this->input->post('name'),
 				'lname' => $this->input->post('lname'),
 				'role' => $this->input->post('role'),
+				'role_id' => $this->input->post('user_role'),
 				'username' => $this->input->post('username'),
 				'status' => $this->input->post('status'),
 				'photo' => $profile_image,
@@ -190,12 +193,15 @@ class Admin extends CI_Controller
 					$btns .= $this->mylibrary->generateBtnBan($data['id'], 'admin/change_status_user');
 				}
 				$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_user');
+				$this->load->model('Role_model');
+				$role_name = $this->Role_model->get_role($datas['role_id'])[0]->role_name;
 
 				$data['tr'] = array(
 					$datas['fname'],
 					$datas['lname'],
 					$datas['username'],
 					$this->mylibrary->generateUserBadge($this->input->post('status')),
+					$role_name,
 					$this->lang($this->mylibrary->check_user_type($datas['role'])),
 					$this->mylibrary->btn_group($btns)
 				);
@@ -262,6 +268,7 @@ class Admin extends CI_Controller
 					$user['lname'],
 					$user['username'],
 					$this->mylibrary->generateUserBadge($this->input->post('status')),
+					$user['role_name'],
 					$this->lang($this->mylibrary->check_user_type($user['role'])),
 					$this->mylibrary->btn_group($btns)
 				);
