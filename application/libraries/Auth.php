@@ -20,7 +20,7 @@ class Auth
 	public function require_permission($permission_name)
 	{
 		if (!$this->has_permission($permission_name)) {
-			show_error('Access Denied: You do not have the required permission.', 403);
+			show_error('Access Denied: You do not have the required category.', 403);
 		}
 	}
 }
