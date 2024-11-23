@@ -18,10 +18,16 @@
 			$ci->render('users/components/permissions_group_column.php');
 			?>
 			<!--columns area end-->
+			<div class="customHr"></div>
 
-			<button class="btn btn-secondary"  style="float: right" onclick="saveRole()">
+			<button class="btn btn-success"  style="float: right" onclick="saveRole()">
 				Save
 			</button>
+
+			<button class="btn btn-primary"  style="float: right; margin: 0 20px" onclick="cancelAllToggles()">
+				Cancel All
+			</button>
+
 		</div>
 	</div>
 
@@ -71,12 +77,35 @@
 				} else {
 					alert('Error: ' + response.message);
 				}
+
+				cancelAllToggles()
 			},
 			error: function() {
 				alert('An error occurred while processing the request.');
 			}
 		});
 	}
+	function cancelAllToggles() {
+
+		const allToggles = document.querySelectorAll(".switch-input");
+		const roleNameInput = document.getElementById('roleName');
+
+		if (allToggles.length === 0) {
+			console.warn("No toggles found on the page.");
+			return;
+		}
+
+		// trigger from original cancel button
+		allToggles.forEach(toggle => {
+			toggle.checked = false;
+			toggle.dispatchEvent(new Event("change")); // remember this shit it maybe useful
+		});
+
+		console.log(`${allToggles.length} toggles have been untoggled.`);
+		roleNameInput.value = '';
+	}
+
+
 
 
 </script>

@@ -48,6 +48,7 @@
 									onclick='setupCancelButton("PermissionCancel<?= $category['category_id'] ?>","checkbox<?= $category['category_id'] ?>","details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>")'>
 								cancel
 							</button>
+
 							<button class="btn btn-success" id="savePermissionBTN_<?= $category['category_id'] ?>"
 									onclick='setupSaveButton("savePermissionBTN_<?= $category['category_id'] ?>", "checkbox<?= $category['category_id'] ?>", "details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>"); trackToggleStates("<?= $category['category_id'] ?>")'>
 								Save
@@ -205,39 +206,83 @@
 		}
 	}
 
-	function setupCancelButton(cancelButtonId, checkboxId, detailsTagId, permissionContainerId, sectionId) {
+	// function setupCancelButton(cancelButtonId, checkboxId, detailsTagId, permissionContainerId, sectionId) {
+	// 	const cancelButton = document.getElementById(cancelButtonId);
+	// 	const checkbox = document.getElementById(checkboxId);
+	// 	const detailsTag = document.getElementById(detailsTagId);
+	// 	const permissionContainer = document.getElementById(permissionContainerId);
+	// 	const section = document.getElementById(sectionId);
+	//
+	// 	if (cancelButton) {
+	// 		// cancelButton.addEventListener("click", function () {
+	// 		if (checkbox) {
+	// 			checkbox.checked = false;
+	// 			checkbox.dispatchEvent(new Event("change"));
+	// 		}
+	//
+	// 		if (detailsTag) {
+	// 			detailsTag.removeAttribute("open");
+	// 			detailsTag.classList.add("pointerEventsDisable");
+	// 		}
+	//
+	// 		if (permissionContainer) {
+	// 			permissionContainer.classList.remove("col-md-12");
+	// 			permissionContainer.classList.add("col-md-3");
+	// 		}
+	//
+	// 		clearDisablePermissions();
+	//
+	// 		if (section) {
+	// 			const toggles = section.querySelectorAll(".switch-input");
+	// 			toggles.forEach(toggle => (toggle.checked = false));
+	// 		}
+	// 		// });
+	// 	} else {
+	// 		console.error(`Button with ID ${cancelButtonId} not found.`);
+	// 	}
+	// }
+
+	function setupCancelButton(cancelButtonId, checkboxId, detailsTagId, permissionContainerId) {
 		const cancelButton = document.getElementById(cancelButtonId);
 		const checkbox = document.getElementById(checkboxId);
 		const detailsTag = document.getElementById(detailsTagId);
 		const permissionContainer = document.getElementById(permissionContainerId);
-		const section = document.getElementById(sectionId);
 
 		if (cancelButton) {
 			// cancelButton.addEventListener("click", function () {
-			if (checkbox) {
-				checkbox.checked = false;
-				checkbox.dispatchEvent(new Event("change"));
-			}
+				// Uncheck the main checkbox and trigger its change event
+				if (checkbox) {
+					checkbox.checked = false;
+					checkbox.dispatchEvent(new Event("change"));
+				}
 
-			if (detailsTag) {
-				detailsTag.removeAttribute("open");
-				detailsTag.classList.add("pointerEventsDisable");
-			}
+				// Close the details tag and disable pointer events
+				if (detailsTag) {
+					detailsTag.removeAttribute("open");
+					detailsTag.classList.add("pointerEventsDisable");
+				}
 
-			if (permissionContainer) {
-				permissionContainer.classList.remove("col-md-12");
-				permissionContainer.classList.add("col-md-3");
-			}
+				// Reset the permission container layout classes
+				if (permissionContainer) {
+					permissionContainer.classList.remove("col-md-12");
+					permissionContainer.classList.add("col-md-3");
+				}
 
-			clearDisablePermissions();
+				// Clear any disable-permission classes (assuming this is a utility function)
+				clearDisablePermissions();
 
-			if (section) {
-				const toggles = section.querySelectorAll(".switch-input");
-				toggles.forEach(toggle => (toggle.checked = false));
-			}
+				// Untoggle all toggles within the details tag
+				if (detailsTag) {
+					const toggles = detailsTag.querySelectorAll(".switch-input");
+					toggles.forEach(toggle => {
+						toggle.checked = false;
+						// Trigger a change event for toggles
+						toggle.dispatchEvent(new Event("change"));
+					});
+				}
 			// });
 		} else {
-			console.error(`Button with ID ${cancelButtonId} not found.`);
+			console.error(`Cancel button with ID "${cancelButtonId}" not found.`);
 		}
 	}
 
