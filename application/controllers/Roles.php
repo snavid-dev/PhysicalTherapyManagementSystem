@@ -26,9 +26,9 @@ class Roles extends CI_Controller
 
 		// Send response
 		if ($result['status'] === 'success') {
-			echo json_encode(['status' => 'success', 'message' => 'Role and permissions inserted successfully.']);
+			echo json_encode(['status' => 'success', 'message' => 'Hello Navid', 'title' => $this->language->languages('success', $_COOKIE['language'])]);
 		} else {
-			echo json_encode(['status' => 'error', 'message' => $result['message']]);
+			echo json_encode(['status' => 'error', 'message' => $result['message'], 'title' => $this->language->languages('error', $_COOKIE['language'])]);
 		}
 	}
 }

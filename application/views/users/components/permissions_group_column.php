@@ -1,5 +1,22 @@
 <?php $ci = get_instance(); ?>
 
+<?php
+//
+//foreach ($permissions as $category){
+//	foreach ($category['permissions'] as $permission){
+//		echo $permission['permission_name'];
+//		echo "</br>";
+//	}
+//}
+//exit();
+//?>
+<!---->
+
+<style>
+	.hide{
+		display: none;
+	}
+</style>
 
 <div class="row" id="permissionContainer" style="margin-top: 50px">
 
@@ -11,7 +28,7 @@
 				<details class="customAccordion__details pointerEventsDisable"
 						 id="details<?= $category['category_id'] ?>">
 					<summary class="customAccordion__summary">
-						<?= $category['category_name'] ?>
+						<?= $ci->lang($category['category_name']); ?>
 					</summary>
 					<div class="customAccordion__content">
 						<div class="row" style="row-gap: 20px">
@@ -19,13 +36,13 @@
 							<?php
 							foreach ($category['permissions'] as $permission):
 								?>
-							<div class="col-sm-12 col-md-4">
-								<div class="switch flex_switch">
-									<input role="switch" type="checkbox" class="switch-input"
-										   value="<?= $permission['permission_id'] ?>"/>
-									<label class="switch-input-label"><?= $permission['permission_name'] ?></label>
+								<div class="col-sm-12 col-md-4">
+									<div class="switch flex_switch">
+										<input role="switch" type="checkbox" class="switch-input"
+											   value="<?= $permission['permission_id'] ?>"/>
+										<label class="switch-input-label"><?= $ci->lang($permission['permission_name']) ?></label>
+									</div>
 								</div>
-							</div>
 
 							<?php
 							endforeach;
@@ -36,22 +53,20 @@
 						<div class="customHr"></div>
 
 						<div class="permissionContainer_footer">
-							<button class="btn btn-primary"
-									onclick="toggleAllToggles(<?= $category['category_id'] ?>)"> Select all
-							</button>
 
-							<button class="btn btn-primary" id="echo1"
-									onclick="initializeToggleFunctionality('echo1', '1')"> Select All
+							<button class="btn btn-primary" id="echo<?= $category['category_id'] ?>"
+									onclick="initializeToggleFunctionality('echo<?= $category['category_id'] ?>', '<?= $category['category_id'] ?>')">
+								<?= $ci->lang('select all') ?>
 							</button>
 
 							<button class="btn btn-primary" id="PermissionCancel<?= $category['category_id'] ?>"
 									onclick='setupCancelButton("PermissionCancel<?= $category['category_id'] ?>","checkbox<?= $category['category_id'] ?>","details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>")'>
-								cancel
+								<?= $ci->lang('cancel') ?>
 							</button>
 
 							<button class="btn btn-success" id="savePermissionBTN_<?= $category['category_id'] ?>"
 									onclick='setupSaveButton("savePermissionBTN_<?= $category['category_id'] ?>", "checkbox<?= $category['category_id'] ?>", "details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>"); trackToggleStates("<?= $category['category_id'] ?>")'>
-								Save
+								<?= $ci->lang('save') ?>
 							</button>
 						</div>
 
@@ -60,10 +75,10 @@
 				</details>
 
 
-				<label class="custom-checkbox-container" style="margin-top: 16px">
+				<label class="custom-checkbox-container" id="label<?= $category['category_id'] ?>" style="margin-top: 16px">
 					<input type="checkbox" class="custom-checkbox-input permissionCheckBox"
 						   id="checkbox<?= $category['category_id'] ?>"
-						   onclick='setupCheckboxLogging("checkbox<?= $category['category_id'] ?>","details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>")'>
+						   onclick='setupCheckboxLogging("checkbox<?= $category['category_id'] ?>","details<?= $category['category_id'] ?>", "<?= $category['category_id'] ?>");toggle_view_label("<?= $category['category_id'] ?>")'>
 					<svg viewBox="0 0 64 64" height="1.5em" width="1.5em" class="custom-checkbox-svg">
 						<path
 							d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
@@ -178,6 +193,7 @@
 	}
 
 	function setupSaveButton(saveButtonId, checkboxId, detailsTagId, permissionContainerId) {
+		toggle_view_label(permissionContainerId);
 		const saveButton = document.getElementById(saveButtonId);
 		const checkbox = document.getElementById(checkboxId);
 
@@ -206,43 +222,10 @@
 		}
 	}
 
-	// function setupCancelButton(cancelButtonId, checkboxId, detailsTagId, permissionContainerId, sectionId) {
-	// 	const cancelButton = document.getElementById(cancelButtonId);
-	// 	const checkbox = document.getElementById(checkboxId);
-	// 	const detailsTag = document.getElementById(detailsTagId);
-	// 	const permissionContainer = document.getElementById(permissionContainerId);
-	// 	const section = document.getElementById(sectionId);
-	//
-	// 	if (cancelButton) {
-	// 		// cancelButton.addEventListener("click", function () {
-	// 		if (checkbox) {
-	// 			checkbox.checked = false;
-	// 			checkbox.dispatchEvent(new Event("change"));
-	// 		}
-	//
-	// 		if (detailsTag) {
-	// 			detailsTag.removeAttribute("open");
-	// 			detailsTag.classList.add("pointerEventsDisable");
-	// 		}
-	//
-	// 		if (permissionContainer) {
-	// 			permissionContainer.classList.remove("col-md-12");
-	// 			permissionContainer.classList.add("col-md-3");
-	// 		}
-	//
-	// 		clearDisablePermissions();
-	//
-	// 		if (section) {
-	// 			const toggles = section.querySelectorAll(".switch-input");
-	// 			toggles.forEach(toggle => (toggle.checked = false));
-	// 		}
-	// 		// });
-	// 	} else {
-	// 		console.error(`Button with ID ${cancelButtonId} not found.`);
-	// 	}
-	// }
+
 
 	function setupCancelButton(cancelButtonId, checkboxId, detailsTagId, permissionContainerId) {
+		toggle_view_label(permissionContainerId);
 		const cancelButton = document.getElementById(cancelButtonId);
 		const checkbox = document.getElementById(checkboxId);
 		const detailsTag = document.getElementById(detailsTagId);
@@ -250,81 +233,42 @@
 
 		if (cancelButton) {
 			// cancelButton.addEventListener("click", function () {
-				// Uncheck the main checkbox and trigger its change event
-				if (checkbox) {
-					checkbox.checked = false;
-					checkbox.dispatchEvent(new Event("change"));
-				}
+			// Uncheck the main checkbox and trigger its change event
+			if (checkbox) {
+				checkbox.checked = false;
+				checkbox.dispatchEvent(new Event("change"));
+			}
 
-				// Close the details tag and disable pointer events
-				if (detailsTag) {
-					detailsTag.removeAttribute("open");
-					detailsTag.classList.add("pointerEventsDisable");
-				}
+			// Close the details tag and disable pointer events
+			if (detailsTag) {
+				detailsTag.removeAttribute("open");
+				detailsTag.classList.add("pointerEventsDisable");
+			}
 
-				// Reset the permission container layout classes
-				if (permissionContainer) {
-					permissionContainer.classList.remove("col-md-12");
-					permissionContainer.classList.add("col-md-3");
-				}
+			// Reset the permission container layout classes
+			if (permissionContainer) {
+				permissionContainer.classList.remove("col-md-12");
+				permissionContainer.classList.add("col-md-3");
+			}
 
-				// Clear any disable-permission classes (assuming this is a utility function)
-				clearDisablePermissions();
+			// Clear any disable-permission classes (assuming this is a utility function)
+			clearDisablePermissions();
 
-				// Untoggle all toggles within the details tag
-				if (detailsTag) {
-					const toggles = detailsTag.querySelectorAll(".switch-input");
-					toggles.forEach(toggle => {
-						toggle.checked = false;
-						// Trigger a change event for toggles
-						toggle.dispatchEvent(new Event("change"));
-					});
-				}
+			// Untoggle all toggles within the details tag
+			if (detailsTag) {
+				const toggles = detailsTag.querySelectorAll(".switch-input");
+				toggles.forEach(toggle => {
+					toggle.checked = false;
+					// Trigger a change event for toggles
+					toggle.dispatchEvent(new Event("change"));
+				});
+			}
 			// });
 		} else {
 			console.error(`Cancel button with ID "${cancelButtonId}" not found.`);
 		}
 	}
 
-	// function toggleAllToggles(sectionId) {
-	// 	const section = document.getElementById(sectionId);
-	//
-	// 	if (!section) {
-	// 		console.warn(`Section with ID ${sectionId} not found.`);
-	// 		return;
-	// 	}
-	//
-	// 	const checkboxes = section.querySelectorAll(".switch-input");
-	// 	checkboxes.forEach(checkbox => (checkbox.checked = toggleState));
-	// 	toggleState = !toggleState;
-	// }
-
-	// function setupToggleButton(buttonId, containerId) {
-	// 	const selectAllButton = document.getElementById(buttonId);
-	// 	const specificDiv = document.getElementById(containerId);
-	// 	const toggles = specificDiv.querySelectorAll(".switch-input");
-	//
-	// 	// Function to update button text based on toggle states
-	// 	function updateButtonText() {
-	// 		const allChecked = Array.from(toggles).every(toggle => toggle.checked);
-	// 		selectAllButton.textContent = allChecked ? "Deselect All" : "Select All";
-	// 	}
-	//
-	// 	// Handle button click to toggle all checkboxes
-	// 	selectAllButton.addEventListener("click", function () {
-	// 		const shouldSelectAll = selectAllButton.textContent === "Select All";
-	// 		toggles.forEach(toggle => (toggle.checked = shouldSelectAll));
-	// 		selectAllButton.textContent = shouldSelectAll ? "Deselect All" : "Select All";
-	// 	});
-	//
-	// 	// Add event listeners to each toggle to update the button text on manual selection
-	// 	toggles.forEach(toggle => {
-	// 		toggle.addEventListener("change", updateButtonText);
-	// 	});
-	//
-	// 	// Initial setup for button text
-	// 	updateButtonText();
-	// }
 
 	function initializeToggleFunctionality(buttonId, containerId) {
 		const toggleContainer = document.getElementById(containerId);
@@ -348,7 +292,7 @@
 	}
 
 	function updateButtonText(button, allSelected) {
-		button.textContent = allSelected ? 'Deselect All' : 'Select All';
+		button.textContent = allSelected ? "<?= $ci->lang('deselect all') ?>" : "<?= $ci->lang('select all') ?>";
 	}
 
 	function trackToggleStates(categoryId) {
@@ -377,4 +321,11 @@
 
 	let toggleState = true; // Global state to track the toggle status
 
+</script>
+
+
+<script>
+	function toggle_view_label(label_id){
+		$(`#label${label_id}`).toggleClass("hide");
+	}
 </script>

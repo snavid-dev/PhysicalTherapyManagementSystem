@@ -3,23 +3,25 @@
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xl-12">
 		<div class="row">
-			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="show_patient_modal()">
-				<div class="card overflow-hidden bg-success-gradient clickable">
-					<div class="card-body">
-						<div class="d-flex">
-							<div class="mt-2">
-								<h2 class="mb-0 number-font"><?= $ci->lang('patients') ?></h2>
-							</div>
-							<div class="ms-auto">
-								<div class="chart-wrapper mt-1 img_icon_style">
-									<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/toothache.png"
-										 alt="">
+			<?php if ($ci->auth->has_permission('Create Patient')): ?>
+				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="show_patient_modal()">
+					<div class="card overflow-hidden bg-success-gradient clickable">
+						<div class="card-body">
+							<div class="d-flex">
+								<div class="mt-2">
+									<h2 class="mb-0 number-font"><?= $ci->lang('patients') ?></h2>
+								</div>
+								<div class="ms-auto">
+									<div class="chart-wrapper mt-1 img_icon_style">
+										<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/toothache.png"
+											 alt="">
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			<?php endif; ?>
 			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#turnsModal`).modal('toggle');">
 				<div class="card overflow-hidden bg-info-gradient clickable">
 					<div class="card-body">
@@ -938,7 +940,8 @@
 								<label class="form-label">
 									<?= $ci->lang('scan') ?>
 								</label>
-								<button class="btn btn-primary" type="button" onclick="startScanning(list_patients)"><i class="fa fa-qrcode"></i></button>
+								<button class="btn btn-primary" type="button" onclick="startScanning(list_patients)"><i
+										class="fa fa-qrcode"></i></button>
 							</div>
 						</div>
 
@@ -956,7 +959,8 @@
 								<label class="form-label" for="fullname">
 									<?= $ci->lang('fullname') ?>
 								</label>
-								<input type="text" class="form-control" id="fullname" onkeyup="list_patients()" autocomplete="off" name="fullname">
+								<input type="text" class="form-control" id="fullname" onkeyup="list_patients()"
+									   autocomplete="off" name="fullname">
 							</div>
 						</div>
 
@@ -998,7 +1002,6 @@
 </script>
 
 
-
 <script>
 	function list_patients(open_profile = false) {
 		const serial_id = document.getElementById("serial_id");
@@ -1014,12 +1017,12 @@
 				serial_id: serial,
 				fullname: full_name
 			},
-			success: function(response) {
+			success: function (response) {
 				var result = JSON.parse(response);
 				if (result['type'] == 'success') {
 					if (result['content']['patients'].length < 1) {
 						var querytable = ``;
-					}else {
+					} else {
 						var querytable = `
           <table class="table text-nowrap table-striped">
             <thead>

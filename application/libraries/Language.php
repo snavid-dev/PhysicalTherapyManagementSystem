@@ -148,6 +148,11 @@ class Language
 			'Crop Image' => self::lang_arr('Crop Image', 'برش تصویر', 'not set'),
 			// end users page
 
+			//Role & Perimission
+			'role and permission' => self::lang_arr('roles and permissions', 'نقش ها و دسترسی ها', 'رولونه او اجازې'),
+			//Role & Perimission
+
+
 			// Start Patients page
 
 			'patient list' => self::lang_arr('Patients list', 'لیست مریضان', 'د ناروغانو لیست'),
@@ -436,6 +441,9 @@ class Language
 			'error' => self::lang_arr('warning', 'هشدار', 'اخطار'),
 			'yes' => self::lang_arr('yes', 'بله', 'هو'),
 			'cancel' => self::lang_arr('cancel', 'لغو', 'لغوه کول'),
+			'cancel all' => self::lang_arr('cancel all', 'لغو همه', 'لغوه کول'),
+			'select all' => self::lang_arr('select all', 'انتخاب همه', 'لغوه کول'),
+			'deselect all' => self::lang_arr('deselect all', 'لغو انتخاب همه', 'لغوه کول'),
 			'delete alert title' => self::lang_arr('are you sure?', 'آیا شما مطمئن هستید؟', 'تاسو ډاډه یاست؟'),
 			'delete alert text' => self::lang_arr('If it is deleted, it will not be returned!', 'اگر حذف شود دیگر برگردانده نمیشود!', 'که دا حذف شي، دا به بیرته نه راځي!'),
 			'success' => self::lang_arr('success', 'موفقیت', 'بریالی'),
@@ -660,6 +668,97 @@ class Language
 			'phonebook' => self::lang_arr('call log', 'تاریخچه تماس', 'د تلیفون کتاب'),
 			// end phonebook information
 
+			//Perimissions
+			'enter the role name' => self::lang_arr('enter the role name', 'نام نقش را وارد کنید', 'د رول نوم دننه کړئ'),
+			'role name' => self::lang_arr('role name', 'نام نقش', 'د رول نوم'),
+			//Perimissions
+
+			//Perimissions Categories
+			'Patient Management' => self::lang_arr('Patient Management', 'مدیریت بیماران	', 'د ناروغان مدیریت'),
+			'Turn Management' => self::lang_arr('Turn Management', 'مدیریت نوبت', 'د نوبت مدیریت'),
+			'Financial Management' => self::lang_arr('Financial Management', 'مدیریت مالی', 'مالي مدیریت'),
+			'Reporting' => self::lang_arr('Reporting', 'گزارش‌دهی	', 'راپور ورکول'),
+			'Communication Management' => self::lang_arr('Communication Management', 'مدیریت ارتباطات', 'د اړیکو مدیریت'),
+			'Service Management' => self::lang_arr('Service Management', 'مدیریت خدمات', 'د خدمتونو مدیریت'),
+			'User Management' => self::lang_arr('User Management', 'مدیریت کاربران', 'د کاروونکو مدیریت'),
+			'Patient Profile Details' => self::lang_arr('Patient Profile Details', 'جزئیات پروفایل بیمار	', 'د ناروغ د پروفایل جزئیات'),
+			//Perimissions Categories
+
+			//List of Perimissions
+			'Create Patient' => self::lang_arr('Create Patient', 'ایجاد بیمار', 'د ناروغ جوړول'),
+			'Read Patients' => self::lang_arr('Read Patients', 'خواندن بیماران', 'د ناروغان لوستل'),
+			'Read Patient Profile' => self::lang_arr('Read Patient Profile', 'خواندن پروفایل بیمار', 'د ناروغ پروفایل لوستل'),
+			'Update Patient Acceptance' => self::lang_arr('Update Patient Acceptance', 'به‌روزرسانی پذیرش بیمار', 'د ناروغ د منلو تازه کول'),
+			'Update Blocked Patient' => self::lang_arr('Update Blocked Patient', 'به‌روزرسانی بیمار مسدود شده', 'بند شوی ناروغ تازه کول'),
+			'Delete Patient' => self::lang_arr('Delete Patient', 'حذف بیمار', 'د ناروغ حذف کول'),
+			'Create New Patient' => self::lang_arr('Create New Patient', 'ایجاد بیمار جدید', 'نوی ناروغ جوړول'),
+			'Update Personal Information' => self::lang_arr('Update Personal Information', 'به‌روزرسانی اطلاعات شخصی', 'شخصي معلومات تازه کول'),
+			'Delete Teeth' => self::lang_arr('Delete Teeth', 'حذف دندان‌ها', 'غاښونه حذف کړئ'),
+			'Delete Personal Turn' => self::lang_arr('Delete Personal Turn', 'حذف نوبت شخصی', 'شخصي نوبت حذف کړئ'),
+			'Create Turn' => self::lang_arr('Create Turn', 'ایجاد نوبت', 'نوبت جوړول'),
+			'Read Today\'s Turn List' => self::lang_arr('Read Today\'s Turn List', 'خواندن لیست نوبت‌های امروز', 'د نن ورځې د نوبتونو لیست لوستل'),
+			'Read Turns Index' => self::lang_arr('Read Turns Index', 'خواندن شاخص نوبت‌ها', 'د نوبت شاخص لوستل'),
+			'Create New Turn' => self::lang_arr('Create New Turn', 'ایجاد نوبت جدید', 'نوې نوبت جوړول'),
+			'Read Sent SMS' => self::lang_arr('Read Sent SMS', 'خواندن پیامک‌های ارسال‌شده', 'لیږل شوي SMS لوستل'),
+			'Update Turn Acceptance' => self::lang_arr('Update Turn Acceptance', 'به‌روزرسانی پذیرش نوبت', 'د نوبت منلو تازه کول'),
+			'Read Printed Turns' => self::lang_arr('Read Printed Turns', 'خواندن نوبت‌های چاپ‌شده', 'چاپ شوي نوبتونه لوستل'),
+			'Update Personal Turn' => self::lang_arr('Update Personal Turn', 'به‌روزرسانی نوبت شخصی', 'شخصي نوبت تازه کول'),
+			'Create Expenses' => self::lang_arr('Create Expenses', 'ایجاد هزینه‌ها', 'لګښتونه جوړ کړئ'),
+			'Read Today\'s Balance Sheet' => self::lang_arr('Read Today\'s Balance Sheet', 'خواندن ترازنامه امروز', 'د نن ورځې د بیلانس پاڼه لوستل'),
+			'Create Payment' => self::lang_arr('Create Payment', 'ایجاد پرداخت', 'تادیه جوړول'),
+			'Read Printed Payment' => self::lang_arr('Read Printed Payment', 'خواندن پرداخت‌های چاپ‌شده', 'چاپ شوي تادیات لوستل'),
+			'Create New Account' => self::lang_arr('Create New Account', 'ایجاد حساب جدید', 'نوې حساب جوړ کړئ'),
+			'Update Account' => self::lang_arr('Update Account', 'به‌روزرسانی حساب', 'حساب تازه کول'),
+			'Delete Account' => self::lang_arr('Delete Account', 'حذف حساب', 'حساب حذف کول'),
+			'Delete Receipt' => self::lang_arr('Delete Receipt', 'حذف رسید', 'رسید حذف کړئ'),
+			'Update Receipt' => self::lang_arr('Update Receipt', 'به‌روزرسانی رسید', 'رسید تازه کول'),
+			'Read Filtered Receipts by Date' => self::lang_arr('Read Filtered Receipts by Date', 'خواندن رسیدهای فیلتر‌شده بر اساس تاریخ', 'د نیټې پراساس فلټر شوي رسیدونه لوستل'),
+			'Read Financial Accounts Index' => self::lang_arr('Read Financial Accounts Index', 'خواندن شاخص حساب‌های مالی', 'د مالي حسابونو شاخص لوستل'),
+			'Create New Receipt' => self::lang_arr('Create New Receipt', 'ایجاد رسید جدید', 'نوی رسید جوړ کړئ'),
+			'Read Balance' => self::lang_arr('Read Balance', 'خواندن موجودی', 'بیلانس لوستل'),
+			'Read Financials of Patient' => self::lang_arr('Read Financials of Patient', 'خواندن اطلاعات مالی بیمار', 'د ناروغ مالي معلومات لوستل'),
+			'Read Paid' => self::lang_arr('Read Paid', 'خواندن پرداخت‌ها', 'تادیه شوي لوستل'),
+			'Read Revenue' => self::lang_arr('Read Revenue', 'خواندن درآمد', 'عواید لوستل'),
+			'Read Expenses' => self::lang_arr('Read Expenses', 'خواندن هزینه‌ها', 'لګښتونه لوستل'),
+			'Read Printed Report' => self::lang_arr('Read Printed Report', 'خواندن گزارش چاپ‌شده', 'چاپ شوی راپور لوستل'),
+			'Read Report Receipts Index' => self::lang_arr('Read Report Receipts Index', 'خواندن شاخص رسید گزارش‌ها', 'د راپور رسیدونو شاخص لوستل'),
+			'Read Printed Receipts' => self::lang_arr('Read Printed Receipts', 'خواندن رسیدهای چاپ‌شده', 'چاپ شوي رسیدونه لوستل'),
+			'Read Call Log Index' => self::lang_arr('Read Call Log Index', 'خواندن شاخص تماس‌ها', 'د اړیکو شاخص لوستل'),
+			'Read Calls' => self::lang_arr('Read Calls', 'خواندن تماس‌ها', 'اړیکې لوستل'),
+			'Create Services' => self::lang_arr('Create Services', 'ایجاد خدمات', 'خدمتونه جوړ کړئ'),
+			'Read Services' => self::lang_arr('Read Services', 'خواندن خدمات', 'خدمتونه لوستل'),
+			'Update Services' => self::lang_arr('Update Services', 'به‌روزرسانی خدمات', 'خدمتونه تازه کړئ'),
+			'Delete Services' => self::lang_arr('Delete Services', 'حذف خدمات', 'خدمتونه حذف کړئ'),
+			'Create Medicine' => self::lang_arr('Create Medicine', 'ایجاد دارو', 'درمل جوړ کړئ'),
+			'Read Medicine' => self::lang_arr('Read Medicine', 'خواندن دارو', 'درمل لوستل'),
+			'Update Medicine' => self::lang_arr('Update Medicine', 'به‌روزرسانی دارو', 'درمل تازه کړئ'),
+			'Delete Medicine' => self::lang_arr('Delete Medicine', 'حذف دارو', 'درمل حذف کړئ'),
+			'Create Diagnoses' => self::lang_arr('Create Diagnoses', 'ایجاد تشخیص', 'تشخیصونه جوړ کړئ'),
+			'Read Diagnoses' => self::lang_arr('Read Diagnoses', 'خواندن تشخیص‌ها', 'تشخیصونه لوستل'),
+			'Update Diagnoses' => self::lang_arr('Update Diagnoses', 'به‌روزرسانی تشخیص‌ها', 'تشخیصونه تازه کړئ'),
+			'Delete Diagnoses' => self::lang_arr('Delete Diagnoses', 'حذف تشخیص‌ها', 'تشخیصونه حذف کړئ'),
+			'Read Users Index' => self::lang_arr('Read Users Index', 'خواندن شاخص کاربران', 'د کاروونکو شاخص لوستل'),
+			'Create User' => self::lang_arr('Create User', 'ایجاد کاربر', 'کاروونکی جوړ کړئ'),
+			'Update User Block' => self::lang_arr('Update User Block', 'به‌روزرسانی بلاک کاربر', 'د کاروونکي بلاک تازه کړئ'),
+			'Delete User' => self::lang_arr('Delete User', 'حذف کاربر', 'کاروونکی حذف کړئ'),
+			'Update User Acceptance' => self::lang_arr('Update User Acceptance', 'به‌روزرسانی پذیرش کاربر', 'د کاروونکي منل تازه کړئ'),
+			'Update User' => self::lang_arr('Update User', 'به‌روزرسانی کاربر', 'کاروونکی تازه کړئ'),
+			'Read Payment Information' => self::lang_arr('Read Payment Information', 'خواندن اطلاعات پرداخت', 'د تادیاتو معلومات لوستل'),
+			'Read Personal Information' => self::lang_arr('Read Personal Information', 'خواندن اطلاعات شخصی', 'شخصي معلومات لوستل'),
+			'Create Teeth Entry' => self::lang_arr('Create Teeth Entry', 'ایجاد ورودی دندان', 'د غاښونو ننوتنه جوړ کړئ'),
+			'Create Restorative Entry' => self::lang_arr('Create Restorative Entry', 'ایجاد ورودی ترمیمی', 'ترمیمي ننوتنه جوړ کړئ'),
+			'Create Endodontic Entry' => self::lang_arr('Create Endodontic Entry', 'ایجاد ورودی اندودنتیک', 'اندودنتیک ننوتنه جوړ کړئ'),
+			'Create Prosthetic Entry' => self::lang_arr('Create Prosthetic Entry', 'ایجاد ورودی پروستتیک', 'پروستیتیک ننوتنه جوړ کړئ'),
+			'Update Restorative Entry' => self::lang_arr('Update Restorative Entry', 'به‌روزرسانی ورودی ترمیمی', 'ترمیمي ننوتنه تازه کړئ'),
+			'Update Endodontic Entry' => self::lang_arr('Update Endodontic Entry', 'به‌روزرسانی ورودی اندودنتیک', 'اندودنتیک ننوتنه تازه کړئ'),
+			'Update Prosthetic Entry' => self::lang_arr('Update Prosthetic Entry', 'به‌روزرسانی ورودی پروستتیک', 'پروستیتیک ننوتنه تازه کړئ'),
+			'Update Teeth Entry' => self::lang_arr('Update Teeth Entry', 'به‌روزرسانی ورودی دندان', 'د غاښونو ننوتنه تازه کړئ'),
+			'Create Lab Entry' => self::lang_arr('Create Lab Entry', 'ایجاد ورودی آزمایشگاه', 'د لابراتوار ننوتنه جوړ کړئ'),
+			'Read Lab Entry' => self::lang_arr('Read Lab Entry', 'خواندن ورودی آزمایشگاه', 'د لابراتوار ننوتنه لوستل'),
+			'Update Lab Entry' => self::lang_arr('Update Lab Entry', 'به‌روزرسانی ورودی آزمایشگاه', 'د لابراتوار ننوتنه تازه کړئ'),
+			'Delete Lab Entry' => self::lang_arr('Delete Lab Entry', 'حذف ورودی آزمایشگاه', 'د لابراتوار ننوتنه حذف کړئ'),
+
+			//List of Perimissions
 
 			// Restorative Tab
 			'Caries Depth' => self::lang_arr('Caries Depth', 'عمق پوسیدگی', 'د تلیفون کتاب'),
