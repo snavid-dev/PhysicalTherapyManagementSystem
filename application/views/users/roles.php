@@ -13,8 +13,9 @@
 
 						<ul class="nav panel-tabs product-sale" role="tablist">
 							<li>
-								<button class="btn btn-primary" data-bs-toggle="modal"
-										data-bs-target="#extralargemodal"><?= $ci->lang('add new') ?> <i
+								<button class="btn btn-primary"
+										onclick="window.location.href='<?= base_url() ?>admin/user_role'"><?= $ci->lang('add new') ?>
+									<i
 										class="fe fe-plus"></i></button>
 							</li>
 						</ul>

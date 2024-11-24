@@ -5536,8 +5536,7 @@ class Admin extends CI_Controller
 		$this->load->model('Role_model');
 		$data['title'] = $this->lang('role and permission');
 		$data['page'] = "users";
-		$data['users'] = $this->Admin_model->get_users();
-		$data['user_roles'] = $this->Role_model->get_all_roles();
+		$data['roles'] = $this->Role_model->get_all_roles();
 //		$data['script_single_patient_assets'] = ['assets/js/users.js'];
 
 		$this->load->view('header', $data);
