@@ -349,7 +349,7 @@ $ci = get_instance();
 						<li class="slide">
 							<a class="side-menu__item has-link <?= ($page == 'roles') ? 'active' : '' ?>"
 							   data-bs-toggle="slide" href="<?= base_url() ?>admin/roles"><i
-									class="side-menu__icon fas fa-user-lock	"></i><span
+									class="side-menu__icon fas fa-user-shield"></i><span
 									class="side-menu__label"><?= $ci->lang('role and permission') ?></span></a>
 						</li>
 						<li class="slide">

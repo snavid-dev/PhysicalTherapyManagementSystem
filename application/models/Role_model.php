@@ -11,7 +11,7 @@ class Role_model extends CI_Model
 
 	public function get_all_roles()
 	{
-		return $this->db->get('roles')->result();
+		return $this->db->query("SELECT r.*, COUNT(u.id) AS user_count FROM roles r LEFT JOIN users u ON r.id = u.role_id GROUP BY r.id, r.role_name")->result();
 	}
 
 	public function get_role($id)
