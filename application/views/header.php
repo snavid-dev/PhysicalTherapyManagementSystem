@@ -42,8 +42,6 @@ $ci = get_instance();
 	<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 
-
-
 	<script>
 		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker.register('<?= base_url('service-worker.js') ?>')
@@ -210,16 +208,17 @@ $ci = get_instance();
 												</div>
 											</div>
 											<div class="dropdown-divider m-0"></div>
-<!--											<a class="dropdown-item" href="profile.html">-->
-<!--												<i class="dropdown-icon fa fa-user"></i> Profile-->
-<!--											</a>-->
+											<!--											<a class="dropdown-item" href="profile.html">-->
+											<!--												<i class="dropdown-icon fa fa-user"></i> Profile-->
+											<!--											</a>-->
 											<a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal"
 											   data-bs-target="#modify_password">
 												<i class="dropdown-icon fa fa-key"></i> <?= $ci->lang('change password') ?>
 											</a>
-<!--											<a class="dropdown-item" href="--><?php //= base_url('admin/lock/') ?><!--">-->
-<!--												<i class="dropdown-icon fa fa-lock"></i> Lockscreen-->
-<!--											</a>-->
+											<!--											<a class="dropdown-item" href="-->
+											<?php //= base_url('admin/lock/') ?><!--">-->
+											<!--												<i class="dropdown-icon fa fa-lock"></i> Lockscreen-->
+											<!--											</a>-->
 											<a class="dropdown-item" href="<?= base_url('admin/logout') ?>">
 												<i class="dropdown-icon fa fa-exclamation-circle"></i> <?= $ci->lang('logout') ?>
 											</a>
@@ -267,27 +266,35 @@ $ci = get_instance();
 									class="side-menu__icon fa fa-home"></i><span
 									class="side-menu__label"><?= $ci->language->languages('home') ?></span></a>
 						</li>
+						<?php if($ci->auth->has_permission('Read Patients') || $ci->auth->has_permission('Read Turns Index') || $ci->auth->has_permission('Read Call Log Index')): ?>
 						<li class="sub-category">
 							<h3><?= $ci->lang('manage') ?></h3>
 						</li>
+						<?php endif; ?>
 
-						<li class="slide">
-							<a class="side-menu__item has-link" data-bs-toggle="slide"
-							   href="<?= base_url() ?>admin/patients"><i class="side-menu__icon fa fa-user"></i><span
-									class="side-menu__label"><?= $ci->language->languages('patients') ?></span></a>
-						</li>
-
-						<li>
-							<a class="side-menu__item has-link" href="<?= base_url() ?>admin/turns"><i
-									class="side-menu__icon fa fa-calendar"></i><span
-									class="side-menu__label"><?= $ci->lang('turns') ?></span></a>
-						</li>
-						<li>
-							<a class="side-menu__item has-link"
-							   href="<?= ($page == 'phonebook') ? 'javascript:void(0)' : base_url('admin/phonebook') ?>"><i
-									class="side-menu__icon fa fa-phone"></i><span
-									class="side-menu__label"><?= $ci->lang('phonebook') ?></span></a>
-						</li>
+						<?php if ($ci->auth->has_permission('Read Patients')): ?>
+							<li class="slide">
+								<a class="side-menu__item has-link" data-bs-toggle="slide"
+								   href="<?= base_url() ?>admin/patients"><i
+										class="side-menu__icon fa fa-user"></i><span
+										class="side-menu__label"><?= $ci->language->languages('patients') ?></span></a>
+							</li>
+						<?php endif; ?>
+						<?php if ($ci->auth->has_permission('Read Turns Index')): ?>
+							<li>
+								<a class="side-menu__item has-link" href="<?= base_url() ?>admin/turns"><i
+										class="side-menu__icon fa fa-calendar"></i><span
+										class="side-menu__label"><?= $ci->lang('turns') ?></span></a>
+							</li>
+						<?php endif; ?>
+						<?php if ($ci->auth->has_permission('Read Call Log Index')): ?>
+							<li>
+								<a class="side-menu__item has-link"
+								   href="<?= ($page == 'phonebook') ? 'javascript:void(0)' : base_url('admin/phonebook') ?>"><i
+										class="side-menu__icon fa fa-phone"></i><span
+										class="side-menu__label"><?= $ci->lang('phonebook') ?></span></a>
+							</li>
+						<?php endif; ?>
 						<li class="sub-category">
 							<h3><?= $ci->lang('finances') ?></h3>
 						</li>
@@ -338,6 +345,12 @@ $ci = get_instance();
 							   data-bs-toggle="slide" href="<?= base_url() ?>admin/users"><i
 									class="side-menu__icon fa fa-users"></i><span
 									class="side-menu__label"><?= $ci->lang('users') ?></span></a>
+						</li>
+						<li class="slide">
+							<a class="side-menu__item has-link <?= ($page == 'roles') ? 'active' : '' ?>"
+							   data-bs-toggle="slide" href="<?= base_url() ?>admin/roles"><i
+									class="side-menu__icon fas fa-user-lock	"></i><span
+									class="side-menu__label"><?= $ci->lang('role and permission') ?></span></a>
 						</li>
 						<li class="slide">
 							<a class="side-menu__item has-link <?= ($page == 'primary_info') ? 'active' : '' ?>"

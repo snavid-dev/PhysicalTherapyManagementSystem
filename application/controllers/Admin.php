@@ -5,7 +5,6 @@ class Admin extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->library('Auth');
 		$this->language->startup('fa');
 		$this->load->model('Admin_model');
 		if (!$this->session->userdata($this->mylibrary->hash_session('logged_in'))) {
@@ -53,7 +52,7 @@ class Admin extends CI_Controller
 
 	public function index()
 	{
-		$this->auth->require_permission('View Appointments');
+		$this->auth->has_permission('View Appointments');
 		$data['title'] = $this->lang('home');;
 		$data['page'] = "home";
 		$data['patients'] = $this->Admin_model->get_patients();
@@ -5530,6 +5529,22 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+
+	//Start Roles
+	public function roles()
+	{
+		$this->load->model('Role_model');
+		$data['title'] = $this->lang('role and permission');
+		$data['page'] = "users";
+		$data['users'] = $this->Admin_model->get_users();
+		$data['user_roles'] = $this->Role_model->get_all_roles();
+//		$data['script_single_patient_assets'] = ['assets/js/users.js'];
+
+		$this->load->view('header', $data);
+		$this->load->view('users/roles', $data);
+		$this->load->view('footer');
+	}
+	//End Roles
 	function render($file_path, $data = null)
 	{
 		if (!is_null($data)) {

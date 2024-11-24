@@ -1,29 +1,37 @@
 <?php $ci = get_instance(); ?>
 
-	<div class="row row-sm">
-		<div class="col-sm-12 col-md-12" style="border: 1px solid white; padding: 30px">
-			<!-- input area -->
-			<div class="col-sm-12 col-md-6" style="margin: 0 auto">
-				<div class="form-group">
-					<label class="form-label">
-						Enter the Permission
-					</label>
-					<input type="text" name="notset" class="form-control" placeholder="Permission Name"
-						   style="height: 50px" id="roleName">
-				</div>
+<div class="row row-sm">
+	<div class="col-sm-12 col-md-12" style="border: 1px solid white; padding: 30px">
+		<!-- input area -->
+		<div class="col-sm-12 col-md-6" style="margin: 0 auto">
+			<div class="form-group">
+				<label class="form-label">
+					<?= $ci->lang('enter the role name'); ?>
+				</label>
+				<input type="text" name="notset" class="form-control" placeholder="<?= $ci->lang('role name') ?>"
+					   style="height: 50px" id="roleName">
 			</div>
+		</div>
 
-			<!--columns area start-->
-			<?php
-			$ci->render('users/components/permissions_group_column.php');
-			?>
-			<!--columns area end-->
+		<!--columns area start-->
+		<?php
+		$ci->render('users/components/permissions_group_column.php');
+		?>
+		<!--columns area end-->
+		<div class="customHr"></div>
 
-			<button class="btn btn-secondary"  style="float: right" onclick="saveRole()">
-				Save
+		<div style="text-align: end;">
+
+			<button class="btn btn-primary" style="margin: 0 20px" onclick="cancelAllToggles()">
+				<?= $ci->lang('cancel all') ?>
 			</button>
+			<button class="btn btn-success" onclick="saveRole()">
+				<?= $ci->lang('save') ?>
+			</button>
+
 		</div>
 	</div>
+</div>
 
 
 <?php
@@ -65,17 +73,48 @@
 				categories: resultArray
 			},
 			dataType: 'json',
-			success: function(response) {
+			success: function (response) {
 				if (response.status === 'success') {
-					alert('Role and permissions added successfully!');
+					$.growl.notice1({
+						title: response.title,
+						message: response.message
+					});
 				} else {
-					alert('Error: ' + response.message);
+					$.growl.error1({
+						title: response.title,
+						message: response.message
+					});
 				}
+
+				cancelAllToggles()
 			},
-			error: function() {
-				alert('An error occurred while processing the request.');
+			error: function () {
+				$.growl.error1({
+					title: "<?= $ci->lang('error') ?>",
+					message: "something went wrong . . . "
+				});
 			}
 		});
+	}
+
+	function cancelAllToggles() {
+
+		const allToggles = document.querySelectorAll(".switch-input");
+		const roleNameInput = document.getElementById('roleName');
+
+		if (allToggles.length === 0) {
+			console.warn("No toggles found on the page.");
+			return;
+		}
+
+		// trigger from original cancel button
+		allToggles.forEach(toggle => {
+			toggle.checked = false;
+			toggle.dispatchEvent(new Event("change")); // remember this shit it maybe useful
+		});
+
+		console.log(`${allToggles.length} toggles have been untoggled.`);
+		roleNameInput.value = '';
 	}
 
 
