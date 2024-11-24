@@ -5544,6 +5544,19 @@ class Admin extends CI_Controller
 		$this->load->view('footer');
 	}
 	//End Roles
+
+	public function init()
+	{
+		$this->load->model('Role_model');
+		$data['title'] = $this->lang('role and permission');
+		$data['page'] = "users";
+		$data['roles'] = $this->Role_model->get_all_roles();
+//		$data['script_single_patient_assets'] = ['assets/js/users.js'];
+
+		$this->load->view('header', $data);
+		$this->load->view('test/init', $data);
+		$this->load->view('footer');
+	}
 	function render($file_path, $data = null)
 	{
 		if (!is_null($data)) {

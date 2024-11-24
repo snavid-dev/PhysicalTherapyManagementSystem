@@ -150,6 +150,7 @@ class Language
 
 			//Role & Perimission
 			'role and permission' => self::lang_arr('roles and permissions', 'نقش ها و دسترسی ها', 'رولونه او اجازې'),
+			'totalUsers' => self::lang_arr('total Users', 'مجموعه کاربران', 'د کاروونکو مجموعه'),
 			//Role & Perimission
 
 
