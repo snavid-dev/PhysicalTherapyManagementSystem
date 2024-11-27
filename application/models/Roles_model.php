@@ -41,4 +41,49 @@ class Roles_model extends CI_Model
 			return ['status' => 'error', 'message' => $e->getMessage()];
 		}
 	}
+
+	public function update_role_with_permissions($roleId, $roleName, $categories)
+	{
+		// Start transaction
+		$this->db->trans_start();
+
+		// Update the role name in the roles table
+		$this->db->where('id', $roleId);
+		$this->db->update('roles', ['role_name' => $roleName]);
+
+		// Delete all existing permissions for the role
+		$this->db->where('role_id', $roleId);
+		$this->db->delete('role_permissions');
+
+//		print_r($categories);
+//		exit();
+
+		// Insert the new permissions for the role
+		foreach ($categories as $category) {
+			$categoryId = $category['category_id'];
+			if (isset($category['permissions'])) {
+				$permissions = $category['permissions'];
+				if (is_array($permissions) && !empty($permissions)) {
+					foreach ($permissions as $permissionId) {
+						$this->db->insert('role_permissions', [
+							'role_id' => $roleId,
+							'permission_id' => $permissionId
+						]);
+					}
+				}
+			}
+
+		}
+
+		// Complete the transaction
+		$this->db->trans_complete();
+
+		// Check if the transaction was successful
+		if ($this->db->trans_status() === false) {
+			return ['status' => 'error', 'message' => 'Failed to update role and permissions.'];
+		}
+
+		return ['status' => 'success'];
+	}
+
 }

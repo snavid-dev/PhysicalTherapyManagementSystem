@@ -44,10 +44,11 @@
 										   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"
 										   data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span
 												class="fa fa-trash fs-14"></span></a>
-										<a href="javascript:delete_via_alert('<?= $role->id ?>', '<?= base_url() ?>admin/delete_role', 'file-datatable', null, true)"
-										   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"
+
+										<a href="javascript:window.location.href='<?= base_url() ?>admin/edit_role/<?= $role->id ?>'"
+										   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"
 										   data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span
-												class="fa fa-trash fs-14"></span></a>
+												class="fa fa-edit fs-14"></span></a>
 									</div>
 								</td>
 							</tr>

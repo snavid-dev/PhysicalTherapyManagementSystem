@@ -5537,11 +5537,44 @@ class Admin extends CI_Controller
 		$data['title'] = $this->lang('role and permission');
 		$data['page'] = "users";
 		$data['roles'] = $this->Role_model->get_all_roles();
-//		$data['script_single_patient_assets'] = ['assets/js/users.js'];
 
 		$this->load->view('header', $data);
 		$this->load->view('users/roles', $data);
 		$this->load->view('footer');
+	}
+
+	public function edit_role($id = null)
+	{
+		if (!is_null($id)) {
+			$this->load->model('Role_model');
+			$role = $this->Role_model->get_role($id);
+
+			$permissions = $this->Role_model->get_assigned_permissions($role[0]->id);
+
+
+
+			if (count($role) !== 0) {
+				$this->load->model('Permission_model');
+
+				$data['title'] = $role[0]->role_name;
+				$data['page'] = "single_role";
+				$data['assigned_permissions'] = $permissions;
+				$data['role'] = $role[0];
+				$data['permissions'] = $this->Permission_model->get_permissions_with_categories();
+
+				// Start List of primary information for insert teeth
+
+				$this->load->view('header', $data);
+				$this->load->view('users/user_role_edit', $data);
+				$this->load->view('footer');
+			} else {
+				show_404();
+				exit();
+			}
+		} else {
+			show_404();
+			exit;
+		}
 	}
 	//End Roles
 
