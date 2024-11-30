@@ -1,3 +1,6 @@
+<?php
+$ci = get_instance();
+?>
 <div class="tab-pane fade p-0 border-0 bg-white p-4 rounded-3" id="pros-pane" role="tabpanel"
 					 aria-labelledby="Pros-pane" tabindex="0">
 

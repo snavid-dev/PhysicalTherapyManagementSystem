@@ -1,7 +1,5 @@
 <?php
-
 $ci = get_instance();
-
 ?>
 <!doctype html>
 <html lang="en" dir="ltr">
