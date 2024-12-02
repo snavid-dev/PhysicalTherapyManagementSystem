@@ -1,5 +1,7 @@
 <?php $ci = get_instance(); ?>
-<!-- Start::row-1 -->
+
+<?php $ci->render("patients/js.php"); ?>
+
 <div class="row">
 	<!--Patient Information Card -->
 	<?php $ci->render('patients/components/patient_info/patient.php') ?>
@@ -10,4 +12,8 @@
 </div>
 <!--End::row-1 -->
 
-<?php $ci->render('patients/modals.php');
+
+
+
+<?php $ci->render('patients/modals.php'); ?>
+

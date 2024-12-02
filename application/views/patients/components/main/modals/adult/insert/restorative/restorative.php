@@ -1,3 +1,6 @@
+<?php
+$ci = get_instance();
+?>
 <div class="tab-pane show active fade p-0 border-0 bg-white p-4 rounded-3" id="Restorative-pane"
 					 role="tabpanel" aria-labelledby="Restorative-pane" tabindex="0">
 					<div class="modal-body">

@@ -1,7 +1,12 @@
+<?php
+$ci = get_instance();
+?>
 <div class="modal fade effect-scale" tabindex="-1" id="teethmodal" role="dialog">
 
 
 	<!-- TODO: Here is the sidebar start -->
+	<?php $ci->render("patients/components/main/modals/adult/insert/sidebar/sidebar.php");  ?>
+
 	<!-- TODO: Here is the sidebar end -->
 
 
@@ -79,14 +84,17 @@
 
 				<!--TODO:insFixing  -->
 				<!--insFixing  -->
+				<?php $ci->render("patients/components/main/modals/adult/insert/restorative/restorative.php");  ?>
 
 
 				<!-- TODO:insEndo -->
+				<?php $ci->render("patients/components/main/modals/adult/insert/endo/endo.php");  ?>
 
 				<!-- insEndo -->
 
 
 				<!-- TODO:insPro -->
+				<?php $ci->render("patients/components/main/modals/adult/insert/pro/pro.php");  ?>
 
 				<!-- insPro -->
 

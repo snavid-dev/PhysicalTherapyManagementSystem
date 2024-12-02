@@ -1,3 +1,6 @@
+<?php
+$ci = get_instance();
+?>
 <header class="sidebar_header">
 		<div id="toggle" class="sidebar_toggle">
 			<span><?= $ci->lang('Departments') ?> <i class="fa fa-bars"></i></span>

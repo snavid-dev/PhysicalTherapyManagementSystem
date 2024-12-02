@@ -1,4 +1,7 @@
-				<div class="tab-pane fade p-0 border-0 bg-white p-4 rounded-3" id="endo-pane" role="tabpanel"
+<?php
+$ci = get_instance();
+?>
+<div class="tab-pane fade p-0 border-0 bg-white p-4 rounded-3" id="endo-pane" role="tabpanel"
 					 aria-labelledby="Endo-pane" tabindex="0">
 
 					<div class="modal-body">
