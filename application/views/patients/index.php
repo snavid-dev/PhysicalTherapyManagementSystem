@@ -40,16 +40,19 @@
 								</button>
 							</li>
 							<li>
+								<?php if ($ci->auth->has_permission('Create Patient')): ?>
 								<button class="btn btn-primary" data-bs-toggle="modal"
 										data-bs-target="#extralargemodal">
 									<?= $ci->lang('add new') ?> <i class="fa-solid fa-plus"></i>
 								</button>
+								<?php endif; ?>
 							</li>
 						</ul>
 
 
 						<!-- Modal Button -->
 						<!-- Modal -->
+						<?php if ($ci->auth->has_permission('Create Patient')): ?>
 						<div class="modal fade effect-scale" id="extralargemodal" tabindex="-1" role="dialog">
 							<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
 								<div class="modal-content">
@@ -220,6 +223,7 @@
 								</div>
 							</div>
 						</div>
+						<?php endif; ?>
 						<!-- Modal End -->
 					</div>
 				</div>

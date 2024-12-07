@@ -86,7 +86,8 @@
 					});
 				}
 
-				cancelAllToggles()
+				cancelAllToggles();
+				location.reload();
 			},
 			error: function () {
 				$.growl.error1({
