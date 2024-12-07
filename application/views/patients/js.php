@@ -1,334 +1,23 @@
 <?php
 $ci = get_instance();
 ?>
-<script>
-	var ageOld = <?= $profile['age']; ?>;
 
-	function multiple_value(selectId = '#pains', inputId = '#model_value') {
-		const select = $(selectId).val();
-		let text = select.join()
-		$(inputId).val(text);
-	}
+<!--all services functions --- this mf is so important-->
+<?php $ci->render('patients/components/main/modals/adult/services_js.php');  ?>
 
+<!--edit profile function-->
+<?php $ci->render('patients/components/patient_info/editProfile_js.php'); ?>
 
-
-
-	// TODO: the fucking services start
-	// Update service_price_resto to accept a callback function
-	function service_price_resto(serviceSelectId = '#services_restorative', hiddenInputId = '#services_input_restorative', priceInputId = '#price_tooth_restorative', callback) {
-		const select = $(serviceSelectId).val();
-		let text = select.join();
-		$(hiddenInputId).val(text);
-
-		$.ajax({
-			url: "<?= base_url('admin/check_service_price') ?>",
-			type: 'POST',
-			data: {
-				service: select
-			},
-			success: function (response) {
-				let result = JSON.parse(response);
-				$(priceInputId).val(result[0]);
-				// Call the callback function with the result value
-				if (typeof callback === 'function') {
-					callback(result[0]);
-				}
-			}
-		});
-	}
-
-	// Update service_price to accept a callback function
-	function service_price(serviceSelectId = '#services', hiddenInputId = '#services_input', priceInputId = '#price_tooth', callback) {
-		const select = $(serviceSelectId).val();
-		let text = select.join();
-		$(hiddenInputId).val(text);
-
-		$.ajax({
-			url: "<?= base_url('admin/check_service_price') ?>",
-			type: 'POST',
-			data: {
-				service: select
-			},
-			success: function (response) {
-				let result = JSON.parse(response);
-				$(priceInputId).val(result[0]);
-				// Call the callback function with the result value
-				if (typeof callback === 'function') {
-					callback(result[0]);
-				}
-			}
-		});
-	}
-
-
-	function service_price_pro(serviceSelectId = '#services_pro', hiddenInputId = '#services_input_pro', priceInputId = '#price_tooth_pro', callback) {
-		const select = $(serviceSelectId).val();
-		let text = select.join();
-		$(hiddenInputId).val(text);
-
-		$.ajax({
-			url: "<?= base_url('admin/check_service_price') ?>",
-			type: 'POST',
-			data: {
-				service: select
-			},
-			success: function (response) {
-				let result = JSON.parse(response);
-				$(priceInputId).val(result[0]);
-				// Call the callback function with the result value
-				if (typeof callback === 'function') {
-					callback(result[0]);
-				}
-			}
-		});
-	}
-
-	// Function to calculate the sum of values from service_price_resto and service_price
-	function calculate_sum() {
-		let priceResto = 0;
-		let priceService = 0;
-		let priceProsthodontics = 0;
-
-		let is_endo = ($('#checkbox_endo').is(':checked')) ? true : false;
-		let is_resto = ($('#checkbox_resto').is(':checked')) ? true : false;
-		let is_prosthodontics = ($('#checkbox_prosthodontics').is(':checked')) ? true : false;
-
-		// Callback function for service_price_resto
-		function handlePriceResto(price) {
-			if (is_resto) {
-				priceResto = price;
-				handleResults();
-			}
-		}
-
-		function handlePriceProsthodontics(price) {
-			if (is_prosthodontics) {
-				priceProsthodontics = price;
-				handleResults();
-			}
-		}
-
-
-		// Callback function for service_price
-		function handlePriceService(price) {
-			if (is_endo) {
-				priceService = price;
-				handleResults();
-			}
-		}
-
-		// Function to handle the results and update the inputs accordingly
-		function handleResults() {
-			// Calculate the sum
-			const sum = priceResto + priceService + priceProsthodontics;
-
-			// Determine which inputs to update based on the values of priceResto and priceService
-			if (priceResto === 0 && priceService !== 0) {
-				// If priceResto is zero, update only the "priceTag_resto" input
-				$('#priceTag_endo').val(sum);
-				$('#priceTag_resto').val(sum);
-				$('#priceTag_pro').val(sum);
-			} else if (priceService === 0 && priceResto !== 0) {
-				// If priceService is zero, update only the "priceTag_endo" input
-				$('#priceTag_resto').val(sum);
-				$('#priceTag_endo').val(sum);
-				$('#priceTag_pro').val(sum);
-
-			} else {
-				// If both priceResto and priceService have non-zero values, update both inputs
-				$('#priceTag_resto').val(sum);
-				$('#priceTag_endo').val(sum);
-				$('#priceTag_pro').val(sum);
-			}
-		}
-
-		// Add event listeners to handle changes in price_tooth_restorative and price_tooth inputs
-		document.getElementById('price_tooth_restorative').addEventListener('change', () => {
-			priceResto = parseFloat(document.getElementById('price_tooth_restorative').value) || 0;
-			handleResults();
-		});
-
-		document.getElementById('price_tooth_pro').addEventListener('change', () => {
-			priceProsthodontics = parseFloat(document.getElementById('price_tooth_pro').value) || 0;
-			handleResults();
-		});
-
-		document.getElementById('price_tooth').addEventListener('change', () => {
-			priceService = parseFloat(document.getElementById('price_tooth').value) || 0;
-			handleResults();
-		});
-
-		// Call the functions with the appropriate callback functions
-		service_price_resto('#services_restorative', '#services_input_restorative', '#price_tooth_restorative', handlePriceResto);
-		service_price('#services', '#services_input', '#price_tooth', handlePriceService);
-		service_price_pro('#services_pro', '#services_input_pro', '#price_tooth_pro', handlePriceProsthodontics);
-	}
-
-	// TODO: the fucking services end
-
-
-	let pains = document.getElementById('pains').innerHTML;
-	let doctor_id = document.getElementById('doctor_id').innerHTML;
-	let gender = document.getElementById('gender').innerHTML;
-
-	function edit_profile(id = <?= $profile['id'] ?>) {
-		$.ajax({
-			url: "<?= base_url('admin/edit_patient') ?>",
-			type: 'POST',
-			data: {
-				slug: id
-			},
-			success: function (response) {
-				var result = JSON.parse(response);
-				if (result['type'] == 'success') {
-					$('#slug').val(result['content']['slug']);
-					$('#name').val(result['content']['name']);
-					$('#lname').val(result['content']['lname']);
-					$('#age').val(result['content']['age']);
-					$('#phone1').val(result['content']['phone1']);
-					$('#phone2').val(result['content']['phone2']);
-					$('#other_pains').val(result['content']['other_pains']);
-					$('#address').val(result['content']['address']);
-					$('#remarks').val(result['content']['remarks']);
-					$('#model_value').val(result['content']['pains']);
-					let pains_selected = result['content']['pains_select'];
-					let pains_new = pains;
-					pains_selected.map((item) => {
-						pains_new = pains_new.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-					});
-					$("#pains").html(pains_new);
-
-					let gender_new = gender;
-					gender_new = gender_new.replace(`<option value="${result['content']['gender']}">`, `<option value="${result['content']['gender']}" selected>`);
-					$("#gender").html(gender_new);
-
-
-					let doctor = doctor_id;
-					doctor = doctor.replace(`<option value="${result['content']['doctor_id']}">`, `<option value="${result['content']['doctor_id']}" selected>`);
-					$("#doctor_id").html(doctor);
-
-
-					// select_with_search('edit_profile');
-				} else if (result['type'] == 'error') {
-					$.growl.error1({
-						title: result['alert']['title'],
-						message: result['alert']['text']
-					});
-				}
-			}
-		})
-	}
-</script>
-
+<!--date picker (jalali) loader-->
 <script>
 	document.addEventListener("DOMContentLoaded", function () {
 		jalaliDatepicker.startWatch();
 	});
 </script>
 
-<script>
-	function check_turns(selectElement = document.getElementById('reference_doctor'), date = $('#test-date-id-date').val(), doctor = $('#reference_doctor').val(), tableId = '#turnsTableModal') {
-		const time = document.getElementById("hour_insert");
-		const timeOption = time.value;
-		$.ajax({
-			url: "<?= base_url('admin/check_turns') ?>",
-			type: 'POST',
-			data: {
-				date: date,
-				doctor: doctor,
-				patient_time: timeOption
-			},
-			success: function (response) {
-				var result = JSON.parse(response);
-				var turns = result['content']['turns'];
+<!--check turns and editTurns functions as turnsFunctions-->
+<?php $ci->render('patients/components/main/Turns/turnsFunctions_js.php'); ?>
 
-
-				if (result['type'] == 'success') {
-					if (turns.length != 0) {
-						var tableTemplate =
-							`<table class="table text-nowrap table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col"><?= $ci->lang('patient name') ?></th>
-                                            <th scope="col"><?= $ci->lang('reference doctor') ?></th>
-                                            <th scope="col"><?= $ci->lang('hour') ?></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>`;
-
-						turns.map((item) => {
-							tableTemplate += `<tr>
-                                            <th scope="row">${item['patient_name']}</th>
-                                            <td>${item['doctor_name']}</td>
-                                            <td>${item['hour']}</td>
-                                        </tr>`;
-						})
-
-
-						tableTemplate += `</tbody>
-                                </table>`;
-					} else {
-						var tableTemplate = ``;
-					}
-					$(tableId).html(tableTemplate);
-				} else if (result['type'] == 'error') {
-					$.growl.error1({
-						title: result['alert']['title'],
-						message: result['alert']['text']
-					});
-				}
-
-				// if in the date & time turn was already taken this will alert for the user
-				if (result['alert']) {
-					$.growl.error1({
-						title: result['alert']['title'],
-						message: result['alert']['text']
-					});
-				}
-			}
-		})
-	}
-</script>
-
-
-<script>
-	function edit_turn(id) {
-		$.ajax({
-			url: "<?= base_url('admin/single_turn') ?>",
-			type: 'POST',
-			data: {
-				slug: id
-			},
-			success: function (response) {
-				var result = JSON.parse(response);
-				if (result['type'] == 'success') {
-					$('#slug_turn').val(result['content']['slug']);
-					$('#date_turn').val(result['content']['date']);
-					$('#dateTurnOld').val(result['content']['date']);
-					$('#hourTurnOld').val(result['content']['hour']);
-					$('#doctorTurnOld').val(result['content']['doctor_id']);
-					let doctor = $('#doctor_id_turn').html();
-					replacer(doctor, result['content']['doctor_id'], 'doctor_id_turn');
-
-					let hour = $('#hour_turn').html();
-					replacer(hour, result['content']['hour'], 'hour_turn');
-					$('#update_turn').modal('toggle');
-				} else if (result['type'] == 'error') {
-					$.growl.error1({
-						title: result['alert']['title'],
-						message: result['alert']['text']
-					});
-				}
-			}
-		})
-	}
-</script>
-
-<script>
-	function print_turn(turnId) {
-		window.open(`<?= base_url() ?>admin/print_turn/${turnId}`, '_blank');
-	}
-</script>
 
 <script>
 	function print_payment(turnId) {
@@ -337,17 +26,12 @@ $ci = get_instance();
 	}
 </script>
 
-<script>
-	function print_lab(labId) {
-		window.open(`<?= base_url() ?>admin/print_lab/${labId}`, '_blank');
-	}
-</script>
+<!--print lab-->
+<?php $ci->render('patients/components/main/Lab/lab_printLan_js.php'); ?>
 
-<script>
-	function print_prescription(prescriptionId) {
-		window.open(`<?= base_url() ?>admin/print_prescription/${prescriptionId}`, '_blank');
-	}
-</script>
+
+<!--print prescription-->
+<?php $ci->render('patients/components/main/prescription/prescription_js.php'); ?>
 
 <script>
 	function payment_modal_clicked() {

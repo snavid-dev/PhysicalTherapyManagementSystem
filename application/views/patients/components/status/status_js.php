@@ -13,7 +13,7 @@
 			$("#selectaction").val("").trigger("change");
 		}
 		if (actionValues == 3) {
-			request();
+			// request();
 			$(`#laboratoryInsertModal`).modal("toggle");
 			$("#selectaction").val("").trigger("change");
 		}
