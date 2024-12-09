@@ -13,14 +13,14 @@
 
             <ul class="nav panel-tabs product-sale" role="tablist">
               <li>
-				  <?php if ($ci->auth->has_permission('Create Expenses')): ?>
+				  <?php if ($ci->auth->has_permission('Create New Account')): ?>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extralargemodal"><?= $ci->lang('add new') ?> <i class="fa fa-plus"></i></button>
 				  <?php endif; ?>
               </li>
             </ul>
             <!-- Modal Button -->
             <!-- expenses Modal -->
-			  <?php if ($ci->auth->has_permission('Create Expenses')): ?>
+			  <?php if ($ci->auth->has_permission('Create New Account')): ?>
             <div class="modal fade effect-scale" id="extralargemodal" tabindex="-1" role="dialog">
               <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
                 <div class="modal-content">
