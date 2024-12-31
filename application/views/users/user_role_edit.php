@@ -88,7 +88,8 @@
 					});
 				}
 
-				cancelAllToggles()
+				cancelAllToggles();
+				location.reload();
 			},
 			error: function () {
 				$.growl.error1({
@@ -97,6 +98,7 @@
 				});
 			}
 		});
+		// location.reload();
 	}
 
 	function cancelAllToggles() {

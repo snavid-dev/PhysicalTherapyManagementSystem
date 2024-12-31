@@ -3,6 +3,7 @@
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xl-12">
 		<div class="row">
+<!--			patients modal			-->
 			<?php if ($ci->auth->has_permission('Create Patient')): ?>
 				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="show_patient_modal()">
 					<div class="card overflow-hidden bg-success-gradient clickable">
@@ -22,6 +23,9 @@
 					</div>
 				</div>
 			<?php endif; ?>
+
+<!--			turns Modal-->
+			<?php if ($ci->auth->has_permission('Create Turn')): ?>
 			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#turnsModal`).modal('toggle');">
 				<div class="card overflow-hidden bg-info-gradient clickable">
 					<div class="card-body">
@@ -38,7 +42,10 @@
 					</div>
 				</div>
 			</div>
+			<?php endif; ?>
 
+<!--			expenses -->
+			<?php if ($ci->auth->has_permission('Create Expenses')): ?>
 			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#receiptModal`).modal('toggle');">
 				<div class="card overflow-hidden bg-warning-gradient clickable">
 					<div class="card-body">
@@ -55,6 +62,7 @@
 					</div>
 				</div>
 			</div>
+			<?php endif; ?>
 			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#searchModal`).modal('toggle');">
 				<div class="card overflow-hidden bg-danger-gradient clickable">
 					<div class="card-body">
@@ -428,6 +436,8 @@
 
 
 <!-- Modal -->
+<?php if ($ci->auth->has_permission('Create Patient')): ?>
+
 <div class="modal fade effect-scale" id="extralargemodal" tabindex="-1" role="dialog">
 	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
 		<div class="modal-content">
@@ -593,16 +603,21 @@
 		</div>
 	</div>
 </div>
+<?php endif; ?>
 <!-- Modal End -->
 
+
+<?php if ($ci->auth->has_permission('Create Patient')): ?>
 <script>
 	function show_patient_modal() {
 		$(`#extralargemodal`).modal('toggle');
 	}
 </script>
+<?php endif; ?>
 
 
-<!-- Modal -->
+<!-- turns Modal -->
+<?php if ($ci->auth->has_permission('Create Turn')): ?>
 <div class="modal fade effect-scale" id="turnsModal" role="dialog">
 	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
 		<div class="modal-content">
@@ -713,7 +728,8 @@
 		</div>
 	</div>
 </div>
-<!-- Modal End -->
+<?php endif; ?>
+<!-- turns Modal End -->
 
 <script>
 	function multiple_value() {
@@ -810,7 +826,8 @@
 </script>
 
 
-<!-- Modal -->
+<!-- Expenses Modal -->
+<?php if ($ci->auth->has_permission('Create Expenses')): ?>
 <div class="modal fade effect-scale hide" id="receiptModal" role="dialog">
 	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
 		<div class="modal-content">
@@ -913,7 +930,8 @@
 		</div>
 	</div>
 </div>
-<!-- Modal End -->
+<?php endif; ?>
+<!-- Expenses Modal End -->
 
 
 <!-- Modal -->

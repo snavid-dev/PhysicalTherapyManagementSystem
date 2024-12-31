@@ -32,14 +32,17 @@
 
 
               <li>
+				  <?php if ($ci->auth->has_permission('Create Expenses')): ?>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extralargemodal">
                   <?= $ci->lang('add new') ?> <i class="fa fa-plus"></i>
                 </button>
+				  <?php endif; ?>
               </li>
 
             </ul>
             <!-- Modal Button -->
-            <!-- Modal -->
+            <!-- ReceiptsModal -->
+			  <?php if ($ci->auth->has_permission('Create Expenses')): ?>
             <div class="modal fade effect-scale" id="extralargemodal" role="dialog">
               <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
                 <div class="modal-content">
@@ -136,7 +139,8 @@
                 </div>
               </div>
             </div>
-            <!-- Modal End -->
+			  <?php endif; ?>
+            <!-- ReceiptsModal End -->
           </div>
         </div>
 
