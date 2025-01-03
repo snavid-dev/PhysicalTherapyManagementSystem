@@ -132,7 +132,7 @@ class Admin_model extends CI_Model
 			$extra = "DATE(tooth.create_date) = DATE('" . $this->mylibrary->getCurrentShamsiDate()['date'] . "')";
 		}
 
-		return $this->db->query("SELECT tooth.name AS 'tooth_name', tooth.location, tooth.services, tooth.price, tooth.root_number, tooth.create_date, tooth.details, patient.name, patient.lname, patient.gender FROM `tooth` INNER JOIN patient ON tooth.patient_id = patient.id WHERE " . $extra . " ORDER BY `tooth`.`create_date` ASC;")->result_array();
+		return $this->db->query("SELECT tooth.name AS 'tooth_name', tooth.location, tooth.price, tooth.create_date, patient.name, patient.lname, patient.gender FROM `tooth` INNER JOIN patient ON tooth.patient_id = patient.id WHERE " . $extra . " ORDER BY `tooth`.`create_date` ASC;")->result_array();
 	}
 
 
@@ -347,6 +347,11 @@ class Admin_model extends CI_Model
 	public function get_patients_extra($extra = null)
 	{
 		return $this->db->query("SELECT `patient`.*, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `patient` INNER JOIN users ON patient.doctor_id = users.id WHERE " . $extra . " ORDER BY patient.create DESC")->result_array();
+	}
+
+	public function get_temp_patients_extra($extra = "temp_patient.status = 'p'")
+	{
+		return $this->db->query("SELECT `temp_patient`.*, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `temp_patient` INNER JOIN users ON temp_patient.doctor_id = users.id WHERE " . $extra . " ORDER BY temp_patient.create DESC")->result_array();
 	}
 
 
@@ -671,10 +676,23 @@ class Admin_model extends CI_Model
 		return array($log, $id);
 	}
 
+	public function insert_temp_patient($data = array())
+	{
+		$log = $this->db->insert('temp_patient', $data);
+		$id = $this->db->insert_id();
+
+		return array($log, $id);
+	}
+
 
 	public function profile_patient($id)
 	{
 		return $this->db->query("SELECT `patient`.*, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name FROM `patient` INNER JOIN users ON patient.doctor_id = users.id WHERE patient.id = '$id'")->result_array();
+	}
+
+	public function single_temp_patient($id)
+	{
+		return $this->db->get_where('temp_patient', array('id' => $id))->result_array();
 	}
 
 	public function list_insert_tooth_basic_information($category_name, $department = 'restorative')
@@ -824,6 +842,11 @@ class Admin_model extends CI_Model
 		return $this->db->update('patient', $data, array('id' => $id));
 	}
 
+	function update_temp_patient($data, $id)
+	{
+		return $this->db->update('temp_patient', $data, array('id' => $id));
+	}
+
 	function turns_by_patient_id($patient_id)
 	{
 		return $this->db->query("SELECT `turn`.*, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name FROM `turn` INNER JOIN users ON turn.doctor_id = users.id WHERE turn.patient_id = '$patient_id'")->result_array();
@@ -837,6 +860,11 @@ class Admin_model extends CI_Model
 	function delete_patient($where = array())
 	{
 		return $this->db->delete('patient', $where);
+	}
+
+	function remove_temp($id)
+	{
+		return $this->db->delete('temp_patient', array('id' => $id));
 	}
 
 	function get_doctors()

@@ -25,6 +25,7 @@
 									<option value="p"><?= $ci->lang('pending') ?></option>
 									<option value="a"><?= $ci->lang('accepted') ?></option>
 									<option value="b"><?= $ci->lang('blocked') ?></option>
+									<option value="t">temp</option>
 
 								</select>
 								<!-- Filter Select -->
@@ -41,10 +42,10 @@
 							</li>
 							<li>
 								<?php if ($ci->auth->has_permission('Create Patient')): ?>
-								<button class="btn btn-primary" data-bs-toggle="modal"
-										data-bs-target="#extralargemodal">
-									<?= $ci->lang('add new') ?> <i class="fa-solid fa-plus"></i>
-								</button>
+									<button class="btn btn-primary" data-bs-toggle="modal"
+											data-bs-target="#extralargemodal">
+										<?= $ci->lang('add new') ?> <i class="fa-solid fa-plus"></i>
+									</button>
 								<?php endif; ?>
 							</li>
 						</ul>
@@ -53,176 +54,181 @@
 						<!-- Modal Button -->
 						<!-- Modal -->
 						<?php if ($ci->auth->has_permission('Create Patient')): ?>
-						<div class="modal fade effect-scale" id="extralargemodal" tabindex="-1" role="dialog">
-							<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title">
-											<?= $ci->lang('insert patient') ?>
-										</h5>
-										<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">×</span>
-										</button>
-									</div>
-									<div class="modal-body">
-										<form id="insertAccount">
-											<div class="row">
-												<div class="col-sm-12 col-md-3">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('name') ?> <span class="text-red">*</span>
-														</label>
-														<input type="text" name="name" class="form-control"
-															   placeholder="<?= $ci->lang('name') ?>">
+							<div class="modal fade effect-scale" id="extralargemodal" tabindex="-1" role="dialog">
+								<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title">
+												<?= $ci->lang('insert patient') ?>
+											</h5>
+											<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body">
+											<form id="insertAccount">
+												<div class="row">
+													<div class="col-sm-12 col-md-3">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('name') ?> <span class="text-red">*</span>
+															</label>
+															<input type="text" name="name" class="form-control"
+																   placeholder="<?= $ci->lang('name') ?>">
+														</div>
 													</div>
-												</div>
 
-												<div class="col-sm-12 col-md-3">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('lname') ?> <span class="text-red">*</span>
-														</label>
-														<input type="text" name="lname" class="form-control"
-															   placeholder="<?= $ci->lang('lname') ?>">
+													<div class="col-sm-12 col-md-3">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('lname') ?> <span
+																	class="text-red">*</span>
+															</label>
+															<input type="text" name="lname" class="form-control"
+																   placeholder="<?= $ci->lang('lname') ?>">
+														</div>
 													</div>
-												</div>
 
-												<div class="col-sm-12 col-md-3">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('age') ?> <span class="text-red">*</span>
-														</label>
-														<input type="number" name="age" class="form-control"
-															   placeholder="<?= $ci->lang('age') ?>">
+													<div class="col-sm-12 col-md-3">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('age') ?> <span class="text-red">*</span>
+															</label>
+															<input type="number" name="age" class="form-control"
+																   placeholder="<?= $ci->lang('age') ?>">
+														</div>
 													</div>
-												</div>
 
-												<div class="col-sm-12 col-md-3">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('phone') ?> <span class="text-red">*</span>
-														</label>
-														<input type="text" name="phone1" class="form-control"
-															   placeholder="<?= $ci->lang('phone') ?>">
+													<div class="col-sm-12 col-md-3">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('phone') ?> <span
+																	class="text-red">*</span>
+															</label>
+															<input type="text" name="phone1" class="form-control"
+																   placeholder="<?= $ci->lang('phone') ?>">
+														</div>
 													</div>
-												</div>
 
-												<div class="col-sm-12 col-md-3">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('phone2') ?>
-														</label>
-														<input type="text" name="phone2" class="form-control"
-															   placeholder="<?= $ci->lang('phone2') ?>">
+													<div class="col-sm-12 col-md-3">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('phone2') ?>
+															</label>
+															<input type="text" name="phone2" class="form-control"
+																   placeholder="<?= $ci->lang('phone2') ?>">
+														</div>
 													</div>
-												</div>
 
-												<div class="col-sm-12 col-md-3">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('gender') ?> <span class="text-red">*</span>
-														</label>
-														<select name="gender" class="form-control form-select">
-															<option label="<?= $ci->lang('select') ?>"></option>
-															<option value="m">
-																<?= $ci->lang('male') ?>
-															</option>
-															<option value="f">
-																<?= $ci->lang('female') ?>
-															</option>
-														</select>
-													</div>
-												</div>
-
-												<div class="col-sm-12 col-md-3">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('medical history') ?>
-														</label>
-														<select name="pains_select"
-																class="form-control select2-show-search form-select"
-																id="model" data-placeholder="<?= $ci->lang('select') ?>"
-																multiple onchange="multiple_value()">
-															<option label="<?= $ci->lang('select') ?>"></option>
-															<?php foreach ($ci->dentist->diseases() as $pain) : ?>
-																<option value="<?= $pain ?>">
-																	<?= $pain ?>
+													<div class="col-sm-12 col-md-3">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('gender') ?> <span
+																	class="text-red">*</span>
+															</label>
+															<select name="gender" class="form-control form-select">
+																<option label="<?= $ci->lang('select') ?>"></option>
+																<option value="m">
+																	<?= $ci->lang('male') ?>
 																</option>
-															<?php endforeach; ?>
-														</select>
-														<input type="hidden" name="pains" id="model_value">
-													</div>
-												</div>
-
-												<div class="col-sm-12 col-md-3">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('reference doctor') ?>
-														</label>
-														<select name="doctor_id"
-																class="form-control select2-show-search form-select"
-																data-placeholder="<?= $ci->lang('select') ?>">
-															<option label="<?= $ci->lang('select') ?>"></option>
-															<?php foreach ($doctors as $doctor) : ?>
-																<option value="<?= $doctor['id'] ?>">
-																	<?= $ci->mylibrary->user_name($doctor['fname'], $doctor['lname']) ?>
+																<option value="f">
+																	<?= $ci->lang('female') ?>
 																</option>
-															<?php endforeach; ?>
-														</select>
+															</select>
+														</div>
 													</div>
-												</div>
 
-												<div class="col-sm-12 col-md-4">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('other diseases') ?>
-														</label>
-														<textarea type="text" name="other_pains" class="form-control"
-																  rows="4"
-																  placeholder="<?= $ci->lang('other diseases') ?>"></textarea>
+													<div class="col-sm-12 col-md-3">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('medical history') ?>
+															</label>
+															<select name="pains_select"
+																	class="form-control select2-show-search form-select"
+																	id="model"
+																	data-placeholder="<?= $ci->lang('select') ?>"
+																	multiple onchange="multiple_value()">
+																<option label="<?= $ci->lang('select') ?>"></option>
+																<?php foreach ($ci->dentist->diseases() as $pain) : ?>
+																	<option value="<?= $pain ?>">
+																		<?= $pain ?>
+																	</option>
+																<?php endforeach; ?>
+															</select>
+															<input type="hidden" name="pains" id="model_value">
+														</div>
 													</div>
-												</div>
 
-												<div class="col-sm-12 col-md-4">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('address') ?>
-														</label>
-														<textarea type="text" name="address" class="form-control"
-																  rows="4"
-																  placeholder="<?= $ci->lang('address') ?>"></textarea>
+													<div class="col-sm-12 col-md-3">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('reference doctor') ?>
+															</label>
+															<select name="doctor_id"
+																	class="form-control select2-show-search form-select"
+																	data-placeholder="<?= $ci->lang('select') ?>">
+																<option label="<?= $ci->lang('select') ?>"></option>
+																<?php foreach ($doctors as $doctor) : ?>
+																	<option value="<?= $doctor['id'] ?>">
+																		<?= $ci->mylibrary->user_name($doctor['fname'], $doctor['lname']) ?>
+																	</option>
+																<?php endforeach; ?>
+															</select>
+														</div>
 													</div>
-												</div>
 
-
-												<div class="col-sm-12 col-md-4">
-													<div class="form-group">
-														<label class="form-label">
-															<?= $ci->lang('desc') ?>
-														</label>
-														<textarea type="text" name="remarks" class="form-control"
-																  rows="4"
-																  placeholder="<?= $ci->lang('desc') ?>"></textarea>
+													<div class="col-sm-12 col-md-4">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('other diseases') ?>
+															</label>
+															<textarea type="text" name="other_pains"
+																	  class="form-control"
+																	  rows="4"
+																	  placeholder="<?= $ci->lang('other diseases') ?>"></textarea>
+														</div>
 													</div>
+
+													<div class="col-sm-12 col-md-4">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('address') ?>
+															</label>
+															<textarea type="text" name="address" class="form-control"
+																	  rows="4"
+																	  placeholder="<?= $ci->lang('address') ?>"></textarea>
+														</div>
+													</div>
+
+
+													<div class="col-sm-12 col-md-4">
+														<div class="form-group">
+															<label class="form-label">
+																<?= $ci->lang('desc') ?>
+															</label>
+															<textarea type="text" name="remarks" class="form-control"
+																	  rows="4"
+																	  placeholder="<?= $ci->lang('desc') ?>"></textarea>
+														</div>
+													</div>
+
+
 												</div>
+											</form>
 
-
-											</div>
-										</form>
-
-									</div>
-									<div class="modal-footer">
-										<button class="btn btn-secondary" data-bs-dismiss="modal">
-											<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
-										</button>
-										<button class="btn btn-primary"
-												onclick="xhr_insert_patient('insertAccount', '<?= base_url() ?>admin/insert_patient','<?= base_url() ?>admin/single_patient/')">
-											<?= $ci->lang('save') ?> <i class="fa-solid fa-plus"></i>
-										</button>
+										</div>
+										<div class="modal-footer">
+											<button class="btn btn-secondary" data-bs-dismiss="modal">
+												<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
+											</button>
+											<button class="btn btn-primary"
+													onclick="xhr_insert_patient('insertAccount', '<?= base_url() ?>admin/insert_patient','<?= base_url() ?>admin/single_patient/')">
+												<?= $ci->lang('save') ?> <i class="fa-solid fa-plus"></i>
+											</button>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
 						<?php endif; ?>
 						<!-- Modal End -->
 					</div>
@@ -442,6 +448,20 @@
             <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-check-circle fs-14"></span></a>`;
 
 					}
+					let buttons = '';
+					if (selectIdValue != 't') {
+						buttons = ` <div class="g-2">
+                <a href="<?= base_url("admin/single_patient/") ?>${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span class="fa fa-user-circle-o fs-14"></span></a>
+                <a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('print') ?>"><span class="fa fa-print fs-14"></span></a>
+                ${changeBtnsStatus}
+                <a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fe fe-trash-2 fs-14"></span></a>
+              </div>`;
+					} else {
+						buttons = ` <div class="g-2">
+                      <a href="javascript:temp_to_permenant('${item.id}', '<?= base_url() ?>admin/temp_to_permenant', 'tempTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check fs-14"></span></a>
+                    </div>`;
+					}
+
 					let row = table.row.add([
 						item.number,
 						item.serial_id,
@@ -451,12 +471,7 @@
 						item.history,
 						item.other_pains,
 						item.remarks,
-						` <div class="g-2">
-                <a href="<?= base_url("admin/single_patient/") ?>${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span class="fa fa-user-circle-o fs-14"></span></a>
-                <a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('print') ?>"><span class="fa fa-print fs-14"></span></a>
-                ${changeBtnsStatus}
-                <a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fe fe-trash-2 fs-14"></span></a>
-              </div>`
+						buttons
 					]).node();
 					row.id = item.id;
 				});
@@ -549,5 +564,46 @@
 				}
 			}
 		});
+	}
+</script>
+<script>
+	function temp_to_permenant(id, url, tableId) {
+
+		swal({
+			title: '<?= $ci->lang('delete alert title') ?>',
+			text: "<?= $ci->lang('delete alert text') ?>",
+			icon: "info",
+			buttons: ['<?= $ci->lang('cancel') ?>', '<?= $ci->lang('yes') ?>'],
+			dangerMode: '<?= $ci->lang('yes') ?>',
+		})
+			.then((willDelete) => {
+				if (willDelete) {
+					$.ajax({
+						url: url,
+						type: 'POST',
+						data: {
+							record: id
+						},
+						success: function (response) {
+							var result = JSON.parse(response);
+
+							if (result['type'] == 'success') {
+								$.growl.notice1({
+									title: result['alert']['title'],
+									message: result['alert']['text']
+								});
+								window.location.href = '<?= base_url('admin/single_patient/') ?>' + result['id'];
+							} else if (result['type'] == 'error') {
+								$.growl.error1({
+									title: result['alert']['title'],
+									message: result['alert']['text']
+								});
+							}
+						}
+					});
+				}
+			});
+		// Schedule the list update function to execute after 1000ms
+
 	}
 </script>

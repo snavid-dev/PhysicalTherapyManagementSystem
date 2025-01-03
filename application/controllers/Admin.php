@@ -55,6 +55,7 @@ class Admin extends CI_Controller
 		$this->auth->has_permission('View Appointments');
 		$data['title'] = $this->lang('home');;
 		$data['page'] = "home";
+		$data['temp_patients'] = $this->Admin_model->get_temp_patients_extra();
 		$data['patients'] = $this->Admin_model->get_patients();
 		$data['doctors'] = $this->Admin_model->get_doctors();
 		$data['accounts'] = $this->Admin_model->get_accounts();
@@ -2083,13 +2084,21 @@ class Admin extends CI_Controller
 		if ($this->form_validation->run()) {
 			$data = array();
 			$status = $this->input->post('status');
-			$patients = $this->Admin_model->get_patients($status);
+			if ($status != 't') {
+				$patients = $this->Admin_model->get_patients($status);
+			}else{
+				$patients = $this->Admin_model->get_temp_patients_extra("temp_patient.status = 'a'");
+			}
 
 
 			if (count($patients) > 0) {
 				$data['type'] = 'success';
 				$i = 1;
+
 				foreach ($patients as $patient) {
+					if ($status == 't'){
+						$patient['serial_id'] = 'none';
+					}
 					$data['content'][] = array(
 						'number' => $i,
 						'id' => $patient['id'],
@@ -2101,6 +2110,7 @@ class Admin extends CI_Controller
 						'other_pains' => $patient['other_pains'],
 						'remarks' => $patient['remarks'],
 					);
+
 					$i++;
 				}
 			} else {
@@ -2831,6 +2841,240 @@ class Admin extends CI_Controller
 		}
 		print_r(json_encode($data));
 	}
+
+	public function insert_temp_patient()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert patient name error')));
+		$this->form_validation->set_rules('lname', 'lname', 'trim|required', array('required' => $this->lang('insert patient lname error')));
+		$this->form_validation->set_rules('phone1', 'phone1', 'trim|required', array('required' => $this->lang('insert patient phone1 error')));
+		$this->form_validation->set_rules('age', 'age', 'trim|required', array('required' => $this->lang('insert patient age error')));
+		$this->form_validation->set_rules('gender', 'gender', 'trim|required', array('required' => $this->lang('insert patient gender error')));
+		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', array('required' => $this->lang('insert patient doctor_id error')));
+		$this->form_validation->set_rules('pains', 'pains', 'trim');
+		$this->form_validation->set_rules('address', 'address', 'trim');
+		$this->form_validation->set_rules('phone2', 'phone2', 'trim');
+		$this->form_validation->set_rules('other_pains', 'other_pains', 'trim');
+		$this->form_validation->set_rules('remarks', 'remarks', 'trim');
+		if ($this->form_validation->run()) {
+
+			$datas = array(
+				'name' => $this->input->post('name'),
+				'lname' => $this->input->post('lname'),
+				'phone1' => $this->input->post('phone1'),
+				'phone2' => $this->input->post('phone2'),
+				'age' => $this->input->post('age'),
+				'address' => $this->input->post('address'),
+				'pains' => $this->input->post('pains'),
+				'doctor_id' => $this->input->post('doctor_id'),
+				'gender' => $this->input->post('gender'),
+				'other_pains' => $this->input->post('other_pains'),
+				'remarks' => $this->input->post('remarks'),
+				'status' => 'p',
+				'create' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s'),
+				'users_id' => $this->session->userdata($this->mylibrary->hash_session('u_id'))
+			);
+
+			$insert = $this->Admin_model->insert_temp_patient($datas);
+			if ($insert[0]) {
+
+				// End insert turn
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');
+				$data['alert']['text'] = $this->lang('insert patient success');
+				$data['alert']['type'] = 'success';
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+					$data['title'] = $this->lang('error');
+				}
+			}
+		}
+		print_r(json_encode($data));
+	}
+
+	public function temp_to_permenant()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$id = $this->input->post('record');
+			$profile = $this->Admin_model->single_temp_patient($id);
+			if (count($profile) != 0) {
+				$temp_patient = $profile[0];
+				$last_serial = $this->Admin_model->get_serial($this->mylibrary->getCurrentShamsiDate()['serial']);
+				$number_of_month = str_replace($this->mylibrary->getCurrentShamsiDate()['serial'], '', $last_serial);
+				$serial = $number_of_month + 1;
+				if ($serial >= 10) {
+					$serial_id = $this->mylibrary->getCurrentShamsiDate()['serial'] . $serial;
+				} else {
+					$serial_id = $this->mylibrary->getCurrentShamsiDate()['serial'] . '0' . $serial;
+				}
+				$datas = array(
+					'name' => $temp_patient['name'],
+					'lname' => $temp_patient['lname'],
+					'phone1' => $temp_patient['phone1'],
+					'phone2' => $temp_patient['phone2'],
+					'age' => $temp_patient['age'],
+					'address' => $temp_patient['address'],
+					'pains' => $temp_patient['pains'],
+					'doctor_id' => $temp_patient['doctor_id'],
+					'gender' => $temp_patient['gender'],
+					'other_pains' => $temp_patient['other_pains'],
+					'remarks' => $temp_patient['remarks'],
+					'status' => 'p',
+					'serial_id' => $serial_id,
+					'create' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s'),
+					'users_id' => $this->session->userdata($this->mylibrary->hash_session('u_id'))
+				);
+				$insert = $this->Admin_model->insert_patient($datas);
+				if ($insert[0]) {
+					$this->Admin_model->remove_temp($id);
+
+					// start insert turn
+
+					$message = "سلام ";
+					$message .= $this->mylibrary->get_patient_name($datas['name'], $datas['lname'], '', $datas['gender']);
+					$message .= "
+شما موفقانه به دیپارتمنت دندان شفاخانه تخصصی رازی برای تداوی دندان تان راجستر شده‌اید.
+از اینکه مرکز مارا برای تداوی دندان‌تان انتخاب نموده‌اید از شما قلبا سپاسگذاریم.
+
+“دیپارتمنت دندان شفاخانه تخصصی رازی”";
+
+					$sms = $this->mylibrary->sendSms("+93" . $datas['phone1'], $message);
+
+
+					$turn = array(
+						'patient_id' => $insert[1],
+						'date' => $this->mylibrary->getCurrentShamsiDate()['date'],
+						'hour' => $this->dentist->hour_for_insert(),
+						'status' => 'p',
+						'doctor_id' => $temp_patient['doctor_id'],
+					);
+
+					$this->Admin_model->insert_turn($turn);
+
+					// End insert turn
+					$data['id'] = $insert[1];
+					$data['type'] = 'success';
+					$data['alert']['title'] = $this->lang('success');
+					$data['alert']['text'] = $this->lang('insert patient success');
+					$data['alert']['type'] = 'success';
+
+					$data['id'] = $insert[1];
+
+					$btns = '';
+					$btns .= $this->mylibrary->generateBtnUpdate('edit_account', $data['id']);
+
+					$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_turn', 'turnsTable', 'update_balance');
+
+
+					$data['tr'] = array(
+						$datas['serial_id'],
+						$this->mylibrary->get_patient_name($datas['name'], $datas['lname'], '', $datas['gender']),
+						$datas['phone1'],
+						$datas['pains'],
+						$datas['other_pains'],
+						$datas['remarks'],
+						$this->mylibrary->btn_group($btns)
+					);
+				} else {
+					$data['type'] = 'error';
+					$data['alert']['title'] = $this->lang('error');
+					$data['alert']['text'] = $this->lang('problem');
+					$data['alert']['type'] = 'error';
+				}
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+					$data['title'] = $this->lang('error');
+				}
+			}
+		}
+		print_r(json_encode($data));
+	}
+
+
+	function list_temp_patients()
+	{
+		$data = array();
+
+		$patients = $this->Admin_model->get_temp_patients_extra();
+
+		$data['type'] = 'success';
+		if (count($patients) > 0) {
+			$i = 1;
+			foreach ($patients as $patient) {
+				$data['content'][] = array(
+					'number' => $i,
+					'id' => $patient['id'],
+					'patient_name' => $this->mylibrary->get_patient_name($patient['name'], $patient['lname'], '', $patient['gender']),
+					'phone1' => $patient['phone1'],
+					'phone2' => $patient['phone2'],
+					'doctor_name' => $patient['doctor_name'],
+					'pains' => $patient['pains'],
+					'other_pains' => $patient['other_pains'],
+					'remarks' => $patient['remarks'],
+				);
+				$i++;
+			}
+		} else {
+			$data['content'] = array();
+		}
+
+		print_r(json_encode($data));
+	}
+
+	function archive_temp_patient()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$id = $this->input->post('record');
+
+			$datas = array(
+				'status' => 'a'
+			);
+
+			if ($this->Admin_model->update_temp_patient($datas, $id)) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['text'] = $this->lang('archive patient');
+				$data['alert']['type'] = 'success';
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
 
 	public function print_patient($id)
 	{
@@ -5081,9 +5325,7 @@ class Admin extends CI_Controller
 						'date' => $receipt['create_date'],
 						'patient_name' => $this->mylibrary->get_patient_name($receipt['name'], $receipt['lname'], '', $receipt['gender']),
 						'tooth_name' => $receipt['tooth_name'] . ' (' . $this->dentist->find_location($receipt['location']) . ')',
-						'services' => $this->services_name($receipt['services']),
 						'cr' => $receipt['price'],
-						'remarks' => $receipt['details'],
 					);
 					$sum_cr += $receipt['price'];
 				}
@@ -5552,7 +5794,6 @@ class Admin extends CI_Controller
 			$permissions = $this->Role_model->get_assigned_permissions($role[0]->id);
 
 
-
 			if (count($role) !== 0) {
 				$this->load->model('Permission_model');
 
@@ -5576,6 +5817,7 @@ class Admin extends CI_Controller
 			exit;
 		}
 	}
+
 	//End Roles
 
 	public function init()
@@ -5590,6 +5832,7 @@ class Admin extends CI_Controller
 		$this->load->view('test/init', $data);
 		$this->load->view('footer');
 	}
+
 	function render($file_path, $data = null)
 	{
 		if (!is_null($data)) {

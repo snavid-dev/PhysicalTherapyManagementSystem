@@ -3,7 +3,7 @@
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xl-12">
 		<div class="row">
-<!--			patients modal			-->
+			<!--			patients modal			-->
 			<?php if ($ci->auth->has_permission('Create Patient')): ?>
 				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="show_patient_modal()">
 					<div class="card overflow-hidden bg-success-gradient clickable">
@@ -24,44 +24,46 @@
 				</div>
 			<?php endif; ?>
 
-<!--			turns Modal-->
+			<!--			turns Modal-->
 			<?php if ($ci->auth->has_permission('Create Turn')): ?>
-			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#turnsModal`).modal('toggle');">
-				<div class="card overflow-hidden bg-info-gradient clickable">
-					<div class="card-body">
-						<div class="d-flex">
-							<div class="mt-2">
-								<h2 class="mb-0 number-font"><?= $ci->lang('turns') ?></h2>
-							</div>
-							<div class="ms-auto">
-								<div class="chart-wrapper mt-1 img_icon_style">
-									<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/queue.png" alt="">
+				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#turnsModal`).modal('toggle');">
+					<div class="card overflow-hidden bg-info-gradient clickable">
+						<div class="card-body">
+							<div class="d-flex">
+								<div class="mt-2">
+									<h2 class="mb-0 number-font"><?= $ci->lang('turns') ?></h2>
+								</div>
+								<div class="ms-auto">
+									<div class="chart-wrapper mt-1 img_icon_style">
+										<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/queue.png"
+											 alt="">
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 			<?php endif; ?>
 
-<!--			expenses -->
+			<!--			expenses -->
 			<?php if ($ci->auth->has_permission('Create Expenses')): ?>
-			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#receiptModal`).modal('toggle');">
-				<div class="card overflow-hidden bg-warning-gradient clickable">
-					<div class="card-body">
-						<div class="d-flex">
-							<div class="mt-2">
-								<h2 class="mb-0 number-font"><?= $ci->lang('expenses') ?></h2>
-							</div>
-							<div class="ms-auto">
-								<div class="chart-wrapper mt-1 img_icon_style">
-									<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/bill.png" alt="">
+				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#receiptModal`).modal('toggle');">
+					<div class="card overflow-hidden bg-warning-gradient clickable">
+						<div class="card-body">
+							<div class="d-flex">
+								<div class="mt-2">
+									<h2 class="mb-0 number-font"><?= $ci->lang('expenses') ?></h2>
+								</div>
+								<div class="ms-auto">
+									<div class="chart-wrapper mt-1 img_icon_style">
+										<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/bill.png"
+											 alt="">
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 			<?php endif; ?>
 			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#searchModal`).modal('toggle');">
 				<div class="card overflow-hidden bg-danger-gradient clickable">
@@ -88,6 +90,101 @@
 <!-- ROW-4 -->
 
 <!-- ROW-4 END -->
+
+
+<!-- ROW-3 -->
+<div class="row" id="temp_list_div" <?= (count($temp_patients) == 0) ? 'style="display: none"' : '' ?>>
+	<div class="col-xl-12 col-md-12">
+		<div class="card">
+			<div class="card-header turens_header">
+				<h4 class="card-title fw-semibold"><?= $ci->lang('turns list') ?></h4>
+
+			</div>
+			<div class="card-body pb-0">
+				<!-- the table start _______________________________________________________________________________ -->
+				<div class="table-responsive scrollTable" id="temp_patient_list">
+					<table class="table text-nowrap" id="tempTable">
+						<thead class="tableHead">
+						<tr>
+							<th scope="col">#</th>
+							<th scope="col">
+								<?= $ci->lang('fullname') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('phone1') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('phone2') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('reference doctor') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('medical history') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('other diseases') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('desc') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('actions') ?>
+							</th>
+						</tr>
+						</thead>
+						<tbody>
+						<?php $i = 1;
+						foreach ($temp_patients as $temp_patient) : ?>
+							<tr id="temp<?= $temp_patient['id'] ?>" class="tableRow">
+								<td>
+									<?= $i ?>
+								</td>
+								<td class="">
+									<?= $ci->mylibrary->get_patient_name($temp_patient['name'], $temp_patient['lname'], '', $temp_patient['gender']) ?>
+								</td>
+								<td class="">
+									<?= $temp_patient['phone1'] ?>
+								</td>
+								<td class="">
+									<?= $temp_patient['phone2'] ?>
+								</td>
+								<td class="">
+									<?= $temp_patient['doctor_name'] ?>
+								</td>
+								<td class="">
+									<?= $temp_patient['pains'] ?>
+								</td>
+								<td class="">
+									<?= $temp_patient['other_pains'] ?>
+								</td>
+								<td class="">
+									<?= $temp_patient['remarks'] ?>
+								</td>
+								<td>
+									<div class="g-2">
+										<a href="javascript:temp_to_permenant('<?= $temp_patient['id'] ?>', '<?= base_url() ?>admin/temp_to_permenant', 'tempTable')"
+										   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+												class="fa fa-check"></span></a>
+										<a href="javascript:archive_temp_patient('<?= $temp_patient['id'] ?>', '<?= base_url() ?>admin/archive_temp_patient', 'tempTable')"
+										   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
+												class="fa-solid fa-archive fs-14"></span></a>
+									</div>
+								</td>
+							</tr>
+							<?php $i++;
+						endforeach; ?>
+						</tbody>
+					</table>
+				</div>
+				<!-- the table end _______________________________________________________________________________ -->
+
+			</div>
+		</div>
+	</div>
+
+</div>
+<!-- ROW-3 END -->
 
 
 <!-- ROW-3 -->
@@ -438,296 +535,301 @@
 <!-- Modal -->
 <?php if ($ci->auth->has_permission('Create Patient')): ?>
 
-<div class="modal fade effect-scale" id="extralargemodal" tabindex="-1" role="dialog">
-	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">
-					<?= $ci->lang('insert patient') ?>
-				</h5>
-				<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">×</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form id="insertPatient">
-					<div class="row">
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('name') ?> <span class="text-red">*</span>
-								</label>
-								<input type="text" name="name" class="form-control"
-									   placeholder="<?= $ci->lang('name') ?>">
+	<div class="modal fade effect-scale" id="extralargemodal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<?= $ci->lang('insert patient') ?>
+					</h5>
+					<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="insertPatient">
+						<div class="row">
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('name') ?> <span class="text-red">*</span>
+									</label>
+									<input type="text" name="name" class="form-control"
+										   placeholder="<?= $ci->lang('name') ?>">
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('lname') ?> <span class="text-red">*</span>
-								</label>
-								<input type="text" name="lname" class="form-control"
-									   placeholder="<?= $ci->lang('lname') ?>">
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('lname') ?> <span class="text-red">*</span>
+									</label>
+									<input type="text" name="lname" class="form-control"
+										   placeholder="<?= $ci->lang('lname') ?>">
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('age') ?> <span class="text-red">*</span>
-								</label>
-								<input type="number" name="age" class="form-control"
-									   placeholder="<?= $ci->lang('age') ?>">
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('age') ?> <span class="text-red">*</span>
+									</label>
+									<input type="number" name="age" class="form-control"
+										   placeholder="<?= $ci->lang('age') ?>">
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('phone') ?> <span class="text-red">*</span>
-								</label>
-								<input type="text" name="phone1" class="form-control"
-									   placeholder="<?= $ci->lang('phone') ?>">
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('phone') ?> <span class="text-red">*</span>
+									</label>
+									<input type="text" name="phone1" class="form-control"
+										   placeholder="<?= $ci->lang('phone') ?>">
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('phone2') ?>
-								</label>
-								<input type="text" name="phone2" class="form-control"
-									   placeholder="<?= $ci->lang('phone2') ?>">
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('phone2') ?>
+									</label>
+									<input type="text" name="phone2" class="form-control"
+										   placeholder="<?= $ci->lang('phone2') ?>">
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('gender') ?> <span class="text-red">*</span>
-								</label>
-								<select name="gender" class="form-control form-select">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<option value="m">
-										<?= $ci->lang('male') ?>
-									</option>
-									<option value="f">
-										<?= $ci->lang('female') ?>
-									</option>
-								</select>
-							</div>
-						</div>
-
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('medical history') ?>
-								</label>
-								<select name="pains_select" class="form-control select2-show-search form-select"
-										id="model" data-placeholder="<?= $ci->lang('select') ?>" multiple
-										onchange="multiple_value()">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<?php foreach ($ci->dentist->diseases() as $pain) : ?>
-										<option value="<?= $pain ?>">
-											<?= $pain ?>
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('gender') ?> <span class="text-red">*</span>
+									</label>
+									<select name="gender" class="form-control form-select">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<option value="m">
+											<?= $ci->lang('male') ?>
 										</option>
-									<?php endforeach; ?>
-								</select>
-								<input type="hidden" name="pains" id="model_value">
-							</div>
-						</div>
-
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('reference doctor') ?>
-								</label>
-								<select name="doctor_id" class="form-control select2-show-search form-select"
-										data-placeholder="<?= $ci->lang('select') ?>">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<?php foreach ($doctors as $doctor) : ?>
-										<option value="<?= $doctor['id'] ?>">
-											<?= $ci->mylibrary->user_name($doctor['fname'], $doctor['lname']) ?>
+										<option value="f">
+											<?= $ci->lang('female') ?>
 										</option>
-									<?php endforeach; ?>
-								</select>
+									</select>
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-4">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('other diseases') ?>
-								</label>
-								<textarea type="text" name="other_pains" class="form-control" rows="4"
-										  placeholder="<?= $ci->lang('other diseases') ?>"></textarea>
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('medical history') ?>
+									</label>
+									<select name="pains_select" class="form-control select2-show-search form-select"
+											id="model" data-placeholder="<?= $ci->lang('select') ?>" multiple
+											onchange="multiple_value()">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<?php foreach ($ci->dentist->diseases() as $pain) : ?>
+											<option value="<?= $pain ?>">
+												<?= $pain ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+									<input type="hidden" name="pains" id="model_value">
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-4">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('address') ?>
-								</label>
-								<textarea type="text" name="address" class="form-control" rows="4"
-										  placeholder="<?= $ci->lang('address') ?>"></textarea>
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('reference doctor') ?>
+									</label>
+									<select name="doctor_id" class="form-control select2-show-search form-select"
+											data-placeholder="<?= $ci->lang('select') ?>">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<?php foreach ($doctors as $doctor) : ?>
+											<option value="<?= $doctor['id'] ?>">
+												<?= $ci->mylibrary->user_name($doctor['fname'], $doctor['lname']) ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
 							</div>
-						</div>
 
-
-						<div class="col-sm-12 col-md-4">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('desc') ?>
-								</label>
-								<textarea type="text" name="remarks" class="form-control" rows="4"
-										  placeholder="<?= $ci->lang('desc') ?>"></textarea>
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('other diseases') ?>
+									</label>
+									<textarea type="text" name="other_pains" class="form-control" rows="4"
+											  placeholder="<?= $ci->lang('other diseases') ?>"></textarea>
+								</div>
 							</div>
+
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('address') ?>
+									</label>
+									<textarea type="text" name="address" class="form-control" rows="4"
+											  placeholder="<?= $ci->lang('address') ?>"></textarea>
+								</div>
+							</div>
+
+
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('desc') ?>
+									</label>
+									<textarea type="text" name="remarks" class="form-control" rows="4"
+											  placeholder="<?= $ci->lang('desc') ?>"></textarea>
+								</div>
+							</div>
+
+
 						</div>
+					</form>
 
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" data-bs-dismiss="modal">
+						<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
+					</button>
+					<button class="btn btn-primary"
+							onclick="xhr_insert_patient('insertPatient', '<?= base_url() ?>admin/insert_patient','<?= base_url() ?>admin/single_patient/')">
+						<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
+					</button>
+					<button class="btn btn-primary"
+							onclick="xhr_insert_patient('insertPatient', '<?= base_url() ?>admin/insert_temp_patient'); setTimeout(list_temp_patients, 500);">
+						<?= $ci->lang('save') ?> <i class="fa fa-archive"></i>
+					</button>
 
-					</div>
-				</form>
-
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-secondary" data-bs-dismiss="modal">
-					<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
-				</button>
-				<button class="btn btn-primary"
-						onclick="xhr_insert_patient('insertPatient', '<?= base_url() ?>admin/insert_patient','<?= base_url() ?>admin/single_patient/')">
-					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
-				</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 <?php endif; ?>
 <!-- Modal End -->
 
 
 <?php if ($ci->auth->has_permission('Create Patient')): ?>
-<script>
-	function show_patient_modal() {
-		$(`#extralargemodal`).modal('toggle');
-	}
-</script>
+	<script>
+		function show_patient_modal() {
+			$(`#extralargemodal`).modal('toggle');
+		}
+	</script>
 <?php endif; ?>
 
 
 <!-- turns Modal -->
 <?php if ($ci->auth->has_permission('Create Turn')): ?>
-<div class="modal fade effect-scale" id="turnsModal" role="dialog">
-	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">
-					<?= $ci->lang('insert turn') ?>
-				</h5>
-				<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">×</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form id="insertTurn">
+	<div class="modal fade effect-scale" id="turnsModal" role="dialog">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<?= $ci->lang('insert turn') ?>
+					</h5>
+					<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="insertTurn">
+						<div class="row">
+
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('patient name') ?> <span class="text-red">*</span>
+									</label>
+									<select name="patient_id" class="form-control select2-show-search form-select"
+											data-placeholder="<?= $ci->lang('select') ?>" id="patientName"
+											onchange="check_turns()">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<?php foreach ($patients as $patient) : ?>
+											<option value="<?= $patient['id'] ?>">
+												<?= $ci->mylibrary->get_patient_name($patient['name'], $patient['lname'], $patient['serial_id'], $patient['gender']) ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+
+
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group jdp" id="main-div">
+									<label class="form-label">
+										<?= $ci->lang('date') ?> <span class="text-red">*</span>
+									</label>
+									<input data-jdp type="text" id="test-date-id-date" name="date"
+										   value="<?= $ci->mylibrary->getCurrentShamsiDate()['date'] ?>"
+										   class="form-control" placeholder="<?= $ci->lang('date') ?>"
+										   onchange="check_turns()">
+									<div></div>
+								</div>
+							</div>
+
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('reference doctor') ?> <span class="text-red">*</span>
+									</label>
+									<select name="doctor_id" class="form-control select2-show-search form-select"
+											data-placeholder="<?= $ci->lang('select') ?>" id="doctorName"
+											onchange="check_turns()">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<option value="all">
+											<?= $ci->lang("select") ?>
+										</option>
+										<?php foreach ($doctors as $doctor) : ?>
+											<option value="<?= $doctor['id'] ?>">
+												<?= $ci->mylibrary->user_name($doctor['fname'], $doctor['lname']) ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('hour') ?> <span class="text-red">*</span>
+									</label>
+									<select name="hour" class="form-control select2-show-search form-select"
+											data-placeholder="<?= $ci->lang('select') ?>" id="patientTime"
+											onchange="check_turns()">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<?php foreach ($ci->dentist->hours() as $hour) :
+											?>
+											<option value="<?= $hour['key'] ?>">
+												<?= $hour['value'] ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+
+						</div>
+					</form>
 					<div class="row">
+						<div class="col-md-12">
+							<div class="table-responsive" id="queryTable">
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('patient name') ?> <span class="text-red">*</span>
-								</label>
-								<select name="patient_id" class="form-control select2-show-search form-select"
-										data-placeholder="<?= $ci->lang('select') ?>" id="patientName"
-										onchange="check_turns()">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<?php foreach ($patients as $patient) : ?>
-										<option value="<?= $patient['id'] ?>">
-											<?= $ci->mylibrary->get_patient_name($patient['name'], $patient['lname'], $patient['serial_id'], $patient['gender']) ?>
-										</option>
-									<?php endforeach; ?>
-								</select>
 							</div>
-						</div>
-
-
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group jdp" id="main-div">
-								<label class="form-label">
-									<?= $ci->lang('date') ?> <span class="text-red">*</span>
-								</label>
-								<input data-jdp type="text" id="test-date-id-date" name="date"
-									   value="<?= $ci->mylibrary->getCurrentShamsiDate()['date'] ?>"
-									   class="form-control" placeholder="<?= $ci->lang('date') ?>"
-									   onchange="check_turns()">
-								<div></div>
-							</div>
-						</div>
-
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('reference doctor') ?> <span class="text-red">*</span>
-								</label>
-								<select name="doctor_id" class="form-control select2-show-search form-select"
-										data-placeholder="<?= $ci->lang('select') ?>" id="doctorName"
-										onchange="check_turns()">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<option value="all">
-										<?= $ci->lang("select") ?>
-									</option>
-									<?php foreach ($doctors as $doctor) : ?>
-										<option value="<?= $doctor['id'] ?>">
-											<?= $ci->mylibrary->user_name($doctor['fname'], $doctor['lname']) ?>
-										</option>
-									<?php endforeach; ?>
-								</select>
-							</div>
-						</div>
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('hour') ?> <span class="text-red">*</span>
-								</label>
-								<select name="hour" class="form-control select2-show-search form-select"
-										data-placeholder="<?= $ci->lang('select') ?>" id="patientTime"
-										onchange="check_turns()">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<?php foreach ($ci->dentist->hours() as $hour) :
-										?>
-										<option value="<?= $hour['key'] ?>">
-											<?= $hour['value'] ?>
-										</option>
-									<?php endforeach; ?>
-								</select>
-							</div>
-						</div>
-
-					</div>
-				</form>
-				<div class="row">
-					<div class="col-md-12">
-						<div class="table-responsive" id="queryTable">
-
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-secondary" data-bs-dismiss="modal">
-					<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
-				</button>
-				<button class="btn btn-warning"
-						onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable','turnsModal', print_turn, 'print'); update_turns_by_doctor();"><?= $ci->lang('save and print') ?>
-					<i class="fa fa-print"></i></button>
-				<button class="btn btn-primary"
-						onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable', 'turnsModal', update_turns_by_doctor);update_turns_by_doctor();"><?= $ci->lang('save') ?>
-					<i class="fa fa-plus"></i></button>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" data-bs-dismiss="modal">
+						<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
+					</button>
+					<button class="btn btn-warning"
+							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable','turnsModal', print_turn, 'print'); update_turns_by_doctor();"><?= $ci->lang('save and print') ?>
+						<i class="fa fa-print"></i></button>
+					<button class="btn btn-primary"
+							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable', 'turnsModal', update_turns_by_doctor);update_turns_by_doctor();"><?= $ci->lang('save') ?>
+						<i class="fa fa-plus"></i></button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 <?php endif; ?>
 <!-- turns Modal End -->
 
@@ -828,108 +930,108 @@
 
 <!-- Expenses Modal -->
 <?php if ($ci->auth->has_permission('Create Expenses')): ?>
-<div class="modal fade effect-scale hide" id="receiptModal" role="dialog">
-	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">
-					<?= $ci->lang('insert receipt') ?>
-				</h5>
-				<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">×</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form id="insertAccount">
-					<div class="row">
+	<div class="modal fade effect-scale hide" id="receiptModal" role="dialog">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<?= $ci->lang('insert receipt') ?>
+					</h5>
+					<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="insertAccount">
+						<div class="row">
 
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('account') ?> <span class="text-red">*</span>
-								</label>
-								<select name="customers_id" class="form-control select2-show-search form-select"
-										data-placeholder="<?= $ci->lang('select') ?>">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<?php foreach ($accounts as $account) : ?>
-										<option value="<?= $account['id'] ?>">
-											<?= $ci->mylibrary->finance_account_name($account['name'], $account['lname'], $account['type']) ?>
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('account') ?> <span class="text-red">*</span>
+									</label>
+									<select name="customers_id" class="form-control select2-show-search form-select"
+											data-placeholder="<?= $ci->lang('select') ?>">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<?php foreach ($accounts as $account) : ?>
+											<option value="<?= $account['id'] ?>">
+												<?= $ci->mylibrary->finance_account_name($account['name'], $account['lname'], $account['type']) ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('type') ?>
+									</label>
+									<select name="type" id="" class="form-control form-select">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<option value="cr">
+											<?= $ci->lang('cr') ?>
 										</option>
-									<?php endforeach; ?>
-								</select>
+										<option value="dr">
+											<?= $ci->lang('dr') ?>
+										</option>
+									</select>
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('type') ?>
-								</label>
-								<select name="type" id="" class="form-control form-select">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<option value="cr">
-										<?= $ci->lang('cr') ?>
-									</option>
-									<option value="dr">
-										<?= $ci->lang('dr') ?>
-									</option>
-								</select>
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('amount') ?>
+									</label>
+									<input type="number" name="amount" class="form-control"
+										   placeholder="<?= $ci->lang('amount') ?>">
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('amount') ?>
-								</label>
-								<input type="number" name="amount" class="form-control"
-									   placeholder="<?= $ci->lang('amount') ?>">
+							<div class="col-sm-12 col-md-3">
+								<div class="form-group jdp" id="main-div">
+									<label class="form-label">
+										<?= $ci->lang('date') ?> <span class="text-red">*</span>
+									</label>
+									<!-- <input id="test-date-id-date" data-jdp type="text" name="phone" class="form-control" placeholder="<?= $ci->lang('amount') ?>" autocomplete="off"> -->
+									<input data-jdp type="text" id="test-date-id-date" name="shamsi"
+										   value="<?= $ci->mylibrary->getCurrentShamsiDate()['date'] ?>"
+										   class="form-control" placeholder="<?= $ci->lang('date') ?>">
+									<div></div>
+								</div>
 							</div>
-						</div>
 
-						<div class="col-sm-12 col-md-3">
-							<div class="form-group jdp" id="main-div">
-								<label class="form-label">
-									<?= $ci->lang('date') ?> <span class="text-red">*</span>
-								</label>
-								<!-- <input id="test-date-id-date" data-jdp type="text" name="phone" class="form-control" placeholder="<?= $ci->lang('amount') ?>" autocomplete="off"> -->
-								<input data-jdp type="text" id="test-date-id-date" name="shamsi"
-									   value="<?= $ci->mylibrary->getCurrentShamsiDate()['date'] ?>"
-									   class="form-control" placeholder="<?= $ci->lang('date') ?>">
-								<div></div>
+
+							<div class="col-sm-12 col-md-12 ">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('description') ?> <span class="text-red"></span>
+									</label>
+									<!-- <input id="test-date-id" type="text" name="phone" class="form-control" placeholder="<?= $ci->lang('amount') ?>"> -->
+									<textarea class="form-control" name="remarks"
+											  placeholder="<?= $ci->lang('description') ?>"></textarea>
+								</div>
 							</div>
+
 						</div>
+					</form>
 
-
-						<div class="col-sm-12 col-md-12 ">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('description') ?> <span class="text-red"></span>
-								</label>
-								<!-- <input id="test-date-id" type="text" name="phone" class="form-control" placeholder="<?= $ci->lang('amount') ?>"> -->
-								<textarea class="form-control" name="remarks"
-										  placeholder="<?= $ci->lang('description') ?>"></textarea>
-							</div>
-						</div>
-
-					</div>
-				</form>
-
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-secondary" data-bs-dismiss="modal">
-					<?= $ci->lang('cancel') ?>
-					<i class="fa fa-close"></i>
-				</button>
-				<button class="btn btn-primary"
-						onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal')">
-					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
-				</button>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" data-bs-dismiss="modal">
+						<?= $ci->lang('cancel') ?>
+						<i class="fa fa-close"></i>
+					</button>
+					<button class="btn btn-primary"
+							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal')">
+						<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 <?php endif; ?>
 <!-- Expenses Modal End -->
 
@@ -1105,3 +1207,149 @@
 	}
 </script>
 
+
+<script>
+	function navid(){
+
+	}
+	function list_temp_patients() {
+		$.ajax({
+			url: "<?= base_url('admin/list_temp_patients') ?>",
+			type: 'GET',
+			success: function (response) {
+				var result = JSON.parse(response);
+				if (result['type'] == 'success') {
+					if (result.content.length == 0 || typeof result.content == 'undefined') {
+						$('#temp_list_div').hide();
+						var querytable = ``;
+					} else {
+
+						var querytable = `
+            <table class="table text-nowrap" id="tempTable">
+            <thead class="tableHead">
+              <tr>
+               	<th scope="col">#</th>
+							<th scope="col">
+								<?= $ci->lang('fullname') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('phone1') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('phone2') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('reference doctor') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('medical history') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('other diseases') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('desc') ?>
+							</th>
+							<th scope="col">
+								<?= $ci->lang('actions') ?>
+							</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+						let counter = 1;
+						result.content.map((item) => {
+							querytable += `
+            <tr class="tableRow" id="temp${item.id}">
+              <td>${counter}</td>
+              <td>${item.patient_name}</td>
+              <td>${item.phone1}</td>
+              <td>${item.phone2}</td>
+              <td>${item.doctor_name}</td>
+              <td>${item.pains}</td>
+              <td>${item.other_pains}</td>
+              <td>${item.remarks}</td>
+              <td>
+                    <div class="g-2">
+                      <a href="javascript:temp_to_permenant('${item.id}', '<?= base_url() ?>admin/temp_to_permenant', 'tempTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check fs-14"></span></a>
+                      <a href="javascript:archive_temp_patient('${item.id}', '<?= base_url() ?>admin/archive_temp_patient', 'tempTable')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-archive fs-14"></span></a>
+                    </div>
+                  </td>
+            </tr>
+          `;
+							counter++;
+						});
+						querytable += `
+            </tbody>
+          </table>
+        `;
+
+					}
+
+					document.getElementById("temp_patient_list").innerHTML = querytable;
+					$('#temp_list_div').show();
+				} else if (result['type'] == 'error') {
+					$.growl.error1({
+						title: field['alert']['title'],
+						message: field['alert']['text']
+					});
+				}
+			}
+		});
+	}
+</script>
+
+<script>
+	function archive_temp_patient(id, url, tableId) {
+		// Call the alert function immediately
+		accept_via_alert(id, url, tableId);
+
+		// Schedule the list update function to execute after 1000ms
+		setTimeout(() => {
+			list_temp_patients();
+		}, 2000);
+	}
+</script>
+
+<script>
+	function temp_to_permenant(id, url, tableId) {
+
+		swal({
+			title: '<?= $ci->lang('delete alert title') ?>',
+			text: "<?= $ci->lang('delete alert text') ?>",
+			icon: "info",
+			buttons: ['<?= $ci->lang('cancel') ?>', '<?= $ci->lang('yes') ?>'],
+			dangerMode: '<?= $ci->lang('yes') ?>',
+		})
+			.then((willDelete) => {
+				if (willDelete) {
+					$.ajax({
+						url: url,
+						type: 'POST',
+						data: {
+							record: id
+						},
+						success: function (response) {
+							var result = JSON.parse(response);
+
+							if (result['type'] == 'success') {
+								$.growl.notice1({
+									title: result['alert']['title'],
+									message: result['alert']['text']
+								});
+								window.location.href = '<?= base_url('admin/single_patient/') ?>' + result['id'];
+							} else if (result['type'] == 'error') {
+								$.growl.error1({
+									title: result['alert']['title'],
+									message: result['alert']['text']
+								});
+							}
+						}
+					});
+				}
+			});
+		// Schedule the list update function to execute after 1000ms
+
+	}
+</script>

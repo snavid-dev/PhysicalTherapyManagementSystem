@@ -458,11 +458,7 @@
                             <th class="bg-transparent border-bottom-0">
                               <?= $ci->lang('Tooth Position and Name') ?></th>
                             <th class="bg-transparent border-bottom-0">
-                              <?= $ci->lang('services') ?></th>
-                            <th class="bg-transparent border-bottom-0">
                               <?= $ci->lang('Sum Deposit') ?></th>
-                            <th class="bg-transparent border-bottom-0">
-                              <?= $ci->lang('description') ?></th>
 
                           </tr>
                         </thead>
@@ -477,9 +473,7 @@
               <td>${item.date}</td>
               <td>${item.patient_name}</td>
               <td>${item.tooth_name}</td>
-              <td>${item.services}</td>
               <td>${item.cr}</td>
-              <td>${item.remarks}</td>
             </tr>
           `;
               counter++;
@@ -491,10 +485,8 @@
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
             <td><?= $ci->lang('Balance') ?></td>
             <td>${result.content.sum_cr}</td>
-            <td></td>
 
             </tr>
             `

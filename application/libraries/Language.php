@@ -575,6 +575,7 @@ class Language
 			'patient delete not allowed' => self::lang_arr('Patient has data that\'s why you\'re not allowed to delete this patient', 'مریض اطلاعات دارد به همین دلیل شما مجاز به حذف این مریض نیستید', 'ناروغ معلومات لري له همدې امله تاسو اجازه نلرئ چې دا ناروغ حذف کړئ'),
 			'delete patient' => self::lang_arr('Patient deleted successfully', 'مریض موفقانه حذف شد', 'ناروغ په بریالیتوب سره حذف شو'),
 			'accept patient' => self::lang_arr('The patient status has been successfully changed to Completed', 'وضعیت مریض موفقانه به حالت تمام شده تغییر داده شد', 'د ناروغ حالت په بریالیتوب سره بشپړ شوی ته بدل شوی'),
+			'archive patient' => self::lang_arr('The patient status has been successfully changed to Archived', 'وضعیت مریض موفقانه به حالت آرشیف تغییر داده شد', 'د ناروغ حالت په بریالیتوب سره آرشیف ته بدل شوی'),
 			'block patient' => self::lang_arr('The patient status has been successfully changed to Blocked', 'وضعیت مریض موفقانه به حالت معلق تغییر داده شد', 'د ناروغ حالت په بریالیتوب سره بلاک شوی ته بدل شوی'),
 			'pending patient' => self::lang_arr('The patient status has been successfully changed to pending', 'وضعیت مریض موفقانه به حالت تمام نشده تغییر داده شد', 'د ناروغ حالت په بریالیتوب سره په انتظار کې بدل شوی'),
 			'patient payment remain' => self::lang_arr('The patient has (' . number_format($amount) . ') Afghanis of residuals', 'مریض مقدار (' . number_format($amount) . ') افغانی باقیمانده مالی دارد', 'ناروغ ته (' . number_format($amount) . ') افغانۍ پاتې دي'),
