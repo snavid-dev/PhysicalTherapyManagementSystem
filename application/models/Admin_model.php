@@ -11,6 +11,7 @@ class Admin_model extends CI_Model
 	{
 		return $this->db->query("SELECT users.*, roles.role_name FROM users INNER JOIN roles ON users.role_id = roles.id")->result_array();
 	}
+
 	public function single_user($id)
 	{
 		return $this->db->query("SELECT users.*, roles.role_name FROM users INNER JOIN roles ON users.role_id = roles.id WHERE users.id = '$id'")->result_array();
@@ -22,6 +23,98 @@ class Admin_model extends CI_Model
 		$id = $this->db->insert_id();
 
 		return array($log, $id);
+	}
+
+	public function insert_leave($data = array())
+	{
+		$log = $this->db->insert('doctor_leave', $data);
+		$id = $this->db->insert_id();
+
+		return array($log, $id);
+	}
+
+	function delete_leave($where = array())
+	{
+		return $this->db->delete('doctor_leave', $where);
+	}
+
+	public function get_leave_by_id($leave_id)
+	{
+		$this->db->select('doctor_leave.*, users.fname, users.lname');
+		$this->db->from('doctor_leave');
+		$this->db->join('users', 'users.id = doctor_leave.doctor_id', 'left');
+		$this->db->where('doctor_leave.id', $leave_id);
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0) {
+			return $query->row_array();
+		}
+
+		return false;
+	}
+
+	public function update_leave_record($datas, $leave_id)
+	{
+		$this->db->where('id', $leave_id);
+		return $this->db->update('doctor_leave', $datas);
+	}
+
+
+	public function get_leave_details($leave_id)
+	{
+		// Get the details of the leave from the 'doctor_leaves' table
+		$this->db->select('doctor_id, leave_start_date, leave_end_date, reason, status');
+		$this->db->from('doctor_leave');
+		$this->db->where('id', $leave_id);
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0) {
+			$leave = $query->row_array();
+			$doctor = $this->get_doctor_by_id($leave['doctor_id']);  // Assuming a function to fetch doctor's name
+			$leave['doctor_name'] = $doctor['fname'] . ' ' . $doctor['lname'];
+			return $leave;
+		}
+		return false;
+	}
+
+	public function get_doctor_by_id($doctor_id)
+	{
+		// Select relevant doctor details from the 'users' table (or the table where doctor data is stored)
+		$this->db->select('id, fname, lname');  // Adjust fields as needed
+		$this->db->from('users');  // Assuming 'users' table stores doctor info
+		$this->db->where('id', $doctor_id);
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0) {
+			return $query->row_array();  // Return doctor details as an associative array
+		}
+
+		// Return false if doctor is not found
+		return false;
+	}
+
+	public function get_leave_requests()
+	{
+		// Start by selecting the leave request fields
+		$this->db->select('doctor_leave.id, doctor_leave.leave_start_date, doctor_leave.leave_end_date, doctor_leave.reason, doctor_leave.status, doctor_leave.doctor_id, users.fname AS doctor_fname, users.lname AS doctor_lname');
+
+		// Join the 'users' table (doctor details) on 'doctor_id'
+		$this->db->from('doctor_leave');  // Assuming 'doctor_leave' stores leave data
+		$this->db->join('users', 'doctor_leave.doctor_id = users.id', 'left');  // Join doctors from 'users' table
+
+		// Order by the leave start date in descending order
+		$this->db->order_by('doctor_leave.leave_start_date DESC');
+
+		// Execute the query
+		$query = $this->db->get();
+
+		// Check if the query returns any results
+		if ($query->num_rows() > 0) {
+			return $query->result_array();  // Return leave requests as an array of associative arrays
+		}
+
+		// If no leave requests found, return false
+		return false;
 	}
 
 
@@ -138,12 +231,33 @@ class Admin_model extends CI_Model
 
 	public function get_turns_paid($extra = null)
 	{
+		// Default condition for today's date if no extra condition is provided
 		if (is_null($extra)) {
-			$extra = "DATE(date) = DATE('" . $this->mylibrary->getCurrentShamsiDate()['date'] . "')";
+			$currentDate = $this->mylibrary->getCurrentShamsiDate()['date'];
+			$extra = "DATE(turn.date) = DATE(?)";
+			$params = [$currentDate];
+		} else {
+			$params = []; // Assume `extra` already contains conditions and doesn't need parameters
 		}
 
-		return $this->db->query("SELECT `turn`.*, patient.name,  patient.gender,patient.lname, patient.serial_id FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id WHERE " . $extra . " ORDER BY `turn`.`date` ASC;")->result_array();
+		// Base SQL query
+		$sql = "SELECT 
+                turn.*, 
+                patient.name, 
+                patient.gender, 
+                patient.lname, 
+                patient.serial_id 
+            FROM `turn` 
+            INNER JOIN patient ON turn.patient_id = patient.id 
+            WHERE $extra 
+            ORDER BY `turn`.`date` ASC";
+
+		// Execute query with parameters if applicable
+		return empty($params)
+			? $this->db->query($sql)->result_array()
+			: $this->db->query($sql, $params)->result_array();
 	}
+
 
 	public function get_labs_expenses($extra = 1)
 	{
@@ -248,8 +362,6 @@ class Admin_model extends CI_Model
 	{
 		return $this->db->query("SELECT SUM(cr) AS 'cr', SUM(dr) AS 'dr', balance_sheet.currency FROM balance_sheet GROUP BY currency;")->result_array();
 	}
-
-
 
 
 	public function update_user($data = array(), $id)
@@ -519,12 +631,36 @@ class Admin_model extends CI_Model
 
 	public function get_turns($date = null)
 	{
-		if (is_null($date)) {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.status = 'p' ORDER BY turn.hour ASC")->result_array();
-		} else {
-			return $this->db->query("SELECT turn.*, patient.name, patient.phone1, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.status = 'p' AND turn.date = '$date' ORDER BY turn.hour ASC")->result_array();
+		// Base SQL query
+		$sql = "SELECT 
+                turn.*, 
+                patient.name, 
+                patient.phone1, 
+                patient.lname, 
+                patient.serial_id, 
+                patient.gender, 
+                CONCAT(users.fname, ' - ', users.lname) AS doctor_name 
+            FROM `turn` 
+            INNER JOIN patient ON turn.patient_id = patient.id 
+            INNER JOIN users ON turn.doctor_id = users.id 
+            WHERE turn.status = 'p'";
+
+		// Parameters for the query
+		$params = [];
+
+		// Add date condition if provided
+		if (!is_null($date)) {
+			$sql .= " AND turn.date = ?";
+			$params[] = $date;
 		}
+
+		// Add sorting by from_time
+		$sql .= " ORDER BY turn.from_time ASC";
+
+		// Execute query with parameters
+		return $this->db->query($sql, $params)->result_array();
 	}
+
 
 	public function get_turns_where($where)
 	{
@@ -558,7 +694,30 @@ class Admin_model extends CI_Model
 
 	public function get_turns_extra($extra = null)
 	{
-		return $this->db->query("SELECT turn.*, patient.name, patient.phone1, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.status = 'p' " . $extra . " ORDER BY `turn`.`hour` ASC")->result_array();
+		// Base SQL query
+		$sql = "SELECT 
+                turn.*, 
+                patient.name, 
+                patient.phone1, 
+                patient.lname, 
+                patient.serial_id, 
+                patient.gender, 
+                CONCAT(users.fname, ' - ', users.lname) AS doctor_name 
+            FROM `turn` 
+            INNER JOIN patient ON turn.patient_id = patient.id 
+            INNER JOIN users ON turn.doctor_id = users.id 
+            WHERE turn.status = 'p'";
+
+		// Add extra conditions if provided
+		if (!empty($extra)) {
+			$sql .= " " . $extra;
+		}
+
+		// Sort by `from_time` (start of the turn)
+		$sql .= " ORDER BY `turn`.`from_time` ASC";
+
+		// Execute query
+		return $this->db->query($sql)->result_array();
 	}
 
 
@@ -618,16 +777,151 @@ class Admin_model extends CI_Model
 		return $this->db->query("SELECT `labs`.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.name, patient.lname, patient.serial_id, patient.gender FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id INNER JOIN patient ON labs.patient_id = patient.id WHERE labs.id = '$id'")->result_array();
 	}
 
-	function check_turns($date, $doctor = null, $time = null)
+	function check_turns($date, $doctor = null, $from_time = null, $to_time = null)
 	{
-		if (is_null($doctor)) {
-			return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.date = '$date' AND turn.status = 'p'  ORDER BY turn.hour ASC")->result_array();
-		} elseif (!is_null($time)) {
-			return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.date = '$date' AND turn.doctor_id = '$doctor' AND turn.hour = '$time'  AND turn.status = 'p' ORDER BY turn.hour ASC")->result_array();
-		} else {
-			return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.date = '$date' AND turn.doctor_id = '$doctor' AND turn.status = 'p'  ORDER BY turn.hour ASC")->result_array();
+		// Base SQL query
+		$sql = "SELECT 
+                patient.name, 
+                patient.lname, 
+                patient.serial_id, 
+                CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, 
+                turn.* 
+            FROM `turn` 
+            INNER JOIN patient ON turn.patient_id = patient.id 
+            INNER JOIN users ON turn.doctor_id = users.id 
+            WHERE turn.date = ? AND turn.status = 'p'";
+
+		// Parameters for the query
+		$params = [$date];
+
+		// Add doctor condition if provided
+		if (!is_null($doctor)) {
+			$sql .= " AND turn.doctor_id = ?";
+			$params[] = $doctor;
 		}
+
+		// Add time range condition if both from_time and to_time are provided
+		if (!is_null($from_time) && !is_null($to_time)) {
+			$sql .= " AND (turn.from_time < ? AND turn.to_time > ?)";
+			$params[] = $to_time;  // Overlapping check
+			$params[] = $from_time; // Overlapping check
+		}
+
+		// Add sorting
+		$sql .= " ORDER BY turn.from_time ASC";
+
+		// Execute query with parameters
+		return $this->db->query($sql, $params)->result_array();
 	}
+	// Fetch doctor working hours
+// Fetch doctor's working hours
+	public function get_doctor_working_hours($doctor_id)
+	{
+		$this->db->select('working_start_time, working_end_time');
+		$this->db->from('users');
+		$this->db->where('id', $doctor_id);
+		$query = $this->db->get();
+		return $query->row_array();
+	}
+
+	// Fetch doctor's leaves for the given date
+	public function get_doctor_leaves($doctor_id, $date)
+	{
+		$this->db->select('leave_start_date, leave_end_date, reason');
+		$this->db->from('doctor_leave');
+		$this->db->where('doctor_id', $doctor_id);
+		$this->db->where('leave_start_date <=', $date);
+		$this->db->where('leave_end_date >=', $date);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	// Fetch booked appointments for the given doctor on a specific date
+	public function get_booked_appointments($doctor_id, $date)
+	{
+		$this->db->select('from_time, to_time');
+		$this->db->from('turn');
+		$this->db->where('doctor_id', $doctor_id);
+		$this->db->where('DATE(date)', $date);  // Assuming the appointment date is stored in `appointment_date`
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	// Calculate available time slots considering working hours, leaves, and booked appointments
+	public function calculate_available_time_slots($doctor_id, $date)
+	{
+		// Fetch working hours for the doctor
+		$working_hours = $this->get_doctor_working_hours($doctor_id);
+		if (empty($working_hours)) {
+			return [];  // No working hours found for doctor
+		}
+
+		// Convert working start and end times to timestamps
+		$working_start_time = strtotime($working_hours['working_start_time']);
+		$working_end_time = strtotime($working_hours['working_end_time']);
+
+		// Fetch doctor's leaves for the selected date
+		$doctor_leaves = $this->get_doctor_leaves($doctor_id, $date);
+
+		// If the doctor is on leave for the entire day, return this status
+		foreach ($doctor_leaves as $leave) {
+			if (strtotime($leave['leave_start_date']) <= strtotime($date) && strtotime($leave['leave_end_date']) >= strtotime($date)) {
+				return [['range' => 'On Leave', 'status' => $leave['reason']]];
+			}
+		}
+
+		// Fetch the booked slots (e.g., from appointments table)
+		$booked_slots = $this->get_booked_appointments($doctor_id, $date);
+
+		// Convert booked slots to timestamps for easier comparison
+		$booked_ranges = [];
+		foreach ($booked_slots as $slot) {
+			$booked_ranges[] = [
+				'start' => strtotime($slot['from_time']),
+				'end' => strtotime($slot['to_time'])
+			];
+		}
+
+		// Sort booked slots by start time
+		usort($booked_ranges, function($a, $b) {
+			return $a['start'] <=> $b['start'];
+		});
+
+		// Generate available time slots
+		$available_slots = [];
+		$last_end_time = $working_start_time;  // Start at the working start time
+
+		foreach ($booked_ranges as $slot) {
+			// If there's a gap before the booked slot, we add it to the available slots
+			if ($slot['start'] > $last_end_time) {
+				$available_slots[] = [
+					'range' => date('H:i', $last_end_time) . ' - ' . date('H:i', $slot['start']),
+					'status' => 'Available'
+				];
+			}
+			// Update the last end time after the current booked slot
+			$last_end_time = max($last_end_time, $slot['end']);
+		}
+
+		// Add the final available slot after the last booked slot, if any
+		if ($last_end_time < $working_end_time) {
+			$available_slots[] = [
+				'range' => date('H:i', $last_end_time) . ' - ' . date('H:i', $working_end_time),
+				'status' => 'Available'
+			];
+		}
+
+		return $available_slots;
+	}
+	public function check_turn_conflict($date, $doctor_id, $from_time, $to_time)
+	{
+		$this->db->where('date', $date);
+		$this->db->where('doctor_id', $doctor_id);
+		$this->db->where("('$from_time' < to_time AND '$to_time' > from_time)"); // Check for overlap
+		$query = $this->db->get('turn');
+		return $query->num_rows() > 0;
+	}
+
 
 	function turn_after_payment($turnId)
 	{
