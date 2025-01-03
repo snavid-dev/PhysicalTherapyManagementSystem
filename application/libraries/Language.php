@@ -318,6 +318,7 @@ class Language
 			// TODO what is the meaning of this word (لست نوب ها)?
 			'turns list' => self::lang_arr('List of turns', 'لیست نوبت ها', 'مالي حساب'),
 			'select turn' => self::lang_arr('select turns', 'انتخاب نوبت ها', 'مالي حساب'),
+			'available time ranges' => self::lang_arr('available time ranges', 'محدوده زمانی موجود', 'مالي حساب'),
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------turns clould not had translated yet
 			'turn' => self::lang_arr('Queue', 'نوبت ', 'مالي حساب'),
 			'patient name' => self::lang_arr('Patient Name', 'نام مریض', 'د ناروغ نوم'),
@@ -389,6 +390,21 @@ class Language
 			'Full Mobile' => self::lang_arr('Full Mobile', 'متحرک کامل', 'بشپړه ګرځنده'),
 
 			// end teeth type
+
+			//Start doctors leave requests
+			'doctors leave requests' => self::lang_arr('doctors leave requests', 'رخصتی های داکتران', 'not set'),
+			'start date' => self::lang_arr('start date', 'تاریخ شروع', 'not set'),
+			'end date' => self::lang_arr('end date', 'تاریخ ختم', 'not set'),
+			'reason' => self::lang_arr('reason', 'دلیل', 'not set'),
+			'leave_inserted_success' => self::lang_arr('leave request inserted successfully', 'درخواست ترک با موفقیت درج شد', 'not set'),
+			'delete leave' => self::lang_arr('leave request deleted successfully', 'درخواست ترک با موفقیت حذف شد', 'not set'),
+			'update leave success' => self::lang_arr('leave request updated successfully', 'درخواست ترک با موفقیت بروزرسانی شد', 'not set'),
+
+			'insert leave doctor error' => self::err_gen('doctor name', 'نام داکتر', 'نوم'),
+			'insert leave leave_start_date error' => self::err_gen('start date', 'تاریخ شروع', 'نوم'),
+			'insert leave leave_end_date error' => self::err_gen('end date', 'تاریخ ختم', 'نوم'),
+
+			//End doctors leave requests
 
 			// Start Laboratory expressions
 			'tooth type' => self::lang_arr('tooth type', 'نوعیت دندان', 'د غاښ ډول'),
@@ -537,6 +553,7 @@ class Language
 			// TODO: could not be treanslated
 			'insert turn success' => self::lang_arr('The turn was successfully added', 'نوبت موفقانه افزوده شد', '????'),
 			'turn already taken' => self::lang_arr('On the selected date and time, the relevant doctor has a patient', 'در تاریخ و ساعت انتخاب شده داکتر مربوطه مریض دارد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
+			'turn conflict' => self::lang_arr('On the selected date and time, the relevant doctor has a patient', 'در تاریخ و ساعت انتخاب شده داکتر مربوطه مریض دارد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
 			'update turn success' => self::lang_arr('The turn was successfully updated', 'نوبت موفقانه بروزرسانی شد', '????'),
 			// end turn errors
 

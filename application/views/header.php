@@ -351,6 +351,12 @@ $ci = get_instance();
 									class="side-menu__label"><?= $ci->lang('role and permission') ?></span></a>
 						</li>
 						<li class="slide">
+							<a class="side-menu__item has-link <?= ($page == 'leave') ? 'active' : '' ?>"
+							   data-bs-toggle="slide" href="<?= base_url() ?>admin/leave"><i
+									class="side-menu__icon fas fa-user-md"></i><span
+									class="side-menu__label"><?= $ci->lang('doctors leave requests') ?></span></a>
+						</li>
+						<li class="slide">
 							<a class="side-menu__item has-link <?= ($page == 'primary_info') ? 'active' : '' ?>"
 							   data-bs-toggle="slide"
 							   href="<?= ($page == 'primary_info') ? 'javascript:void(0)' : base_url('admin/primary_info') ?>"><i

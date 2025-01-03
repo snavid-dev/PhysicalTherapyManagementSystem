@@ -400,7 +400,18 @@ class Mylibrary
     return $fullname;
   }
 
-  public function finance_account_name($name, $fname, $role = '')
+	public function format_time_range($from_time, $to_time)
+	{
+		// Convert 24-hour format time to 12-hour format with AM/PM
+		$from_time_12hr = date("g:i A", strtotime($from_time));
+		$to_time_12hr = date("g:i A", strtotime($to_time));
+
+		// Return the formatted time range
+		return $from_time_12hr . ' - ' . $to_time_12hr;
+	}
+
+
+	public function finance_account_name($name, $fname, $role = '')
   {
     $fullname = $name;
     if ($fname !== '') {

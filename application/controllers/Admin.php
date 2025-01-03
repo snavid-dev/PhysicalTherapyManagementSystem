@@ -65,7 +65,6 @@ class Admin extends CI_Controller
 		$data['script'] = $this->mylibrary->generateSelect2();
 //		$data['script_single_patient_assets'] = ['assets/js/home.js'];
 		$data['turns'] = $this->Admin_model->get_turns($this->mylibrary->getCurrentShamsiDate()['date']);
-
 		$this->load->view('header', $data);
 		$this->load->view('index', $data);
 		$this->load->view('footer', $data);
@@ -84,6 +83,209 @@ class Admin extends CI_Controller
 		$this->load->view('users/index', $data);
 		$this->load->view('footer');
 	}
+
+	public function leave()
+	{
+		$data['title'] = $this->lang('doctors leave requests');
+		$data['page'] = "leave";
+		$data['leaves'] = $this->Admin_model->get_leave_requests();
+		$data['doctors'] = $this->Admin_model->get_doctors();
+		$data['script'] = $this->mylibrary->generateSelect2();
+		$this->load->view('header', $data);
+		$this->load->view('users/leave_requests', $data);
+		$this->load->view('footer');
+	}
+
+	public function insert_leave()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+
+		// Set validation rules
+		$this->form_validation->set_rules('doctor_id', 'Doctor', 'trim|required', array('required' => $this->lang('insert leave doctor error')));
+		$this->form_validation->set_rules('leave_start_date', 'Leave Start Date', 'trim|required', array('required' => $this->lang('insert leave leave_start_date error')));
+		$this->form_validation->set_rules('leave_end_date', 'Leave End Date', 'trim|required', array('required' => $this->lang('insert leave leave_end_date error')));
+		$this->form_validation->set_rules('reason', 'Reason', 'trim');
+
+		if ($this->form_validation->run()) {
+
+			// Collect the leave data
+			$datas = array(
+				'doctor_id' => $this->input->post('doctor_id'),
+				'leave_start_date' => $this->input->post('leave_start_date'),
+				'leave_end_date' => $this->input->post('leave_end_date'),
+				'reason' => $this->input->post('reason'),
+				'status' => "a"  // Default to approved status for simplicity
+			);
+
+			// Insert the leave record into the database
+			$insert = $this->Admin_model->insert_leave($datas);
+
+			// Check if the insertion was successful
+			if ($insert[0]) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');
+				$data['alert']['text'] = $this->lang('leave_inserted_success');
+				$data['alert']['type'] = 'success';
+
+				// Provide the leave ID for further processing or for the frontend
+				$data['id'] = $insert[1];
+
+				// Optional: If you want to display additional information such as buttons for edit and delete
+				$btns = '';
+				$btns .= $this->mylibrary->generateBtnUpdate('edit_leave', $data['id']);
+				$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_leave');
+
+				// Collect the information for the row display, if required
+				$leaveDetails = $this->Admin_model->get_leave_details($insert[1]);  // Assuming a function to get details of the inserted leave
+
+				$data['tr'] = array(
+					$leaveDetails['doctor_name'],
+					$leaveDetails['leave_start_date'],
+					$leaveDetails['leave_end_date'],
+					$leaveDetails['reason'],
+					$this->mylibrary->check_status($leaveDetails['status']),
+					$this->mylibrary->btn_group($btns)
+				);
+			} else {
+				// Failure case
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('error');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			// Collect and return form validation errors
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+					$data['title'] = $this->lang('error');
+				}
+			}
+		}
+
+		// Send the response back as JSON
+		print_r(json_encode($data));
+	}
+
+	public function delete_leave()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$datas = array(
+				'id' => $this->input->post('record')
+			);
+
+			if ($this->Admin_model->delete_leave($datas)) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['text'] = $this->lang('delete leave');
+				$data['alert']['type'] = 'success';
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
+	public function get_leave()
+	{
+		$leave_id = $this->input->post('leave_id');
+
+		$leave = $this->Admin_model->get_leave_by_id($leave_id);
+
+		if ($leave) {
+			$data['type'] = 'success';
+			$data['content'] = $leave;
+		} else {
+			$data['type'] = 'error';
+			$data['alert']['text'] = $this->lang('leave_not_found');
+		}
+
+		echo json_encode($data);
+	}
+
+	public function update_leave()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+
+		// Form validation rules
+		$this->form_validation->set_rules('leave_id', 'Leave ID', 'trim|required', array('required' => $this->lang('error')));
+		$this->form_validation->set_rules('doctor_id', 'Doctor', 'trim|required', array('required' => $this->lang('insert leave doctor error')));
+		$this->form_validation->set_rules('leave_start_date', 'Leave Start Date', 'trim|required', array('required' => $this->lang('insert leave leave_start_date error')));
+		$this->form_validation->set_rules('leave_end_date', 'Leave End Date', 'trim|required', array('required' => $this->lang('insert leave leave_end_date error')));
+		$this->form_validation->set_rules('reason', 'Reason', 'trim');
+
+		if ($this->form_validation->run()) {
+			// Collect form data
+			$datas = array(
+				'doctor_id' => $this->input->post('doctor_id'),
+				'leave_start_date' => $this->input->post('leave_start_date'),
+				'leave_end_date' => $this->input->post('leave_end_date'),
+				'reason' => $this->input->post('reason'),
+			);
+
+			$id = $this->input->post('leave_id'); // Leave ID to update
+
+			// Call model function to update the record
+			$update = $this->Admin_model->update_leave_record($datas, $id);
+
+			if ($update) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');
+				$data['alert']['text'] = $this->lang('update leave success');
+				$data['alert']['type'] = 'success';
+
+				$data['id'] = $id;
+
+				// Generate action buttons for the updated leave record
+				$btns = '';
+				$btns .= $this->mylibrary->generateBtnUpdate('edit_leave', $data['id']);
+				$btns .= $this->mylibrary->generateBtnDelete($data['id'], 'admin/delete_leave');
+
+				// Fetch updated leave details
+				$x = $this->Admin_model->get_leave_by_id($id);
+
+				$data['tr'] = array(
+					$this->mylibrary->user_name($x['fname'], $x['lname']),
+					$x['leave_start_date'],
+					$x['leave_end_date'],
+					$x['reason'],
+					$this->mylibrary->check_status($x['status']),
+					$this->mylibrary->btn_group($btns),
+				);
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('error');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			// Handle validation errors
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		// Return response as JSON
+		print_r(json_encode($data));
+	}
+
 
 	public function user_role()
 	{
@@ -2086,7 +2288,7 @@ class Admin extends CI_Controller
 			$status = $this->input->post('status');
 			if ($status != 't') {
 				$patients = $this->Admin_model->get_patients($status);
-			}else{
+			} else {
 				$patients = $this->Admin_model->get_temp_patients_extra("temp_patient.status = 'a'");
 			}
 
@@ -2096,7 +2298,7 @@ class Admin extends CI_Controller
 				$i = 1;
 
 				foreach ($patients as $patient) {
-					if ($status == 't'){
+					if ($status == 't') {
 						$patient['serial_id'] = 'none';
 					}
 					$data['content'][] = array(
@@ -3942,46 +4144,58 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
-	function list_turns_json_dashboard()
+	public function list_turns_json_dashboard()
 	{
+		// Validate input
 		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim', array('required' => $this->lang('problem')));
+
 		if ($this->form_validation->run()) {
 			$data = array();
 			$doctor_id = $this->input->post('doctor_id');
 			$date = $this->mylibrary->getCurrentShamsiDate()['date'];
+
+			// Build extra query condition
 			$extra = " AND turn.date = '$date'";
 			if ($doctor_id != '0') {
 				$extra .= " AND turn.doctor_id = '$doctor_id'";
 			}
+
+			// Fetch turns based on the conditions
 			$turns = $this->Admin_model->get_turns_extra($extra);
 
-
 			$data['type'] = 'success';
+
 			if (count($turns) > 0) {
 				$i = 1;
 				foreach ($turns as $turn) {
 					$data['content'][] = array(
 						'number' => $i,
 						'id' => $turn['id'],
-						'patient_name' => $this->mylibrary->get_patient_name($turn['name'], $turn['lname'], '', $turn['gender']),
+						'patient_name' => $this->mylibrary->get_patient_name(
+							$turn['name'],
+							$turn['lname'],
+							'',
+							$turn['gender']
+						),
 						'patient_id' => $turn['patient_id'],
 						'doctor_name' => $turn['doctor_name'],
-						'hour' => $this->dentist->find_time($turn['hour']),
 						'date' => $turn['date'],
-						'time' => $this->dentist->find_time($turn['hour']),
+						'hour' => $turn['from_time'] . ' - ' . $turn['to_time'] // Combine time range
 					);
 					$i++;
 				}
 			} else {
-				$data['content'] = array();
+				$data['content'] = array(); // No turns found
 			}
 		} else {
+			// Validation error response
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
 			$data['alert']['type'] = 'error';
 		}
 
+		// Output the response as JSON
 		print_r(json_encode($data));
 	}
 
@@ -4077,56 +4291,54 @@ class Admin extends CI_Controller
 		}
 	}
 
-
 	public function check_turns()
 	{
-		$this->form_validation->set_rules('doctor', 'doctor', 'trim');
-		$this->form_validation->set_rules('date', 'date', 'trim');
-		$this->form_validation->set_rules('patient_time', 'patient_time', 'trim');
+		// Validate input
+		$this->form_validation->set_rules('doctor', 'Doctor', 'trim|required');
+		$this->form_validation->set_rules('date', 'Date', 'trim|required');
+		$this->form_validation->set_rules('patient_time', 'Patient Time', 'trim');
+
 		if ($this->form_validation->run()) {
-			$doctor = $this->input->post('doctor');
+			$doctor_id = $this->input->post('doctor');
 			$date = $this->input->post('date');
 			$patient_time = $this->input->post('patient_time');
 
-			if (!empty($doctor)) {
-				$turns = $this->Admin_model->check_turns($date, $doctor);
+			// Fetch available time slots for the doctor
+			$available_slots = $this->Admin_model->calculate_available_time_slots($doctor_id, $date);
+
+			if (empty($available_slots)) {
+				// No available slots or doctor on leave
+				$response = [
+					'type' => 'error',
+					'alert' => [
+						'title' => 'No Available Slots',
+						'text' => 'The doctor is either unavailable or on leave.',
+						'type' => 'error'
+					]
+				];
 			} else {
-				$turns = $this->Admin_model->check_turns($date);
-			}
-
-			$datas = array();
-
-			foreach ($turns as $turn) {
-				if (($turn['doctor_id'] == $doctor) && ($turn['hour'] == $patient_time) && ($turn['date'] == $date)) {
-					$data['alert']['title'] = $this->lang('error');
-					$data['alert']['text'] = $this->lang('turn already taken');
-					$data['alert']['type'] = 'error';
-				}
-				$datas[] = array(
-					'patient_name' => $this->mylibrary->get_patient_name($turn['name'], $turn['lname'], $turn['serial_id']),
-					'doctor_name' => $turn['doctor_name'],
-					'hour' => $this->dentist->find_time($turn['hour']),
-				);
-			}
-
-			$data['content']['turns'] = $datas;
-
-			if (count($turns) >= 0) {
-				$data['type'] = 'success';
-			} else {
-				$data['type'] = 'error';
-				$data['alert']['title'] = $this->lang('error');
-				$data['alert']['text'] = $this->lang('problem');
-				$data['alert']['type'] = 'error';
+				// Return the available slots
+				$response = [
+					'type' => 'success',
+					'content' => [
+						'time_slots' => $available_slots
+					]
+				];
 			}
 		} else {
-			$data['type'] = 'error';
-			$data['alert']['title'] = $this->lang('error');
-			$data['alert']['text'] = $this->lang('problem');
-			$data['alert']['type'] = 'error';
+			// Validation error
+			$response = [
+				'type' => 'error',
+				'alert' => [
+					'title' => 'Invalid Input',
+					'text' => 'Please ensure all fields are correctly filled.',
+					'type' => 'error'
+				]
+			];
 		}
 
-		print_r(json_encode($data));
+		// Output response as JSON
+		echo json_encode($response);
 	}
 
 	public function list_patients()
@@ -4450,44 +4662,66 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required', array('required' => $this->lang('insert turn patient_id error')));
 		$this->form_validation->set_rules('date', 'date', 'trim|required', array('required' => $this->lang('insert turn date error')));
 		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', array('required' => $this->lang('insert turn doctor_id error')));
-		$this->form_validation->set_rules('hour', 'hour', 'trim|required', array('required' => $this->lang('insert turn hour error')));
+		$this->form_validation->set_rules('from_time', 'from_time', 'trim|required', array('required' => $this->lang('insert turn hour error')));
+		$this->form_validation->set_rules('to_time', 'to_time', 'trim|required', array('required' => $this->lang('insert turn hour error')));
 		if ($this->form_validation->run()) {
-			$turns = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'));
-			$datas = array(
-				'patient_id' => $this->input->post('patient_id'),
-				'date' => $this->input->post('date'),
-				'hour' => $this->input->post('hour'),
-				'status' => 'p',
-				'doctor_id' => $this->input->post('doctor_id'),
+			// Check for conflicting turns (time overlaps for the same doctor)
+			$conflict = $this->Admin_model->check_turn_conflict(
+				$this->input->post('date'),
+				$this->input->post('doctor_id'),
+				$this->input->post('from_time'),
+				$this->input->post('to_time')
 			);
-			$insert = $this->Admin_model->insert_turn_form($datas);
-			if ($insert[0]) {
-				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');
-				$data['alert']['text'] = $this->lang('insert turn success');
-				$data['alert']['type'] = 'success';
 
-				$data['id'] = $insert[1];
-
-				$btns = '';
-				$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $data['id']);
-				$btns .= $this->mylibrary->generateBtnPrint('print_turn', $data['id']);
-				$btns .= $this->mylibrary->generateBtnStatus($data['id'], 'admin/accept_turn');
-				$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_turn', 'turnsTable', 'update_balance');
-				$turn = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'))[0];
-
-				$data['tr'] = array(
-					$turn['doctor_name'],
-					$datas['date'],
-					$this->dentist->find_time($datas['hour']),
-					$turn['cr'],
-					$this->mylibrary->btn_group($btns)
-				);
-			} else {
+			if ($conflict) {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
-				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['text'] = $this->lang('turn conflict');
 				$data['alert']['type'] = 'error';
+			} else {
+				// Prepare data for turn insertion
+				$datas = array(
+					'patient_id' => $this->input->post('patient_id'),
+					'date' => $this->input->post('date'),
+					'from_time' => $this->input->post('from_time'),
+					'to_time' => $this->input->post('to_time'),
+					'status' => 'p', // Status 'p' means pending
+					'doctor_id' => $this->input->post('doctor_id')
+				);
+
+				// Insert the turn into the database
+				$insert = $this->Admin_model->insert_turn_form($datas);
+
+				if ($insert[0]) {
+					$data['type'] = 'success';
+					$data['alert']['title'] = $this->lang('success');
+					$data['alert']['text'] = $this->lang('insert turn success');
+					$data['alert']['type'] = 'success';
+
+					$data['id'] = $insert[1];
+
+					$btns = '';
+					$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $data['id']);
+					$btns .= $this->mylibrary->generateBtnPrint('print_turn', $data['id']);
+					$btns .= $this->mylibrary->generateBtnStatus($data['id'], 'admin/accept_turn');
+					$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_turn', 'turnsTable', 'update_balance');
+					$turn = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'))[0];
+
+					$hour = $this->input->post('from_time') . ' - ' . $this->input->post('to_time');
+
+					$data['tr'] = array(
+						$turn['doctor_name'],
+						$datas['date'],
+						$hour,
+						$turn['cr'],
+						$this->mylibrary->btn_group($btns)
+					);
+				} else {
+					$data['type'] = 'error';
+					$data['alert']['title'] = $this->lang('error');
+					$data['alert']['text'] = $this->lang('problem');
+					$data['alert']['type'] = 'error';
+				}
 			}
 		} else {
 			foreach ($_POST as $key => $value) {
