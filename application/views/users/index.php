@@ -106,7 +106,7 @@
 																class="text-red">*</span></label>
 														<select class="form-control form-select" name="role"
 																data-bs-placeholder="Select" tabindex="-1"
-																aria-hidden="true">
+																aria-hidden="true" onchange="if (this.value == 'D') {$('.working_time').show()} else{$('.working_time').hide()}">
 															<option label="<?= $ci->lang('select') ?>"></option>
 															<?php foreach ($ci->mylibrary->list_user_type() as $key => $value) : ?>
 																<option
@@ -143,6 +143,24 @@
 															<span class="text-red">*</span></label>
 														<input type="password" name="confirm" class="form-control"
 															   placeholder="<?= $ci->lang('confirm password') ?>"
+															   autocomplete="off">
+													</div>
+												</div>
+												<div class="col-md-6 working_time" style="display: none">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('start time') ?>
+															<span class="text-red">*</span></label>
+														<input type="time" name="working_start_time" class="form-control"
+															   placeholder="<?= $ci->lang('start time') ?>"
+															   autocomplete="off">
+													</div>
+												</div>
+												<div class="col-md-6 working_time" style="display: none">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('end time') ?>
+															<span class="text-red">*</span></label>
+														<input type="time" name="working_end_time " class="form-control"
+															   placeholder="<?= $ci->lang('end time') ?>"
 															   autocomplete="off">
 													</div>
 												</div>

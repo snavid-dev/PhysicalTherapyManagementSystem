@@ -144,6 +144,8 @@ class Language
 			'delete' => self::lang_arr('delete', 'حذف', 'ړنګول'),
 			'users list' => self::lang_arr('users list', 'لیست کاربران', 'د کاروونکو لیست'),
 			'insert user' => self::lang_arr('insert user', 'افزودن کاربر', 'کارن داخل کړئ'),
+			'start time' => self::lang_arr('start time', 'زمان شروع', 'کارن داخل کړئ'),
+			'end time' => self::lang_arr('end time', 'زمان ختم', 'کارن داخل کړئ'),
 			// TODO: pashto not set
 			'Crop Image' => self::lang_arr('Crop Image', 'برش تصویر', 'not set'),
 			// end users page
