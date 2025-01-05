@@ -88,7 +88,8 @@ class Admin extends CI_Controller
 	{
 		$data['title'] = $this->lang('doctors leave requests');
 		$data['page'] = "leave";
-		$data['leaves'] = $this->Admin_model->get_leave_requests();
+		$data['leaves'] = ($this->Admin_model->get_leave_requests()) ? $this->Admin_model->get_leave_requests() : array();
+
 		$data['doctors'] = $this->Admin_model->get_doctors();
 		$data['script'] = $this->mylibrary->generateSelect2();
 		$this->load->view('header', $data);
@@ -359,6 +360,8 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('password', 'password', 'trim|required', array('required' => $this->lang('insert user password error')));
 		$this->form_validation->set_rules('confirm', 'confirm', 'trim|required|matches[password]', array('required' => $this->lang('insert user confirm error'), 'matches' => $this->lang('insert user confirm matches error')));
 
+		$this->form_validation->set_rules('working_start_time', 'working_start_time', 'trim');
+		$this->form_validation->set_rules('working_end_time', 'working_end_time', 'trim');
 
 		if ($this->form_validation->run()) {
 			$upload = $this->upload_image($this->input->post('uploadedImage'), $this->input->post('username'));
@@ -375,6 +378,8 @@ class Admin extends CI_Controller
 				'role_id' => $this->input->post('user_role'),
 				'username' => $this->input->post('username'),
 				'status' => $this->input->post('status'),
+				'working_start_time' => $this->input->post('working_start_time'),
+				'working_end_time' => $this->input->post('working_end_time'),
 				'photo' => $profile_image,
 				'password' => $this->mylibrary->hash($this->input->post('password')),
 				'uniqid' => uniqid()
