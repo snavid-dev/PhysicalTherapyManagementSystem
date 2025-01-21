@@ -201,8 +201,8 @@
                   </td>
                   <td>
                     <div class="g-2">
-                      <a href="javascript:edit_receipt('<?= $receipt['id'] ?>')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-edit fs-14"></span></a>
-                      <a href="javascript:delete_via_alert('<?= $receipt['id'] ?>', '<?= base_url() ?>admin/delete_receipt')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-trash-2 fs-14"></span></a>
+                      <a href="javascript:edit_receipt('<?= $receipt['id'] ?>')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-edit"></span></a>
+                      <a href="javascript:delete_via_alert('<?= $receipt['id'] ?>', '<?= base_url() ?>admin/delete_receipt')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-trash"></span></a>
                     </div>
                   </td>
                 </tr>
@@ -397,7 +397,7 @@
                           class="fa fa-user-circle-o fs-14"></span></a>
                       <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_turn')"
                         class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-                          class="fe fe-check-circle fs-14"></span></a>
+                          class="fa fa-check-circle"></span></a>
                       <a href="javascript:print_turn('${item.id}', '<?= base_url() ?>admin/delete_turn')"
                         class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
                           class="fe fe-printer fs-14"></span></a>

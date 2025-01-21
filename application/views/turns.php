@@ -238,7 +238,7 @@
                   <td>
                     <div class="g-2">
                       <a href="<?= base_url() ?>admin/single_patient/<?= $receipt['patient_id'] ?>" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-user-circle-o fs-14"></span></a>
-                      <a href="javascript:accept_via_alert('<?= $receipt['id'] ?>', '<?= base_url() ?>admin/accept_turn');alert('navid')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-check-circle fs-14"></span></a>
+                      <a href="javascript:accept_via_alert('<?= $receipt['id'] ?>', '<?= base_url() ?>admin/accept_turn');alert('navid')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
                       <a href="javascript:print_turn('<?= $receipt['id'] ?>', '<?= base_url() ?>admin/delete_turn')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-printer fs-14"></span></a>
                       <a href="javascript:turnPayment('<?= $receipt['id'] ?>')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-money fs-14"></span></a>
                     </div>
@@ -467,7 +467,7 @@
                           class="fa fa-user-circle-o fs-14"></span></a>
                       <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_turn')"
                         class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-                          class="fe fe-check-circle fs-14"></span></a>
+                          class="fa fa-check-circle"></span></a>
                       <a href="javascript:print_turn('${item.id}', '<?= base_url() ?>admin/delete_turn')"
                         class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
                           class="fe fe-printer fs-14"></span></a>

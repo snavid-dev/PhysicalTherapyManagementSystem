@@ -56,18 +56,18 @@
                   <div class="g-2">
                     <!-- controlBtns _______________________________________________________________________________________________________________start -->
                     <a class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"
-                      onclick="editModalToggle()"><span class="fe fe-edit fs-14"></span></a>
+                      onclick="editModalToggle()"><span class="fa fa-edit"></span></a>
 
 
                     <a class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"
                       onclick="prescriptionToggle()"><span class="fe fe-printer fs-14"></span></a>
                     <a class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"
-                      onclick="setMedicine()"><span class="fe fe-check-circle fs-14"></span></a>
+                      onclick="setMedicine()"><span class="fa fa-check-circle"></span></a>
 
                     <a onclick="viewPrescriptionsMedicines('5')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
                         class="las la-times-circle fs-14"></span></a>
                     <a class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span
-                        class="fe fe-trash-2 fs-14"></span></a>
+                        class="fa fa-trash"></span></a>
                   </div>
                 </td>
               </tr>

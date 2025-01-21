@@ -502,7 +502,7 @@
               <td>
                     <div class="g-2">
                       <a href="<?= base_url() ?>admin/single_patient/${item.patient_id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-user-circle-o fs-14"></span></a>
-                      <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_turn', 'turnsTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-check-circle fs-14"></span></a>
+                      <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_turn', 'turnsTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
                       <a href="javascript:print_turn('${item.id}', '<?= base_url() ?>admin/delete_turn')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-printer fs-14"></span></a>
                       <a href="javascript:turnPayment('${item.id}')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-money fs-14"></span></a>
                     </div>

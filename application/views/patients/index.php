@@ -436,16 +436,16 @@
 
 					if (selectIdValue == 'p') {
 						changeBtnsStatus +=
-							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-check-circle fs-14"></span></a>
+							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
               <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-minus-circle fs-14"></span></a>`;
 					} else if (selectIdValue == 'a') {
 						changeBtnsStatus +=
-							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-clock fs-14"></span></a>
-              <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-minus-circle fs-14"></span></a>`;
+							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock"></span></a>
+              <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
 					} else {
 						changeBtnsStatus +=
 							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-clock fs-14"></span></a>
-            <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-check-circle fs-14"></span></a>`;
+            <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>`;
 
 					}
 					let buttons = '';
@@ -454,7 +454,7 @@
                 <a href="<?= base_url("admin/single_patient/") ?>${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span class="fa fa-user-circle-o fs-14"></span></a>
                 <a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('print') ?>"><span class="fa fa-print fs-14"></span></a>
                 ${changeBtnsStatus}
-                <a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fe fe-trash-2 fs-14"></span></a>
+                <a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fa fa-trash"></span></a>
               </div>`;
 					} else {
 						buttons = ` <div class="g-2">
