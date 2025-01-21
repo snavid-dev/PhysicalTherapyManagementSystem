@@ -295,9 +295,11 @@ class Admin_model extends CI_Model
 		return $this->db->query("SELECT customers.name, customers.fname, customers.page FROM `balance_sheet` INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE balance_sheet.id = $id")->result_array();
 	}
 
-	function balance_by_id($id = null)
+	function balance_by_id($data = array())
 	{
-		return $this->db->get_where("balance_sheet", $id)->result_array();
+		$id = $data['id'];
+
+		return $this->db->query("SELECT `balance_sheet`.*, users.fname AS 'firstname', users.lname AS 'lastname', users.role, customers.name, customers.lname, customers.type FROM `balance_sheet` INNER JOIN `users` ON balance_sheet.users_id = users.id INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE `balance_sheet`.id = '$id'")->result_array();
 	}
 
 	public function delete_balance($where)

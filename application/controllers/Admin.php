@@ -5679,7 +5679,31 @@ class Admin extends CI_Controller
 	}
 
 
-	public function report_ajax_psatients_balance()
+	public function print_expense($id)
+	{
+		$data['title'] = $this->lang('expenses');
+		$data['page'] = "turns";
+		if (is_null($id)) {
+			redirect(base_url() . 'admin/');
+		}
+
+		$data = array();
+		$datas = array(
+			'id' => $id
+		);
+		$receipt = $this->Admin_model->balance_by_id($datas);
+
+		if (count($receipt) !== 1) {
+			show_404();
+		} else {
+			$data['single'] = $receipt[0];
+			$data['title'] = 'print';
+			$this->load->view("prints/expense", $data);
+		}
+	}
+
+	public
+	function report_ajax_psatients_balance()
 	{
 		$this->form_validation->set_rules('from', 'from', 'trim');
 		$this->form_validation->set_rules('to', 'to', 'trim');
@@ -5769,7 +5793,8 @@ class Admin extends CI_Controller
 	}
 
 
-	public function report_patients()
+	public
+	function report_patients()
 	{
 		$data['title'] = $this->lang('report patients');
 		$data['page'] = "report_patients";
@@ -5784,18 +5809,21 @@ class Admin extends CI_Controller
 
 	// End Reports
 
-	public function _404()
+	public
+	function _404()
 	{
 		$this->load->view('errors/html/error_404');
 	}
 
-	public function logout()
+	public
+	function logout()
 	{
 		session_destroy();
 		redirect(base_url());
 	}
 
-	public function phoneBook()
+	public
+	function phoneBook()
 	{
 		$data['title'] = $this->lang('turns');
 		$data['page'] = "phonebook";
@@ -5807,7 +5835,8 @@ class Admin extends CI_Controller
 		$this->load->view('footer');
 	}
 
-	public function failedCall()
+	public
+	function failedCall()
 	{
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
@@ -5895,7 +5924,8 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
-	public function single_phonebook()
+	public
+	function single_phonebook()
 	{
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('problem')));
@@ -6012,7 +6042,8 @@ class Admin extends CI_Controller
 
 
 	//Start Roles
-	public function roles()
+	public
+	function roles()
 	{
 		$this->load->model('Role_model');
 		$data['title'] = $this->lang('role and permission');
@@ -6024,7 +6055,8 @@ class Admin extends CI_Controller
 		$this->load->view('footer');
 	}
 
-	public function edit_role($id = null)
+	public
+	function edit_role($id = null)
 	{
 		if (!is_null($id)) {
 			$this->load->model('Role_model');
@@ -6059,7 +6091,8 @@ class Admin extends CI_Controller
 
 	//End Roles
 
-	public function init()
+	public
+	function init()
 	{
 		$this->load->model('Role_model');
 		$data['title'] = $this->lang('role and permission');
