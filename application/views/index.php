@@ -398,6 +398,10 @@
 	function print_payment(turnId) {
 		window.open(`<?= base_url() ?>admin/print_payment/${turnId}`, '_blank');
 	}
+
+	function print_expense(expenseId) {
+		window.open(`<?= base_url() ?>admin/print_expense/${expenseId}`, '_blank');
+	}
 </script>
 
 <script>
@@ -996,6 +1000,10 @@
 						<?= $ci->lang('cancel') ?>
 						<i class="fa fa-close"></i>
 					</button>
+					<!-- TODO: Create Function for update the today balance of today after finishing the print functionality  -->
+					<button class="btn btn-warning"
+							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal', print_expense, 'print');">
+						<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i></button>
 					<button class="btn btn-primary"
 							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal')">
 						<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
