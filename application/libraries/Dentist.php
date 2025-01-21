@@ -27,13 +27,13 @@ class Dentist
 		$usage_type = $this->usage_type;
 		if (is_null($filepath)) {
 			if ($usage_type == 'online') {
-				$assets_url = 'https://crown-cdn.cyborgtech.co/';
+				$assets_url = 'https://canin-cdn.cyborgtech.co/';
 			} else {
 				$assets_url = 'http://localhost/cdn/';
 			}
 		} else {
 			if ($usage_type == 'online') {
-				$assets_url = 'https://crown-cdn.cyborgtech.co/' . $filepath;
+				$assets_url = 'https://canin-cdn.cyborgtech.co/' . $filepath;
 			} else {
 				$assets_url = 'http://localhost/cdn/' . $filepath;
 			}
