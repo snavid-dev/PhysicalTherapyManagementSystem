@@ -1,4 +1,8 @@
 <?php $ci = get_instance(); ?>
+
+
+<?php //print_r($turns); exit(); ?>
+
 <div class="table-responsive">
 	<table class="table text-nowrap" id="turnsTable">
 		<thead class="tableHead">
@@ -18,7 +22,7 @@
 				<td scope="row"><?= $i ?></td>
 				<td><?= $turn['doctor_name'] ?></td>
 				<td><?= $turn['date'] ?></td>
-				<td><?= $ci->dentist->find_time($turn['hour']) ?></td>
+				<td><bdo dir="ltr"><?= $turn['from_time'] ?> - <?= $turn['to_time'] ?></bdo></td>
 				<td><?= $turn['cr'] ?></td>
 				<td>
 					<div class="g-2">
