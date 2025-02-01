@@ -7,12 +7,12 @@
   "description": "سیستم تخصصی و تحقیقی مدیریت کلینیک تاج",
   "icons": [
     {
-      "src": "https://crown-cdn.cyborgtech.co/logos/Crown192px.png",
+      "src": "https://canin-cdn.cyborgtech.co/logos/Crown192px.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://crown-cdn.cyborgtech.co/logos/Crown512px.png",
+      "src": "https://canin-cdn.cyborgtech.co/logos/Crown512px.png",
       "sizes": "512x512",
       "type": "image/png"
     }

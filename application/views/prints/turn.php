@@ -444,7 +444,7 @@
 													</tr>
 													<tr>
 														<td>ساعت</td>
-														<td><bdo dir="ltr"><?= $ci->dentist->find_time($single['hour']) ?></bdo></td>
+														<td><bdo dir="ltr"><?= $single['from_time'] ?> - <?= $single['to_time'] ?></bdo></td>
 													</tr>
 
 													<tr>

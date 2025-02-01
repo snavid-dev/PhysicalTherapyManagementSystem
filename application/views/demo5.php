@@ -60,7 +60,7 @@
 
 
                     <a class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"
-                      onclick="prescriptionToggle()"><span class="fe fe-printer fs-14"></span></a>
+                      onclick="prescriptionToggle()"><span class="fa fa-print"></span></a>
                     <a class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"
                       onclick="setMedicine()"><span class="fa fa-check-circle"></span></a>
 
