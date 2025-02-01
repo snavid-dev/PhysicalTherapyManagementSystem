@@ -4132,7 +4132,7 @@ class Admin extends CI_Controller
 						'patient_id' => $turn['patient_id'],
 						'doctor_name' => $turn['doctor_name'],
 						'date' => $turn['date'],
-						'time' => $this->dentist->find_time($turn['hour']),
+						'time' => $turn['from_time'] . ' - ' . $turn['to_time'],
 					);
 					$i++;
 				}
@@ -4678,11 +4678,13 @@ class Admin extends CI_Controller
 				$this->input->post('to_time')
 			);
 
-			if ($conflict) {
+			if ($conflict == true) {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('turn conflict');
 				$data['alert']['type'] = 'error';
+				print_r(json_encode($data));
+				return;
 			} else {
 				// Prepare data for turn insertion
 				$datas = array(

@@ -675,9 +675,9 @@ class Admin_model extends CI_Model
 		$ci = get_instance();
 		$today = $ci->mylibrary->getCurrentShamsiDate()['date'];
 		if (is_null($date)) {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) < DATE('$today') ORDER BY `turn`.`hour` ASC")->result_array();
+			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) < DATE('$today') ORDER BY `turn`.`from_time` ASC")->result_array();
 		} else {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) < DATE('$today') AND turn.date = '$date' ORDER BY `turn`.`hour` ASC")->result_array();
+			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) < DATE('$today') AND turn.date = '$date' ORDER BY `turn`.`from_time` ASC")->result_array();
 		}
 	}
 
@@ -687,9 +687,9 @@ class Admin_model extends CI_Model
 		$ci = get_instance();
 		$today = $ci->mylibrary->getCurrentShamsiDate()['date'];
 		if (is_null($date)) {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) >= DATE('$today') ORDER BY `turn`.`hour` ASC")->result_array();
+			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) >= DATE('$today') ORDER BY `turn`.`from_time` ASC")->result_array();
 		} else {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) >= DATE('$today') AND turn.date = '$date' ORDER BY `turn`.`hour` ASC")->result_array();
+			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) >= DATE('$today') AND turn.date = '$date' ORDER BY `turn`.`from_time` ASC")->result_array();
 		}
 	}
 

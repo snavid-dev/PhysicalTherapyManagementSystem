@@ -507,7 +507,7 @@
                     <div class="g-2">
                       <a href="<?= base_url() ?>admin/single_patient/${item.patient_id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-user-circle-o fs-14"></span></a>
                       <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_turn', 'turnsTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
-                      <a href="javascript:print_turn('${item.id}', '<?= base_url() ?>admin/delete_turn')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-printer fs-14"></span></a>
+                      <a href="javascript:print_turn('${item.id}', '<?= base_url() ?>admin/delete_turn')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-print"></span></a>
                       <a href="javascript:turnPayment('${item.id}')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-money fs-14"></span></a>
                     </div>
                   </td>
@@ -796,7 +796,27 @@
 									<label class="form-label">
 										<?= $ci->lang('hour') ?> <span class="text-red">*</span>
 									</label>
-									<input name="from_time" class="form-control" type="time">
+									<input type="time" name="from_time" list="from_times" class="form-control"
+										   id="from_time">
+									<datalist id="from_times">
+										<option value="08:00">
+										<option value="08:30">
+										<option value="09:00">
+										<option value="09:30">
+										<option value="10:00">
+										<option value="10:30">
+										<option value="11:00">
+										<option value="11:30">
+										<option value="12:00">
+										<option value="12:30">
+										<option value="13:00">
+										<option value="13:30">
+										<option value="14:00">
+										<option value="14:30">
+										<option value="15:00">
+										<option value="15:30">
+										<option value="16:00">
+									</datalist>
 								</div>
 							</div>
 							<div class="col-sm-12 col-md-6">
@@ -804,7 +824,8 @@
 									<label class="form-label">
 										<?= $ci->lang('hour') ?> <span class="text-red">*</span>
 									</label>
-									<input name="to_time" class="form-control" type="time">
+									<input name="to_time" class="form-control" type="time" list="from_times"
+										   id="to_time">
 								</div>
 							</div>
 						</div>
@@ -1096,13 +1117,6 @@
 
 
 <script>
-	document.addEventListener("DOMContentLoaded", function () {
-		feather.replace();
-	});
-</script>
-
-
-<script>
 	function list_patients(open_profile = false) {
 		const serial_id = document.getElementById("serial_id");
 		const serial = serial_id.value;
@@ -1346,11 +1360,25 @@
 			},
 			success: function (response) {
 				var result = JSON.parse(response);
-				var timeSlots = result['content']['time_slots'];  // assuming we get 'time_slots' as part of the response
+
 
 				// Check for success type
 				if (result['type'] === 'success') {
-					if (timeSlots.length > 0) {
+					document.querySelector('#from_time').removeAttribute('readonly');
+
+					document.querySelector('#to_time').removeAttribute('readonly');
+
+					if (typeof result['content']['time_slots'] != 'undefined') {
+						var timeSlots = result['content']['time_slots'];  // assuming we get 'time_slots' as part of the response
+					}
+					if (timeSlots.length > 0 && typeof timeSlots != 'undefined') {
+						if (timeSlots[0].range == "On Leave") {
+							document.querySelector('#from_time').setAttribute('readonly', true);
+							document.querySelector('#from_time').value = '';
+
+							document.querySelector('#to_time').setAttribute('readonly', true);
+							document.querySelector('#to_time').value = '';
+						}
 						var tableTemplate = `<table class="table text-nowrap table-striped">
                                             <thead>
                                                 <tr>
@@ -1376,19 +1404,20 @@
 						$(tableId).html(tableTemplate);
 					}
 				} else if (result['type'] === 'error') {
-					// Show an error alert if something went wrong
-					$.growl.error({
-						title: result['alert']['title'],
-						message: result['alert']['text']
-					});
+					document.querySelector('#from_time').setAttribute('readonly', true);
+					document.querySelector('#from_time').value = '';
+
+					document.querySelector('#to_time').setAttribute('readonly', true);
+					document.querySelector('#to_time').value = '';
+
+					var tableTemplate = ``;
+
+					$(tableId).html(tableTemplate);
+					toastr["error"](result['alert']['text'], result['alert']['title'])
 				}
 			},
 			error: function () {
-				// Handle any AJAX error (e.g., network issues)
-				$.growl.error({
-					title: 'Error',
-					message: 'An error occurred while fetching the available time slots.'
-				});
+				toastr["error"]('An error occurred while fetching the available time slots.', 'Error')
 			}
 		});
 	}

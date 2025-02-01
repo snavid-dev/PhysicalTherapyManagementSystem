@@ -3,10 +3,10 @@ self.addEventListener('install', function (event) {
     caches.open('your-app-cache').then(function (cache) {
       return cache.addAll([
         '/',
-        'https://erfan.cyborgtech.co/Admin/',
-        'https://erfan.cyborgtech.co/Admin/patients/',
-        'https://erfan.cyborgtech.co/Admin/turns/',
-        'https://crown-cdn.cyborgtech.co/assets/images/brand/favicon.ico',
+        'https://canin.cyborgtech.co/Admin/',
+        'https://canin.cyborgtech.co/Admin/patients/',
+        'https://canin.cyborgtech.co/Admin/turns/',
+        'https://canin-cdn.cyborgtech.co/assets/images/brand/favicon.ico',
         // Add more assets to cache
       ]);
     })

@@ -61,16 +61,9 @@ $ci = get_instance();
 	<!--- FONT-ICONS CSS -->
 	<link href="<?= $ci->dentist->assets_url() ?>assets/css/icons.css" rel="stylesheet">
 
-	<link rel="stylesheet"
-		  href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
-
 	<!-- TODO: the font-awesome___________________________________________________________________________________________________________________________________________________________________________ -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js">
-
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icon@0.1.0/css/feather.min.css">
-
 
 	<!-- TODO: the font-awesome___________________________________________________________________________________________________________________________________________________________________________ -->
 
@@ -109,6 +102,10 @@ $ci = get_instance();
 
 	<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feathericon@1.0.2/build/css/feathericon.min.css" integrity="sha256-obzGI3z5BUpmd1YT/GIEbWtcqHm3+/SGKgDaI3TB+V0=" crossorigin="anonymous"> -->
 
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+
+
 </head>
 
 <body class="app sidebar-mini ltr light-mode">
@@ -128,7 +125,9 @@ $ci = get_instance();
 			<div class="container-fluid main-container">
 				<div class="d-flex">
 					<a aria-label="Hide Sidebar" class="app-sidebar__toggle" data-bs-toggle="sidebar"
-					   href="javascript:void(0)"></a>
+					   href="javascript:void(0)">
+						<i class="fa fa-bars"></i>
+					</a>
 					<!-- sidebar-toggle-->
 					<a class="logo-horizontal " href="<?= base_url() ?>admin">
 						<img src="<?= $ci->dentist->assets_url() ?>assets/images/brand/logo-white.png"
@@ -264,10 +263,10 @@ $ci = get_instance();
 									class="side-menu__icon fa fa-home"></i><span
 									class="side-menu__label"><?= $ci->language->languages('home') ?></span></a>
 						</li>
-						<?php if($ci->auth->has_permission('Read Patients') || $ci->auth->has_permission('Read Turns Index') || $ci->auth->has_permission('Read Call Log Index')): ?>
-						<li class="sub-category">
-							<h3><?= $ci->lang('manage') ?></h3>
-						</li>
+						<?php if ($ci->auth->has_permission('Read Patients') || $ci->auth->has_permission('Read Turns Index') || $ci->auth->has_permission('Read Call Log Index')): ?>
+							<li class="sub-category">
+								<h3><?= $ci->lang('manage') ?></h3>
+							</li>
 						<?php endif; ?>
 
 						<?php if ($ci->auth->has_permission('Read Patients')): ?>

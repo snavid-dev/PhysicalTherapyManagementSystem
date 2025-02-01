@@ -139,8 +139,6 @@
 
 
 <!-- TypeHead js -->
-<script src="<?= $ci->dentist->assets_url() ?>assets/plugins/bootstrap5-typehead/autocomplete.js"></script>
-<script src="<?= $ci->dentist->assets_url() ?>assets/js/typehead.js"></script>
 
 <!-- FORM WIZARD JS-->
 <script src="<?= $ci->dentist->assets_url() ?>assets/plugins/formwizard/jquery.smartWizard.js"></script>
@@ -161,9 +159,7 @@
 
 
 <!-- INTERNAL Notifications js -->
-<script src="<?= $ci->dentist->assets_url() ?>assets/plugins/notify/js/rainbow.js"></script>
-<script src="<?= $ci->dentist->assets_url() ?>assets/plugins/notify/js/jquery.growl.js"></script>
-<script src="<?= $ci->dentist->assets_url() ?>assets/plugins/notify/js/notifIt.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <?php if ($_COOKIE['language'] == 'fa') : ?>
 	<script src="<?= $ci->dentist->assets_url() ?>assets/plugins/datatable-fa/js/jquery.dataTables.min.js"></script>
