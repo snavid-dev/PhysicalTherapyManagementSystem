@@ -3,7 +3,7 @@ $ci = get_instance();
 ?>
 
 <!--all services functions --- this mf is so important-->
-<?php $ci->render('patients/components/main/modals/adult/services_js.php');  ?>
+<?php $ci->render('patients/components/main/modals/adult/services_js.php'); ?>
 
 <!--edit profile function-->
 <?php $ci->render('patients/components/patient_info/editProfile_js.php'); ?>

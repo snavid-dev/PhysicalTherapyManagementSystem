@@ -3,7 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Dentist
 {
-	public $usage_type = 'online';
+	public $usage_type = 'offline';
 	public function __construct()
 	{
 	}
@@ -29,13 +29,13 @@ class Dentist
 			if ($usage_type == 'online') {
 				$assets_url = 'https://canin-cdn.cyborgtech.co/';
 			} else {
-				$assets_url = 'http://localhost/cdn/';
+				$assets_url = 'http://localhost/canin-cdn/';
 			}
 		} else {
 			if ($usage_type == 'online') {
 				$assets_url = 'https://canin-cdn.cyborgtech.co/' . $filepath;
 			} else {
-				$assets_url = 'http://localhost/cdn/' . $filepath;
+				$assets_url = 'http://localhost/canin-cdn/' . $filepath;
 			}
 		}
 
