@@ -417,15 +417,10 @@ $ci = get_instance();
 							<span class="hint-dot"></span>
 							<div class="hint-content do--split-children">
 								<p>
-									The point of using Lorem Ipsum is that it has a more-or-less normal
-									distribution of letters, as opposed to using 'Content here, content
-									here', making it look like readable English.
-									The point of using Lorem Ipsum is that it has a more-or-less normal
-									distribution of letters, as opposed to using 'Content here, content
-									here', making it look like readable English.
-									The point of using Lorem Ipsum is that it has a more-or-less normal
-									distribution of letters, as opposed to using 'Content here, content
-									here', making it look like readable English.
+									Brushing too hard can wear down enamel.
+									Use a soft-bristled brush with gentle strokes.
+									Floss daily to clean between teeth and gums.
+									Visit your dentist regularly for checkups.
 								</p>
 							</div>
 						</div>
