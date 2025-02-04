@@ -284,7 +284,7 @@ $ci = get_instance();
 																	class="text-red">*</span>
 															</label>
 															<input type="number" name="price_pro"
-																   id="price_tooth_pro"
+																   id="price_tooth_pro_update"
 																   class="form-control"
 																   placeholder="<?= $ci->lang('pay amount') ?>">
 														</div>
@@ -321,7 +321,7 @@ $ci = get_instance();
 										<label class="form-label">
 											<?= $ci->lang('pay amount') ?>
 										</label>
-										<input type="text" id="priceTag_pro" class="form-control" name="total_price">
+										<input type="text" id="priceTag_pro_update" class="form-control" name="total_price">
 									</div>
 
 								</div>

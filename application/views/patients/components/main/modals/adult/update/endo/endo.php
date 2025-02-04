@@ -346,7 +346,7 @@ $ci = get_instance();
 												</label>
 												<input type="hidden" name="diagnose" id="diagnose_adultOld">
 												<select class="form-control select2-show-search form-select"
-														id="services" onchange="service_price(), calculate_sum()"
+														id="services_endo_update" onchange="service_price(), calculate_sum_update()"
 														data-placeholder="<?= $ci->lang('select') ?>" multiple>
 													<?php foreach ($endo_services as $service) : ?>
 
@@ -367,7 +367,7 @@ $ci = get_instance();
 												<label class="form-label">
 													<?= $ci->lang('pay amount') ?> <span class="text-red">*</span>
 												</label>
-												<input type="number" name="price" id="price_tooth" class="form-control"
+												<input type="number" name="price" id="price_tooth_endo_update" class="form-control"
 													   placeholder="<?= $ci->lang('pay amount') ?>">
 											</div>
 
@@ -398,7 +398,7 @@ $ci = get_instance();
 										<label class="form-label">
 											<?= $ci->lang('pay amount') ?>
 										</label>
-										<input type="text" id="priceTag_endo" class="form-control" name="total_price">
+										<input type="text" id="priceTag_endo_update" class="form-control" name="total_price">
 									</div>
 								</div>
 
