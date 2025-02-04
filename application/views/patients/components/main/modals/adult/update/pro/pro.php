@@ -14,7 +14,7 @@ $ci = get_instance();
 								<div class="row">
 
 									<div class="col-sm-12">
-										<form action="" id="insertPro">
+										<form action="" id="updatePro">
 											<div class="row">
 
 												<div class="col-sm-12 col-md-12">
@@ -39,7 +39,7 @@ $ci = get_instance();
 															<?= ucwords('type of restoration') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="type_restoration" name="type_restoration"
+														<select id="type_restoration_update" name="type_restoration"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -58,7 +58,7 @@ $ci = get_instance();
 															<?= ucwords('Filling material (Core)') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="filling_material" name="filling_material"
+														<select id="filling_material_update" name="filling_material"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -98,7 +98,7 @@ $ci = get_instance();
 														</label>
 														<!-- this is an important select tag remember it -->
 														<!--  -->
-														<select id="fiber_post" name="PrefabricatedPost"
+														<select id="fiber_post_update" name="PrefabricatedPost"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -119,7 +119,7 @@ $ci = get_instance();
 															<?= ucwords('type of custom post') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="metal_screw_post" name="customPost"
+														<select id="metal_screw_post_update" name="customPost"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -138,7 +138,7 @@ $ci = get_instance();
 															<?= ucwords('type of crown material') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="crown_material" name="crown_material"
+														<select id="crown_material_update" name="crown_material"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -157,7 +157,7 @@ $ci = get_instance();
 															<?= ucwords('color') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="pro_color" name="pro_color"
+														<select id="pro_color_update" name="pro_color"
 																onchange="multiple_value('#pro_color', '#pro_colors')"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>"
@@ -168,7 +168,7 @@ $ci = get_instance();
 																	value="<?= $Color['id'] ?>"><?= ucwords($Color['name']) ?></option>
 															<?php endforeach; ?>
 														</select>
-														<input type="hidden" name="color" id="pro_colors">
+														<input type="hidden" name="color" id="pro_colors_update">
 													</div>
 												</div>
 
@@ -201,7 +201,7 @@ $ci = get_instance();
 															<?= ucwords('Impression material') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="impression_material" name="impression_material"
+														<select id="impression_material_update" name="impression_material"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -220,7 +220,7 @@ $ci = get_instance();
 															<?= ucwords('Cement Material') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="content_material" name="CementMaterial"
+														<select id="content_material_update" name="CementMaterial"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -237,7 +237,7 @@ $ci = get_instance();
 															<?= ucwords('Pontic Design') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="pontic_design" name="pontic_design"
+														<select id="pontic_design_update" name="pontic_design"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -256,6 +256,7 @@ $ci = get_instance();
 																<?= $ci->lang('treatment') ?> <span
 																	class="text-red">*</span>
 															</label>
+<!--															ask this-->
 															<input type="hidden" name="diagnose"
 																   id="diagnose_adult">
 															<select

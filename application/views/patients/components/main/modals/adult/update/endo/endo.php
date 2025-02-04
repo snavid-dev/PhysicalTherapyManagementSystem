@@ -8,7 +8,7 @@ $ci = get_instance();
 						<div class="row">
 							<div class="col-md-10">
 
-								<form id="insertTooth">
+								<form id="updateTooth">
 									<div class="row">
 
 										<div class="col-sm-12 col-md-4">
@@ -18,7 +18,7 @@ $ci = get_instance();
 													<?= $ci->lang('tooth name') ?> <span class="text-red">*</span>
 												</label>
 												<!-- this is an important select tag remember it -->
-												<select id="selectName" name="name"
+												<select id="selectName_update" name="name"
 														class="form-control select2-show-search form-select"
 														data-placeholder="<?= $ci->lang('select') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
@@ -40,7 +40,7 @@ $ci = get_instance();
 													<?= $ci->lang('tooth location') ?> <span class="text-red">*</span>
 												</label>
 
-												<select id="locationSelector" name="location"
+												<select id="locationSelector_update" name="location"
 														class="form-control select2-show-search form-select"
 														data-placeholder="<?= $ci->lang('select') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
@@ -53,15 +53,15 @@ $ci = get_instance();
 										</div>
 
 										<div class="col-sm-12 col-md-4">
-											<div class="form-group jdp" id="main-divs">
+											<div class="form-group jdp" id="main-divs" style="border: 5px solid yellow">
 												<label class="form-label">
 													<?= $ci->lang('number of canal') ?>
 												</label>
 
-												<select id="canalselector" name="root_number"
+												<select id="canalselector_update" name="root_number"
 														class="form-control select2-show-search form-select"
 														data-placeholder="<?= $ci->lang('select') ?>"
-														onchange="showRow()">
+														onchange="showRow('#canalselector_update', '#firstRow_update', '#secoundRow_update', '#thirdRow_update', '#fourthRow_update', '#fifthRow_update')">
 													<option label="<?= $ci->lang('select') ?>"></option>
 
 													<option value="0">none</option>
@@ -77,7 +77,7 @@ $ci = get_instance();
 									</div>
 
 									<div>
-										<div class="row" id="firstRow" style="display: none;">
+										<div class="row" id="firstRow_update" style="display: none;">
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
 												<div class="form-group">
 													<label class="form-label">
@@ -87,7 +87,7 @@ $ci = get_instance();
 
 													<select name="r_name1"
 															class="form-control select2-show-search form-select"
-															id="canalLocation1"
+															id="canalLocation1_update"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -111,7 +111,7 @@ $ci = get_instance();
 
 										</div>
 
-										<div class="row" id="secoundRow" style="display: none;">
+										<div class="row" id="secoundRow_update" style="display: none;">
 
 
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
@@ -124,7 +124,7 @@ $ci = get_instance();
 
 													<select name="r_name2"
 															class="form-control select2-show-search form-select"
-															id="canalLocation2"
+															id="canalLocation2_update"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -152,7 +152,7 @@ $ci = get_instance();
 
 										</div>
 
-										<div class="row" id="thirdRow" style="display: none;">
+										<div class="row" id="thirdRow_update" style="display: none;">
 
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
 												<div class="form-group">
@@ -163,7 +163,7 @@ $ci = get_instance();
 
 													<select name="r_name3"
 															class="form-control select2-show-search form-select"
-															id="canalLocation3"
+															id="canalLocation3_update"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -191,7 +191,7 @@ $ci = get_instance();
 
 										</div>
 
-										<div class="row" id="fourthRow" style="display: none;">
+										<div class="row" id="fourthRow_update" style="display: none;">
 
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
 												<div class="form-group">
@@ -203,7 +203,7 @@ $ci = get_instance();
 
 													<select name="r_name4"
 															class="form-control select2-show-search form-select"
-															id="canalLocation4"
+															id="canalLocation4_update"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -232,7 +232,7 @@ $ci = get_instance();
 
 										</div>
 
-										<div class="row" id="fifthRow" style="display: none;">
+										<div class="row" id="fifthRow_update" style="display: none;">
 
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
 												<div class="form-group">
@@ -244,7 +244,7 @@ $ci = get_instance();
 
 													<select name="r_name5"
 															class="form-control select2-show-search form-select"
-															id="canalLocation5"
+															id="canalLocation5_update"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -285,6 +285,7 @@ $ci = get_instance();
 												<label class="form-label">
 													<?= $ci->lang('type of obturation') ?>
 												</label>
+<!--												ask this-->
 												<select name="typeObturation"
 														class="form-control select2-show-search form-select"
 														id="instypeObturation"
@@ -306,7 +307,7 @@ $ci = get_instance();
 
 												<select name="TypeSealer"
 														class="form-control select2-show-search form-select"
-														id="insTypeSealer"
+														id="insTypeSealer_update"
 														data-placeholder="<?= $ci->lang('type of sealer') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
 													<?php foreach ($typeOfSealerList as $typeOfSealer) : ?>
@@ -325,7 +326,7 @@ $ci = get_instance();
 
 												<select name="TypeIrrigation"
 														class="form-control select2-show-search form-select"
-														id="insTypeIrrigation"
+														id="insTypeIrrigation_update"
 														data-placeholder="<?= $ci->lang('type of irrigation') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
 													<?php foreach ($typeOfIrregationList as $typeOfIrregation) : ?>
@@ -344,7 +345,7 @@ $ci = get_instance();
 												<label class="form-label">
 													<?= $ci->lang('treatment') ?> <span class="text-red">*</span>
 												</label>
-												<input type="hidden" name="diagnose" id="diagnose_adultOld">
+												<input type="hidden" name="diagnose" id="diagnose_adultOld_update">
 												<select class="form-control select2-show-search form-select"
 														id="services_endo_update" onchange="service_price(), calculate_sum_update()"
 														data-placeholder="<?= $ci->lang('select') ?>" multiple>
@@ -356,9 +357,9 @@ $ci = get_instance();
 													<?php endforeach; ?>
 
 												</select>
-												<input type="hidden" name="imgAddress" id="adulth_teeth_location"
+												<input type="hidden" name="imgAddress" id="adulth_teeth_location_update"
 													   value="">
-												<input type="hidden" name="endo_services" id="services_input">
+												<input type="hidden" name="endo_services" id="services_input_update">
 											</div>
 										</div>
 
@@ -417,15 +418,10 @@ $ci = get_instance();
 							<span class="hint-dot"></span>
 							<div class="hint-content do--split-children">
 								<p>
-									The point of using Lorem Ipsum is that it has a more-or-less normal
-									distribution of letters, as opposed to using 'Content here, content
-									here', making it look like readable English.
-									The point of using Lorem Ipsum is that it has a more-or-less normal
-									distribution of letters, as opposed to using 'Content here, content
-									here', making it look like readable English.
-									The point of using Lorem Ipsum is that it has a more-or-less normal
-									distribution of letters, as opposed to using 'Content here, content
-									here', making it look like readable English.
+									Brushing too hard can wear down enamel.
+									Use a soft-bristled brush with gentle strokes.
+									Floss daily to clean between teeth and gums.
+									Visit your dentist regularly for checkups.
 								</p>
 							</div>
 						</div>
