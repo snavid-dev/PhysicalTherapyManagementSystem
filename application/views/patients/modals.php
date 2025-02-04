@@ -28,7 +28,10 @@ $ci->render('patients/components/main/Turns/payment_modal.php');
 //Update Turns
 $ci->render('patients/components/main/Turns/update_modal.php');
 
-
+//insert teeth
 $ci->render('patients/components/main/modals/adult/insert/teethmodal.php');
+
+//update teeth
+$ci->render('patients/components/main/modals/adult/update/teethmodal_update.php');
 
 

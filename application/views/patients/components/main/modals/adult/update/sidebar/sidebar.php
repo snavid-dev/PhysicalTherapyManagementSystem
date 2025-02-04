@@ -1,8 +1,11 @@
+<?php
+$ci = get_instance();
+?>
 <header class="sidebar_header">
 		<div id="toggle" class="sidebar_toggle">
 			<span><?= $ci->lang('Departments') ?> <i class="fa fa-bars"></i></span>
 		</div>
-		<form id="checkboxes_update">
+		<form id="checkboxes">
 			<div id="menu">
 				<ul class="unstyled-list">
 					<li>
@@ -12,7 +15,6 @@
 
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
-								<!-- TODO (Important) change these input ids according to the check boxes to toggle them -->
 								<input type="checkbox" name="checkbox1" id="checkbox_resto" class="checkbox"
 									   onchange="calculate_sum()" value="restorative" checked/>
 								<div>
@@ -53,8 +55,8 @@
 
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
-								<input type="checkbox" name="checkbox1" id="checkbox_resto" class="checkbox"
-									   onchange="calculate_sum()" value="restorative" checked/>
+								<input type="checkbox" name="checkbox3" id="checkbox_prosthodontics" class="checkbox"
+									   onchange="calculate_sum()" value="Prosthodontics" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path
