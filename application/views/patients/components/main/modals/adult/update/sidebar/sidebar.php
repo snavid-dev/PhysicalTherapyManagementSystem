@@ -13,9 +13,10 @@ $ci = get_instance();
 							<?= $ci->lang('restorative') ?> <span class="text-red"></span>
 						</label>
 
+
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
-								<input type="checkbox" name="checkbox1" id="checkbox_resto" class="checkbox"
+								<input type="checkbox" name="checkbox1" id="checkbox_update_resto" class="checkbox"
 									   onchange="calculate_sum()" value="restorative" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
@@ -35,7 +36,7 @@ $ci = get_instance();
 
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
-								<input type="checkbox" name="checkbox2" class="checkbox" id="checkbox_endo"
+								<input type="checkbox" name="checkbox2" class="checkbox" id="checkbox_update_endo"
 									   onchange="calculate_sum()" value="endo" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
@@ -55,7 +56,7 @@ $ci = get_instance();
 
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
-								<input type="checkbox" name="checkbox3" id="checkbox_prosthodontics" class="checkbox"
+								<input type="checkbox" name="checkbox3" id="checkbox_update_prosthodontics" class="checkbox"
 									   onchange="calculate_sum()" value="Prosthodontics" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
