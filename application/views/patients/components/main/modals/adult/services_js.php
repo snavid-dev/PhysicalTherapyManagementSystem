@@ -163,23 +163,23 @@ $ci = get_instance();
 
 	// Function to calculate the sum of values from service_price_resto and service_price
 	function calculate_sum_update() {
-		let priceResto = 0;
+		let priceRestoUpdate = 0;
 		let priceService = 0;
 		let priceProsthodontics = 0;
 
-		let is_endo = ($('#checkbox_endo_update').is(':checked')) ? true : true;
-		let is_resto = ($('#checkbox_resto_update').is(':checked')) ? true : true;
-		let is_prosthodontics = ($('#checkbox_prosthodontics_update').is(':checked')) ? true : true;
+		let is_endo = ($('#checkbox_update_endo').is(':checked')) ? true : false;
+		let is_resto = ($('#checkbox_update_resto_update').is(':checked')) ? true : false;
+		let is_prosthodontics = ($('#checkbox_update_prosthodontics_update').is(':checked')) ? true : false;
 
 		// Callback function for service_price_resto
-		function handlePriceResto(price) {
+		function handlePriceRestoUpdate(price) {
 			if (is_resto) {
-				priceResto = price;
+				priceRestoUpdate = price;
 				handleResults_update();
 			}
 		}
 
-		function handlePriceProsthodontics(price) {
+		function handlePriceProsthodonticsUpdate(price) {
 			if (is_prosthodontics) {
 				priceProsthodontics = price;
 				handleResults_update();
@@ -188,7 +188,7 @@ $ci = get_instance();
 
 
 		// Callback function for service_price
-		function handlePriceService(price) {
+		function handlePriceServiceUpdate(price) {
 			if (is_endo) {
 				priceService = price;
 				handleResults_update();
@@ -198,22 +198,25 @@ $ci = get_instance();
 		// Function to handle the results and update the inputs accordingly
 		function handleResults_update() {
 			// Calculate the sum
-			const sum = priceResto + priceService + priceProsthodontics;
+			console.log(priceRestoUpdate);
+			console.log(priceService);
+			console.log(priceProsthodontics);
+			const sum = priceRestoUpdate + priceService + priceProsthodontics;
 
-			// Determine which inputs to update based on the values of priceResto and priceService
-			if (priceResto === 0 && priceService !== 0) {
-				// If priceResto is zero, update only the "priceTag_resto" input
+			// Determine which inputs to update based on the values of priceRestoUpdate and priceService
+			if (priceRestoUpdate === 0 && priceService !== 0) {
+				// If priceRestoUpdate is zero, update only the "priceTag_resto" input
 				$('#priceTag_endo_update').val(sum);
 				$('#priceTag_resto_update').val(sum);
 				$('#priceTag_pro_update').val(sum);
-			} else if (priceService === 0 && priceResto !== 0) {
+			} else if (priceService === 0 && priceRestoUpdate !== 0) {
 				// If priceService is zero, update only the "priceTag_endo" input
 				$('#priceTag_resto_update').val(sum);
 				$('#priceTag_endo_update').val(sum);
 				$('#priceTag_pro_update').val(sum);
 
 			} else {
-				// If both priceResto and priceService have non-zero values, update both inputs
+				// If both priceRestoUpdate and priceService have non-zero values, update both inputs
 				$('#priceTag_resto_update').val(sum);
 				$('#priceTag_endo_update').val(sum);
 				$('#priceTag_pro_update').val(sum);
@@ -222,24 +225,24 @@ $ci = get_instance();
 
 		// Add event listeners to handle changes in price_tooth_restorative and price_tooth inputs
 		document.getElementById('price_tooth_restorative_update').addEventListener('change', () => {
-			priceResto = parseFloat(document.getElementById('price_tooth_restorative_update').value) || 0;
-			handleResults();
+			priceRestoUpdate = parseFloat(document.getElementById('price_tooth_restorative_update').value) || 0;
+			handleResults_update();
 		});
 
 		document.getElementById('price_tooth_pro_update').addEventListener('change', () => {
 			priceProsthodontics = parseFloat(document.getElementById('price_tooth_pro_update').value) || 0;
-			handleResults();
+			handleResults_update();
 		});
 
 		document.getElementById('price_tooth_endo_update').addEventListener('change', () => {
 			priceService = parseFloat(document.getElementById('price_tooth_endo_update').value) || 0;
-			handleResults();
+			handleResults_update();
 		});
 
 		// Call the functions with the appropriate callback functions
-		service_price_resto('#services_restorative_update', '#services_input_restorative_update', '#price_tooth_restorative_update', handlePriceResto);
-		service_price('#services_endo_update', '#services_input_endo_update', '#price_tooth_endo_update', handlePriceService);
-		service_price_pro('#services_pro', '#services_input_pro', '#price_tooth_pro', handlePriceProsthodontics);
+		service_price_resto('#services_restorative_update', '#services_input_restorative_update', '#price_tooth_restorative_update', handlePriceRestoUpdate);
+		service_price('#services_endo_update', '#services_input_endo_update', '#price_tooth_endo_update', handlePriceServiceUpdate);
+		service_price_pro('#services_pro', '#services_input_pro', '#price_tooth_pro', handlePriceProsthodonticsUpdate);
 	}
 
 	// TODO: the fucking services end

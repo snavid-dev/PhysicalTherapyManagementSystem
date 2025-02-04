@@ -5,7 +5,7 @@ $ci = get_instance();
 
 
 	<!-- TODO: Here is the sidebar start -->
-	<?php $ci->render("patients/components/main/modals/adult/insert/sidebar/sidebar.php");  ?>
+	<?php $ci->render("patients/components/main/modals/adult/update/sidebar/sidebar.php");  ?>
 
 	<!-- TODO: Here is the sidebar end -->
 
