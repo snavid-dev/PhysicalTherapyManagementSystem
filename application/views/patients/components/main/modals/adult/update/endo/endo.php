@@ -1,11 +1,14 @@
+<?php
+$ci = get_instance();
+?>
 <div class="tab-pane fade p-0 border-0 bg-white p-4 rounded-3" id="endo_update-pane" role="tabpanel"
-					 aria-labelledby="Endo_update-pane" tabindex="0">
+					 aria-labelledby="endo_update-pane" tabindex="0">
 
 					<div class="modal-body">
 						<div class="row">
 							<div class="col-md-10">
 
-								<form id="insertTooth_update">
+								<form id="insertTooth">
 									<div class="row">
 
 										<div class="col-sm-12 col-md-4">
@@ -15,7 +18,7 @@
 													<?= $ci->lang('tooth name') ?> <span class="text-red">*</span>
 												</label>
 												<!-- this is an important select tag remember it -->
-												<select id="selectName_update" name="name"
+												<select id="selectName" name="name"
 														class="form-control select2-show-search form-select"
 														data-placeholder="<?= $ci->lang('select') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
@@ -37,7 +40,7 @@
 													<?= $ci->lang('tooth location') ?> <span class="text-red">*</span>
 												</label>
 
-												<select id="locationSelector_update" name="location"
+												<select id="locationSelector" name="location"
 														class="form-control select2-show-search form-select"
 														data-placeholder="<?= $ci->lang('select') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
@@ -55,10 +58,10 @@
 													<?= $ci->lang('number of canal') ?>
 												</label>
 
-												<select id="canalselector_update" name="root_number"
+												<select id="canalselector" name="root_number"
 														class="form-control select2-show-search form-select"
 														data-placeholder="<?= $ci->lang('select') ?>"
-														onchange="showRow('#canalselector_update','#firstRow_update', '#secoundRow_update', '#thirdRow_update', '#fourthRow_update', '#fifthRow_update')">
+														onchange="showRow()">
 													<option label="<?= $ci->lang('select') ?>"></option>
 
 													<option value="0">none</option>
@@ -74,7 +77,7 @@
 									</div>
 
 									<div>
-										<div class="row" id="firstRow_update" style="display: none;">
+										<div class="row" id="firstRow" style="display: none;">
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
 												<div class="form-group">
 													<label class="form-label">
@@ -84,7 +87,7 @@
 
 													<select name="r_name1"
 															class="form-control select2-show-search form-select"
-															id="canalLocation1_update"
+															id="canalLocation1"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -101,15 +104,14 @@
 													<label class="form-label">
 														<?= $ci->lang('canal length') ?>
 													</label>
-													<input type="number" id="c_length1_update" name="r_width1"
-														   class="form-control"
+													<input type="number" name="r_width1" class="form-control"
 														   placeholder="<?= $ci->lang('canal length') ?>">
 												</div>
 											</div>
 
 										</div>
 
-										<div class="row" id="secoundRow_update" style="display: none;">
+										<div class="row" id="secoundRow" style="display: none;">
 
 
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
@@ -122,7 +124,7 @@
 
 													<select name="r_name2"
 															class="form-control select2-show-search form-select"
-															id="canalLocation2_update"
+															id="canalLocation2"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -142,8 +144,7 @@
 													</label>
 
 
-													<input type="number" id="c_length2_update" name="r_width2"
-														   class="form-control"
+													<input type="number" name="r_width2" class="form-control"
 														   placeholder="<?= $ci->lang('canal length') ?>">
 
 												</div>
@@ -151,7 +152,7 @@
 
 										</div>
 
-										<div class="row" id="thirdRow_update" style="display: none;">
+										<div class="row" id="thirdRow" style="display: none;">
 
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
 												<div class="form-group">
@@ -162,7 +163,7 @@
 
 													<select name="r_name3"
 															class="form-control select2-show-search form-select"
-															id="canalLocation3_update"
+															id="canalLocation3"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -182,8 +183,7 @@
 													</label>
 
 
-													<input type="number" id="c_length3_update" name="r_width3"
-														   class="form-control"
+													<input type="number" name="r_width3" class="form-control"
 														   placeholder="<?= $ci->lang('canal length') ?>">
 
 												</div>
@@ -191,7 +191,7 @@
 
 										</div>
 
-										<div class="row" id="fourthRow_update" style="display: none;">
+										<div class="row" id="fourthRow" style="display: none;">
 
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
 												<div class="form-group">
@@ -203,7 +203,7 @@
 
 													<select name="r_name4"
 															class="form-control select2-show-search form-select"
-															id="canalLocation4_update"
+															id="canalLocation4"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -224,8 +224,7 @@
 													</label>
 
 
-													<input type="number" id="c_length4_update" name="r_width4"
-														   class="form-control"
+													<input type="number" name="r_width4" class="form-control"
 														   placeholder="<?= $ci->lang('canal length') ?>">
 
 												</div>
@@ -233,7 +232,7 @@
 
 										</div>
 
-										<div class="row" id="fifthRow_update" style="display: none;">
+										<div class="row" id="fifthRow" style="display: none;">
 
 											<div class="col-sm-12 col-md-6"> <!-- Canal Location -->
 												<div class="form-group">
@@ -245,7 +244,7 @@
 
 													<select name="r_name5"
 															class="form-control select2-show-search form-select"
-															id="canalLocation5_update"
+															id="canalLocation5"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option label="<?= $ci->lang('select') ?>"></option>
 
@@ -266,8 +265,7 @@
 													</label>
 
 
-													<input type="number" id="c_length5_update" name="r_width5"
-														   class="form-control"
+													<input type="number" name="r_width5" class="form-control"
 														   placeholder="<?= $ci->lang('canal length') ?>">
 
 												</div>
@@ -281,7 +279,7 @@
 									<div class="row">
 										<div
 											style="border-bottom: 1px solid gray;margin: 50px 0 30px 0;opacity: 0.5;"></div>
-										<!-- TODO: (Update) the new select start-->
+										<!-- TODO the new select start-->
 										<div class="col-sm-12 col-md-6"> <!-- type of obturation -->
 											<div class="form-group">
 												<label class="form-label">
@@ -289,7 +287,7 @@
 												</label>
 												<select name="typeObturation"
 														class="form-control select2-show-search form-select"
-														id="instypeObturation_update"
+														id="instypeObturation"
 														data-placeholder="<?= $ci->lang('type of obturation') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
 													<?php foreach ($typeOfAbturationList as $typeOfAbturation) : ?>
@@ -308,7 +306,7 @@
 
 												<select name="TypeSealer"
 														class="form-control select2-show-search form-select"
-														id="insTypeSealer_update"
+														id="insTypeSealer"
 														data-placeholder="<?= $ci->lang('type of sealer') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
 													<?php foreach ($typeOfSealerList as $typeOfSealer) : ?>
@@ -327,7 +325,7 @@
 
 												<select name="TypeIrrigation"
 														class="form-control select2-show-search form-select"
-														id="insTypeIrrigation_update"
+														id="insTypeIrrigation"
 														data-placeholder="<?= $ci->lang('type of irrigation') ?>">
 													<option label="<?= $ci->lang('select') ?>"></option>
 													<?php foreach ($typeOfIrregationList as $typeOfIrregation) : ?>
@@ -338,7 +336,7 @@
 											</div>
 										</div>
 
-										<!-- TODO: (Update) the new select end-->
+										<!-- TODO the new select end-->
 
 
 										<div class="col-sm-12 col-md-6">
@@ -346,9 +344,9 @@
 												<label class="form-label">
 													<?= $ci->lang('treatment') ?> <span class="text-red">*</span>
 												</label>
-												<input type="hidden" name="diagnose" id="diagnose_adult_update">
+												<input type="hidden" name="diagnose" id="diagnose_adultOld">
 												<select class="form-control select2-show-search form-select"
-														id="services_update" onchange="service_price(), calculate_sum()"
+														id="services" onchange="service_price(), calculate_sum()"
 														data-placeholder="<?= $ci->lang('select') ?>" multiple>
 													<?php foreach ($endo_services as $service) : ?>
 
@@ -358,9 +356,9 @@
 													<?php endforeach; ?>
 
 												</select>
-												<input type="hidden" name="imgAddress" id="adulth_teeth_location_update"
+												<input type="hidden" name="imgAddress" id="adulth_teeth_location"
 													   value="">
-												<input type="hidden" name="endo_services" id="services_input_update">
+												<input type="hidden" name="endo_services" id="services_input">
 											</div>
 										</div>
 
@@ -369,8 +367,7 @@
 												<label class="form-label">
 													<?= $ci->lang('pay amount') ?> <span class="text-red">*</span>
 												</label>
-												<input type="number" name="price" id="price_tooth_update"
-													   class="form-control"
+												<input type="number" name="price" id="price_tooth" class="form-control"
 													   placeholder="<?= $ci->lang('pay amount') ?>">
 											</div>
 
@@ -381,7 +378,7 @@
 												<label class="form-label">
 													<?= $ci->lang('description') ?>
 												</label>
-												<textarea class="form-control" name="details" id="details_update"
+												<textarea class="form-control" name="details"
 														  placeholder="<?= $ci->lang('description') ?>"></textarea>
 											</div>
 										</div>
@@ -396,7 +393,7 @@
 
 									<h2 class="modal-Title"></h2>
 									<img src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/up/PNG/1upup.png"
-										 class="modalimg" id="modalImage_update">
+										 class="modalimg" id="modalImage">
 									<div>
 										<label class="form-label">
 											<?= $ci->lang('pay amount') ?>
@@ -412,7 +409,7 @@
 
 
 					</div>
-					<!-- TODO: (Update) tooltip div Endo -->
+					<!-- TODO: tooltip div Endo -->
 					<div class="item-hints">
 						<div class="hint" data-position="4">
 							<!-- is-hint -->
@@ -433,5 +430,5 @@
 							</div>
 						</div>
 					</div>
-					<!-- TODO: (Update) tooltip div Endo -->
+					<!-- TODO: tooltip div Endo -->
 				</div>

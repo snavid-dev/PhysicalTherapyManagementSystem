@@ -22,7 +22,7 @@ $ci = get_instance();
 														<?= ucwords('type of Prosthodontics') ?>
 													</label>
 													<!-- this is an important select tag remember it -->
-													<select id="type_pro" name="type_pro" onchange="check_pro_type()"
+													<select id="type_pro" name="type_pro" onchange="check_pro_type('type_pro')"
 															class="form-control select2-show-search form-select"
 															data-placeholder="<?= $ci->lang('select') ?>">
 														<option value="abutment"
@@ -80,7 +80,8 @@ $ci = get_instance();
 														<select id="post" name="post"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>"
-																onchange="showSelect()">
+																onchange="showSelect('post','fiber_post_div', 'metal_screw_post_div', 'type_crown_material_div')">
+
 															<option label="<?= $ci->lang('select') ?>"></option>
 															<?php foreach ($PostList as $Post) : ?>
 																<option
@@ -112,8 +113,7 @@ $ci = get_instance();
 													</div>
 												</div>
 												<!-- metal screw post -->
-												<div class="col-sm-12 col-md-6 nonDisplay abutment"
-													 id="metal_screw_post_div">
+												<div class="col-sm-12 col-md-6 nonDisplay abutment" id="metal_screw_post_div">
 													<div class="form-group">
 
 														<label class="form-label">
@@ -181,10 +181,10 @@ $ci = get_instance();
 															<?= ucwords('Impression Technique') ?>
 														</label>
 														<!-- this is an important select tag remember it -->
-														<select id="impression_techniq" name="impression_technique"
+														<select id="impression_technique" name="impression_technique"
 																class="form-control select2-show-search form-select"
 																data-placeholder="<?= $ci->lang('select') ?>"
-																onchange="ImpressionTechniq()">
+																onchange="ImpressionTechniq('impression_technique', 'impression_material_div')">
 															<option label="<?= $ci->lang('select') ?>"></option>
 															<?php foreach ($ImpressionTechniqueList as $ImpressionTechnique) : ?>
 																<option
@@ -258,7 +258,7 @@ $ci = get_instance();
 																	class="text-red">*</span>
 															</label>
 															<input type="hidden" name="diagnose"
-																   id="diagnose_adult">
+																   id="diagnose_adult_update">
 															<select
 																class="form-control select2-show-search form-select"
 																id="services_pro"
