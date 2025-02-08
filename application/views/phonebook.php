@@ -28,7 +28,7 @@
 
               <!-- <li>
                 <button class="btn btn-success" onclick="sendSms()">
-                  <?= $ci->lang('sms') ?> <i class="las la-sms" style="font-size: 15px;"></i>
+                  <?= $ci->lang('sms') ?> <i class="fa fa-sms" style="font-size: 15px;"></i>
                 </button>
               </li> -->
 
@@ -177,7 +177,7 @@
                     <?= $receipt['date'] ?>
                   </td>
                   <td>
-                    <?= $ci->dentist->find_time($receipt['hour']) ?>
+                    <bdo direction="ltr"><?= $receipt['from_time'] ?> - <?= $receipt['to_time'] ?></bdo>
                   </td>
                   <td>
                     <div class="g-2">

@@ -13,7 +13,7 @@
 
               <ul class="nav panel-tabs product-sale" role="tablist">
                 <li>
-                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extralargemodal"><?= $ci->lang('add new') ?> <i class="fe fe-plus"></i></button>
+                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extralargemodal"><?= $ci->lang('add new') ?> <i class="fa fa-plus"></i></button>
                 </li>
               </ul>
               <!-- Modal Button -->
@@ -147,7 +147,7 @@
                       <div class="g-2">
                         <?php if (ucfirst($user['status']) == 'A') : ?>
 
-                          <a class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-minus-circle fs-14"></span></a>
+                          <a class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>
                         <?php else : ?>
                           <a class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-unlock fs-14"></span></a>
                         <?php endif; ?>

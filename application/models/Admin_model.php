@@ -927,7 +927,7 @@ class Admin_model extends CI_Model
 
 	function turn_after_payment($turnId)
 	{
-		return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.id = '$turnId'  ORDER BY turn.hour ASC")->result_array();
+		return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.id = '$turnId'  ORDER BY turn.from_time ASC")->result_array();
 	}
 
 

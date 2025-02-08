@@ -437,7 +437,7 @@
 					if (selectIdValue == 'p') {
 						changeBtnsStatus +=
 							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
-              <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-minus-circle fs-14"></span></a>`;
+              <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
 					} else if (selectIdValue == 'a') {
 						changeBtnsStatus +=
 							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock"></span></a>

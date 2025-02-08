@@ -16,7 +16,7 @@
             <ul class="nav panel-tabs product-sale" role="tablist">
               <li>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#labModal">
-                  <?= $ci->lang('add new') ?> <i class="fe fe-plus"></i>
+                  <?= $ci->lang('add new') ?> <i class="fa fa-plus"></i>
                 </button>
               </li>
             </ul>
@@ -26,7 +26,7 @@
 
         <div class="table-responsive">
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#labModal">
-            <?= $ci->lang('add new') ?> <i class="fe fe-plus"></i>
+            <?= $ci->lang('add new') ?> <i class="fa fa-plus"></i>
           </button>
           <table class="table text-nowrap" id="turnsTable">
             <thead class="tableHead">
@@ -65,7 +65,7 @@
                       onclick="setMedicine()"><span class="fa fa-check-circle"></span></a>
 
                     <a onclick="viewPrescriptionsMedicines('5')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-                        class="las la-times-circle fs-14"></span></a>
+                        class="fa fa-times-circle fs-14"></span></a>
                     <a class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span
                         class="fa fa-trash"></span></a>
                   </div>

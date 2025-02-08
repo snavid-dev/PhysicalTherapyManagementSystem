@@ -52,7 +52,7 @@
 								class="fa-regular fa-pen-to-square fs-14"></span></a>
 						<a href=""
 						   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-								class="las la-check-circle"></span></a>
+								class="fa fa-check-circle"></span></a>
 						<a href="javascript:print_lab('<?= $lab['id'] ?>')"
 						   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
 								class="fa-solid fa-print fs-14"></span></a>

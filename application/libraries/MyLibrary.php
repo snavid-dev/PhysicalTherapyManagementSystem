@@ -94,7 +94,7 @@ class Mylibrary
       $icon =  'fa fa-check-circle fs-14';
     } else {
       $tooltip = $ci->lang('cancel');
-      $icon = 'las la-times-circle fs-14';
+      $icon = 'fa fa-times-circle fs-14';
     }
     $btns = '<a href="javascript:changeStatus(`' . $id . '`, `' . $url . '`)" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="' . $tooltip . '"><span class="' . $icon . '"></span></a> ';
     return $btns;
@@ -173,7 +173,7 @@ class Mylibrary
   public function generateBtnView($edit_function = 'edit_service', $id)
   {
     $ci = get_instance();
-    $btns = '<a href="javascript:' . $edit_function . '(`' . $id . '`)" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip"><span class="las la-eye fs-14"></span></a> ';
+    $btns = '<a href="javascript:' . $edit_function . '(`' . $id . '`)" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip"><span class="fa fa-eye fs-14"></span></a> ';
     return $btns;
   }
 

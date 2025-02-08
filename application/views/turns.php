@@ -28,7 +28,7 @@
 
 							<li>
 								<button class="btn btn-success" onclick="sendSms()">
-									<?= $ci->lang('sms') ?> <i class="las la-sms" style="font-size: 15px;"></i>
+									<?= $ci->lang('sms') ?> <i class="fa fa-sms" style="font-size: 15px;"></i>
 								</button>
 							</li>
 
@@ -36,7 +36,7 @@
 								<?php if ($ci->auth->has_permission('Create Turn')): ?>
 									<button class="btn btn-primary" data-bs-toggle="modal"
 											data-bs-target="#extralargemodal">
-										<?= $ci->lang('add new') ?> <i class="fe fe-plus"></i>
+										<?= $ci->lang('add new') ?> <i class="fa fa-plus"></i>
 									</button>
 								<?php endif; ?>
 							</li>

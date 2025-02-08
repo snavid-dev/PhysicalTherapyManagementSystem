@@ -60,19 +60,19 @@ $ci = get_instance();
 							<button class="nav-link active" id="Restorative_update" data-bs-toggle="tab"
 								data-bs-target="#Restorative_update-pane" type="button" role="tab"
 								aria-controls="Restorative_update-pane" aria-selected="true"><i
-									class="las la-tooth me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('restorative') ?>
+									class="fa fa-tooth me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('restorative') ?>
 							</button> <!--Translate-->
 						</li>
 						<li class="nav-item rounded" role="presentation">
 							<button class="nav-link" id="endo_update" data-bs-toggle="tab" data-bs-target="#endo_update-pane"
 								type="button" role="tab" aria-controls="endo_update-pane" aria-selected="false"><i
-									class="las la-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Endodantic') ?>
+									class="fa fa-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Endodantic') ?>
 							</button> <!--Translate-->
 						</li>
 						<li class="nav-item rounded" role="presentation">
 							<button class="nav-link" id="pros_update-tab" data-bs-toggle="tab" data-bs-target="#pros_update-pane"
 								type="button" role="tab" aria-controls="pros_update-pane" aria-selected="false"><i
-									class="las la-vial me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Prosthodontics') ?>
+									class="fa fa-vial me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Prosthodontics') ?>
 							</button> <!--Translate-->
 						</li>
 					</ul>
