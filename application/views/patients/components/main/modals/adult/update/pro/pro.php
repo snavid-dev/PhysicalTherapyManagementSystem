@@ -112,7 +112,7 @@ $ci = get_instance();
 													</div>
 												</div>
 												<!-- metal screw post -->
-												<div class="col-sm-12 col-md-6 nonDisplay abutment" id="metal_screw_post_div_update">
+												<div class="col-sm-12 col-md-6 nonDisplay abutment" id="metal_screw_post_div_update" style="border: 3px solid yellow">
 													<div class="form-group">
 
 														<label class="form-label">
@@ -261,7 +261,7 @@ $ci = get_instance();
 																   id="diagnose_adult_update">
 															<select
 																class="form-control select2-show-search form-select"
-																id="services_pro"
+																id="services_pro_update"
 																onchange="service_price_pro(), calculate_sum()"
 																data-placeholder="<?= $ci->lang('select') ?>"
 																multiple>
@@ -297,7 +297,7 @@ $ci = get_instance();
 															<label class="form-label">
 																<?= $ci->lang('description') ?>
 															</label>
-															<textarea class="form-control" name="details_pro"
+															<textarea class="form-control" name="details_pro" id="protextarea_update"
 																	  placeholder="<?= $ci->lang('description') ?>"></textarea>
 														</div>
 													</div>

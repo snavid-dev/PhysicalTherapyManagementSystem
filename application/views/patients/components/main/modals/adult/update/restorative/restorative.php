@@ -181,7 +181,7 @@ $ci = get_instance();
 														<label class="form-label">
 															<?= $ci->lang('description') ?>
 														</label>
-														<textarea class="form-control" name="restorativeDescription"
+														<textarea class="form-control" id="restorative_details_update" name="restorativeDescription"
 																  placeholder="<?= $ci->lang('desc') ?>"
 																  rows="7"></textarea>
 													</div>

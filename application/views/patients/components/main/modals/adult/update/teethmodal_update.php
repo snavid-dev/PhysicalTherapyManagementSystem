@@ -115,3 +115,7 @@ $ci = get_instance();
 		</div>
 	</div>
 </div>
+
+
+<!--scripts for set update values-->
+<?php $ci->render("patients/components/main/modals/adult/update/teethmodal_update-js.php");  ?>
