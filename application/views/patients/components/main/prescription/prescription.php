@@ -20,7 +20,7 @@
                         <div class="g-2">
                             <a href="javascript:viewPrescriptionsMedicines('<?= $prescription['id'] ?>')"
                                 class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
-                                    class="las la-eye fs-14"></span></a>
+                                    class="fa fa-eye fs-14"></span></a>
                             <a href="javascript:print_prescription('<?= $prescription['id'] ?>')"
                                 class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
                                     class="fa-solid fa-print fs-14"></span></a>

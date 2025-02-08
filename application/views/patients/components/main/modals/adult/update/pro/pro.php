@@ -258,7 +258,7 @@ $ci = get_instance();
 															</label>
 <!--															ask this-->
 															<input type="hidden" name="diagnose"
-																   id="diagnose_adult">
+																   id="diagnose_adult_update">
 															<select
 																class="form-control select2-show-search form-select"
 																id="services_pro"

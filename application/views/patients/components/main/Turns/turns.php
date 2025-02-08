@@ -39,7 +39,7 @@
 						<?php else : ?>
 							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/pending_turn')"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-									class="las la-times-circle fs-14"></span></a>
+									class="fa fa-times-circle fs-14"></span></a>
 						<?php endif; ?>
 						<a href="javascript:delete_via_alert('<?= $turn['id'] ?>', '<?= base_url() ?>admin/delete_turn', 'turnsTable', update_balance)"
 						   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span

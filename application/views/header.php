@@ -137,7 +137,7 @@ $ci = get_instance();
 					</a>
 					<!-- TODO: timer  -->
 					<div class="text-primary" style="display: flex; align-items: center;">
-						<i class="las la-clock" style="font-size: 40px;"></i>
+						<i class="fa fa-clock" style="font-size: 25px; margin: 5px"></i>
 						<span style="color: gray;"><?= $ci->lang('Page will Reload In:') ?></span>
 
 						<span id="timer" style="margin-left: 3px; font-size: large; margin-right: 3px;"> </span>

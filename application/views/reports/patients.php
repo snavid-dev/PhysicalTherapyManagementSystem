@@ -69,7 +69,7 @@
                       <div class="col-md-2" style="margin-top: 36px;">
 
                         <button class="btn btn-primary-gradient btn-wave custom-btn" type="button" onclick="finnancialReport_paid()">
-                          <?= $ci->lang('report') ?> <i class="las la-chart-pie"></i>
+                          <?= $ci->lang('report') ?> <i class="fa fa-chart-pie"></i>
                         </button>
                       </div>
 
@@ -77,7 +77,7 @@
                       <div class="col-md-2" style="margin-top: 36px;">
 
                         <button type="submit" class="btn btn-success-gradient btn-wave custom-btn">
-                          <?= $ci->lang('print') ?> <i class="las la-print"></i>
+                          <?= $ci->lang('print') ?> <i class="fa fa-print"></i>
                       </div>
 
                     </div>
@@ -135,7 +135,7 @@
                       <div class="col-md-2" style="margin-top: 36px;">
 
                         <button class="btn btn-primary-gradient btn-wave custom-btn" type="button" onclick="finnancialReport_revenue()">
-                          <?= $ci->lang('report') ?> <i class="las la-chart-pie"></i>
+                          <?= $ci->lang('report') ?> <i class="fa fa-chart-pie"></i>
                         </button>
                       </div>
 
@@ -143,7 +143,7 @@
                       <div class="col-md-2" style="margin-top: 36px;">
 
                         <button type="submit" class="btn btn-success-gradient btn-wave custom-btn">
-                          <?= $ci->lang('print') ?> <i class="las la-print"></i>
+                          <?= $ci->lang('print') ?> <i class="fa fa-print"></i>
                       </div>
 
                     </div>
@@ -215,7 +215,7 @@
                       <div class="col-md-2" style="margin-top: 36px;">
 
                         <button class="btn btn-primary-gradient btn-wave custom-btn" type="button" onclick="finnancialReport_expenses()">
-                          <?= $ci->lang('report') ?> <i class="las la-chart-pie"></i>
+                          <?= $ci->lang('report') ?> <i class="fa fa-chart-pie"></i>
                         </button>
                       </div>
 
@@ -223,7 +223,7 @@
                       <div class="col-md-2" style="margin-top: 36px;">
 
                         <button type="submit" class="btn btn-success-gradient btn-wave custom-btn">
-                          <?= $ci->lang('print') ?> <i class="las la-print"></i>
+                          <?= $ci->lang('print') ?> <i class="fa fa-print"></i>
                       </div>
 
                     </div>
@@ -294,7 +294,7 @@
                       <div class="col-md-2" style="margin-top: 36px;">
 
                         <button class="btn btn-primary-gradient btn-wave custom-btn" type="button" onclick="finnancialReport_balance()">
-                          <?= $ci->lang('report') ?> <i class="las la-chart-pie"></i>
+                          <?= $ci->lang('report') ?> <i class="fa fa-chart-pie"></i>
                         </button>
                       </div>
 
@@ -302,7 +302,7 @@
                       <div class="col-md-2" style="margin-top: 36px;">
 
                         <button type="submit" class="btn btn-success-gradient btn-wave custom-btn">
-                          <?= $ci->lang('print') ?> <i class="las la-print"></i>
+                          <?= $ci->lang('print') ?> <i class="fa fa-print"></i>
                       </div>
 
                     </div>

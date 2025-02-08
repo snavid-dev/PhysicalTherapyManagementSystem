@@ -130,7 +130,7 @@ $ci = get_instance();
 			<button type="button" class="btn btn-primary-gradient btn-wave custom-btn" data-bs-toggle="modal"
 					data-bs-target="#edit_patient" onclick="edit_profile()"
 					style=" display: flex;align-items: center; width: 100%; justify-content: space-between;"><?= $ci->lang('edit') ?>
-				<i class="las la-edit"></i>
+				<i class="fa fa-edit"></i>
 			</button>
 
 			<!-- patients edit profile modal codes goes here - start -->

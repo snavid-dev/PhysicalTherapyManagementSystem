@@ -15,7 +15,7 @@ $ci = get_instance();
 									<button class="nav-link active" id="activity-tab" data-bs-toggle="tab"
 											data-bs-target="#activity-tab-pane" type="button" role="tab"
 											aria-controls="activity-tab-pane" aria-selected="true"><i
-											class="las la-tooth me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('teeth') ?>
+											class="fa fa-tooth me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('teeth') ?>
 									</button>
 								</li>
 
@@ -23,7 +23,7 @@ $ci = get_instance();
 									<button class="nav-link" id="other-treatment-tab" data-bs-toggle="tab"
 											data-bs-target="#other_treatment_tab" type="button" role="tab"
 											aria-controls="other_treatment_tab" aria-selected="false"><i
-											class="las la-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('other treatments') ?>
+											class="fa fa-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('other treatments') ?>
 									</button>
 								</li>
 
@@ -31,28 +31,28 @@ $ci = get_instance();
 									<button class="nav-link" id="gallery-tab" data-bs-toggle="tab"
 											data-bs-target="#gallery-tab-pane" type="button" role="tab"
 											aria-controls="gallery-tab-pane" aria-selected="false"><i
-											class="las la-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('turns') ?>
+											class="fa fa-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('turns') ?>
 									</button>
 								</li>
 								<li class="nav-item rounded" role="presentation">
 									<button class="nav-link" id="posts-tab" data-bs-toggle="tab"
 											data-bs-target="#posts-tab-pane" type="button" role="tab"
 											aria-controls="posts-tab-pane" aria-selected="false"><i
-											class="las la-vial me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('laboratory') ?>
+											class="fa fa-vial me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('laboratory') ?>
 									</button>
 								</li>
 								<li class="nav-item rounded" role="presentation">
 									<button class="nav-link" id="followers-tab" data-bs-toggle="tab"
 											data-bs-target="#followers-tab-pane" type="button" role="tab"
 											aria-controls="followers-tab-pane" aria-selected="false"><i
-											class="las la-prescription me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('prescription') ?>
+											class="fa fa-prescription me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('prescription') ?>
 									</button>
 								</li>
 								<li class="nav-item rounded" role="presentation">
 									<button class="nav-link" id="followers-tab" data-bs-toggle="tab"
 											data-bs-target="#archive-tab-pane" type="button" role="tab"
 											aria-controls="archive-tab-pane" aria-selected="false"><i
-											class="lar la-folder-open me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('archive') ?>
+											class="fa fa-archive me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('archive') ?>
 									</button>
 								</li>
 							</ul>

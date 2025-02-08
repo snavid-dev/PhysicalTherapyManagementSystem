@@ -25,7 +25,7 @@
 
               <li>
                 <button class="btn btn-primary" onclick="tableUpdate()">
-                  <?= $ci->lang('Submit') ?> <i class="las la-share"></i> </i>
+                  <?= $ci->lang('Submit') ?> <i class="fa fa-share"></i> </i>
                 </button>
               </li>
 

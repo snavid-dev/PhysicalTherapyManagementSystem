@@ -59,19 +59,19 @@ $ci = get_instance();
 							<button class="nav-link active" id="Restorative" data-bs-toggle="tab"
 								data-bs-target="#Restorative-pane" type="button" role="tab"
 								aria-controls="Restorative-pane" aria-selected="true"><i
-									class="las la-tooth me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('restorative') ?>
+									class="fa fa-tooth me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('restorative') ?>
 							</button> <!--Translate-->
 						</li>
 						<li class="nav-item rounded" role="presentation">
 							<button class="nav-link" id="endo" data-bs-toggle="tab" data-bs-target="#endo-pane"
 								type="button" role="tab" aria-controls="endo-pane" aria-selected="false"><i
-									class="las la-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Endodantic') ?>
+									class="fa fa-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Endodantic') ?>
 							</button> <!--Translate-->
 						</li>
 						<li class="nav-item rounded" role="presentation">
 							<button class="nav-link" id="pros-tab" data-bs-toggle="tab" data-bs-target="#pros-pane"
 								type="button" role="tab" aria-controls="pros-pane" aria-selected="false"><i
-									class="las la-vial me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Prosthodontics') ?>
+									class="fa fa-vial me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Prosthodontics') ?>
 							</button> <!--Translate-->
 						</li>
 					</ul>

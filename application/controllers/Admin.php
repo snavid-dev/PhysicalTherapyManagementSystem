@@ -3001,7 +3001,8 @@ class Admin extends CI_Controller
 				$turn = array(
 					'patient_id' => $insert[1],
 					'date' => $this->mylibrary->getCurrentShamsiDate()['date'],
-					'hour' => $this->dentist->hour_for_insert(),
+					'from_time' => date('H:i'),
+					'to_time' => date('H:i', strtotime('+30 minutes')),
 					'status' => 'p',
 					'doctor_id' => $this->input->post('doctor_id'),
 				);
@@ -4502,7 +4503,7 @@ class Admin extends CI_Controller
 				$data['type'] = 'success';
 
 				foreach ($turns as $turn) {
-					$data['content']['turns'][] = array('date' => $turn['date'], 'id' => $turn['id'], 'hour_key' => $turn['hour'], 'hour' => $this->dentist->find_time($turn['hour']));
+					$data['content']['turns'][] = array('date' => $turn['date'], 'id' => $turn['id'], 'hour_key' => '1', 'hour' => $turn['from_time'] . ' - ' . $turn['to_time']);
 				}
 			} else {
 				$data['type'] = 'success';
@@ -4638,7 +4639,7 @@ class Admin extends CI_Controller
 				$data['tr'] = array(
 					$turn['doctor_name'],
 					$turn['date'],
-					$this->dentist->find_time($turn['hour']),
+					$turn['from_time'] . ' - ' . $turn['to_time'],
 					$turn['cr'],
 					$this->mylibrary->btn_group($btns)
 				);

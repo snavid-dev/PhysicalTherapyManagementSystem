@@ -278,7 +278,7 @@
 			<div class="card-body">
 				<div class="d-flex mb-4 mt-3">
 					<div class="avatar avatar-md bg-secondary-transparent text-secondary bradius me-3">
-						<i class="las la-check"></i>
+						<i class="fa fa-check"></i>
 					</div>
 					<div class="">
 						<h6 class="mb-1 fw-semibold"><?= $ci->lang('income') ?></h6>
@@ -291,7 +291,7 @@
 				</div>
 				<div class="d-flex mb-4 mt-3">
 					<div class="avatar  avatar-md bg-pink-transparent text-pink bradius me-3">
-						<i class="las la-times"></i>
+						<i class="fa fa-times"></i>
 					</div>
 					<div class="">
 						<h6 class="mb-1 fw-semibold"><?= $ci->lang('paid') ?></h6>
@@ -304,7 +304,7 @@
 				</div>
 				<div class="d-flex mb-4 mt-3">
 					<div class="avatar  avatar-md bg-pink-transparent text-pink bradius me-3">
-						<i class="las la-times"></i>
+						<i class="fa fa-times"></i>
 					</div>
 					<div class="">
 						<h6 class="mb-1 fw-semibold"><?= $ci->lang('expenses') ?></h6>
