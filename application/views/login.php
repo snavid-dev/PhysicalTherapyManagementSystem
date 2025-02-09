@@ -17,6 +17,18 @@ $ci = get_instance();
     <!-- Styles -->
     <link href="<?= $ci->dentist->assets_url() ?>assets/css/scroll_style.css" rel="stylesheet">
 
+<!--	css(fonts) for pages-->
+	<?php if ($_COOKIE['language'] == 'fa') : ?>
+		<link rel="stylesheet" href="<?= $ci->dentist->assets_url() ?>assets/css/language/farsi.css">
+
+	<?php elseif ($_COOKIE['language'] == 'pa') : ?>
+		<link rel="stylesheet" href="<?= $ci->dentist->assets_url() ?>assets/css/language/pashto.css">
+	<?php endif; ?>
+	<?php if (!isset($_COOKIE['language'])) : ?>
+		<script>
+			window.location.reload();
+		</script>
+	<?php endif; ?>
 
 </head>
 
@@ -38,11 +50,11 @@ $ci = get_instance();
                 <form action="<?= base_url('Login/index') ?>" method="POST">
                 <div class="input-block">
                     <label for="email" class="input-label"><?= $ci->lang('username') ?></label>
-                    <input class="effect-19" type="text" name="username" id="userName" placeholder="User Name">
+                    <input class="effect-19" type="text" name="username" id="userName" placeholder="<?= $ci->lang('username') ?>">
                 </div>
                 <div class="input-block">
                     <label for="password" class="input-label"><?= $ci->lang('password') ?></label>
-                    <input class="effect-19" type="password" name="password" id="password" placeholder="Password">
+                    <input class="effect-19" type="password" name="password" id="password" placeholder="<?= $ci->lang('password') ?>">
                 </div>
 
                 <div class="modal-buttons">
