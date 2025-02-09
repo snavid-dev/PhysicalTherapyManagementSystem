@@ -841,7 +841,7 @@ class Language
 			//login page
 			'Scroll Down' => self::lang_arr('SCROLL DOWN', 'به پایین اسکرول کنید', 'لاندې سکرول وکړئ'),
 			'welcome' => self::lang_arr('Welcome', 'خوش آمدید', 'ښه راغلاست'),
-			'Smile Slogan' => self::lang_arr('Smile, You have Earned it!', 'لیخند بزنید، شما لایق اش هستید!', 'Smile, You have Earned it!'),
+			'Smile Slogan' => self::lang_arr('Smile, You have Earned it!', 'لیخند بزنید، شما بدست اش آوردید!', 'موسکا وکړه، تا ګټلې ده'),
 			'click here' => self::lang_arr('Click Here to Login', 'برای وارد شدن کلیک کنید', 'د ننوتلو لپاره دلته کلیک وکړئ'),
 			//login page
 
