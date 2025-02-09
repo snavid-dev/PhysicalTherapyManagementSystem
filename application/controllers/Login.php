@@ -14,6 +14,11 @@ class Login extends CI_Controller
 		$this->mylibrary->check_theme();
 	}
 
+	public function lang($key)
+	{
+		return $this->language->languages($key, $_COOKIE['language']);
+	}
+
 	public function index()
 	{
 		$data = array();
