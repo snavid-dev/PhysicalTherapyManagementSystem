@@ -845,6 +845,15 @@ class Language
 			'click here' => self::lang_arr('Click Here to Login', 'برای وارد شدن کلیک کنید', 'د ننوتلو لپاره دلته کلیک وکړئ'),
 			//login page
 
+			//turns errors
+			'invalid input' => self::lang_arr('Invalid Input', 'ورودی نامعتر', 'not set'),
+			'invalid input text' => self::lang_arr('Please ensure all fields are correctly filled', 'لطفا مطمئن شوید که تمام گزینه ها درست پر شده باشند ', 'not set'),
+			'no available slots' => self::lang_arr('No Available Slots', 'نوبتی در دسترس نیست', 'not set'),
+			'no available slots text' => self::lang_arr('The doctor is either unavailable or on leave', 'داکتر مورد نظر یا در دسترس نمی باشند یا در مرخصی هستند', 'not set'),
+			'on leave' => self::lang_arr('On Leave', 'در مرخصی هستند', 'not set'),
+
+			//turns errors
+
 		];
 
 		return ucwords($lang[$key][$lan]);
