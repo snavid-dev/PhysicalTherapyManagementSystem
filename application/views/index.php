@@ -1382,8 +1382,8 @@
 						var tableTemplate = `<table class="table text-nowrap table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th scope="col">Available Time Range</th>
-                                                    <th scope="col">Status</th>
+                                                    <th scope="col"><?= $ci->lang('Available Time Range') ?></th>
+                                                    <th scope="col"><?= $ci->lang('Status') ?></th>
                                                 </tr>
                                             </thead>
                                             <tbody>`;
