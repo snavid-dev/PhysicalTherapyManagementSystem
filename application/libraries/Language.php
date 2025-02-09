@@ -455,6 +455,10 @@ class Language
 			'update' => self::lang_arr('update', 'به روز رسانی', 'تازه کول'),
 			'not member' => self::lang_arr('Not a member?', 'تا به حال عضو نیستید؟', 'غړی نه دی؟'),
 			'accept' => self::lang_arr('accept', 'پذیرفتن', 'accept'),
+			'Available Time Range' => self::lang_arr('Available Time Range', 'بازه زمانی قابل دسترس', 'د موجوده وخت حد'),
+			'Status' => self::lang_arr('Status', 'وضعیت', 'وضعیت'),
+			'Available' => self::lang_arr('Available', 'قابل دسترس', 'موجود دي'),
+
 
 			// Start Alerts
 			'error' => self::lang_arr('warning', 'هشدار', 'اخطار'),
@@ -833,6 +837,13 @@ class Language
 			'unlock' => self::lang_arr('Unlock', 'قفل گشایی', 'not set'),
 			'forget password' => self::lang_arr('Forget Password', 'آیا رمز عبور خور را فراموش کرده اید؟', 'not set'),
 			// lockScreen
+
+			//login page
+			'Scroll Down' => self::lang_arr('SCROLL DOWN', 'به پایین اسکرول کنید', 'لاندې سکرول وکړئ'),
+			'welcome' => self::lang_arr('Welcome', 'خوش آمدید', 'ښه راغلاست'),
+			'Smile Slogan' => self::lang_arr('Smile, You have Earned it!', 'لیخند بزنید، شما لایق اش هستید!', 'Smile, You have Earned it!'),
+			'click here' => self::lang_arr('Click Here to Login', 'برای وارد شدن کلیک کنید', 'د ننوتلو لپاره دلته کلیک وکړئ'),
+			//login page
 
 		];
 

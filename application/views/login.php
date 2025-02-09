@@ -21,7 +21,7 @@ $ci = get_instance();
 </head>
 
 <body>
-    <div class="scroll-down">SCROLL DOWN
+    <div class="scroll-down"><?= $ci->lang('Scroll Down') ?>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
             <path d="M16 3C8.832031 3 3 8.832031 3 16s5.832031 13 13 13 13-5.832031 13-13S23.167969 3 16 3zm0 2c6.085938 0 11 4.914063 11 11 0 6.085938-4.914062 11-11 11-6.085937 0-11-4.914062-11-11C5 9.914063 9.914063 5 16 5zm-1 4v10.28125l-4-4-1.40625 1.4375L16 23.125l6.40625-6.40625L21 15.28125l-4 4V9z" />
         </svg>
@@ -33,20 +33,20 @@ $ci = get_instance();
     <div class="modal">
         <div class="modal-container">
             <div class="modal-left">
-                <h1 class="modal-title">Welcome!</h1>
-                <p class="modal-desc">Fanny pack hexagon food truck, street art waistcoat kitsch.</p>
+                <h1 class="modal-title"><?= $ci->lang('welcome') ?></h1>
+                <p class="modal-desc"><?= $ci->lang('Smile Slogan') ?></p>
                 <form action="<?= base_url('Login/index') ?>" method="POST">
                 <div class="input-block">
-                    <label for="email" class="input-label">UserNmae</label>
+                    <label for="email" class="input-label"><?= $ci->lang('username') ?></label>
                     <input class="effect-19" type="text" name="username" id="userName" placeholder="User Name">
                 </div>
                 <div class="input-block">
-                    <label for="password" class="input-label">Password</label>
+                    <label for="password" class="input-label"><?= $ci->lang('password') ?></label>
                     <input class="effect-19" type="password" name="password" id="password" placeholder="Password">
                 </div>
 
                 <div class="modal-buttons">
-                    <button type="submit" class="input-button">Login</button>
+                    <button type="submit" class="input-button"><?= $ci->lang('login') ?></button>
                 </div>
             </form>
 
@@ -60,7 +60,7 @@ $ci = get_instance();
                 </svg>
             </button>
         </div>
-        <button class="modal-button">Click here to login</button>
+        <button class="modal-button"><?= $ci->lang('click here') ?></button>
     </div>
     <script src="script.js" charset="utf-8"></script>
     <script src="<?= $ci->dentist->assets_url() ?>assets/js/scrollJs.js"></script>
