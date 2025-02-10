@@ -33,6 +33,10 @@ class Admin_model extends CI_Model
 		return array($log, $id);
 	}
 
+	public function single_user_update($where = array()){
+		return $this->db->get_where('users', $where)->result_array();
+	}
+
 	function delete_leave($where = array())
 	{
 		return $this->db->delete('doctor_leave', $where);
