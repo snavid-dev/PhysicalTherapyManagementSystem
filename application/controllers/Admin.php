@@ -431,6 +431,50 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+	public function single_user()
+	{
+		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+
+		if ($this->form_validation->run()) {
+			$data = array();
+			$record = $this->input->post('slug');
+			$datas = array(
+				'id' => $record
+			);
+			$receipt = $this->Admin_model->single_user_update($datas);
+
+
+			if (count($receipt) > 0) {
+				$data['type'] = 'success';
+
+				$data['content'] = array(
+					'slug' => $receipt[0]['id'],
+					'fname' => $receipt[0]['fname'],
+					'lname' => $receipt[0]['lname'],
+					'role' => $receipt[0]['role'],
+					'username' => $receipt[0]['username'],
+					'status' => $receipt[0]['status'],
+					'role_id' => $receipt[0]['role_id'],
+					'working_start_time' => $receipt[0]['working_start_time'],
+					'working_end_time' => $receipt[0]['working_end_time'],
+				);
+
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert']['title'] = $this->lang('error');
+			$data['alert']['text'] = $this->lang('problem');
+			$data['alert']['type'] = 'error';
+		}
+
+		print_r(json_encode($data));
+	}
+
 	public function change_status_user()
 	{
 		$data = array('type' => 'form_error', 'messages' => array());
