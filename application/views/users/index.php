@@ -14,12 +14,12 @@
 						<ul class="nav panel-tabs product-sale" role="tablist">
 							<li>
 								<button class="btn btn-primary" data-bs-toggle="modal"
-										data-bs-target="#extralargemodal"><?= $ci->lang('add new') ?> <i
+										data-bs-target="#extralargemodal_insert"><?= $ci->lang('add new') ?> <i
 										class="fe fe-plus"></i></button>
 							</li>
 						</ul>
 						<!-- Modal Button -->
-						<!--TODO cropper modal start--------------------------------------------------------------------------------------------------------------------------------------------- -->
+						<!--TODO: cropper modal start--------------------------------------------------------------------------------------------------------------------------------------------- -->
 						<div id="cropperModal" class="cropper-modal" tabindex="-1">
 							<div class="cropper-modal-content">
 								<span class="cropper-close">&times;</span>
@@ -31,10 +31,10 @@
 								</div>
 							</div>
 						</div>
-						<!--TODO cropper modal end--------------------------------------------------------------------------------------------------------------------------------------------- -->
+						<!--TODO: cropper modal end--------------------------------------------------------------------------------------------------------------------------------------------- -->
 
 						<!-- Modal -->
-						<div class="modal fade effect-scale" id="extralargemodal" tabindex="-1" role="dialog">
+						<div class="modal fade effect-scale" id="extralargemodal_insert" tabindex="-1" role="dialog">
 							<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
@@ -106,7 +106,8 @@
 																class="text-red">*</span></label>
 														<select class="form-control form-select" name="role"
 																data-bs-placeholder="Select" tabindex="-1"
-																aria-hidden="true" onchange="if (this.value == 'D') {$('.working_time').show()} else{$('.working_time').hide()}">
+																aria-hidden="true"
+																onchange="if (this.value == 'D') {$('.working_time').show()} else{$('.working_time').hide()}">
 															<option label="<?= $ci->lang('select') ?>"></option>
 															<?php foreach ($ci->mylibrary->list_user_type() as $key => $value) : ?>
 																<option
@@ -150,7 +151,8 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('start time') ?>
 															<span class="text-red">*</span></label>
-														<input type="time" name="working_start_time" class="form-control"
+														<input type="time" name="working_start_time"
+															   class="form-control"
 															   placeholder="<?= $ci->lang('start time') ?>"
 															   autocomplete="off">
 													</div>
@@ -172,13 +174,168 @@
 												data-bs-dismiss="modal"><?= $ci->lang('cancel') ?><i
 												class="fa fa-close"></i></button>
 										<button class="btn btn-primary"
-												onclick="xhrSubmitMultiTable('insert_user', '<?= base_url('admin/insert_user') ?>', 'file-datatable', 'extralargemodal')"><?= $ci->lang('save') ?>
+												onclick="xhrSubmitMultiTable('insert_user', '<?= base_url('admin/insert_user') ?>', 'file-datatable', 'extralargemodal_insert')"><?= $ci->lang('save') ?>
 											<i class="fa fa-plus"></i></button>
 									</div>
 								</div>
 							</div>
 						</div>
 						<!-- Modal End -->
+
+						<!--Edit Modal start-->
+						<div class="modal fade effect-scale" id="extralargemodal_update" tabindex="-1" role="dialog">
+							<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title"><?= $ci->lang('Update User') ?></h5>
+										<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">×</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<form id="update_user">
+											<div class="row">
+												<div class="col-sm-12 col-md-4">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('image') ?> <span
+																class="text-red">*</span></label>
+														<input type="file" id="inputImage_update" class="form-control">
+														<input type="hidden" id="inputImageHiddenInput_update"
+															   name="uploadedImage" class="form-control">
+													</div>
+												</div>
+											</div>
+											<div class="row">
+
+												<!--first name-->
+												<div class="col-sm-12 col-md-4">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('name') ?> <span
+																class="text-red">*</span></label>
+														<input type="text" name="name" id="firstName_update" class="form-control"
+															   placeholder="<?= $ci->lang('name') ?>">
+													</div>
+												</div>
+												<!--last name-->
+												<div class="col-md-4">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('lname') ?> <span
+																class="text-red">*</span></label>
+														<input type="text" name="lname" id="lastName_update" class="form-control"
+															   placeholder="<?= $ci->lang('lname') ?>">
+													</div>
+												</div>
+												<!--user name-->
+												<div class="col-md-4">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('username') ?> <span
+																class="text-red">*</span></label>
+														<input type="text" name="username" id="userName_update" class="form-control"
+															   placeholder="<?= $ci->lang('username') ?>"
+															   autocomplete="username" disabled>
+													</div>
+												</div>
+												<!--user role -->
+												<div class="col-md-4">
+													<div class="form-group">
+														<label class="form-label"><?= ucwords('role') ?> <span
+																class="text-red">*</span></label>
+														<select class="form-control form-select" name="user_role" id="userRole_update"
+																data-bs-placeholder="Select" tabindex="-1"
+																aria-hidden="true">
+															<option label="<?= $ci->lang('select') ?>"></option>
+															<?php foreach ($user_roles as $role) : ?>
+																<option
+																	value="<?= $role->id ?>"><?= ucwords($role->role_name) ?></option>
+															<?php endforeach; ?>
+														</select>
+													</div>
+												</div>
+												<!--account type-->
+												<div class="col-md-4">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('account type') ?> <span
+																class="text-red">*</span></label>
+														<select class="form-control form-select" name="role" id="accountType_update"
+																data-bs-placeholder="Select" tabindex="-1"
+																aria-hidden="true"
+																onchange="if (this.value == 'D') {$('.working_time').show()} else{$('.working_time').hide()}">
+															<option label="<?= $ci->lang('select') ?>"></option>
+															<?php foreach ($ci->mylibrary->list_user_type() as $key => $value) : ?>
+																<option
+																	value="<?= $key ?>"><?= $ci->lang($value) ?></option>
+															<?php endforeach; ?>
+														</select>
+													</div>
+												</div>
+												<!--status-->
+												<div class="col-md-4">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('status') ?> <span
+																class="text-red">*</span></label>
+														<select name="status" id="status_update" class="form-control form-select">
+															<option value="A"
+																	selected><?= $ci->lang('accepted') ?></option>
+															<option value="P"><?= $ci->lang('pending') ?></option>
+														</select>
+													</div>
+												</div>
+												<!--password-->
+												<div class="col-md-6">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('password') ?> <span
+																class="text-red">*</span></label>
+														<input type="password" name="password" id="password_update" class="form-control"
+															   placeholder="<?= $ci->lang('password') ?>"
+															   autocomplete="off">
+													</div>
+												</div>
+												<!--confirm password-->
+												<div class="col-md-6">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('confirm password') ?>
+															<span class="text-red">*</span></label>
+														<input type="password" name="confirm" id="confirmPassword_update" class="form-control"
+															   placeholder="<?= $ci->lang('confirm password') ?>"
+															   autocomplete="off">
+													</div>
+												</div>
+												<!--start time-->
+												<div class="col-md-6 working_time" style="display: none">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('start time') ?>
+															<span class="text-red">*</span></label>
+														<input type="time" name="working_start_time" id="startTime_update"
+															   class="form-control"
+															   placeholder="<?= $ci->lang('start time') ?>"
+															   autocomplete="off">
+													</div>
+												</div>
+												<!--end time-->
+												<div class="col-md-6 working_time" style="display: none">
+													<div class="form-group">
+														<label class="form-label"><?= $ci->lang('end time') ?>
+															<span class="text-red">*</span></label>
+														<input type="time" name="working_end_time" id="endTime_update" class="form-control"
+															   placeholder="<?= $ci->lang('end time') ?>"
+															   autocomplete="off">
+													</div>
+												</div>
+											</div>
+										</form>
+									</div>
+									<div class="modal-footer">
+										<button class="btn btn-secondary"
+												data-bs-dismiss="modal"><?= $ci->lang('cancel') ?><i
+												class="fa fa-close"></i></button>
+										<button class="btn btn-primary"
+												onclick="xhrSubmitMultiTable('insert_user', '<?= base_url('admin/insert_user') ?>', 'file-datatable', 'extralargemodal_update')"><?= $ci->lang('save') ?>
+											<i class="fa fa-plus"></i></button>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!--Edit Modal end-->
 
 
 					</div>
@@ -224,6 +381,10 @@
 										   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"
 										   data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span
 												class="fa fa-trash fs-14"></span></a>
+
+										<a href="javascript:updateUser('<?= $user['id'] ?>')"
+										   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
+												class="fa-regular fa-pen-to-square fs-14"></span></a>
 									</div>
 								</td>
 							</tr>
@@ -259,7 +420,7 @@
 		}
 
 		image.src = URL.createObjectURL(e.target.files[0]);
-		$('#extralargemodal').modal('hide');
+		$('#extralargemodal_insert').modal('hide');
 		modal.style.display = "block";
 		// modal.style.position = ""
 
@@ -302,7 +463,48 @@
 		// Close the modal after saving
 		modal.style.display = "none";
 		cropper.destroy();
-		$('#extralargemodal').modal('show');
+		$('#extralargemodal_insert').modal('show');
 
 	});
+</script>
+
+<!--TODO: update User scripts-->
+<script>
+	function updateUser(id) {
+		$.ajax({
+			url: "<?= base_url() ?>admin/single_user",
+			type: 'POST',
+			data: {
+				slug: id,
+			},
+			success: function (response) {
+				let result = JSON.parse(response);
+				let contents = result.content;
+				console.log(contents);
+
+				$('#firstName_update').val(contents.fname).trigger('change');
+				$('#lastName_update').val(contents.lname).trigger('change');
+				$('#userName_update').val(contents.username).trigger('change');
+				$('#userRole_update').val(contents.role_id).trigger('change');
+				$('#accountType_update').val(contents.role).trigger('change');
+				$('#status_update').val(contents.status).trigger('change');
+
+				// need to get sure start
+				let accountType = contents.role;
+				if (accountType === 'D'){
+					$('#startTime_update').val(contents.working_start_time).trigger('change');
+					$('#endTime_update').val(contents.working_end_time).trigger('change');
+				}else{
+					$('#startTime_update').val(' ')
+					$('#endTime_update').val(' ');
+				}
+				console.log(accountType);
+				// need to get sure end
+
+				$(`#extralargemodal_update`).modal('toggle');
+			}
+
+
+		});
+	}
 </script>
