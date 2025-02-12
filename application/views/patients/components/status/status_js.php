@@ -1,3 +1,4 @@
+<?php $ci = get_instance(); ?>
 <script>
 	// TODO the actions for patients single page
 	function actions() {
@@ -70,4 +71,79 @@
 			vSpace4.style.display = "none";
 		}
 	}
+
+	function list_labs() {
+		$.ajax({
+			url: "<?= base_url('admin/list_labs_json') ?>",
+			type: 'POST',
+			data: {
+				record: <?= $profile['id'] ?>
+			},
+			success: function(response) {
+				let result = JSON.parse(response);
+				let labs = result.content.labs;
+				if (result['type'] == 'success') {
+					if (labs.length != 0) {
+						let tableTemplate =
+							`
+              <div class="table-responsive">
+                <table class="table text-nowrap" id="labsTable">
+                  <thead class="tableHead">
+                    <tr>
+                    <th scope="col">#</th>
+                          <th scope="col"><?= $ci->lang('laboratory') ?></th>
+                          <th scope="col"><?= $ci->lang('teeth') ?></th>
+                          <th scope="col"><?= $ci->lang('tooth type') ?></th>
+                          <th scope="col"><?= $ci->lang('delivery date') ?></th>
+                          <th scope="col"><?= $ci->lang('delivery time') ?></th>
+                          <th scope="col"><?= $ci->lang('pay amount') ?></th>
+                          <th scope="col"><?= $ci->lang('desc') ?></th>
+                          <th scope="col"><?= $ci->lang('actions') ?></th>
+                    </tr>
+                  </thead>
+                  <tbody>`;
+
+						labs.map((lab) => {
+							tableTemplate +=
+								`
+                    <tr id="${lab['id']}" class="tableRow">
+                        <td scope="row">${lab['number']}</td>
+                        <td>${lab['lab_name']}</td>
+                        <td>${lab['teeth']}</td>
+                        <td>${lab['type']}</td>
+                        <td>${lab['delivery_date']}</td>
+                        <td>${lab['delivery_time']}</td>
+                        <td>${lab['pay_amount']}</td>
+                        <td>${lab['remarks']}</td>
+                        <td>
+                          <div class="g-2">
+                            <a href="javascript:edit_lab('${lab['id']}')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-edit fs-14"></span></a>
+                            <a href="javascript:print_lab('${lab['id']}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-printer fs-14"></span></a>
+                            <a href="javascript:delete_via_alert('${lab['id']}', '<?= base_url() ?>admin/delete_lab', 'labsTable')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-trash-2 fs-14"></span></a>
+                          </div>
+                        </td>
+                      </tr>
+                    `;
+						})
+
+						tableTemplate +=
+							`
+                  </tbody>
+                </table>
+              </div>
+            `;
+						$('#posts-tab-pane').html(tableTemplate);
+						update_balance();
+					} else {
+						var tableTemplate = ``;
+						$('#posts-tab-pane').html(tableTemplate);
+					}
+					// $('#teeth_list').html(tableTemplate);
+				} else if (result['type'] == 'error') {
+					toastr["error"](result['alert']['text'], result['alert']['title'])
+				}
+			}
+		});
+	}
+
 </script>
