@@ -93,38 +93,6 @@ $ci = get_instance();
 
 	});
 
-	// Function to get data
-	// function getAllDataAndSum() {
-	// 	const tableBody = document.querySelector("#percentageTable tbody");
-	// 	const rows = tableBody.querySelectorAll("tr");
-	//
-	// 	let data = [];
-	// 	let sum = 0;
-	//
-	// 	rows.forEach((row, index) => {
-	// 		const rowNumber = index + 1; // Row number (starting from 1)
-	// 		const nameInput = row.querySelector('input[name="name[]"]');
-	// 		const percentageInput = row.querySelector('input[name="percentage[]"]');
-	//
-	// 		const name = nameInput ? nameInput.value.trim() : "";
-	// 		const percentage = percentageInput ? parseFloat(percentageInput.value) : 0;
-	//
-	// 		if (name) {
-	// 			data.push([rowNumber, name, percentage]);
-	// 		}
-	//
-	// 		if (!isNaN(percentage)) {
-	// 			sum += percentage;
-	// 		}
-	// 	});
-	//
-	// 	console.log("Data:", data);
-	// 	console.log("Sum of Percentages:", sum);
-	//
-	// 	return { data, sum };
-	// }
-
-
 	function getAllDataAndSum() {
 		const tableBody = document.querySelector("#percentageTable tbody");
 		const rows = tableBody.querySelectorAll("tr");
