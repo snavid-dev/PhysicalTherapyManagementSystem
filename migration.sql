@@ -13,7 +13,7 @@ SELECT id,
 	   NULL,
 	   '08:00',
 	   '17:00'
-FROM erfan.users ON DUPLICATE KEY
+FROM haidari.users ON DUPLICATE KEY
 UPDATE
 	fname =
 VALUES (fname), lname =
@@ -24,7 +24,7 @@ VALUES (status);
 -- services
 INSERT INTO canin.services (id, name, price, department)
 SELECT id, name, price, department
-FROM erfan.services ON DUPLICATE KEY
+FROM haidari.services ON DUPLICATE KEY
 UPDATE
 	name =
 VALUES (name), price =
@@ -35,7 +35,7 @@ VALUES (department);
 INSERT
 INTO canin.customers (id, name, lname, phone, type, users_id)
 SELECT id, name, lname, phone, type, users_id
-FROM erfan.customers ON DUPLICATE KEY
+FROM haidari.customers ON DUPLICATE KEY
 UPDATE
 	name =
 VALUES (name), lname =
@@ -57,7 +57,7 @@ SELECT `id`,
 	   `shamsi`,
 	   `customers_id`,
 	   `users_id`
-FROM erfan.`balance_sheet`;
+FROM haidari.`balance_sheet`;
 
 -- Patient
 
@@ -80,7 +80,7 @@ SELECT `id`,
 	   `status`,
 	   `remarks`,
 	   `doctor_id`
-FROM erfan.`patient`;
+FROM haidari.`patient`;
 
 
 -- Turn
@@ -92,7 +92,7 @@ SELECT id,
 	   patient_id, date, SUBSTRING_INDEX(hour, ',', 1) AS from_time, -- Extract first part
 	SUBSTRING_INDEX(hour, ',', -1) AS to_time,                       -- Extract second part
 	status, cr, pay_date, doctor_id
-FROM erfan.turn;
+FROM haidari.turn;
 
 
 -- teeth
@@ -107,7 +107,7 @@ SELECT `id`,
 	   `price`,
 	   `users_id`,
 	   `patient_id`
-FROM erfan.`tooth`;
+FROM haidari.`tooth`;
 
 
 -- Tooth has diagnose
@@ -116,7 +116,7 @@ INSERT
 INTO canin.`tooth_has_diagnose` (`tooth_id`, `diagnose_id`)
 SELECT `tooth_id`,
 	   `diagnose_id`
-FROM erfan.`tooth_has_diagnose`;
+FROM haidari.`tooth_has_diagnose`;
 
 
 -- endo
@@ -141,7 +141,7 @@ SELECT `id`,
 	   `root_number`,
 	   `modify_date`,
 	   `tooth_id`
-FROM erfan.`endo`;
+FROM haidari.`endo`;
 
 
 -- endo has basic information
@@ -150,7 +150,7 @@ INSERT
 INTO canin.`endo_has_basic_information_teeth` (`endo_id`, `basic_information_teeth_id`)
 SELECT `endo_id`,
 	   `basic_information_teeth_id`
-FROM erfan.`endo_has_basic_information_teeth`;
+FROM haidari.`endo_has_basic_information_teeth`;
 
 
 -- endo has service
@@ -158,14 +158,14 @@ INSERT
 INTO canin.`endo_has_services` (`endo_id`, `services_id`)
 SELECT `endo_id`,
 	   `services_id`
-FROM erfan.`endo_has_services`;
+FROM haidari.`endo_has_services`;
 
 
 -- restorative
 INSERT
 INTO canin.`restorative` (`id`, `details`, `services`, `price`, `modify_date`, `tooth_id`)
 SELECT `id`, `details`, `services`, `price`, `modify_date`, `tooth_id`
-FROM erfan.`restorative`;
+FROM haidari.`restorative`;
 
 
 -- restorative has basic information
@@ -174,7 +174,7 @@ INSERT
 INTO canin.`restorative_has_basic_information_teeth` (`restorative_id`, `basic_information_teeth_id`)
 SELECT `restorative_id`,
 	   `basic_information_teeth_id`
-FROM erfan.`restorative_has_basic_information_teeth`;
+FROM haidari.`restorative_has_basic_information_teeth`;
 
 -- restorative has service
 
@@ -182,14 +182,14 @@ INSERT
 INTO canin.`restorative_has_services` (`restorative_id`, `services_id`)
 SELECT `restorative_id`,
 	   `services_id`
-FROM erfan.`restorative_has_services`;
+FROM haidari.`restorative_has_services`;
 
 
 -- prosthodontics
 INSERT
 INTO canin.`prosthodontics` (`id`, `details`, `services`, `price`, `modify_date`, `tooth_id`)
 SELECT `id`, `details`, `services`, `price`, `modify_date`, `tooth_id`
-FROM erfan.`prosthodontics`;
+FROM haidari.`prosthodontics`;
 
 
 -- prosthodontics has basic information
@@ -198,7 +198,7 @@ INSERT
 INTO canin.`prosthodontics_has_basic_information_teeth` (`prosthodontics_id`, `basic_information_teeth_id`)
 SELECT `prosthodontics_id`,
 	   `basic_information_teeth_id`
-FROM erfan.`prosthodontics_has_basic_information_teeth`;
+FROM haidari.`prosthodontics_has_basic_information_teeth`;
 
 -- prosthodontics has service
 
@@ -206,7 +206,7 @@ INSERT
 INTO canin.`prosthodontics_has_services` (`prosthodontics_id`, `services_id`)
 SELECT `prosthodontics_id`,
 	   `services_id`
-FROM erfan.`prosthodontics_has_services`;
+FROM haidari.`prosthodontics_has_services`;
 
 
 -- prescription
@@ -297,4 +297,4 @@ SELECT `id`,
 	   `patient_id`,
 	   `users_id`,
 	   `date_time`
-FROM erfan.`prescription`;
+FROM haidari.`prescription`;
