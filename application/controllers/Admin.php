@@ -3059,6 +3059,7 @@ class Admin extends CI_Controller
 				$data['alert']['text'] = $this->lang('insert patient success');
 				$data['alert']['type'] = 'success';
 
+
 				$data['id'] = $insert[1];
 
 				$btns = '';
@@ -4749,6 +4750,8 @@ class Admin extends CI_Controller
 					$data['alert']['title'] = $this->lang('success');
 					$data['alert']['text'] = $this->lang('insert turn success');
 					$data['alert']['type'] = 'success';
+
+					$data['extraFunction'] = 'print';
 
 					$data['id'] = $insert[1];
 

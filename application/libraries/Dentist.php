@@ -3,7 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Dentist
 {
-	public $usage_type = 'offline';
+	public $usage_type = 'online';
 	public function __construct()
 	{
 	}
