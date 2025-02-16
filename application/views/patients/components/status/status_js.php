@@ -146,4 +146,25 @@
 		});
 	}
 
+	function getMedicienInfo(id, dozeId, unitId, usageId, dayId, timeId, amountId) {
+		$.ajax({
+			url: "<?= base_url('admin/single_medicine') ?>",
+			type: 'POST',
+			data: {
+				slug: id
+			},
+			success: function (response) {
+				let result = JSON.parse(response);
+				let medicienDatas = result.content;
+				$('#' + dozeId).val(medicienDatas.doze);
+				$('#' + unitId).val(medicienDatas.unit).trigger('change');
+				$('#' + usageId).val(medicienDatas.usageType).trigger('change');
+				$('#' + dayId).val(medicienDatas.day);
+				$('#' + timeId).val(medicienDatas.times);
+				$('#' + amountId).val(medicienDatas.amount);
+			}
+		})
+
+	}
+
 </script>
