@@ -401,6 +401,8 @@
 
 	function print_expense(expenseId) {
 		window.open(`<?= base_url() ?>admin/print_expense/${expenseId}`, '_blank');
+		$(`#receiptModal`).modal('toggle');
+
 	}
 </script>
 
@@ -1022,11 +1024,11 @@
 						<i class="fa fa-close"></i>
 					</button>
 					<!-- TODO: Create Function for update the today balance of today after finishing the print functionality  -->
-					<button class="btn btn-warning"
+					<button class="btn btn-warning" data-bs-dismiss="modal"
 							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal', print_expense, 'print');">
 						<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i></button>
 					<button class="btn btn-primary"
-							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal')">
+							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal', toggleModeReceipt)">
 						<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
 					</button>
 				</div>
@@ -1421,5 +1423,9 @@
 			}
 		});
 	}
+
+</script>
+
+<script>
 
 </script>
