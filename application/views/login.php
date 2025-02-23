@@ -60,7 +60,7 @@ $ci = get_instance();
 					<div style="display: flex; justify-content: space-between">
 						<input class="effect-19" type="password" name="password" id="password"
 							   placeholder="<?= $ci->lang('password') ?>">
-						<span class="" id="activePasswordEye" onclick="activePassword('password', 'activePasswordEye')">
+						<span onclick="activePassword('password', 'activePasswordEye')" style="cursor: pointer" id="activePasswordEye">
 						<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
 							 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 							 class="feather feather-eye-off"><path
@@ -91,9 +91,25 @@ $ci = get_instance();
 	</div>
 	<button class="modal-button"><?= $ci->lang('click here') ?></button>
 </div>
-<script src="script.js" charset="utf-8"></script>
+<!--<script src="script.js" charset="utf-8"></script>-->
 <script src="<?= $ci->dentist->assets_url() ?>assets/js/scrollJs.js"></script>
 
+<script>
+	// TODO: login page active password
+	function activePassword(passwordId, iconId) {
+		const passwordInput = document.getElementById(passwordId);
+		const icon = document.getElementById(iconId);
+
+		if (passwordInput.type === "password") {
+			passwordInput.type = "text";
+			icon.classList.add('showPassword')
+		} else {
+			passwordInput.type = "password";
+			icon.classList.remove('showPassword')
+		}
+	}
+</script>
 </body>
-<!--its just a note delete it-->
 </html>
+
+
