@@ -133,18 +133,33 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('password') ?> <span
 																class="text-red">*</span></label>
-														<input type="password" name="password" class="form-control"
-															   placeholder="<?= $ci->lang('password') ?>"
-															   autocomplete="off">
+														<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
+															<input type="password" name="password" class="form-control" id="userPassword"
+																   placeholder="<?= $ci->lang('password') ?>"
+																   autocomplete="off">
+
+															<span class="eyeIcon" id="userPasswordIcon" onclick="activePassword('userPassword', 'userPasswordIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</span>
+														</div>
+
 													</div>
 												</div>
 												<div class="col-md-6">
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('confirm password') ?>
 															<span class="text-red">*</span></label>
-														<input type="password" name="confirm" class="form-control"
-															   placeholder="<?= $ci->lang('confirm password') ?>"
-															   autocomplete="off">
+
+														<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
+															<input type="password" name="confirm" class="form-control" id="userConfirmPassword"
+																   placeholder="<?= $ci->lang('confirm password') ?>"
+																   autocomplete="off">
+
+															<span class="eyeIcon" id="userConfirmPasswordIcon" onclick="activePassword('userConfirmPassword', 'userConfirmPasswordIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</span>
+														</div>
+
 													</div>
 												</div>
 												<div class="col-md-6 working_time" style="display: none">
@@ -285,9 +300,16 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('password') ?> <span
 																class="text-red">*</span></label>
-														<input type="password" name="password" id="password_update" class="form-control"
-															   placeholder="<?= $ci->lang('password') ?>"
-															   autocomplete="off">
+														<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
+															<input type="password" name="password" id="password_update" class="form-control"
+																   placeholder="<?= $ci->lang('password') ?>"
+																   autocomplete="off">
+
+															<span class="eyeIcon" id="password_updateIcon" onclick="activePassword('password_update', 'password_updateIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</span>
+														</div>
+
 													</div>
 												</div>
 												<!--confirm password-->
@@ -295,9 +317,16 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('confirm password') ?>
 															<span class="text-red">*</span></label>
-														<input type="password" name="confirm" id="confirmPassword_update" class="form-control"
-															   placeholder="<?= $ci->lang('confirm password') ?>"
-															   autocomplete="off">
+														<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
+															<input type="password" name="confirm" id="confirmPassword_update" class="form-control"
+																   placeholder="<?= $ci->lang('confirm password') ?>"
+																   autocomplete="off">
+															<span class="eyeIcon" id="confirmPassword_updateIcon" onclick="activePassword('confirmPassword_update', 'confirmPassword_updateIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</span>
+
+														</div>
+
 													</div>
 												</div>
 												<!--start time-->
