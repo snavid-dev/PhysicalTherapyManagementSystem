@@ -66,24 +66,44 @@
 							<div class="form-group">
 								<label class="form-label"><?= $ci->lang('old password') ?> <span
 										class="text-red">*</span></label>
-								<input type="password" name="oldPassword" class="form-control"
-									   placeholder="<?= $ci->lang('old password') ?>">
+								<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
+									<input type="password" name="oldPassword" class="form-control" id="oldPassword"
+										   placeholder="<?= $ci->lang('old password') ?>">
+
+									<span class="eyeIcon" id="oldPasswordIcon" onclick="activePassword('oldPassword', 'oldPasswordIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</span>
+								</div>
+
 							</div>
 						</div>
 						<div class="col-sm-12 col-md-12">
 							<div class="form-group">
 								<label class="form-label"><?= $ci->lang('new password') ?> <span
 										class="text-red">*</span></label>
-								<input type="password" name="newPassword" class="form-control"
-									   placeholder="<?= $ci->lang('new password') ?>">
+								<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
+									<input type="password" name="newPassword" class="form-control" id="newPassword"
+										   placeholder="<?= $ci->lang('new password') ?>">
+									<span class="eyeIcon" id="newPasswordIcon" onclick="activePassword('newPassword', 'newPasswordIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</span>
+								</div>
+
 							</div>
 						</div>
 						<div class="col-sm-12 col-md-12">
 							<div class="form-group">
 								<label class="form-label"><?= $ci->lang('confirm new password') ?> <span
 										class="text-red">*</span></label>
-								<input type="password" name="confirmPassword" class="form-control"
-									   placeholder="<?= $ci->lang('confirm new password') ?>">
+								<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
+									<input type="password" name="confirmPassword" class="form-control" id="confirmPassword"
+										   placeholder="<?= $ci->lang('confirm new password') ?>">
+
+									<span class="eyeIcon" id="confirmPasswordIcon" onclick="activePassword('confirmPassword', 'confirmPasswordIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									</span>
+								</div>
+
 							</div>
 						</div>
 					</div>
