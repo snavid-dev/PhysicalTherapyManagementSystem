@@ -4687,6 +4687,7 @@ class Admin extends CI_Controller
 					$turn['date'],
 					$turn['from_time'] . ' - ' . $turn['to_time'],
 					$turn['cr'],
+					$turn['paid_user_name'],
 					$this->mylibrary->btn_group($btns)
 				);
 			} else {
@@ -4770,6 +4771,7 @@ class Admin extends CI_Controller
 						$datas['date'],
 						$hour,
 						$turn['cr'],
+						$this->lang('not paid'),
 						$this->mylibrary->btn_group($btns)
 					);
 				} else {
