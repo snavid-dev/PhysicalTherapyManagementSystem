@@ -294,10 +294,6 @@
 						onclick="update_and_delete('insertPayment', '<?= base_url() ?>admin/pay_turn', 'paymentModal_turns', print_payment, 'print');">
 					<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i>
 				</button>
-				<button class="btn btn-primary"
-						onclick="update_and_delete('insertPayment', '<?= base_url() ?>admin/pay_turn','paymentModal_turns')">
-					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
-				</button>
 			</div>
 		</div>
 	</div>
