@@ -942,7 +942,18 @@ class Admin_model extends CI_Model
 
 	function turns_factor($id)
 	{
-		return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' (', users.lname, ')') AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.id = '$id'")->result_array();
+		return $this->db->query("SELECT 
+    turn.*, 
+    patient.name, 
+    patient.lname, 
+    patient.serial_id, 
+    patient.gender, 
+    CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, 
+    CONCAT(paid_user.fname, ' ', paid_user.lname) AS paid_user_name
+FROM `turn` 
+INNER JOIN patient ON turn.patient_id = patient.id 
+INNER JOIN users AS users ON turn.doctor_id = users.id 
+INNER JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id = '$id'")->result_array();
 	}
 
 
