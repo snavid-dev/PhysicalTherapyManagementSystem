@@ -4655,7 +4655,8 @@ class Admin extends CI_Controller
 			$datas = array(
 				'cr' => $this->input->post('cr'),
 				'pay_date' => $this->mylibrary->getCurrentShamsiDate()['date'],
-				'status' => 'a'
+				'status' => 'a',
+				'paid_user_id' => $this->session->userdata($this->mylibrary->hash_session('u_id'))
 			);
 			$id = $this->input->post('slug');
 			$update = $this->Admin_model->update_turn($datas, $id);

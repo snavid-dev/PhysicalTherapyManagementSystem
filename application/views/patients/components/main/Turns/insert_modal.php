@@ -104,7 +104,7 @@
 							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable','extralargemodal', print_turn, 'print')"><?= $ci->lang('save and print') ?>
 						<i class="fa fa-print"></i></button>
 					<button class="btn btn-primary"
-							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable')"><?= $ci->lang('save') ?>
+							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable', 'extralargemodal', false)"><?= $ci->lang('save') ?>
 						<i class="fa fa-plus"></i></button>
 				</div>
 			</div>
