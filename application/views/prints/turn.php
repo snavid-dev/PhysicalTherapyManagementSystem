@@ -14,6 +14,7 @@
 		div#qrcode img {
 			margin: auto;
 		}
+
 		body {
 			width: 100%;
 			height: 100%;
@@ -390,85 +391,106 @@
 </head>
 
 <body>
-	<div class="book">
-		<div class="page">
-			<div class="subpage">
-				<div class="invoice-w">
-					<div class="infos">
-						<div class="info-1">
-							<div class="company-name">
-								<img src="<?= $ci->dentist->assets_url() ?>assets/clinic/<?= $ci->dentist->info()['logoName'] ?>" width="55%" style="padding: 13px 0;">
-							</div>
-							<div class="company-name">
-								<?= $ci->dentist->info()['title'] ?>
-							</div>
-							<div class="company-name">
-								<?= $ci->dentist->info()['sub_title'] ?>
-							</div>
-							<div class="company-name" style="font-size: 1rem;">
-								شماره تماس: <bdo dir="ltr"><?= $ci->dentist->info()['phone'] ?></bdo>
-							</div>
-
+<div class="book">
+	<div class="page">
+		<div class="subpage">
+			<div class="invoice-w">
+				<div class="infos">
+					<div class="info-1">
+						<div class="company-name">
+							<img
+								src="<?= $ci->dentist->assets_url() ?>assets/clinic/<?= $ci->dentist->info()['logoName'] ?>"
+								width="55%" style="padding: 13px 0;">
 						</div>
-					</div>
-					<div class="invoice-heading text-left">
-						<div class="invoice-date text-center">
-							<?= '(' . $ci->mylibrary->getCurrentShamsiDate()['date'] . ' - ' . date('H:i:s') . ')' ?> تاریخ و ساعت
+						<div class="company-name">
+							<?= $ci->dentist->info()['title'] ?>
 						</div>
+						<div class="company-name">
+							<?= $ci->dentist->info()['sub_title'] ?>
+						</div>
+						<div class="company-name" style="font-size: 1rem;">
+							شماره تماس: <bdo dir="ltr"><?= $ci->dentist->info()['phone'] ?></bdo>
+						</div>
+
 					</div>
-					<div class="invoice-body">
-						<div class="invoice-table  important" style="width: 100%;">
-							<div class="row">
-								<div class="col-md-12">
-									<div class="element-wrapper">
-										<div class="element-box">
+				</div>
+				<div class="invoice-heading text-left">
+					<div class="invoice-date text-center">
+						<?= '(' . $ci->mylibrary->getCurrentShamsiDate()['date'] . ' - ' . date('H:i:s') . ')' ?> تاریخ
+						و ساعت
+					</div>
+				</div>
+				<div class="invoice-body">
+					<div class="invoice-table  important" style="width: 100%;">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="element-wrapper">
+									<div class="element-box">
 
-											<table>
-												<tbody>
-												<tr>
-														<td>نام مریض</td>
-														<td><?= ($single['gender'] == 'm') ? 'آقای‌' : 'خانم' ?> <?= $single['name'] ?> <?= $single['lname'] ?></td>
-													</tr>
-													<tr>
-														<td>سریال نمبر</td>
-														<td><bdo dir="ltr"><?= $single['serial_id'] ?></bdo></td>
-													</tr>
-													<tr>
-														<td>داکتر مربوطه</td>
-														<td><?= $single['doctor_name'] ?></td>
-													</tr>
+										<table>
+											<tbody>
+											<tr>
+												<td>نام مریض</td>
+												<td><?= ($single['gender'] == 'm') ? 'آقای‌' : 'خانم' ?> <?= $single['name'] ?> <?= $single['lname'] ?></td>
+											</tr>
+											<tr>
+												<td>سریال نمبر</td>
+												<td><bdo dir="ltr"><?= $single['serial_id'] ?></bdo></td>
+											</tr>
+											<tr>
+												<td>داکتر مربوطه</td>
+												<td><?= $single['doctor_name'] ?></td>
+											</tr>
 
-													<tr>
-														<td>تاریخ مراجعه بعدی</td>
-														<td><bdo dir="ltr"><?= $single['date'] ?></bdo></td>
-													</tr>
-													<tr>
-														<td>ساعت</td>
-														<td><bdo dir="ltr"><?= $single['from_time'] ?> - <?= $single['to_time'] ?></bdo></td>
-													</tr>
+											<tr>
+												<td>تاریخ مراجعه بعدی</td>
+												<td><bdo dir="ltr"><?= $single['date'] ?></bdo></td>
+											</tr>
+											<tr>
+												<?php
+												$dateString = $single['from_time']; // Example time string in H:i format
 
-													<tr>
-														<td>مجموعه هزینه</td>
-														<td><?= $sum_dr ?> ؋</td>
-													</tr>
+												// Convert the time string to a DateTime object
+												$date = DateTime::createFromFormat('H:i', $dateString);
 
-													<tr>
-														<td>مجموعه پرداخت شده</td>
-														<td><?= $sum_cr ?> ؋</td>
-													</tr>
+												// Extract the hour
+												$hour = (int)$date->format('H'); // 'H' returns hour in 24-hour format
 
-													<tr style="font-size: 1.6rem; border: solid 3px;">
-														<td class="borderless text-center">باقیمانده</td>
-														<td class="borderless text-center"><?= $balance ?> ؋</td>
-													</tr>
+												?>
 
-												</tbody>
-											</table>
+												<td>ساعت</td>
+												<td><bdo dir="ltr"><?= ($hour > 12) ? $hour - 12 : $hour ?>:<?= $date->format('i') ?></bdo> <?= ($hour < 12) ? $ci->lang('am') : $ci->lang('pm') ?></td>
+											</tr>
 
-											<div class="company-extra text-center" style="font-size: 0.8rem; font-weight: 700;margin-top: 10px;" id="qrcode"></div>
-											<div class="company-extra text-center" style="font-size: 0.8rem; font-weight: 700;margin-top: 10px;"><sup>*</sup><?= $ci->dentist->info()['tagline'] ?><sup>*</sup></div>
-											<div class="company-extra text-center" style="font-size: 0.9rem; font-weight: 700;margin-top: 10px;"><?= $ci->dentist->info()['address'] ?></div>
-											<div class="company-extra text-center" style="font-size: 0.6rem; font-weight: 700;margin-top: 10px;">نرم افزار مدیریت کلینیک دندان(سایبورگ)</div>
+											<tr>
+												<td>مجموعه هزینه</td>
+												<td><?= $sum_dr ?> ؋</td>
+											</tr>
+
+											<tr>
+												<td>مجموعه پرداخت شده</td>
+												<td><?= $sum_cr ?> ؋</td>
+											</tr>
+
+											<tr style="font-size: 1.6rem; border: solid 3px;">
+												<td class="borderless text-center">باقیمانده</td>
+												<td class="borderless text-center"><?= $balance ?> ؋</td>
+											</tr>
+
+											</tbody>
+										</table>
+
+										<div class="company-extra text-center"
+											 style="font-size: 0.8rem; font-weight: 700;margin-top: 10px;"
+											 id="qrcode"></div>
+										<div class="company-extra text-center"
+											 style="font-size: 0.8rem; font-weight: 700;margin-top: 10px;">
+											<sup>*</sup><?= $ci->dentist->info()['tagline'] ?><sup>*</sup></div>
+										<div class="company-extra text-center"
+											 style="font-size: 0.9rem; font-weight: 700;margin-top: 10px;"><?= $ci->dentist->info()['address'] ?></div>
+										<div class="company-extra text-center"
+											 style="font-size: 0.6rem; font-weight: 700;margin-top: 10px;">نرم افزار
+											مدیریت کلینیک دندان(سایبورگ)
 										</div>
 									</div>
 								</div>
@@ -479,40 +501,42 @@
 			</div>
 		</div>
 	</div>
-	<script src="<?= $ci->dentist->assets_url() . 'assets/' ?>js/jquery.min.js"></script>
+</div>
+<script src="<?= $ci->dentist->assets_url() . 'assets/' ?>js/jquery.min.js"></script>
 
-	<script>
-		function generateQRCode() {
-			// Clear the previous QR code if any
-			document.getElementById("qrcode").innerHTML = "";
+<script>
+	function generateQRCode() {
+		// Clear the previous QR code if any
+		document.getElementById("qrcode").innerHTML = "";
 
-			// Get the text input value
-			const text = '<?= $single['serial_id'] ?>';
+		// Get the text input value
+		const text = '<?= $single['serial_id'] ?>';
 
-			// Check if input is empty
-			if (text.trim() === "") {
-				alert("Please enter some text.");
-				return;
-			}
-
-			// Create a new QRCode object
-			const qrcode = new QRCode(document.getElementById("qrcode"), {
-				text: text, // Text to be converted into QR Code
-				width: 100, // Width of the QR Code
-				height: 100, // Height of the QR Code
-				colorDark: "#000000", // Dark color of QR Code
-				colorLight: "#ffffff", // Light color of QR Code
-				correctLevel: QRCode.CorrectLevel.H // Error correction level
-			});
+		// Check if input is empty
+		if (text.trim() === "") {
+			alert("Please enter some text.");
+			return;
 		}
-		jQuery(document).ready(function() {
-			setTimeout(() => {
-				generateQRCode();
-				window.print();
-				self.close();
-			}, 1000);
+
+		// Create a new QRCode object
+		const qrcode = new QRCode(document.getElementById("qrcode"), {
+			text: text, // Text to be converted into QR Code
+			width: 100, // Width of the QR Code
+			height: 100, // Height of the QR Code
+			colorDark: "#000000", // Dark color of QR Code
+			colorLight: "#ffffff", // Light color of QR Code
+			correctLevel: QRCode.CorrectLevel.H // Error correction level
 		});
-	</script>
+	}
+
+	jQuery(document).ready(function () {
+		setTimeout(() => {
+			generateQRCode();
+			window.print();
+			self.close();
+		}, 1000);
+	});
+</script>
 </body>
 
 </html>
