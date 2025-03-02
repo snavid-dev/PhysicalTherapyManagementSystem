@@ -16,7 +16,7 @@ $ci = get_instance();
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
 								<input type="checkbox" name="checkbox1" id="checkbox_resto" class="checkbox"
-									   onchange="calculate_sum()" value="restorative" checked/>
+									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_resto', 'Restorative', 'Restorative-pane')" value="restorative" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path
@@ -36,7 +36,7 @@ $ci = get_instance();
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
 								<input type="checkbox" name="checkbox2" class="checkbox" id="checkbox_endo"
-									   onchange="calculate_sum()" value="endo" checked/>
+									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_endo', 'endo', 'endo-pane')" value="endo" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path
@@ -56,7 +56,7 @@ $ci = get_instance();
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
 								<input type="checkbox" name="checkbox3" id="checkbox_prosthodontics" class="checkbox"
-									   onchange="calculate_sum()" value="Prosthodontics" checked/>
+									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_prosthodontics', 'pros-tab', 'pros-pane')" value="Prosthodontics" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path
