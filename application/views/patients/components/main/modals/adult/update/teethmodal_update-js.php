@@ -51,12 +51,14 @@ $ci = get_instance();
 						$('#canalLocation5_update').val(contents.endo.r_name5).trigger('change');
 						$('#c_length5_update').val(contents.endo.r_width5).trigger('change');
 
-						let endoServices = contents.endo.services;
-						var updateInnerHTML = document.getElementById("services_update").innerHTML;
-						endoServices.map((item) => {
-							updateInnerHTML = updateInnerHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-						})
-						document.getElementById("services_update").innerHTML = updateInnerHTML;
+						// TODO: this part have some problems due to its not done yet!!!
+
+						// let endoServices = contents.endo.services;
+						// var updateInnerHTML = document.getElementById("services_update").innerHTML;
+						// endoServices.map((item) => {
+						// 	updateInnerHTML = updateInnerHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
+						// })
+						// document.getElementById("services_update").innerHTML = updateInnerHTML;
 
 
 						$('#price_tooth_update').val(contents.endo.price).trigger('change');
