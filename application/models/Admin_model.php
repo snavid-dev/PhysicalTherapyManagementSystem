@@ -1149,7 +1149,13 @@ class Admin_model extends CI_Model
 
 	function turns_by_patient_id($patient_id)
 	{
-		return $this->db->query("SELECT `turn`.*, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name FROM `turn` INNER JOIN users ON turn.doctor_id = users.id WHERE turn.patient_id = '$patient_id'")->result_array();
+		return $this->db->query("SELECT 
+    `turn`.*, 
+    CONCAT(doctor.fname, ' ', doctor.lname) AS doctor_name,
+    CONCAT(paid_user.fname, ' ', paid_user.lname) AS paid_user_name
+FROM `turn` 
+INNER JOIN users AS doctor ON turn.doctor_id = doctor.id
+LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.patient_id = '$patient_id' ORDER BY turn.date DESC, turn.from_time ASC")->result_array();
 	}
 
 	function table_by_patient($tablename, $patient_id)

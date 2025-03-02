@@ -361,6 +361,8 @@ class Language
 			'reference doctor' => self::lang_arr('reference doctor', 'داکتر مربوطه', 'حواله ډاکټر'),
 			'hour' => self::lang_arr('Time', 'ساعت', 'وخت'),
 			'paid amount' => self::lang_arr('paid amount', 'مقدار پرداخت شده', 'تادیه شوی مقدار'),
+			'received by' => self::lang_arr('received by', 'تسلیم شده توسط', 'تادیه شوی مقدار'),
+			'not paid' => self::lang_arr('not paid', 'پرداخت نشده', 'تادیه شوی مقدار'),
 			// End Turns page
 
 			// Start Payment
