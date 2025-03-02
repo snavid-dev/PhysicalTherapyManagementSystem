@@ -455,10 +455,6 @@
 						onclick="update_and_delete_simple('insertPayment', '<?= base_url() ?>admin/pay_turn', 'paymentModal_turns', 'turnsTable', print_payment, 'print');">
 					<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i>
 				</button>
-				<button class="btn btn-primary"
-						onclick="update_and_delete_simple('insertPayment', '<?= base_url() ?>admin/pay_turn','paymentModal_turns', 'turnsTable')">
-					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
-				</button>
 			</div>
 		</div>
 	</div>
@@ -1027,10 +1023,7 @@
 					<button class="btn btn-warning" data-bs-dismiss="modal"
 							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal', print_expense, 'print');">
 						<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i></button>
-					<button class="btn btn-primary"
-							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal', toggleModeReceipt)">
-						<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
-					</button>
+<!--
 				</div>
 			</div>
 		</div>

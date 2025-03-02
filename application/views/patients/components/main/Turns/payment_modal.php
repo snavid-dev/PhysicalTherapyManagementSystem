@@ -41,9 +41,6 @@
 				<button class="btn btn-warning"
 						onclick="updateWithoutDatatable('insertPayment', '<?= base_url() ?>admin/pay_turn', 'turnsTable', 'paymentModal', print_payment, 'print');"><?= $ci->lang('save and print') ?>
 					<i class="fa fa-print"></i></button>
-				<button class="btn btn-primary"
-						onclick="updateWithoutDatatable('insertPayment', '<?= base_url() ?>admin/pay_turn', 'turnsTable', 'paymentModal', update_balance)"><?= $ci->lang('save') ?>
-					<i class="fa fa-plus"></i></button>
 			</div>
 		</div>
 	</div>

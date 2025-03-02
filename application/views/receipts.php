@@ -132,8 +132,8 @@
                     <button class="btn btn-secondary" data-bs-dismiss="modal">
                       <?= $ci->lang('cancel') ?> <i class="fa fa-close" ></i>
                     </button>
-                    <button class="btn btn-primary" onclick="xhrSubmit('insertAccount', '<?= base_url() ?>admin/insert_receipt')">
-                      <?= $ci->lang('save') ?> <i class="fa fa-plus" ></i>
+                    <button class="btn btn-warning" onclick="xhrSubmit('insertAccount', '<?= base_url() ?>admin/insert_receipt', 'table','extralargemodal', print_expense, false, 'print')">
+                      <?= $ci->lang('save and print') ?> <i class="fa fa-print" ></i>
                     </button>
                   </div>
                 </div>
@@ -467,5 +467,11 @@
         }
       }
     })
+  }
+
+  function print_expense(expenseId) {
+	  window.open(`<?= base_url() ?>admin/print_expense/${expenseId}`, '_blank');
+	  $(`#extralargemodal`).modal('toggle');
+
   }
 </script>
