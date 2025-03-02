@@ -931,7 +931,20 @@ class Admin_model extends CI_Model
 
 	function turn_after_payment($turnId)
 	{
-		return $this->db->query("SELECT patient.name, patient.lname, patient.serial_id, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, turn.* FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.id = '$turnId'  ORDER BY turn.from_time ASC")->result_array();
+		return $this->db->query("SELECT 
+    patient.name, 
+    patient.lname, 
+    patient.serial_id, 
+    CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, 
+    CONCAT(paid_user.fname, ' ', paid_user.lname) AS paid_user_name, 
+    turn.* 
+FROM `turn` 
+INNER JOIN patient ON turn.patient_id = patient.id 
+INNER JOIN users AS users ON turn.doctor_id = users.id 
+LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id 
+WHERE turn.id = '$turnId'  
+ORDER BY doctor_name ASC, paid_user_name ASC, turn.from_time ASC;
+")->result_array();
 	}
 
 
@@ -942,7 +955,18 @@ class Admin_model extends CI_Model
 
 	function turns_factor($id)
 	{
-		return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' (', users.lname, ')') AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE turn.id = '$id'")->result_array();
+		return $this->db->query("SELECT 
+    turn.*, 
+    patient.name, 
+    patient.lname, 
+    patient.serial_id, 
+    patient.gender, 
+    CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name, 
+    CONCAT(paid_user.fname, ' ', paid_user.lname) AS paid_user_name
+FROM `turn` 
+INNER JOIN patient ON turn.patient_id = patient.id 
+INNER JOIN users AS users ON turn.doctor_id = users.id 
+INNER JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id = '$id'")->result_array();
 	}
 
 
@@ -1149,7 +1173,13 @@ class Admin_model extends CI_Model
 
 	function turns_by_patient_id($patient_id)
 	{
-		return $this->db->query("SELECT `turn`.*, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name FROM `turn` INNER JOIN users ON turn.doctor_id = users.id WHERE turn.patient_id = '$patient_id'")->result_array();
+		return $this->db->query("SELECT 
+    `turn`.*, 
+    CONCAT(doctor.fname, ' ', doctor.lname) AS doctor_name,
+    CONCAT(paid_user.fname, ' ', paid_user.lname) AS paid_user_name
+FROM `turn` 
+INNER JOIN users AS doctor ON turn.doctor_id = doctor.id
+LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.patient_id = '$patient_id' ORDER BY turn.date DESC, turn.from_time ASC")->result_array();
 	}
 
 	function table_by_patient($tablename, $patient_id)

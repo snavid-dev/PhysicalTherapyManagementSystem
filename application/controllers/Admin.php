@@ -4655,7 +4655,8 @@ class Admin extends CI_Controller
 			$datas = array(
 				'cr' => $this->input->post('cr'),
 				'pay_date' => $this->mylibrary->getCurrentShamsiDate()['date'],
-				'status' => 'a'
+				'status' => 'a',
+				'paid_user_id' => $this->session->userdata($this->mylibrary->hash_session('u_id'))
 			);
 			$id = $this->input->post('slug');
 			$update = $this->Admin_model->update_turn($datas, $id);
@@ -4686,6 +4687,7 @@ class Admin extends CI_Controller
 					$turn['date'],
 					$turn['from_time'] . ' - ' . $turn['to_time'],
 					$turn['cr'],
+					$turn['paid_user_name'],
 					$this->mylibrary->btn_group($btns)
 				);
 			} else {
@@ -4769,6 +4771,7 @@ class Admin extends CI_Controller
 						$datas['date'],
 						$hour,
 						$turn['cr'],
+						$this->lang('not paid'),
 						$this->mylibrary->btn_group($btns)
 					);
 				} else {

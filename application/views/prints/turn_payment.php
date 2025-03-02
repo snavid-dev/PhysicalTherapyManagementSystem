@@ -443,6 +443,10 @@
 												<td>مجموعه پرداخت شده</td>
 												<td><?= $sum_cr - $single['cr'] ?> ؋</td>
 											</tr>
+											<tr>
+												<td>دریافت شده توسط:</td>
+												<td><?= $single['paid_user_name'] ?></td>
+											</tr>
 
 											<tr style="font-size: 1.2rem; border: solid 3px;">
 												<td class="borderless text-center">مقدار قابل پرداخت</td>
