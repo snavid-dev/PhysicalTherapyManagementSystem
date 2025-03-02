@@ -3,7 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Dentist
 {
-	public $usage_type = 'offline';
+	public $usage_type = 'online';
 	public function __construct()
 	{
 	}
@@ -73,7 +73,7 @@ class Dentist
 			'tagline' => 'برای شادی و تندرستی خود از سلامت دهان تان مراقبت کنید',
 			'address' => 'هرات، چهار راهی نمبر یک',
 			'logoName' => 'logo.png',
-			'prescriptionName' => 'logo.png',
+			'prescriptionName' => 'haidari.jpg',
 		);
 		return $info;
 	}
