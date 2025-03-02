@@ -2181,7 +2181,7 @@ class Admin extends CI_Controller
 			show_404();
 		} else {
 			$data['prescription'] = $prescription[0];
-			$this->load->view("prints/prescription", $data);
+			$this->load->view("prints/prescriptionA5", $data);
 		}
 	}
 
