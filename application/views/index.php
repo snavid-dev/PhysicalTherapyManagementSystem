@@ -857,6 +857,77 @@
 <?php endif; ?>
 <!-- turns Modal End -->
 
+
+<!-- Modal -->
+<div class="modal fade effect-scale hide" id="searchModal" role="dialog">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">
+					<?= $ci->lang('search') ?>
+				</h5>
+				<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form id="insertAccount">
+					<div class="row">
+
+						<div id="reader" style="width:500px; height: 500px; display: none"></div>
+
+
+						<div class="col-sm-12 col-md-1">
+							<div class="form-group">
+								<label class="form-label">
+									<?= $ci->lang('scan') ?>
+								</label>
+								<button class="btn btn-primary" type="button" onclick="startScanning(list_patients)"><i
+										class="fa fa-qrcode"></i></button>
+							</div>
+						</div>
+
+						<div class="col-sm-12 col-md-5">
+							<div class="form-group">
+								<label class="form-label">
+									<?= $ci->lang('serial id') ?>
+								</label>
+								<input type="text" class="form-control" id="serial_id" onchange="list_patients()">
+							</div>
+						</div>
+
+						<div class="col-sm-12 col-md-6">
+							<div class="form-group">
+								<label class="form-label" for="fullname">
+									<?= $ci->lang('fullname') ?>
+								</label>
+								<input type="text" class="form-control" id="fullname" onkeyup="list_patients()"
+									   autocomplete="off" name="fullname">
+							</div>
+						</div>
+
+					</div>
+				</form>
+
+				<div class="row" style="margin-top: 2%">
+					<div class="col-md-12">
+						<div class="table-responsive" id="listpatients">
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" data-bs-dismiss="modal">
+					<?= $ci->lang('cancel') ?>
+					<i class="fa fa-close"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Modal End -->
+
 <script>
 	function multiple_value() {
 		const select = $('#model').val();
@@ -1038,76 +1109,6 @@
 <?php endif; ?>
 <!-- Expenses Modal End -->
 
-
-<!-- Modal -->
-<div class="modal fade effect-scale hide" id="searchModal" role="dialog">
-	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">
-					<?= $ci->lang('search') ?>
-				</h5>
-				<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">×</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form id="insertAccount">
-					<div class="row">
-
-						<div id="reader" style="width:500px; height: 500px; display: none"></div>
-
-
-						<div class="col-sm-12 col-md-1">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('scan') ?>
-								</label>
-								<button class="btn btn-primary" type="button" onclick="startScanning(list_patients)"><i
-										class="fa fa-qrcode"></i></button>
-							</div>
-						</div>
-
-						<div class="col-sm-12 col-md-5">
-							<div class="form-group">
-								<label class="form-label">
-									<?= $ci->lang('serial id') ?>
-								</label>
-								<input type="text" class="form-control" id="serial_id" onchange="list_patients()">
-							</div>
-						</div>
-
-						<div class="col-sm-12 col-md-6">
-							<div class="form-group">
-								<label class="form-label" for="fullname">
-									<?= $ci->lang('fullname') ?>
-								</label>
-								<input type="text" class="form-control" id="fullname" onkeyup="list_patients()"
-									   autocomplete="off" name="fullname">
-							</div>
-						</div>
-
-					</div>
-				</form>
-
-				<div class="row" style="margin-top: 2%">
-					<div class="col-md-12">
-						<div class="table-responsive" id="listpatients">
-						</div>
-					</div>
-				</div>
-
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-secondary" data-bs-dismiss="modal">
-					<?= $ci->lang('cancel') ?>
-					<i class="fa fa-close"></i>
-				</button>
-			</div>
-		</div>
-	</div>
-</div>
-<!-- Modal End -->
 
 
 <script>

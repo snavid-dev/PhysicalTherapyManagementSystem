@@ -6,7 +6,7 @@
     <div class="card">
       <div class="card-header">
         <h3 class="card-title mb-0">
-          <?= $ci->lang('turns list') ?>
+          <?= $ci->lang('phonebook') ?>
         </h3>
       </div>
       <div class="card-body">

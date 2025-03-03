@@ -966,7 +966,7 @@ ORDER BY doctor_name ASC, paid_user_name ASC, turn.from_time ASC;
 FROM `turn` 
 INNER JOIN patient ON turn.patient_id = patient.id 
 INNER JOIN users AS users ON turn.doctor_id = users.id 
-INNER JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id = '$id'")->result_array();
+LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id = '$id'")->result_array();
 	}
 
 
