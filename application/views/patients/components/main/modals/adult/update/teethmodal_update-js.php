@@ -30,7 +30,8 @@ $ci = get_instance();
 					// added by navid
 					$('#selectName_update').val(contents.name).trigger('change');
 					$('#locationSelector_update').val(contents.location).trigger('change');
-
+					// added by Arsalan Venom33! this part checks the checkboxes
+					initializeCheckboxes(contents);
 
 					if (contents.is_endo === "true") {
 						$('#canalselector_update').val(contents.endo.root_number).trigger('change');

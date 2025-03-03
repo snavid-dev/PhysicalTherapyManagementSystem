@@ -17,7 +17,7 @@ $ci = get_instance();
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
 								<input type="checkbox" name="checkbox1" id="checkbox_update_resto" class="checkbox"
-									   onchange="calculate_sum(), disableDepartment('checkbox_update_resto', 'Restorative_update', 'Restorative_update-pane')" onclick="disableDepartment('checkbox_update_resto', 'Restorative_update', 'Restorative_update-pane')" value="restorative" checked/>
+									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_update_resto', 'Restorative_update', 'Restorative_update-pane')" value="restorative" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path
