@@ -95,7 +95,7 @@ $ci = get_instance();
 
 					}
 
-					if (contents.is_prosthodontic === 'true'){
+					if (contents.is_prosthodontic === 'true') {
 						$('#type_pro_update').val(contents.prosthodontic.post).trigger('change');
 						$('#filling_material_update').val(contents.prosthodontic.filling_material).trigger('change');
 						$('#type_restoration_update').val(contents.prosthodontic.type_restoration).trigger('change');
@@ -106,10 +106,13 @@ $ci = get_instance();
 
 						let procolors = contents.prosthodontic.color;
 						var updateproColorHTML = document.getElementById("pro_color_update").innerHTML;
-						procolors.map((item) => {
-							updateproColorHTML = updateproColorHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-						})
-						document.getElementById("pro_color_update").innerHTML = updateproColorHTML;
+						if (procolors.length < 0) {
+							procolors.map((item) => {
+								updateproColorHTML = updateproColorHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
+							})
+							document.getElementById("pro_color_update").innerHTML = updateproColorHTML;
+						}
+
 
 						$('#impression_technique_update').val(contents.prosthodontic.impression_technique).trigger('change');
 						$('#impression_material_update').val(contents.prosthodontic.impression_material).trigger('change');
@@ -123,8 +126,6 @@ $ci = get_instance();
 						document.getElementById("services_pro_update").innerHTML = updateservicesHTML;
 
 						$('#protextarea_update').val(contents.prosthodontic.details).trigger('change');
-
-
 
 
 					}

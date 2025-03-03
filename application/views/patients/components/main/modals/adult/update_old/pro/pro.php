@@ -1,5 +1,5 @@
-<div class="tab-pane fade p-0 border-0 bg-white p-4 rounded-3" id="pros_update-pane" role="tabpanel"
-    aria-labelledby="pros_update-pane" tabindex="0">
+<div class="tab-pane fade p-0 border-0 bg-white p-4 rounded-3" id="prosthodontic_update-pane" role="tabpanel"
+    aria-labelledby="prosthodontic_update-pane" tabindex="0">
 
     <div class="modal-body">
 

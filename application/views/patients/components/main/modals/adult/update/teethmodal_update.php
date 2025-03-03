@@ -70,8 +70,8 @@ $ci = get_instance();
 							</button> <!--Translate-->
 						</li>
 						<li class="nav-item rounded" role="presentation">
-							<button class="nav-link" id="pros_update-tab" data-bs-toggle="tab" data-bs-target="#pros_update-pane"
-								type="button" role="tab" aria-controls="pros_update-pane" aria-selected="false"><i
+							<button class="nav-link" id="prosthodontic_update" data-bs-toggle="tab" data-bs-target="#prosthodontic_update-pane"
+								type="button" role="tab" aria-controls="prosthodontic_update-pane" aria-selected="false"><i
 									class="fa fa-vial me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Prosthodontics') ?>
 							</button> <!--Translate-->
 						</li>

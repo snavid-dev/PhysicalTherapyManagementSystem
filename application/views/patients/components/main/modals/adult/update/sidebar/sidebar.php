@@ -57,7 +57,7 @@ $ci = get_instance();
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
 								<input type="checkbox" name="checkbox3" id="checkbox_update_prosthodontics" class="checkbox"
-									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_update_prosthodontics', 'pros_update-tab', 'pros_update-pane')" value="Prosthodontics" checked/>
+									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_update_prosthodontics', 'prosthodontic_update', 'prosthodontic_update-pane')" value="Prosthodontics" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path
