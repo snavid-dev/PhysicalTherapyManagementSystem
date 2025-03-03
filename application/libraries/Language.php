@@ -376,7 +376,7 @@ class Language
 			// Patients Expressions
 			'Mr' => self::lang_arr('Mr. ', 'آقای ', 'ښاغلی '),
 			'Ms' => self::lang_arr('Ms. ', 'خانم ', 'اغلی'),
-
+			'list temp patients' => self::lang_arr('list temporary patients. ', 'لیست مریضان معاینه ', 'not set'),
 			'male' => self::lang_arr('male', 'مذکر', 'نارینه'),
 			'female' => self::lang_arr('female', 'مونث', 'ښځینه'),
 			'teeth' => self::lang_arr('teeth', 'دندان ها', 'غاښونه'),

@@ -3208,7 +3208,8 @@ class Admin extends CI_Controller
 					$turn = array(
 						'patient_id' => $insert[1],
 						'date' => $this->mylibrary->getCurrentShamsiDate()['date'],
-						'hour' => $this->dentist->hour_for_insert(),
+						'from_time' => date('H:i'),
+						'to_time' => date('H:i', strtotime('+30 minutes')),
 						'status' => 'p',
 						'doctor_id' => $temp_patient['doctor_id'],
 					);

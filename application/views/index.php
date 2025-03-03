@@ -97,7 +97,7 @@
 	<div class="col-xl-12 col-md-12">
 		<div class="card">
 			<div class="card-header turens_header">
-				<h4 class="card-title fw-semibold"><?= $ci->lang('turns list') ?></h4>
+				<h4 class="card-title fw-semibold"><?= $ci->lang('list temp patients') ?></h4>
 
 			</div>
 			<div class="card-body pb-0">
@@ -1321,16 +1321,10 @@
 							var result = JSON.parse(response);
 
 							if (result['type'] == 'success') {
-								$.growl.notice1({
-									title: result['alert']['title'],
-									message: result['alert']['text']
-								});
+								toastr["success"](result['alert']['text'], result['alert']['title'])
 								window.location.href = '<?= base_url('admin/single_patient/') ?>' + result['id'];
 							} else if (result['type'] == 'error') {
-								$.growl.error1({
-									title: result['alert']['title'],
-									message: result['alert']['text']
-								});
+								toastr["error"](result['alert']['text'], result['alert']['title'])
 							}
 						}
 					});
