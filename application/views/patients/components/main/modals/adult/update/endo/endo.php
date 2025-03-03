@@ -53,7 +53,7 @@ $ci = get_instance();
 										</div>
 
 										<div class="col-sm-12 col-md-4">
-											<div class="form-group jdp" id="main-divs" style="border: 5px solid yellow">
+											<div class="form-group jdp" id="main-divs">
 												<label class="form-label">
 													<?= $ci->lang('number of canal') ?>
 												</label>
@@ -347,7 +347,7 @@ $ci = get_instance();
 												</label>
 												<input type="hidden" name="diagnose" id="diagnose_adultOld_update">
 												<select class="form-control select2-show-search form-select"
-														id="services_endo_update" onchange="service_price(), calculate_sum_update()"
+														id="services_endo_update" onchange="service_price('#services_endo_update', '#services_input_update', '#price_tooth_endo_update', insert_endo_price)"
 														data-placeholder="<?= $ci->lang('select') ?>" multiple>
 													<?php foreach ($endo_services as $service) : ?>
 

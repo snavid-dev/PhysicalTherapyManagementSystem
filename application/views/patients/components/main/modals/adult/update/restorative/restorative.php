@@ -146,7 +146,7 @@ $ci = get_instance();
 														</label>
 														<select class="form-control select2-show-search form-select"
 																id="services_restorative_update"
-																onchange="service_price_resto('#services_restorative_update', '#services_input_restorative_update', '#price_tooth_restorative_update'), calculate_sum_update()"
+																onchange="service_price_resto('#services_restorative_update', '#services_input_restorative_update', '#price_tooth_restorative_update', insert_resto_price) "
 																data-placeholder="<?= $ci->lang('select') ?>" multiple>
 															<?php foreach ($restorative_services as $service) : ?>
 
