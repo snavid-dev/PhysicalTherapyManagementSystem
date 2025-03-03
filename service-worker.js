@@ -3,9 +3,9 @@ self.addEventListener('install', function (event) {
     caches.open('your-app-cache').then(function (cache) {
       return cache.addAll([
         '/',
-        'https://canin.cyborgtech.co/Admin/',
-        'https://canin.cyborgtech.co/Admin/patients/',
-        'https://canin.cyborgtech.co/Admin/turns/',
+        'https://haidari-2.cyborgtech.co/Admin/',
+        'https://haidari-2.cyborgtech.co/Admin/patients/',
+        'https://haidari-2.cyborgtech.co/Admin/turns/',
         'https://canin-cdn.cyborgtech.co/assets/images/brand/favicon.ico',
         // Add more assets to cache
       ]);

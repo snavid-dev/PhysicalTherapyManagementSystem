@@ -5878,7 +5878,7 @@ class Admin extends CI_Controller
 	public
 	function phoneBook()
 	{
-		$data['title'] = $this->lang('turns');
+		$data['title'] = $this->lang('phonebook');
 		$data['page'] = "phonebook";
 		$data['receipts'] = $this->Admin_model->get_turns_phonebook();
 		$data['script'] = $this->mylibrary->generateSelect2();
