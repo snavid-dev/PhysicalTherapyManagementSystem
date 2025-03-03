@@ -588,16 +588,10 @@
 							var result = JSON.parse(response);
 
 							if (result['type'] == 'success') {
-								$.growl.notice1({
-									title: result['alert']['title'],
-									message: result['alert']['text']
-								});
+								toastr["success"](result['alert']['text'], result['alert']['title'])
 								window.location.href = '<?= base_url('admin/single_patient/') ?>' + result['id'];
 							} else if (result['type'] == 'error') {
-								$.growl.error1({
-									title: result['alert']['title'],
-									message: result['alert']['text']
-								});
+								toastr["error"](result['alert']['text'], result['alert']['title'])
 							}
 						}
 					});
