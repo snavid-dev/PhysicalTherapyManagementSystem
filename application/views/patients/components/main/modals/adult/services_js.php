@@ -176,18 +176,26 @@ $ci = get_instance();
 		// Retrieve price values safely
 		if (is_endo == true) {
 			if (endo_price != null) {
-				priceService = endo_price;
+				priceService = parseInt(endo_price);
 			} else {
 				priceService = parseInt($('#price_tooth_endo_update').val()) || 0;
 			}
 		}
 
 		if (is_resto == true) {
-			priceRestoUpdate = parseInt($('#price_tooth_restorative_update').val()) || 0;
+			if (restoPrice != null) {
+				priceRestoUpdate = parseInt(restoPrice);
+			} else {
+				priceRestoUpdate = parseInt($('#price_tooth_restorative_update').val()) || 0;
+			}
 		}
 
 		if (is_prosthodontics == true) {
+			if(pro_price != null){
+				priceProsthodontics = parseInt(pro_price);
+			}else{
 			priceProsthodontics = parseInt($('#price_tooth_pro_update').val()) || 0;
+			}
 		}
 
 
@@ -208,14 +216,16 @@ $ci = get_instance();
 		return parseFloat($(selector).val()) || 0;
 	}
 
-	function insert_endo_price(price){
+	function insert_endo_price_update(price) {
 		calculate_sum_update(null, price);
 	}
-	function insert_resto_price(price){
+
+	function insert_resto_price_update(price) {
 		calculate_sum_update(price);
 	}
-	function insert_pro_price(price){
-		calculate_sum_update(null, null,price);
+
+	function insert_pro_price_update(price) {
+		calculate_sum_update(null, null, price);
 	}
 
 	document.addEventListener("DOMContentLoaded", function () {

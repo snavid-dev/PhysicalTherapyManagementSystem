@@ -84,15 +84,18 @@ $ci = get_instance();
 
 	// ✅ Handles Endodontic Updates
 	function handleEndo(endo) {
-		updateEndoFields(endo);
-		updateEndoCanals(endo);
 		updateMultiSelect("services_endo_update", endo.services);
+		setTimeout(function () {
+			updateEndoFields(endo);
+			updateEndoCanals(endo);
+			insert_endo_price_update(endo.price);
+		}, 800);
 	}
 
 	function updateEndoFields(endo) {
 		updateFields({
 			"#canalselector_update": endo.root_number,
-			"#price_tooth_update": endo.price,
+			"#price_tooth_endo_update": endo.price,
 			"#details_update": endo.details,
 			"#instypeObturation_update": endo.typeObturation,
 			"#insTypeSealer_update": endo.TypeSealer,
@@ -113,8 +116,11 @@ $ci = get_instance();
 
 	// ✅ Handles Restorative Updates
 	function handleRestorative(restorative) {
-		updateRestorativeFields(restorative);
 		updateMultiSelect("services_restorative_update", restorative.services);
+		setTimeout(function () {
+			updateRestorativeFields(restorative);
+			insert_resto_price_update(restorative.price);
+		}, 1000);
 	}
 
 	function updateRestorativeFields(restorative) {
@@ -142,8 +148,8 @@ $ci = get_instance();
 		updateMultiSelect("services_pro_update", prosthodontic.services);
 		setTimeout(function () {
 			updateProsthodonticFields(prosthodontic);
-			calculateProsthodonticTotal();
-		}, 1500);
+			insert_pro_price_update(prosthodontic.price);
+		}, 1200);
 
 		determineProsthodonticType(prosthodontic);
 	}
@@ -229,7 +235,6 @@ $ci = get_instance();
 
 	// Call the function initially in case there are pre-filled values
 	calculateProsthodonticTotal();
-
 
 
 </script>

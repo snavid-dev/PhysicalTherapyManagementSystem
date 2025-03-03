@@ -264,7 +264,7 @@ $ci = get_instance();
 											<select
 												class="form-control select2-show-search form-select"
 												id="services_pro_update"
-												onchange="service_price_pro('#services_pro_update', '#services_input_pro_update', '#price_tooth_pro_update', insert_pro_price);"
+												onchange="service_price_pro('#services_pro_update', '#services_input_pro_update', '#price_tooth_pro_update', insert_pro_price_update);"
 												data-placeholder="<?= $ci->lang('select') ?>"
 												multiple>
 												<?php foreach ($Prosthodontics_services as $service) : ?>

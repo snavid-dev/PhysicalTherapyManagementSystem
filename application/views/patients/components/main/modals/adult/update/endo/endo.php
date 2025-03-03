@@ -347,7 +347,7 @@ $ci = get_instance();
 												</label>
 												<input type="hidden" name="diagnose" id="diagnose_adultOld_update">
 												<select class="form-control select2-show-search form-select"
-														id="services_endo_update" onchange="service_price('#services_endo_update', '#services_input_update', '#price_tooth_endo_update', insert_endo_price)"
+														id="services_endo_update" onchange="service_price('#services_endo_update', '#services_input_update', '#price_tooth_endo_update', insert_endo_price_update)"
 														data-placeholder="<?= $ci->lang('select') ?>" multiple>
 													<?php foreach ($endo_services as $service) : ?>
 
