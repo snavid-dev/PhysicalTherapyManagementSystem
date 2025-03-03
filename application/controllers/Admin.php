@@ -4156,15 +4156,17 @@ class Admin extends CI_Controller
 
 	function list_turns_json()
 	{
-		$this->form_validation->set_rules('date', 'date', 'trim', array('required' => $this->lang('problem')));
+		$this->form_validation->set_rules('date', 'date', 'trim');
+		$this->form_validation->set_rules('doctor', 'doctor', 'trim');
 		if ($this->form_validation->run()) {
 			$data = array();
 			$date = $this->input->post('date');
-			if ($date !== '') {
-				$turns = $this->Admin_model->get_turns_page($date);
-			} else {
-				$turns = $this->Admin_model->get_turns_page();
-			}
+			$doctor = $this->input->post('doctor');
+
+			do
+
+// Pass both parameters correctly
+			$turns = $this->Admin_model->get_turns_page($date ?: null, $doctor ?: null);
 
 
 			$data['type'] = 'success';

@@ -33,7 +33,8 @@ class Admin_model extends CI_Model
 		return array($log, $id);
 	}
 
-	public function single_user_update($where = array()){
+	public function single_user_update($where = array())
+	{
 		return $this->db->get_where('users', $where)->result_array();
 	}
 
@@ -686,15 +687,31 @@ class Admin_model extends CI_Model
 	}
 
 
-	public function get_turns_page($date = null)
+	public function get_turns_page($date = null, $doctor_id = null)
 	{
 		$ci = get_instance();
 		$today = $ci->mylibrary->getCurrentShamsiDate()['date'];
-		if (is_null($date)) {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) >= DATE('$today') ORDER BY `turn`.`from_time` ASC")->result_array();
-		} else {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) >= DATE('$today') AND turn.date = '$date' ORDER BY `turn`.`from_time` ASC")->result_array();
+
+		$query = "SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, 
+                     CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' 
+              FROM `turn` 
+              INNER JOIN patient ON turn.patient_id = patient.id 
+              INNER JOIN users ON turn.doctor_id = users.id 
+              WHERE patient.status != 'b' 
+              AND turn.status = 'p' 
+              AND DATE(turn.date) >= DATE('$today')";
+
+		if (!empty($date)) {
+			$query .= " AND turn.date = '$date'";
 		}
+
+		if (!empty($doctor_id)) {
+			$query .= " AND turn.doctor_id = '$doctor_id'";
+		}
+
+		$query .= " ORDER BY `turn`.`from_time` ASC";
+
+		return $this->db->query($query)->result_array();
 	}
 
 
@@ -889,7 +906,7 @@ class Admin_model extends CI_Model
 		}
 
 		// Sort booked slots by start time
-		usort($booked_ranges, function($a, $b) {
+		usort($booked_ranges, function ($a, $b) {
 			return $a['start'] <=> $b['start'];
 		});
 
@@ -919,6 +936,7 @@ class Admin_model extends CI_Model
 
 		return $available_slots;
 	}
+
 	public function check_turn_conflict($date, $doctor_id, $from_time, $to_time)
 	{
 		$this->db->where('date', $date);
