@@ -4163,7 +4163,7 @@ class Admin extends CI_Controller
 			$date = $this->input->post('date');
 			$doctor = $this->input->post('doctor');
 
-			do
+
 
 // Pass both parameters correctly
 			$turns = $this->Admin_model->get_turns_page($date ?: null, $doctor ?: null);
@@ -5801,13 +5801,15 @@ class Admin extends CI_Controller
 					$dr = $check['sum_dr'];
 
 
-					if ($balance == 0) {
-						$datas = array(
-							'status' => 'a'
-						);
-						$id = $receipt['id'];
-						$this->Admin_model->update_patient($datas, $id);
-					}
+//					Code for accept all patients which their balance are 0
+
+//					if ($balance == 0) {
+//						$datas = array(
+//							'status' => 'a'
+//						);
+//						$id = $receipt['id'];
+//						$this->Admin_model->update_patient($datas, $id);
+//					}
 
 					$datas[] = array(
 						'patient_name' => $this->mylibrary->get_patient_name($receipt['name'], $receipt['lname'], $receipt['serial_id'], $receipt['gender']),
