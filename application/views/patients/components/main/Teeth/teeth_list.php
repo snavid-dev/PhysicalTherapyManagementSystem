@@ -28,7 +28,7 @@
 						<td><?= $tooth['price'] ?></td>
 						<td>
 							<div class="g-2">
-								<a href="javascript:updateTeeth('<?= $tooth['id'] ?>')"
+								<a href="javascript:updateTeeth('<?= $tooth['id'] ?>', '<?= $profile['id'] ?>')"
 								   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
 										class="fa-regular fa-pen-to-square fs-14"></span></a>
 								<a href="javascript:delete_via_alert('<?= $tooth['id'] ?>', '<?= base_url() ?>admin/delete_tooth', 'teethTable', update_balance)"

@@ -3,7 +3,7 @@ $ci = get_instance();
 ?>
 
 <script>
-	function updateTeeth(id) {
+	function updateTeeth(id, patient_id) {
 		$.ajax({
 			url: "<?= base_url() ?>admin/single_tooth",
 			type: 'POST',
@@ -15,6 +15,9 @@ $ci = get_instance();
 
 				if (typeof contents.name === 'string' && !isNaN(contents.name)) {
 					clearFields(); // Clears all fields before setting new data
+
+					$('#patient_id_update').val(patient_id);
+					$('#tooth_id_update').val(id);
 
 					updateInputFields(contents);
 					updateDiagnoseSelect(contents.diagnose);
@@ -36,21 +39,6 @@ $ci = get_instance();
 		$("#teethmodal_update input, #teethmodal_update select:not([multiple]), #teethmodal_update textarea")
 			.val("")
 			.trigger('change');
-
-		// Disable onchange events temporarily for multiple selects
-		const multiSelects = [
-			"#services_restorative_update",
-			"#services_endo_update",
-			"#services_pro_update",
-			"#select_diagnose_update",
-			"#pro_color_update"
-		];
-
-		multiSelects.forEach(select => {
-			$(select).off("change").val([]).trigger("change").on("change", function () {
-				// Re-enable onchange event after clearing
-			});
-		});
 	}
 
 	// ✅ Updates Basic Input Fields
@@ -64,17 +52,19 @@ $ci = get_instance();
 	// ✅ Fixes Diagnose Multi-Select Issue (Clears before updating)
 	function updateDiagnoseSelect(diagnoseList) {
 		let selectElement = $("#select_diagnose_update");
-		selectElement.off("change").val([]).trigger("change"); // Clears previous selections
 
-		let optionsHTML = selectElement.html();
-		diagnoseList.forEach(item => {
-			optionsHTML = optionsHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
+		// Clear previous selections
+		selectElement.val([]).trigger("change");
+
+		// Select only existing <option> elements and mark them as selected
+		selectElement.find("option").each(function () {
+			this.selected = diagnoseList.includes(this.value);
 		});
 
-		selectElement.html(optionsHTML).trigger("change").on("change", function () {
-			// Re-enable onchange event
-		});
+		// Trigger change event after setting selections
+		selectElement.trigger("change");
 	}
+
 
 	// ✅ Updates Images
 	function updateImages(imgAddress) {

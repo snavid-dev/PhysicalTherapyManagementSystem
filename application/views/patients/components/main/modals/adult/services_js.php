@@ -209,6 +209,8 @@ $ci = get_instance();
 		if (is_resto) $('#priceTag_resto_update').val(sum);
 		if (is_endo) $('#priceTag_endo_update').val(sum);
 		if (is_prosthodontics) $('#priceTag_pro_update').val(sum);
+
+		$('#total_price_update').val(sum);
 	}
 
 	// ✅ Helper function to safely get numeric values from input fields

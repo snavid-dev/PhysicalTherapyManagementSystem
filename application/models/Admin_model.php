@@ -1037,6 +1037,32 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 		return $this->db->get_where('temp_patient', array('id' => $id))->result_array();
 	}
 
+	public function update_tooth($tooth_id, $data) {
+		$this->db->where('id', $tooth_id);
+		return $this->db->update('tooth', $data);
+	}
+
+	public function update_endo($tooth_id, $data) {
+		$this->db->where('tooth_id', $tooth_id);
+		return $this->db->update('endo', $data);
+	}
+
+	public function update_restorative($tooth_id, $data) {
+		$this->db->where('tooth_id', $tooth_id);
+		return $this->db->update('restorative', $data);
+	}
+
+	public function update_prosthodontics($tooth_id, $data) {
+		$this->db->where('tooth_id', $tooth_id);
+		return $this->db->update('prosthodontics', $data);
+	}
+
+	public function delete_tooth_diagnoses($tooth_id) {
+		$this->db->where('tooth_id', $tooth_id);
+		return $this->db->delete('tooth_has_diagnose');
+	}
+
+
 	public function list_insert_tooth_basic_information($category_name, $department = 'restorative')
 	{
 		return $this->db->query("SELECT id, name FROM `basic_information_teeth` WHERE categories_id IN (SELECT id from categories WHERE name = '$category_name') AND department = '$department'")->result_array();
@@ -1078,10 +1104,6 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 		return array($log, $id);
 	}
 
-	function update_tooth($data = array(), $id)
-	{
-		return $this->db->update('tooth', $data, array('id' => $id));
-	}
 
 	// Start Endo
 

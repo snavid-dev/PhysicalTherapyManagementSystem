@@ -5,7 +5,7 @@ $ci = get_instance();
 		<div id="toggle" class="sidebar_toggle">
 			<span><?= $ci->lang('Departments') ?> <i class="fa fa-bars"></i></span>
 		</div>
-		<form id="checkboxes">
+		<form id="checkboxes_update">
 			<div id="menu">
 				<ul class="unstyled-list">
 					<li>
@@ -17,7 +17,7 @@ $ci = get_instance();
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
 								<input type="checkbox" name="checkbox1" id="checkbox_update_resto" class="checkbox"
-									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_update_resto', 'Restorative_update', 'Restorative_update-pane')" value="restorative" checked/>
+									   onchange="calculate_sum_update()" onclick="disableDepartment('checkbox_update_resto', 'Restorative_update', 'Restorative_update-pane')" value="restorative" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path
@@ -37,7 +37,7 @@ $ci = get_instance();
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
 								<input type="checkbox" name="checkbox2" class="checkbox" id="checkbox_update_endo"
-									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_update_endo', 'endo_update', 'endo_update-pane')" value="endo" checked/>
+									   onchange="calculate_sum_update()" onclick="disableDepartment('checkbox_update_endo', 'endo_update', 'endo_update-pane')" value="endo" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path
@@ -57,7 +57,7 @@ $ci = get_instance();
 						<div class="checkbox-wrapper-44" style="scale: 0.8px; padding-top: 13px;">
 							<label class="toggleButton">
 								<input type="checkbox" name="checkbox3" id="checkbox_update_prosthodontics" class="checkbox"
-									   onchange="calculate_sum()" onclick="disableDepartment('checkbox_update_prosthodontics', 'prosthodontic_update', 'prosthodontic_update-pane')" value="Prosthodontics" checked/>
+									   onchange="calculate_sum_update()" onclick="disableDepartment('checkbox_update_prosthodontics', 'prosthodontic_update', 'prosthodontic_update-pane')" value="Prosthodontics" checked/>
 								<div>
 									<svg viewBox="0 0 44 44">
 										<path

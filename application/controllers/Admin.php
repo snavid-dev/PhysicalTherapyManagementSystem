@@ -5303,62 +5303,124 @@ class Admin extends CI_Controller
 
 	public function update_tooth()
 	{
-		$data = array('type' => 'form_error', 'messages' => array());
-		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert tooth name error')));
-		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('insert tooth patient_id error')));
-		$this->form_validation->set_rules('services', 'services', 'trim|required', array('required' => $this->lang('insert tooth services error')));
-		$this->form_validation->set_rules('price', 'price', 'trim|required', array('required' => $this->lang('insert tooth price error')));
-		$this->form_validation->set_rules('imgAddress', 'imgAddress', 'trim|required', array('required' => $this->lang('insert tooth price error')));
-		$this->form_validation->set_rules('location', 'location', 'trim|required', array('required' => $this->lang('insert tooth location error')));
+		// Determine which sections are active based on checkboxes
+		$is_endo = isset($_POST['checkbox2']);
+		$is_restorative = isset($_POST['checkbox1']);
+		$is_prosthodontics = isset($_POST['checkbox3']);
+
+		// Validation rules
 		$this->form_validation->set_rules('diagnose', 'diagnose', 'trim|required', array('required' => $this->lang('insert tooth diagnose error')));
-		$this->form_validation->set_rules('r_name1', 'r_name1', 'trim');
-		$this->form_validation->set_rules('r_width1', 'r_width1', 'trim');
-		$this->form_validation->set_rules('r_name2', 'r_name2', 'trim');
-		$this->form_validation->set_rules('r_width2', 'r_width2', 'trim');
-		$this->form_validation->set_rules('r_name3', 'r_name3', 'trim');
-		$this->form_validation->set_rules('r_width3', 'r_width3', 'trim');
-		$this->form_validation->set_rules('r_name4', 'r_name4', 'trim');
-		$this->form_validation->set_rules('r_width4', 'r_width4', 'trim');
-		$this->form_validation->set_rules('r_name5', 'r_name5', 'trim');
-		$this->form_validation->set_rules('r_width5', 'r_width5', 'trim');
-		$this->form_validation->set_rules('details', 'details', 'trim');
-		$this->form_validation->set_rules('root_number', 'root_number', 'trim');
+		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert tooth name error')));
+		$this->form_validation->set_rules('location', 'location', 'trim|required', array('required' => $this->lang('insert tooth location error')));
+		$this->form_validation->set_rules('total_price', 'total_price', 'trim|required', array('required' => $this->lang('insert tooth price error')));
+
+		if ($is_endo) {
+			$this->form_validation->set_rules('endo_services', 'endo_services', 'trim|required', array('required' => $this->lang('insert tooth services error')));
+			$this->form_validation->set_rules('price', 'price', 'trim|required', array('required' => $this->lang('insert tooth price error')));
+		}
+
+		if ($is_restorative) {
+			$this->form_validation->set_rules('restorative_services', 'restorative_services', 'trim|required', array('required' => $this->lang('insert tooth services error')));
+			$this->form_validation->set_rules('price_restorative', 'price_restorative', 'trim|required', array('required' => $this->lang('insert tooth price error')));
+		}
+
+		if ($is_prosthodontics) {
+			$this->form_validation->set_rules('pro_services', 'pro_services', 'trim|required', array('required' => $this->lang('insert tooth services error')));
+			$this->form_validation->set_rules('price_pro', 'price_pro', 'trim|required', array('required' => $this->lang('insert tooth price error')));
+		}
+
+		// Run validation
 		if ($this->form_validation->run()) {
-			$datas = array(
+			// Extract post data
+			$tooth_id = $this->input->post('tooth_id');
+			$diagnoses = explode(',', $this->input->post('diagnose'));
+
+			// Prepare main tooth data
+			$main_data = array(
 				'name' => $this->input->post('name'),
-				'r_name1' => $this->input->post('r_name1'),
-				'r_name2' => $this->input->post('r_name2'),
-				'r_name3' => $this->input->post('r_name3'),
-				'r_name4' => $this->input->post('r_name4'),
-				'r_name5' => $this->input->post('r_name5'),
-				'r_width1' => $this->input->post('r_width1'),
-				'r_width2' => $this->input->post('r_width2'),
-				'r_width3' => $this->input->post('r_width3'),
-				'r_width4' => $this->input->post('r_width4'),
-				'r_width5' => $this->input->post('r_width5'),
-				'services' => $this->input->post('services'),
-				'price' => $this->input->post('price'),
-				'imgAddress' => $this->input->post('imgAddress'),
 				'location' => $this->input->post('location'),
-				'details' => $this->input->post('details'),
-				'root_number' => $this->input->post('root_number'),
-				'diagnose' => $this->input->post('diagnose'),
+				'imgAddress' => $this->input->post('imgAddress'),
+				'price' => $this->input->post('total_price'),
 			);
-			$insert = $this->Admin_model->update_tooth($datas, $this->input->post('slug'));
-			if ($insert) {
+
+			// Update main tooth record
+			$update_status = $this->Admin_model->update_tooth($tooth_id, $main_data);
+
+			if ($update_status) {
+				// Handle Endodontic Data
+				if ($is_endo) {
+					$endo_data = array(
+						'services' => $this->input->post('endo_services'),
+						'price' => $this->input->post('price'),
+						'details' => $this->input->post('details'),
+						'root_number' => $this->input->post('root_number'),
+						'modify_date' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' - ' . date('H:i:s'),
+						'r_name1' => $this->input->post('r_name1'),
+						'r_name2' => $this->input->post('r_name2'),
+						'r_name3' => $this->input->post('r_name3'),
+						'r_name4' => $this->input->post('r_name4'),
+						'r_name5' => $this->input->post('r_name5'),
+						'r_width1' => $this->input->post('r_width1'),
+						'r_width2' => $this->input->post('r_width2'),
+						'r_width3' => $this->input->post('r_width3'),
+						'r_width4' => $this->input->post('r_width4'),
+						'r_width5' => $this->input->post('r_width5'),
+					);
+
+					$this->Admin_model->update_endo($tooth_id, $endo_data);
+				}
+
+				// Handle Restorative Data
+				if ($is_restorative) {
+					$restorative_data = array(
+						'services' => $this->input->post('restorative_services'),
+						'price' => $this->input->post('price_restorative'),
+						'details' => $this->input->post('restorativeDescription'),
+						'modify_date' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' - ' . date('H:i:s'),
+					);
+
+					$this->Admin_model->update_restorative($tooth_id, $restorative_data);
+				}
+
+				// Handle Prosthodontic Data
+				if ($is_prosthodontics) {
+					$prosthodontics_data = array(
+						'services' => $this->input->post('pro_services'),
+						'price' => $this->input->post('price_pro'),
+						'details' => $this->input->post('details_pro'),
+						'modify_date' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' - ' . date('H:i:s'),
+					);
+
+					$this->Admin_model->update_prosthodontics($tooth_id, $prosthodontics_data);
+				}
+
+				// Handle Diagnoses Update
+				if (!empty($diagnoses)) {
+					$this->Admin_model->delete_tooth_diagnoses($tooth_id);
+					foreach ($diagnoses as $diagnose) {
+						$data_for_insert = array(
+							'tooth_id' => $tooth_id,
+							'diagnose_id' => $diagnose
+						);
+						$this->Admin_model->insert_tooth_has_diagnose($data_for_insert);
+					}
+				}
+
+				// Success response
 				$data['type'] = 'success';
 				$data['alert']['title'] = $this->lang('success');
 				$data['alert']['text'] = $this->lang('update tooth success');
 				$data['alert']['type'] = 'success';
-
 				$data['extraFunction'] = true;
 			} else {
+				// Error response
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
 		} else {
+			// Validation error response
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
