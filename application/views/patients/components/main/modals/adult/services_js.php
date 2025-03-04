@@ -198,6 +198,17 @@ $ci = get_instance();
 			}
 		}
 
+		if(isNaN(priceProsthodontics)){
+			priceProsthodontics = 0;
+		}
+
+		if(isNaN(priceRestoUpdate)){
+			priceRestoUpdate = 0;
+		}
+
+		if(isNaN(priceService)){
+			priceService = 0;
+		}
 
 		let sum = 0;
 
