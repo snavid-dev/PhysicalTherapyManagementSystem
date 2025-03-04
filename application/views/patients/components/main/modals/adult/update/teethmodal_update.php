@@ -5,7 +5,7 @@ $ci = get_instance();
 
 
 	<!-- TODO: Here is the sidebar start -->
-	<?php $ci->render("patients/components/main/modals/adult/update/sidebar/sidebar.php");  ?>
+	<?php $ci->render("patients/components/main/modals/adult/update/sidebar/sidebar.php"); ?>
 
 	<!-- TODO: Here is the sidebar end -->
 
@@ -26,10 +26,12 @@ $ci = get_instance();
 						<label class="form-label" style="display: flex;">
 							<?= $ci->lang('diagnose') ?> <span class="text-red">*</span>
 						</label>
+						<input type="hidden" id="total_price_update" name="total_price">
 						<select class="form-control select2-show-search form-select" name="diagnoses"
-							style="width: 300px !important;"
-							onchange="multiple_value('#select_diagnose_update', '#diagnose_adult_update')" id="select_diagnose_update"
-							data-placeholder="<?= $ci->lang('select') ?>" multiple>
+								style="width: 300px !important;"
+								onchange="multiple_value('#select_diagnose_update', '#diagnose_adult_update')"
+								id="select_diagnose_update"
+								data-placeholder="<?= $ci->lang('select') ?>" multiple>
 							<option label="<?= $ci->lang('select') ?>" value=""></option>
 
 							<?php foreach ($diagnoses as $diagnose) : ?>
@@ -46,11 +48,11 @@ $ci = get_instance();
 
 				<!-- adulth insbtn -->
 				<button class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-					style="margin: unset; padding: unset;">
+						style="margin: unset; padding: unset;">
 					<span aria-hidden="true">×</span>
 				</button>
 			</div>
-<!--			you are here-->
+			<!--			you are here-->
 			<!-- insTab start head -->
 			<div class="border-block-end-dashed  bg-white rounded-2 p-2">
 				<div>
@@ -58,20 +60,23 @@ $ci = get_instance();
 						role="tablist">
 						<li class="nav-item rounded" role="presentation">
 							<button class="nav-link active" id="Restorative_update" data-bs-toggle="tab"
-								data-bs-target="#Restorative_update-pane" type="button" role="tab"
-								aria-controls="Restorative_update-pane" aria-selected="true"><i
+									data-bs-target="#Restorative_update-pane" type="button" role="tab"
+									aria-controls="Restorative_update-pane" aria-selected="true"><i
 									class="fa fa-tooth me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('restorative') ?>
 							</button> <!--Translate-->
 						</li>
 						<li class="nav-item rounded" role="presentation">
-							<button class="nav-link" id="endo_update" data-bs-toggle="tab" data-bs-target="#endo_update-pane"
-								type="button" role="tab" aria-controls="endo_update-pane" aria-selected="false"><i
+							<button class="nav-link" id="endo_update" data-bs-toggle="tab"
+									data-bs-target="#endo_update-pane"
+									type="button" role="tab" aria-controls="endo_update-pane" aria-selected="false"><i
 									class="fa fa-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Endodantic') ?>
 							</button> <!--Translate-->
 						</li>
 						<li class="nav-item rounded" role="presentation">
-							<button class="nav-link" id="pros_update-tab" data-bs-toggle="tab" data-bs-target="#pros_update-pane"
-								type="button" role="tab" aria-controls="pros_update-pane" aria-selected="false"><i
+							<button class="nav-link" id="prosthodontic_update" data-bs-toggle="tab"
+									data-bs-target="#prosthodontic_update-pane"
+									type="button" role="tab" aria-controls="prosthodontic_update-pane"
+									aria-selected="false"><i
 									class="fa fa-vial me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('Prosthodontics') ?>
 							</button> <!--Translate-->
 						</li>
@@ -85,17 +90,17 @@ $ci = get_instance();
 
 				<!--TODO:insFixing  -->
 				<!--insFixing  -->
-				<?php $ci->render("patients/components/main/modals/adult/update/restorative/restorative.php");  ?>
+				<?php $ci->render("patients/components/main/modals/adult/update/restorative/restorative.php"); ?>
 
 
 				<!-- TODO:insEndo -->
-				<?php $ci->render("patients/components/main/modals/adult/update/endo/endo.php");  ?>
+				<?php $ci->render("patients/components/main/modals/adult/update/endo/endo.php"); ?>
 
 				<!-- insEndo -->
 
 
 				<!-- TODO:insPro -->
-				<?php $ci->render("patients/components/main/modals/adult/update/pro/pro.php");  ?>
+				<?php $ci->render("patients/components/main/modals/adult/update/pro/pro.php"); ?>
 
 				<!-- insPro -->
 
@@ -105,9 +110,9 @@ $ci = get_instance();
 				<button class="btn btn-secondary" data-bs-dismiss="modal">
 					<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
 				</button>
-<!--fix at the end-->
+				<!--fix at the end-->
 				<button class="btn btn-primary"
-					onclick="submitWithoutDatatableMulti(['insertTooth', 'demo_form_update', 'updateFixing', 'insertPro', 'checkboxes'], '<?= base_url() ?>admin/insert_tooth', '','teethmodal', list_teeth)">
+						onclick="submitWithoutDatatableMulti(['updateTooth','total_price_form', 'updatePro', 'updateFixing', 'demo_form_update', 'checkboxes_update'], '<?= base_url() ?>admin/update_tooth', '','teethmodal_update', list_teeth)">
 					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
 				</button>
 
@@ -118,4 +123,4 @@ $ci = get_instance();
 
 
 <!--scripts for set update values-->
-<?php $ci->render("patients/components/main/modals/adult/update/teethmodal_update-js.php");  ?>
+<?php $ci->render("patients/components/main/modals/adult/update/teethmodal_update-js.php"); ?>

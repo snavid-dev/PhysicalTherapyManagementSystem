@@ -158,92 +158,102 @@ $ci = get_instance();
 	// TODO: the fucking services end
 </script>
 
-<!--update functions-->
 <script>
 
-	// Function to calculate the sum of values from service_price_resto and service_price
-	function calculate_sum_update() {
-		let priceRestoUpdate = 0;
+	function calculate_sum_update(restoPrice = null, endo_price = null, pro_price = null) {
+
+
+		// Check which departments are selected
+		let is_endo = $('#checkbox_update_endo').is(':checked');
+		let is_resto = $('#checkbox_update_resto').is(':checked');
+		let is_prosthodontics = $('#checkbox_update_prosthodontics').is(':checked');
+
 		let priceService = 0;
+		let priceRestoUpdate = 0;
 		let priceProsthodontics = 0;
 
-		let is_endo = ($('#checkbox_update_endo').is(':checked')) ? true : false;
-		let is_resto = ($('#checkbox_update_resto_update').is(':checked')) ? true : false;
-		let is_prosthodontics = ($('#checkbox_update_prosthodontics_update').is(':checked')) ? true : false;
 
-		// Callback function for service_price_resto
-		function handlePriceRestoUpdate(price) {
-			if (is_resto) {
-				priceRestoUpdate = price;
-				handleResults_update();
-			}
-		}
-
-		function handlePriceProsthodonticsUpdate(price) {
-			if (is_prosthodontics) {
-				priceProsthodontics = price;
-				handleResults_update();
-			}
-		}
-
-
-		// Callback function for service_price
-		function handlePriceServiceUpdate(price) {
-			if (is_endo) {
-				priceService = price;
-				handleResults_update();
-			}
-		}
-
-		// Function to handle the results and update the inputs accordingly
-		function handleResults_update() {
-			// Calculate the sum
-			console.log(priceRestoUpdate);
-			console.log(priceService);
-			console.log(priceProsthodontics);
-			const sum = priceRestoUpdate + priceService + priceProsthodontics;
-
-			// Determine which inputs to update based on the values of priceRestoUpdate and priceService
-			if (priceRestoUpdate === 0 && priceService !== 0) {
-				// If priceRestoUpdate is zero, update only the "priceTag_resto" input
-				$('#priceTag_endo_update').val(sum);
-				$('#priceTag_resto_update').val(sum);
-				$('#priceTag_pro_update').val(sum);
-			} else if (priceService === 0 && priceRestoUpdate !== 0) {
-				// If priceService is zero, update only the "priceTag_endo" input
-				$('#priceTag_resto_update').val(sum);
-				$('#priceTag_endo_update').val(sum);
-				$('#priceTag_pro_update').val(sum);
-
+		// Retrieve price values safely
+		if (is_endo == true) {
+			if (endo_price != null) {
+				priceService = parseInt(endo_price);
 			} else {
-				// If both priceRestoUpdate and priceService have non-zero values, update both inputs
-				$('#priceTag_resto_update').val(sum);
-				$('#priceTag_endo_update').val(sum);
-				$('#priceTag_pro_update').val(sum);
+				priceService = parseInt($('#price_tooth_endo_update').val()) || 0;
 			}
 		}
 
-		// Add event listeners to handle changes in price_tooth_restorative and price_tooth inputs
-		document.getElementById('price_tooth_restorative_update').addEventListener('change', () => {
-			priceRestoUpdate = parseFloat(document.getElementById('price_tooth_restorative_update').value) || 0;
-			handleResults_update();
-		});
+		if (is_resto == true) {
+			if (restoPrice != null) {
+				priceRestoUpdate = parseInt(restoPrice);
+			} else {
+				priceRestoUpdate = parseInt($('#price_tooth_restorative_update').val()) || 0;
+			}
+		}
 
-		document.getElementById('price_tooth_pro_update').addEventListener('change', () => {
-			priceProsthodontics = parseFloat(document.getElementById('price_tooth_pro_update').value) || 0;
-			handleResults_update();
-		});
+		if (is_prosthodontics == true) {
+			if(pro_price != null){
+				priceProsthodontics = parseInt(pro_price);
+			}else{
+			priceProsthodontics = parseInt($('#price_tooth_pro_update').val()) || 0;
+			}
+		}
 
-		document.getElementById('price_tooth_endo_update').addEventListener('change', () => {
-			priceService = parseFloat(document.getElementById('price_tooth_endo_update').value) || 0;
-			handleResults_update();
-		});
+		if(isNaN(priceProsthodontics)){
+			priceProsthodontics = 0;
+		}
 
-		// Call the functions with the appropriate callback functions
-		service_price_resto('#services_restorative_update', '#services_input_restorative_update', '#price_tooth_restorative_update', handlePriceRestoUpdate);
-		service_price('#services_endo_update', '#services_input_endo_update', '#price_tooth_endo_update', handlePriceServiceUpdate);
-		service_price_pro('#services_pro', '#services_input_pro', '#price_tooth_pro', handlePriceProsthodonticsUpdate);
+		if(isNaN(priceRestoUpdate)){
+			priceRestoUpdate = 0;
+		}
+
+		if(isNaN(priceService)){
+			priceService = 0;
+		}
+
+		let sum = 0;
+
+
+		sum = priceRestoUpdate + priceService + priceProsthodontics;
+		console.log({priceRestoUpdate, priceService, priceProsthodontics, sum});
+
+		// Update only the price fields related to selected checkboxes
+		if (is_resto) $('#priceTag_resto_update').val(sum);
+		if (is_endo) $('#priceTag_endo_update').val(sum);
+		if (is_prosthodontics) $('#priceTag_pro_update').val(sum);
+
+		$('#total_price_update').val(sum);
 	}
+
+	// ✅ Helper function to safely get numeric values from input fields
+	function getNumericValue(selector) {
+		return parseFloat($(selector).val()) || 0;
+	}
+
+	function insert_endo_price_update(price) {
+		calculate_sum_update(null, price);
+	}
+
+	function insert_resto_price_update(price) {
+		calculate_sum_update(price);
+	}
+
+	function insert_pro_price_update(price) {
+		calculate_sum_update(null, null, price);
+	}
+
+	document.addEventListener("DOMContentLoaded", function () {
+		// Get all checkboxes and price input fields
+		const elements = document.querySelectorAll("#checkbox_update_endo, #checkbox_update_resto_update, #checkbox_update_prosthodontics, #price_tooth_restorative_update, #price_tooth_endo_update, #price_tooth_pro_update");
+
+		// Add event listeners for 'input' and 'change' events
+		elements.forEach(element => {
+			element.addEventListener("input", calculate_sum_update);
+			element.addEventListener("change", calculate_sum_update);
+		});
+
+		// Run the function initially to sum existing values
+		calculate_sum_update();
+	});
 
 	// TODO: the fucking services end
 </script>

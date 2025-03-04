@@ -1037,6 +1037,77 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 		return $this->db->get_where('temp_patient', array('id' => $id))->result_array();
 	}
 
+	public function update_tooth($tooth_id, $data) {
+		$this->db->where('id', $tooth_id);
+		return $this->db->update('tooth', $data);
+	}
+
+	public function update_endo($tooth_id, $data) {
+		$this->db->where('tooth_id', $tooth_id);
+		return $this->db->update('endo', $data);
+	}
+
+	public function update_restorative($tooth_id, $data) {
+		$this->db->where('tooth_id', $tooth_id);
+		return $this->db->update('restorative', $data);
+	}
+
+	public function update_prosthodontics($tooth_id, $data) {
+		$this->db->where('tooth_id', $tooth_id);
+		return $this->db->update('prosthodontics', $data);
+	}
+
+	// **Delete Old Restorative Basic Info**
+	public function delete_restorative_basic_info($tooth_id) {
+		$this->db->where('restorative_id', $tooth_id);
+		return $this->db->delete('restorative_has_basic_information_teeth');
+	}
+
+	// **Delete Old Prosthodontic Basic Info**
+	public function delete_prosthodontics_basic_info($tooth_id) {
+		$this->db->where('prosthodontics_id', $tooth_id);
+		return $this->db->delete('prosthodontics_has_basic_information_teeth');
+	}
+
+
+	// **Delete Old Endo Services**
+	public function delete_endo_services($tooth_id) {
+		$this->db->where('endo_id', $tooth_id);
+		return $this->db->delete('endo_has_services');
+	}
+
+	// **Delete Old Restorative Services**
+	public function delete_restorative_services($tooth_id) {
+		$this->db->where('restorative_id', $tooth_id);
+		return $this->db->delete('restorative_has_services');
+	}
+
+	// **Delete Old Prosthodontic Services**
+	public function delete_prosthodontics_services($tooth_id) {
+		$this->db->where('prosthodontics_id', $tooth_id);
+		return $this->db->delete('prosthodontics_has_services');
+	}
+
+	// **Delete Old Endo Basic Info**
+	public function delete_endo_basic_info($tooth_id) {
+		$this->db->where('endo_id', $tooth_id);
+		return $this->db->delete('endo_has_basic_information_teeth');
+	}
+
+
+	// **Delete Old Tooth Diagnoses**
+	public function delete_tooth_diagnoses($tooth_id) {
+		$this->db->where('tooth_id', $tooth_id);
+		return $this->db->delete('tooth_has_diagnose');
+	}
+
+	// **Insert New Tooth Diagnoses**
+	public function insert_tooth_has_diagnose($data) {
+		return $this->db->insert('tooth_has_diagnose', $data);
+	}
+
+
+
 	public function list_insert_tooth_basic_information($category_name, $department = 'restorative')
 	{
 		return $this->db->query("SELECT id, name FROM `basic_information_teeth` WHERE categories_id IN (SELECT id from categories WHERE name = '$category_name') AND department = '$department'")->result_array();
@@ -1078,10 +1149,6 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 		return array($log, $id);
 	}
 
-	function update_tooth($data = array(), $id)
-	{
-		return $this->db->update('tooth', $data, array('id' => $id));
-	}
 
 	// Start Endo
 
@@ -1295,10 +1362,7 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 		return $this->db->update('diagnose', $data, array('id' => $id));
 	}
 
-	public function insert_tooth_has_diagnose($array = array())
-	{
-		return $this->db->insert('tooth_has_diagnose', $array);
-	}
+
 
 	// End Diagnoses
 

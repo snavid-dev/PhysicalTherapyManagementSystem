@@ -3,139 +3,228 @@ $ci = get_instance();
 ?>
 
 <script>
-	function updateTeeth(id) {
+	function updateTeeth(id, patient_id) {
 		$.ajax({
 			url: "<?= base_url() ?>admin/single_tooth",
 			type: 'POST',
-			data: {
-				slug: id,
-			},
+			data: {slug: id},
 			success: function (response) {
 				let result = JSON.parse(response);
 				let contents = result.content;
 				console.log(contents);
+
 				if (typeof contents.name === 'string' && !isNaN(contents.name)) {
+					clearFields(); // Clears all fields before setting new data
 
-					let alldiagnose = contents.diagnose;
-					var diagnoses_select = document.getElementById("select_diagnose_update").innerHTML;
-					alldiagnose.map((item) => {
-						diagnoses_select = diagnoses_select.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-					})
-					document.getElementById("select_diagnose_update").innerHTML = diagnoses_select;
+					$('#patient_id_update').val(patient_id);
+					$('#tooth_id_update').val(id);
 
-
-					$('#modalImage2_update_restro').attr('src', `https://canin-cdn.cyborgtech.co/assets/images/tooth${contents.imgAddress}`);
-
-
-					// added by navid
-					$('#selectName_update').val(contents.name).trigger('change');
-					$('#locationSelector_update').val(contents.location).trigger('change');
-					// added by Arsalan Venom33! this part checks the checkboxes
+					updateInputFields(contents);
+					updateDiagnoseSelect(contents.diagnose);
+					updateImages(contents.imgAddress);
 					initializeCheckboxes(contents);
 
-					if (contents.is_endo === "true") {
-						$('#canalselector_update').val(contents.endo.root_number).trigger('change');
+					if (contents.is_endo === "true") handleEndo(contents.endo);
+					if (contents.is_restorative === "true") handleRestorative(contents.restorative);
+					if (contents.is_prosthodontic === "true") handleProsthodontic(contents.prosthodontic);
 
-
-						$('#canalLocation1_update').val(contents.endo.r_name1).trigger('change');
-						$('#c_length1_update').val(contents.endo.r_width1).trigger('change');
-
-						$('#canalLocation2_update').val(contents.endo.r_name2).trigger('change');
-						$('#c_length2_update').val(contents.endo.r_width2).trigger('change');
-
-						$('#canalLocation3_update').val(contents.endo.r_name3).trigger('change');
-						$('#c_length3_update').val(contents.endo.r_width3).trigger('change');
-
-						$('#canalLocation4_update').val(contents.endo.r_name4).trigger('change');
-						$('#c_length4_update').val(contents.endo.r_width4).trigger('change');
-
-						$('#canalLocation5_update').val(contents.endo.r_name5).trigger('change');
-						$('#c_length5_update').val(contents.endo.r_width5).trigger('change');
-
-						// TODO: this part have some problems due to its not done yet!!!
-
-						// let endoServices = contents.endo.services;
-						// var updateInnerHTML = document.getElementById("services_update").innerHTML;
-						// endoServices.map((item) => {
-						// 	updateInnerHTML = updateInnerHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-						// })
-						// document.getElementById("services_update").innerHTML = updateInnerHTML;
-
-
-						$('#price_tooth_update').val(contents.endo.price).trigger('change');
-						$('#details_update').val(contents.endo.details).trigger('change');
-						$('#instypeObturation_update').val(contents.endo.typeObturation).trigger('change');
-						$('#insTypeSealer_update').val(contents.endo.TypeSealer).trigger('change');
-						$('#insTypeIrrigation_update').val(contents.endo.TypeIrrigation).trigger('change');
-
-						$('#modalImage_update').attr('src', `https://canin-cdn.cyborgtech.co/assets/images/tooth${contents.imgAddress}`);
-
-					}
-
-					if (contents.is_restorative === "true") {
-						$('#updateCariesDepth').val(contents.restorative.CariesDepth).trigger('change');
-						$('#updateMaterial').val(contents.restorative.Material).trigger('change');
-
-
-						$('#updateRestorativeMaterial').val(contents.restorative.RestorativeMaterial).trigger('change');
-						$('#updateCompositeBrand').val(contents.restorative.CompositeBrand).trigger('change');
-						$('#updateBondingBrand').val(contents.restorative.bondingBrand).trigger('change');
-						$('#updateAmalgamBrand').val(contents.restorative.AmalgamBrand).trigger('change');
-
-						let restorativeServices = contents.restorative.services;
-						var updateInnerHTML = document.getElementById("services_restorative_update").innerHTML;
-						restorativeServices.map((item) => {
-							updateInnerHTML = updateInnerHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-						})
-						document.getElementById("services_restorative_update").innerHTML = updateInnerHTML;
-
-						$('#price_tooth_restorative_update').val(contents.restorative.price).trigger('change');
-						$('#restorative_details_update').val(contents.restorative.details).trigger('change');
-
-
-					}
-
-					if (contents.is_prosthodontic === 'true'){
-						$('#type_pro_update').val(contents.prosthodontic.post).trigger('change');
-						$('#filling_material_update').val(contents.prosthodontic.filling_material).trigger('change');
-						$('#type_restoration_update').val(contents.prosthodontic.type_restoration).trigger('change');
-						$('#post_update').val(contents.prosthodontic.post).trigger('change');
-						$('#metal_screw_post_update').val(contents.prosthodontic.customPost).trigger('change')
-						$('#crown_material_update').val(contents.prosthodontic.crown_material).trigger('change');
-						$('#fiber_post_update').val(contents.prosthodontic.PrefabricatedPost).trigger('change');
-
-						let procolors = contents.prosthodontic.color;
-						var updateproColorHTML = document.getElementById("pro_color_update").innerHTML;
-						procolors.map((item) => {
-							updateproColorHTML = updateproColorHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-						})
-						document.getElementById("pro_color_update").innerHTML = updateproColorHTML;
-
-						$('#impression_technique_update').val(contents.prosthodontic.impression_technique).trigger('change');
-						$('#impression_material_update').val(contents.prosthodontic.impression_material).trigger('change');
-						$('#content_material_update').val(contents.prosthodontic.CementMaterial).trigger('change');
-
-						let proservices = contents.prosthodontic.services;
-						var updateservicesHTML = document.getElementById("services_pro_update").innerHTML;
-						proservices.map((item) => {
-							updateservicesHTML = updateservicesHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-						})
-						document.getElementById("services_pro_update").innerHTML = updateservicesHTML;
-
-						$('#protextarea_update').val(contents.prosthodontic.details).trigger('change');
-
-
-
-
-					}
-
-					$(`#teethmodal_update`).modal('toggle');
-				} else if (typeof contents.name === 'string' && /^[a-tA-T]+$/.test(contents.name)) {
-
+					$("#teethmodal_update").modal('toggle');
 				}
 			}
 		});
-
-
 	}
+
+	// ✅ Clears only relevant fields inside #teethmodal_update without triggering onchange events
+	function clearFields() {
+		$("#teethmodal_update input, #teethmodal_update select:not([multiple]), #teethmodal_update textarea")
+			.val("")
+			.trigger('change');
+	}
+
+	// ✅ Updates Basic Input Fields
+	function updateInputFields(contents) {
+		updateFields({
+			"#selectName_update": contents.name,
+			"#locationSelector_update": contents.location
+		});
+	}
+
+	// ✅ Fixes Diagnose Multi-Select Issue (Clears before updating)
+	function updateDiagnoseSelect(diagnoseList) {
+		let selectElement = $("#select_diagnose_update");
+
+		// Clear previous selections
+		selectElement.val([]).trigger("change");
+
+		// Select only existing <option> elements and mark them as selected
+		selectElement.find("option").each(function () {
+			this.selected = diagnoseList.includes(this.value);
+		});
+
+		// Trigger change event after setting selections
+		selectElement.trigger("change");
+	}
+
+
+	// ✅ Updates Images
+	function updateImages(imgAddress) {
+		const imgUrl = `https://canin-cdn.cyborgtech.co/assets/images/tooth${imgAddress}`;
+		$('#modalImage2_update_restro, #modalImage_update').attr('src', imgUrl);
+	}
+
+	// ✅ Handles Endodontic Updates
+	function handleEndo(endo) {
+		updateMultiSelect("services_endo_update", endo.services);
+		setTimeout(function () {
+			updateEndoFields(endo);
+			updateEndoCanals(endo);
+			insert_endo_price_update(endo.price);
+		}, 800);
+	}
+
+	function updateEndoFields(endo) {
+		updateFields({
+			"#canalselector_update": endo.root_number,
+			"#price_tooth_endo_update": endo.price,
+			"#details_update": endo.details,
+			"#instypeObturation_update": endo.typeObturation,
+			"#insTypeSealer_update": endo.TypeSealer,
+			"#insTypeIrrigation_update": endo.TypeIrrigation
+		});
+	}
+
+	function updateEndoCanals(endo) {
+		for (let i = 1; i <= 5; i++) {
+			if (endo[`r_name${i}`] !== undefined) {
+				updateFields({
+					[`#canalLocation${i}_update`]: endo[`r_name${i}`],
+					[`#c_length${i}_update`]: endo[`r_width${i}`]
+				});
+			}
+		}
+	}
+
+	// ✅ Handles Restorative Updates
+	function handleRestorative(restorative) {
+		updateMultiSelect("services_restorative_update", restorative.services);
+		setTimeout(function () {
+			updateRestorativeFields(restorative);
+			insert_resto_price_update(restorative.price);
+		}, 1000);
+	}
+
+	function updateRestorativeFields(restorative) {
+		updateFields({
+			"#updateCariesDepth": restorative.CariesDepth,
+			"#updateMaterial": restorative.Material,
+			"#updateRestorativeMaterial": restorative.RestorativeMaterial,
+			"#updateCompositeBrand": restorative.CompositeBrand,
+			"#updateBondingBrand": restorative.bondingBrand,
+			"#updateAmalgamBrand": restorative.AmalgamBrand,
+			"#price_tooth_restorative_update": restorative.price,
+			"#restorative_details_update": restorative.details
+		});
+	}
+
+	// ✅ Handles Prosthodontic Updates
+	function handleProsthodontic(prosthodontic) {
+
+		if (prosthodontic.color.length > 0) {
+
+			updateMultiSelect("pro_color_update", prosthodontic.color);
+		}
+
+
+		updateMultiSelect("services_pro_update", prosthodontic.services);
+		setTimeout(function () {
+			updateProsthodonticFields(prosthodontic);
+			insert_pro_price_update(prosthodontic.price);
+		}, 1200);
+
+		determineProsthodonticType(prosthodontic);
+	}
+
+	function updateProsthodonticFields(prosthodontic) {
+		updateFields({
+			"#filling_material_update": prosthodontic.filling_material,
+			"#type_restoration_update": prosthodontic.type_restoration,
+			"#post_update": prosthodontic.post,
+			"#metal_screw_post_update": prosthodontic.customPost,
+			"#crown_material_update": prosthodontic.crown_material,
+			"#fiber_post_update": prosthodontic.PrefabricatedPost,
+			"#impression_technique_update": prosthodontic.impression_technique,
+			"#impression_material_update": prosthodontic.impression_material,
+			"#content_material_update": prosthodontic.CementMaterial,
+			"#protextarea_update": prosthodontic.details,
+			"#price_tooth_pro_update": prosthodontic.price,
+		});
+	}
+
+	// ✅ Determines if Prosthodontic Type is "abutment" or "pontic"
+	function determineProsthodonticType(prosthodontic) {
+		const checkFields = [
+			prosthodontic.CementMaterial,
+			prosthodontic.PrefabricatedPost,
+			prosthodontic.color,
+			prosthodontic.crown_material,
+			prosthodontic.customPost,
+			prosthodontic.filling_material,
+			prosthodontic.post,
+			prosthodontic.type_restoration
+		];
+
+		// If any of these fields have a value, it's "abutment"; otherwise, it's "pontic"
+		const isAbutment = checkFields.some(field => field && field !== "");
+
+		$("#type_pro_update").val(isAbutment ? "abutment" : "pontic").trigger("change");
+	}
+
+	// ✅ Generic Field Updater
+	function updateFields(fields) {
+		Object.keys(fields).forEach(selector => {
+			if (fields[selector] !== undefined) {
+				$(selector).val(fields[selector]).trigger('change');
+			}
+		});
+	}
+
+	// ✅ Generic Multi-Select Updater with Disabled `onchange` While Setting Values
+	function updateMultiSelect(selectId, items) {
+		let selectElement = $("#" + $.escapeSelector(selectId)); // Fix selector issue
+		if (!selectElement.length) return;
+
+		selectElement.off("change").val([]).trigger("change"); // Temporarily disable onchange
+
+		let optionsHTML = selectElement.html();
+		items.forEach(item => {
+			optionsHTML = optionsHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
+		});
+
+		selectElement.html(optionsHTML).trigger("change").on("change", function () {
+			// Re-enable onchange event after setting values
+		});
+	}
+
+	// Function to calculate the sum of prosthodontic price and all other prices
+	function calculateProsthodonticTotal() {
+		let priceProsthodontics = parseFloat($('#price_tooth_pro_update').val()) || 0;
+		let priceRestoUpdate = parseFloat($('#price_tooth_restorative_update').val()) || 0;
+		let priceService = parseFloat($('#price_tooth_endo_update').val()) || 0;
+
+		// Calculate the sum
+		const sum = priceProsthodontics + priceRestoUpdate + priceService;
+
+		// Update the prosthodontic price input fields
+		$('#priceTag_pro_update').val(sum);
+
+		return sum; // If you need to use the value somewhere else
+	}
+
+	// ✅ Add event listener to recalculate whenever the prosthodontic price changes
+	$('#price_tooth_pro_update, #price_tooth_restorative_update, #price_tooth_endo_update').on('change', calculateProsthodonticTotal);
+
+	// Call the function initially in case there are pre-filled values
+	calculateProsthodonticTotal();
+
+
 </script>
