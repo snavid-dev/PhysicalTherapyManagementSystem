@@ -52,11 +52,6 @@ $ci = get_instance();
 												data-placeholder="<?= $ci->lang('select') ?>" multiple
 												onchange="multiple_value('#selectTeeth', '#selectTeethHiddenInput')">
 											<option label="<?= $ci->lang('select') ?>"></option>
-											<?php foreach ($teeth as $tooth) : ?>
-												<option value="<?= $tooth["id"] ?>"> <?= $tooth["name"] ?> -
-													(<?= $ci->dentist->find_location($tooth['location']) ?>)
-												</option>
-											<?php endforeach; ?>
 										</select>
 										<input type="hidden" id="selectTeethHiddenInput" name="teeth">
 										<input type="hidden" id="" name="patient_id" value="<?= $profile['id'] ?>">

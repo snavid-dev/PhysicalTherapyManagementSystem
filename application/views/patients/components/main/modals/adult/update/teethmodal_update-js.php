@@ -219,12 +219,7 @@ $ci = get_instance();
 
 		return sum; // If you need to use the value somewhere else
 	}
-
-	// ✅ Add event listener to recalculate whenever the prosthodontic price changes
-	$('#price_tooth_pro_update, #price_tooth_restorative_update, #price_tooth_endo_update').on('change', calculateProsthodonticTotal);
-
-	// Call the function initially in case there are pre-filled values
-	calculateProsthodonticTotal();
+	
 
 
 </script>

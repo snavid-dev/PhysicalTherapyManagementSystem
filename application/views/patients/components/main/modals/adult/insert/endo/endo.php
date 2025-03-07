@@ -13,6 +13,7 @@ $ci = get_instance();
 
 										<div class="col-sm-12 col-md-4">
 											<div class="form-group">
+												<input type="hidden" name="id" value="<?= $profile['id'] ?>">
 												<input type="hidden" name="patient_id" value="<?= $profile['id'] ?>">
 												<label class="form-label">
 													<?= $ci->lang('tooth name') ?> <span class="text-red">*</span>

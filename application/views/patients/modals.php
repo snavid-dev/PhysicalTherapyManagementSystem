@@ -17,6 +17,7 @@ $ci->render('patients/components/main/Lab/insert_modal.php');
 
 //View Lab modal
 $ci->render('patients/components/main/Lab/update_modal.php');
+$ci->render('patients/components/main/Lab/triesModals.php');
 
 
 //Insert Turn Modal

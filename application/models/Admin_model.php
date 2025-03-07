@@ -777,6 +777,16 @@ class Admin_model extends CI_Model
 		return $this->db->delete('labs', $where);
 	}
 
+	public function get_teeth_with_prosthodontics($patient_id) {
+		$this->db->select('tooth.*');
+		$this->db->from('tooth');
+		$this->db->join('prosthodontics', 'tooth.id = prosthodontics.tooth_id', 'inner');
+		$this->db->where('tooth.patient_id', $patient_id);
+		return $this->db->get()->result_array();
+	}
+
+
+
 	function insert_lab($data)
 	{
 		$log = $this->db->insert('labs', $data);

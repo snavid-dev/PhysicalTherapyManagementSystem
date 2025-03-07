@@ -15,6 +15,8 @@
 		}
 		if (actionValues == 3) {
 			// request();
+			list_prostho_teeth('<?= $profile['id'] ?>');
+
 			$(`#laboratoryInsertModal`).modal("toggle");
 			$("#selectaction").val("").trigger("change");
 		}
