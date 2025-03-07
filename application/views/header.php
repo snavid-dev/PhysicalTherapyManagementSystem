@@ -39,9 +39,6 @@ $ci = get_instance();
 	<!--Qr Code Scanner-->
 	<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
-<!--	test script-->
-
-
 
 	<script>
 		if ('serviceWorker' in navigator) {
@@ -250,7 +247,7 @@ $ci = get_instance();
 					</a>
 					<!-- LOGO -->
 				</div>
-				<div class="main-sidemenu" id="sideMenu">
+				<div class="main-sidemenu">
 					<div class="slide-left disabled" id="slide-left">
 						<svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24"
 							 viewBox="0 0 24 24">

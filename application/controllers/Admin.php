@@ -3350,6 +3350,34 @@ class Admin extends CI_Controller
 		}
 	}
 
+	public function list_prostho_teeth()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+
+			$teeth = $this->Admin_model->get_teeth_with_prosthodontics($this->input->post('record'));
+			if ($teeth) {
+				$data['type'] = 'success';
+				$data['content'] = $teeth;
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
 
 	public function insert_lab()
 	{
@@ -3387,6 +3415,41 @@ class Admin extends CI_Controller
 				$data['alert']['type'] = 'success';
 				$data['alert']['type'] = 'success';
 				$data['id'] = $insert[1];
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+					$data['title'] = $this->lang('error');
+				}
+			}
+		}
+		print_r(json_encode($data));
+	}
+
+	public function tryLab()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+
+		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('error')));
+		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('error')));
+		$this->form_validation->set_rules('remarks', 'remarks', 'trim|required', array('required' => $this->lang('insert lab remarks error')));
+		if ($this->form_validation->run()) {
+			$type = $this->input->post('type');
+			$slug = $this->input->post('slug');
+			$remarks = $this->input->post('remarks');
+			$datas = array(
+				$type . '_try_status' => 'a',
+				$type . '_try_datetime' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s'),
+				$type . '_try_message' => $remarks
+			);
+			$update = $this->Admin_model->update_lab($datas, array('id' => $this->input->post('slug')));
+			if ($update) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');
+				$data['alert']['text'] = $this->lang($type . ' try success');
+				$data['alert']['type'] = 'success';
 				$data['extraFunction'] = true;
 			}
 		} else {
@@ -3400,6 +3463,7 @@ class Admin extends CI_Controller
 		}
 		print_r(json_encode($data));
 	}
+
 
 	public function update_lab()
 	{
@@ -3473,6 +3537,83 @@ class Admin extends CI_Controller
 					$data['messages'][] = substr($error, 3, -4);
 				}
 			}
+		}
+
+		print_r(json_encode($data));
+	}
+
+	public function finish_lab()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$datas = array(
+				'status' => 'a',
+				'receive_datetime' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s'),
+			);
+
+			$update = $this->Admin_model->update_lab($datas, array('id' => $this->input->post('record')));
+			if ($update) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['text'] = $this->lang('finish lab');
+				$data['alert']['type'] = 'success';
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
+	public function show_try()
+	{
+		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('problem')));
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$data = array();
+			$record = $this->input->post('record');
+			$type = $this->input->post('type');
+			$datas = array(
+				'id' => $record
+			);
+			$lab = $this->Admin_model->single_lab($datas);
+
+
+			if (count($lab) > 0) {
+				$data['type'] = 'success';
+
+				if ($type == 'finish') {
+					$data['content'] = array(
+						'datetime' => $lab[0]['receive_datetime']
+					);
+				} else {
+					$data['content'] = array(
+						'datetime' => $lab[0][$type . '_try_datetime'],
+						'message' => $lab[0][$type . '_try_message'],
+					);
+				}
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert']['title'] = $this->lang('error');
+			$data['alert']['text'] = $this->lang('problem');
+			$data['alert']['type'] = 'error';
 		}
 
 		print_r(json_encode($data));
@@ -4163,7 +4304,6 @@ class Admin extends CI_Controller
 			$data = array();
 			$date = $this->input->post('date');
 			$doctor = $this->input->post('doctor');
-
 
 
 // Pass both parameters correctly
