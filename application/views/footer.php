@@ -146,6 +146,19 @@
 <!-- JQUERY JS -->
 <script src="<?= $ci->dentist->assets_url() ?>assets/js/jquery.min.js"></script>
 
+<!--fix scroll -->
+<script>
+	// Ensure mouse wheel scrolling works on the scrollable div
+	const scrollableDiv = document.getElementById('scrollableDiv');
+
+	scrollableDiv.addEventListener('wheel', (event) => {
+		// Prevent default scrolling behavior of the parent body
+		event.preventDefault();
+
+		// Scroll the div instead
+		scrollableDiv.scrollTop += event.deltaY;
+	});
+</script>
 <!-- BOOTSTRAP JS -->
 <script src="<?= $ci->dentist->assets_url() ?>assets/plugins/bootstrap/js/popper.min.js"></script>
 <script src="<?= $ci->dentist->assets_url() ?>assets/plugins/bootstrap/js/bootstrap.min.js"></script>
