@@ -24,9 +24,66 @@
 				</div>
 			<?php endif; ?>
 
+			<!--			rx modal-->
+			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#rxModal_home`).modal('toggle');">
+				<div class="card overflow-hidden bg_rx clickable">
+					<div class="card-body">
+						<div class="d-flex">
+							<div class="mt-2">
+								<h2 class="mb-0 number-font"><?= $ci->lang('prescription') ?></h2>
+							</div>
+							<div class="ms-auto">
+								<div class="chart-wrapper mt-1 img_icon_style">
+									<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/rx.png" alt="">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!--			expenses -->
+			<?php if ($ci->auth->has_permission('Create Expenses')): ?>
+				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-2" onclick="$(`#receiptModal`).modal('toggle');">
+					<div class="card overflow-hidden bg-warning-gradient clickable">
+						<div class="card-body">
+							<div class="d-flex">
+								<div class="mt-2">
+									<h2 class="mb-0 number-font"><?= $ci->lang('expenses') ?></h2>
+								</div>
+								<div class="ms-auto">
+									<div class="chart-wrapper mt-1 img_icon_style">
+										<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/bill.png"
+											 alt="">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			<?php endif; ?>
+
+<!--			search modal-->
+			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-2" onclick="$(`#searchModal`).modal('toggle');">
+				<div class="card overflow-hidden bg-danger-gradient clickable">
+					<div class="card-body">
+						<div class="d-flex">
+							<div class="mt-2">
+								<h2 class="mb-0 number-font"><?= $ci->lang('search') ?></h2>
+							</div>
+							<div class="ms-auto">
+								<div class="chart-wrapper mt-1 img_icon_style">
+									<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/search.png" alt="">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<!--			turns Modal-->
 			<?php if ($ci->auth->has_permission('Create Turn')): ?>
-				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#turnsModal`).modal('toggle');">
+				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-2" onclick="$(`#turnsModal`).modal('toggle');">
 					<div class="card overflow-hidden bg-info-gradient clickable">
 						<div class="card-body">
 							<div class="d-flex">
@@ -45,42 +102,6 @@
 				</div>
 			<?php endif; ?>
 
-			<!--			expenses -->
-			<?php if ($ci->auth->has_permission('Create Expenses')): ?>
-				<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#receiptModal`).modal('toggle');">
-					<div class="card overflow-hidden bg-warning-gradient clickable">
-						<div class="card-body">
-							<div class="d-flex">
-								<div class="mt-2">
-									<h2 class="mb-0 number-font"><?= $ci->lang('expenses') ?></h2>
-								</div>
-								<div class="ms-auto">
-									<div class="chart-wrapper mt-1 img_icon_style">
-										<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/bill.png"
-											 alt="">
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			<?php endif; ?>
-			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-3" onclick="$(`#searchModal`).modal('toggle');">
-				<div class="card overflow-hidden bg-danger-gradient clickable">
-					<div class="card-body">
-						<div class="d-flex">
-							<div class="mt-2">
-								<h2 class="mb-0 number-font"><?= $ci->lang('search') ?></h2>
-							</div>
-							<div class="ms-auto">
-								<div class="chart-wrapper mt-1 img_icon_style">
-									<img src="<?= $ci->dentist->assets_url() ?>assets/images/D_icons/search.png" alt="">
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
 		</div>
 	</div>
 </div>
@@ -1094,7 +1115,6 @@
 					<button class="btn btn-warning" data-bs-dismiss="modal"
 							onclick="submitWithoutDatatable('insertAccount', '<?= base_url() ?>admin/insert_receipt', '','receiptModal', print_expense, 'print');">
 						<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i></button>
-<!--
 				</div>
 			</div>
 		</div>
@@ -1102,6 +1122,1426 @@
 <?php endif; ?>
 <!-- Expenses Modal End -->
 
+
+<!--rx modal -->
+<div class="modal fade effect-scale" tabindex="-1" id="rxModal_home" role="dialog">
+
+	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+
+		<div class="modal-content">
+
+			<div class="modal-header">
+
+				<h5 class="modal-title">
+					<?= $ci->lang('insert prescription') ?>
+				</h5>
+				<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
+			</div>
+			<div class="modal-body">
+
+
+				<div class="row">
+
+					<div class="col-md-12">
+
+						<form id="prescriptions_setMedicines_home">
+							<!-- row 1 -->
+							<div class="row">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<input type="hidden" name="patient_id" value="1">
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine1_home" name="medicine_1"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx1_home', 'medicineUnite_Rx1_home', 'set_medicineUsage1_home', 'set_medicineDay1_home', 'set_medicineTime1_home', 'set_medicineAmount1_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_1" id="medicineDoze_Rx1_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx1_home" name="unit_1"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage1_home" name="usageType_1"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_1" class="form-control arrowLessInput"
+											   id="set_medicineDay1_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_1" class="form-control arrowLessInput"
+											   id="set_medicineTime1_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_1" class="form-control arrowLessInput"
+											   id="set_medicineAmount1_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+
+									<div class="plusRemovBtns">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusBtn1_home" class="icon-btn add-btn" type="button"
+													onclick=" plusBtn('setMedicien_row2_home', 'plusBtn1_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<!-- <div  style="text-align: center; margin-top: 8px;">
+                      <button class="icon-btn add-btn" type="button" onclick="removeBtn('', 'plusbtn1')">
+                        <div class="btn-txt"><?= $ci->lang('remove') ?></div>
+                      </button>
+                    </div> -->
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 1 -->
+
+							<!-- row 2 -->
+							<div class="row" id="setMedicien_row2_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine2_home" name="medicine_2"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx2_home', 'medicineUnite_Rx2_home', 'set_medicineUsage2_home', 'set_medicineDay2_home', 'set_medicineTime2_home', 'set_medicineAmount2_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_2" id="medicineDoze_Rx2_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx2_home" name="unit_2"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage2_home" name="usageType_2"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_2" class="form-control arrowLessInput"
+											   id="set_medicineDay2_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_2" class="form-control arrowLessInput"
+											   id="set_medicineTime2_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_2" class="form-control arrowLessInput"
+											   id="set_medicineAmount2_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2" id="PRBtns2_home">
+
+									<div class="plusRemovBtns">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusbtn2_home" class="icon-btn add-btn" type="button"
+													onclick="plusBtn('setMedicien_row3_home', 'plusbtn2_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row2_home', 'plusBtn1_home'), clearInput('set_medicine2_home', 'medicineDoze_Rx2_home', 'medicineUnite_Rx2_home', 'set_medicineUsage2_home', 'set_medicineDay2_home', 'set_medicineTime2_home', 'set_medicineAmount2_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 2 -->
+
+							<!-- row 3 -->
+							<div class="row" id="setMedicien_row3_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine3_home" name="medicine_3"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx3_home', 'medicineUnite_Rx3_home', 'set_medicineUsage3_home', 'set_medicineDay3_home', 'set_medicineTime3_home', 'set_medicineAmount3_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_3" id="medicineDoze_Rx3_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx3_home" name="unit_3"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage3_home" name="usageType_3"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_3" class="form-control arrowLessInput"
+											   id="set_medicineDay3_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_3" class="form-control arrowLessInput"
+											   id="set_medicineTime3_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_3" class="form-control arrowLessInput"
+											   id="set_medicineAmount3_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2" id="PRBtns3_home">
+
+									<div class="plusRemovBtns">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusbtn3_home" class="icon-btn add-btn" type="button"
+													onclick="plusBtn('setMedicien_row4_home', 'plusbtn3_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row3_home', 'plusbtn2_home'),clearInput('set_medicine3_home', 'medicineDoze_Rx3_home', 'medicineUnite_Rx3_home', 'set_medicineUsage3_home', 'set_medicineDay3_home', 'set_medicineTime3_home', 'set_medicineAmount3_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 3 -->
+
+							<!-- row 4 -->
+							<div class="row" id="setMedicien_row4_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine4_home" name="medicine_4"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx4_home', 'medicineUnite_Rx4_home', 'set_medicineUsage4_home', 'set_medicineDay4_home', 'set_medicineTime4_home', 'set_medicineAmount4_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_4" id="medicineDoze_Rx4_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx4_home" name="unit_4"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage4_home" name="usageType_4"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_4" class="form-control arrowLessInput"
+											   id="set_medicineDay4_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_4" class="form-control arrowLessInput"
+											   id="set_medicineTime4_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_4" class="form-control arrowLessInput"
+											   id="set_medicineAmount4_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+
+									<div class="plusRemovBtns" id="PRBtns4_home">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusbtn4_home" class="icon-btn add-btn" type="button"
+													onclick="plusBtn('setMedicien_row5_home', 'plusbtn4_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row4_home', 'plusbtn3_home'), clearInput('set_medicine4_home', 'medicineDoze_Rx4_home', 'medicineUnite_Rx4_home', 'set_medicineUsage4_home', 'set_medicineDay4_home', 'set_medicineTime4_home', 'set_medicineAmount4_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 4 -->
+
+
+							<!-- row 5 -->
+							<div class="row" id="setMedicien_row5_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?> <span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine5_home" name="medicine_5"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx5_home', 'medicineUnite_Rx5_home', 'set_medicineUsage5_home', 'set_medicineDay5_home', 'set_medicineTime5_home', 'set_medicineAmount5_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_5" id="medicineDoze_Rx5_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx5_home" name="unit_5"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage5_home" name="usageType_5"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_5" class="form-control arrowLessInput"
+											   id="set_medicineDay5_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_5" class="form-control arrowLessInput"
+											   id="set_medicineTime5_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_5" class="form-control arrowLessInput"
+											   id="set_medicineAmount5_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+
+									<div class="plusRemovBtns" id="PRBtns5_home" type="button">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusbtn5_home" class="icon-btn add-btn" type="button"
+													onclick="plusBtn('setMedicien_row6_home','plusbtn5_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row5_home', 'plusbtn4_home'), clearInput('set_medicine5_home', 'medicineDoze_Rx5_home', 'medicineUnite_Rx5_home', 'set_medicineUsage5_home', 'set_medicineDay5_home', 'set_medicineTime5_home', 'set_medicineAmount5_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 5 -->
+
+							<!-- row 6 -->
+							<div class="row" id="setMedicien_row6_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine6_home" name="medicine_6"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx6_home', 'medicineUnite_Rx6_home', 'set_medicineUsage6_home', 'set_medicineDay6_home', 'set_medicineTime6_home', 'set_medicineAmount6_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_6" id="medicineDoze_Rx6_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx6_home" name="unit_6"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage6_home" name="usageType_6"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_6" class="form-control arrowLessInput"
+											   id="set_medicineDay6_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_6" class="form-control arrowLessInput"
+											   id="set_medicineTime6_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_6" class="form-control arrowLessInput"
+											   id="set_medicineAmount6_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+
+									<div class="plusRemovBtns" id="PRBtns4_home">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusbtn6_home" class="icon-btn add-btn" type="button"
+													onclick="plusBtn('setMedicien_row7_home', 'plusbtn6_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row6_home', 'plusbtn5_home'), clearInput('set_medicine6_home', 'medicineDoze_Rx6_home', 'medicineUnite_Rx6_home', 'set_medicineUsage6_home', 'set_medicineDay6_home', 'set_medicineTime6_home', 'set_medicineAmount6_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 6 -->
+
+							<!-- row 7 -->
+							<div class="row" id="setMedicien_row7_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine7_home" name="medicine_7"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx7_home', 'medicineUnite_Rx7_home', 'set_medicineUsage7_home', 'set_medicineDay7_home', 'set_medicineTime7_home', 'set_medicineAmount7_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_7" id="medicineDoze_Rx7_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx7_home" name="unit_7"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage7_home" name="usageType_7"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_7" class="form-control arrowLessInput"
+											   id="set_medicineDay7_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_7" class="form-control arrowLessInput"
+											   id="set_medicineTime7_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_7" class="form-control arrowLessInput"
+											   id="set_medicineAmount7_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+
+									<div class="plusRemovBtns">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusbtn7_home" class="icon-btn add-btn" type="button"
+													onclick="plusBtn('setMedicien_row8_home', 'plusbtn7_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row7_home', 'plusbtn6_home'), clearInput('set_medicine7_home', 'medicineDoze_Rx7_home', 'medicineUnite_Rx7_home', 'set_medicineUsage7_home', 'set_medicineDay7_home', 'set_medicineTime7_home', 'set_medicineAmount7_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 7 -->
+
+							<!-- row 8 -->
+							<div class="row" id="setMedicien_row8_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine8_home" name="medicine_8"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx8_home', 'medicineUnite_Rx8_home', 'set_medicineUsage8_home', 'set_medicineDay8_home', 'set_medicineTime8_home', 'set_medicineAmount8_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_8" id="medicineDoze_Rx8_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx8_home" name="unit_8"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage8_home" name="usageType_8"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_8" class="form-control arrowLessInput"
+											   id="set_medicineDay8_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_8" class="form-control arrowLessInput"
+											   id="set_medicineTime8_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_8" class="form-control arrowLessInput"
+											   id="set_medicineAmount8_home">
+
+									</div>
+								</div>
+								<div class="col-sm-12 col-md-2">
+
+									<div class="plusRemovBtns" id="PRBtns4_home">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusbtn8_home" class="icon-btn add-btn" type="button"
+													onclick="plusBtn('setMedicien_row9_home', 'plusbtn8_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row8_home', 'plusbtn7_home'), clearInput('set_medicine8_home', 'medicineDoze_Rx8_home', 'medicineUnite_Rx8_home', 'set_medicineUsage8_home', 'set_medicineDay8_home', 'set_medicineTime8_home', 'set_medicineAmount8_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 8 -->
+
+							<!-- row 9 -->
+							<div class="row" id="setMedicien_row9_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine9_home" name="medicine_9"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx9_home', 'medicineUnite_Rx9_home', 'set_medicineUsage9_home', 'set_medicineDay9_home', 'set_medicineTime9_home', 'set_medicineAmount9_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_9" id="medicineDoze_Rx9_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx9_home" name="unit_9"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage9_home" name="usageType_9"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_9" class="form-control arrowLessInput"
+											   id="set_medicineDay9_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_9" class="form-control arrowLessInput"
+											   id="set_medicineTime9_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_9" class="form-control arrowLessInput"
+											   id="set_medicineAmount9_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+
+									<div class="plusRemovBtns" id="PRBtns4_home">
+										<div class="" style="text-align: center;margin-top:5%">
+											<button id="plusbtn9_home" class="icon-btn add-btn" type="button"
+													onclick="plusBtn('setMedicien_row10_home', 'plusbtn9_home')">
+												<div class="add-icon"></div>
+												<div class="btn-txt"><?= $ci->lang('add') ?></div>
+											</button>
+										</div>
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row9_home', 'plusbtn8_home'), clearInput('set_medicine9_home', 'medicineDoze_Rx9_home', 'medicineUnite_Rx9_home', 'set_medicineUsage9_home', 'set_medicineDay9_home', 'set_medicineTime9_home', 'set_medicineAmount9_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 9 -->
+
+							<!-- row 10 -->
+							<div class="row" id="setMedicien_row10_home" style="display: none;">
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
+										</label>
+										<!-- this is an important select tag remember it -->
+										<select id="set_medicine10_home" name="medicine_10"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>"
+												onchange="getMedicienInfo(this.value,'medicineDoze_Rx10_home', 'medicineUnite_Rx10_home', 'set_medicineUsage10_home', 'set_medicineDay10_home', 'set_medicineTime10_home', 'set_medicineAmount10_home')">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($medicines as $medicine) : ?>
+												<option value="<?= $medicine['id'] ?>">
+													<?= $medicine['type'] ?>.
+													<?= $medicine['name'] ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Doze') ?> <span class="text-red">*</span>
+										</label>
+
+										<input type="number" name="doze_10" id="medicineDoze_Rx10_home"
+											   class="form-control arrowLessInput">
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Unit') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="medicineUnite_Rx10_home" name="unit_10"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_units() as $unit) : ?>
+												<option value="<?= $unit ?>">
+													<?= $unit ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Medicine Usage') ?> <span class="text-red">*</span>
+										</label>
+
+										<select id="set_medicineUsage10_home" name="usageType_10"
+												class="form-control select2-show-search form-select"
+												data-placeholder="<?= $ci->lang('select') ?>">
+
+
+											<option label="<?= $ci->lang('select') ?>"></option>
+											<?php foreach ($ci->dentist->medicine_usage_type() as $type) : ?>
+												<option value="<?= $type ?>">
+													<?= $type ?>
+												</option>
+											<?php endforeach; ?>
+
+
+										</select>
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Day') ?>
+										</label>
+
+										<input type="number" name="day_10" class="form-control arrowLessInput"
+											   id="set_medicineDay10_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('Time') ?>
+										</label>
+
+										<input type="number" name="time_10" class="form-control arrowLessInput"
+											   id="set_medicineTime10_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-1">
+									<div class="form-group">
+										<label class="form-label">
+											<?= $ci->lang('amount') ?>
+										</label>
+
+										<input type="number" name="amount_10" class="form-control arrowLessInput"
+											   id="set_medicineAmount10_home">
+
+									</div>
+								</div>
+
+								<div class="col-sm-12 col-md-2">
+
+									<div class="plusRemovBtns" id="PRBtns4_home">
+										<!-- <div class="" style="text-align: center;margin-top:5%">
+                      <button id="plusbtn10" class="icon-btn add-btn" type="button"
+                        onclick="plusBtn('setMedicien_row5', 'plusbtn10')">
+                        <div class="add-icon"></div>
+                        <div class="btn-txt"><?= $ci->lang('add') ?></div>
+                      </button>
+                    </div> -->
+										<div class="" style="text-align: center; margin-top: 8px;">
+											<button class="icon-btn add-btn" type="button"
+													onclick="removeBtn('setMedicien_row10_home', 'plusbtn9_home'), clearInput('set_medicine10_home', 'medicineDoze_Rx10_home', 'medicineUnite_Rx10_home', 'set_medicineUsage10_home', 'set_medicineDay10_home', 'set_medicineTime10_home', 'set_medicineAmount10_home')">
+												<div class="btn-txt"><?= $ci->lang('remove') ?></div>
+											</button>
+										</div>
+									</div>
+
+
+								</div>
+
+							</div>
+							<!-- row 10 -->
+
+
+						</form>
+
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button class="btn btn-secondary" data-bs-dismiss="modal">
+					<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
+				</button>
+				<button class="btn btn-warning"
+						onclick="submitWithoutDatatable('prescriptions_setMedicines', '<?= base_url() ?>admin/insert_prescription', 'prescriptionTable', 'insertPrescription', print_prescription, 'print')">
+					<?= $ci->lang('save and print') ?> <i class="fe fe-printer"></i>
+				</button>
+				<button class="btn btn-primary"
+						onclick="submitWithoutDatatable('prescriptions_setMedicines', '<?= base_url() ?>admin/insert_prescription', 'prescriptionTable', 'insertPrescription')">
+					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!--rx modal end-->
 
 
 <script>
@@ -1414,6 +2854,46 @@
 
 </script>
 
+<!--rx js-->
 <script>
+	function getMedicienInfo(id, dozeId, unitId, usageId, dayId, timeId, amountId) {
+		$.ajax({
+			url: "<?= base_url('admin/single_medicine') ?>",
+			type: 'POST',
+			data: {
+				slug: id
+			},
+			success: function (response) {
+				let result = JSON.parse(response);
+				let medicienDatas = result.content;
+				$('#' + dozeId).val(medicienDatas.doze);
+				$('#' + unitId).val(medicienDatas.unit).trigger('change');
+				$('#' + usageId).val(medicienDatas.usageType).trigger('change');
+				$('#' + dayId).val(medicienDatas.day);
+				$('#' + timeId).val(medicienDatas.times);
+				$('#' + amountId).val(medicienDatas.amount);
+			}
+		})
 
+	}
+
+	function plusBtn(rowId, plusbtnId) {
+		$(`#${rowId}`).show();
+		$(`#${plusbtnId}`).hide();
+	}
+
+	function removeBtn(rowId, plusbtnId) {
+		$(`#${rowId}`).hide();
+		$(`#${plusbtnId}`).show();
+	}
+
+	function clearInput(medicineId, dozeId, unitId, usageId, dayId, timeId, amountId) {
+		$('#' + medicineId).val('').trigger('change');
+		$('#' + dozeId).val('');
+		$('#' + unitId).val('').trigger('change');
+		$('#' + usageId).val('').trigger('change');
+		$('#' + dayId).val('');
+		$('#' + timeId).val('');
+		$('#' + amountId).val('');
+	}
 </script>
