@@ -63,6 +63,7 @@ class Admin extends CI_Controller
 		$data['sum_paid'] = $this->Admin_model->find_sum_paid_turn($this->mylibrary->getCurrentShamsiDate()['date'])[0]['sum_cr'];
 		$data['sum_expenses'] = $this->Admin_model->find_sum_dr_balance_sheet($this->mylibrary->getCurrentShamsiDate()['date'])[0]['sum_dr'];
 		$data['script'] = $this->mylibrary->generateSelect2();
+		$data['medicines'] = $this->Admin_model->get_medicines();
 //		$data['script_single_patient_assets'] = ['assets/js/home.js'];
 		$data['turns'] = $this->Admin_model->get_turns($this->mylibrary->getCurrentShamsiDate()['date']);
 		$this->load->view('header', $data);
