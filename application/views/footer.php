@@ -146,6 +146,85 @@
 <!-- JQUERY JS -->
 <script src="<?= $ci->dentist->assets_url() ?>assets/js/jquery.min.js"></script>
 
+<!--fix header-->
+<!--TODO: fix header js-->
+<script>
+	function handleRadioChange() {
+		// Get references to the elements
+		const sideMenu = document.getElementById("scrollableDiv");
+		const psRailY = document.querySelector(".ps__rail-y");
+
+		// Get the radio buttons
+		const radio1 = document.getElementById("myonoffswitch34"); // First radio
+		const radio2 = document.getElementById("myonoffswitch35"); // Second radio
+		const radio3 = document.getElementById("myonoffswitch111"); // Third radio
+
+		// Check which radio button is checked and save it to localStorage
+		if (radio2.checked || radio3.checked) {
+			localStorage.setItem("selectedRadio", radio2.checked ? "radio2" : "radio3");
+			// Apply styles when the second or third radio is checked
+			if (sideMenu) {
+				sideMenu.setAttribute("style", "height: 67px !important;");
+			}
+			if (psRailY) {
+				psRailY.setAttribute("style", "display: none !important;");
+			}
+		} else if (radio1.checked) {
+			localStorage.setItem("selectedRadio", "radio1");
+
+			// Remove styles when the first radio is checked
+			if (sideMenu) {
+				sideMenu.setAttribute("style", "");
+			}
+			if (psRailY) {
+				psRailY.setAttribute("style", "");
+			}
+		}
+	}
+
+	// Function to initialize styles based on saved selection in localStorage
+	function initializeStyles() {
+		const sideMenu = document.getElementById("scrollableDiv");
+		const psRailY = document.querySelector(".ps__rail-y");
+
+		// Get the saved selection from localStorage
+		const selectedRadio = localStorage.getItem("selectedRadio");
+
+		// Apply the corresponding styles and check the appropriate radio button
+		if (selectedRadio === "radio2" || selectedRadio === "radio3") {
+			if (sideMenu) {
+				sideMenu.setAttribute("style", "height: 67px !important;");
+			}
+			if (psRailY) {
+				psRailY.setAttribute("style", "display: none !important;");
+			}
+			// Check the correct radio button
+			if (selectedRadio === "radio2") {
+				document.getElementById("myonoffswitch35").checked = true;
+			} else {
+				document.getElementById("myonoffswitch111").checked = true;
+			}
+		} else {
+			// Default to the first radio button
+			if (sideMenu) {
+				sideMenu.setAttribute("style", "");
+			}
+			if (psRailY) {
+				psRailY.setAttribute("style", "");
+			}
+			document.getElementById("myonoffswitch34").checked = true;
+		}
+	}
+
+	// Add event listeners to the radio buttons
+	document.getElementById("myonoffswitch34")?.addEventListener("change", handleRadioChange);
+	document.getElementById("myonoffswitch35")?.addEventListener("change", handleRadioChange);
+	document.getElementById("myonoffswitch111")?.addEventListener("change", handleRadioChange);
+
+	// Initialize styles on page load
+	initializeStyles();
+</script>
+
 <!--fix scroll -->
 <script>
 	// Ensure mouse wheel scrolling works on the scrollable div
@@ -159,6 +238,7 @@
 		scrollableDiv.scrollTop += event.deltaY;
 	});
 </script>
+
 <!-- BOOTSTRAP JS -->
 <script src="<?= $ci->dentist->assets_url() ?>assets/plugins/bootstrap/js/popper.min.js"></script>
 <script src="<?= $ci->dentist->assets_url() ?>assets/plugins/bootstrap/js/bootstrap.min.js"></script>
