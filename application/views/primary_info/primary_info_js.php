@@ -125,3 +125,47 @@ $ci = get_instance();
 
 
 </script>
+
+<!-- TODO: tab10 rx modal-->
+<script>
+	function getMedicienInfo(id, dozeId, unitId, usageId, dayId, timeId, amountId) {
+		$.ajax({
+			url: "<?= base_url('admin/single_medicine') ?>",
+			type: 'POST',
+			data: {
+				slug: id
+			},
+			success: function (response) {
+				let result = JSON.parse(response);
+				let medicienDatas = result.content;
+				$('#' + dozeId).val(medicienDatas.doze);
+				$('#' + unitId).val(medicienDatas.unit).trigger('change');
+				$('#' + usageId).val(medicienDatas.usageType).trigger('change');
+				$('#' + dayId).val(medicienDatas.day);
+				$('#' + timeId).val(medicienDatas.times);
+				$('#' + amountId).val(medicienDatas.amount);
+			}
+		})
+
+	}
+
+	function plusBtn(rowId, plusbtnId) {
+		$(`#${rowId}`).show();
+		$(`#${plusbtnId}`).hide();
+	}
+
+	function removeBtn(rowId, plusbtnId) {
+		$(`#${rowId}`).hide();
+		$(`#${plusbtnId}`).show();
+	}
+
+	function clearInput(medicineId, dozeId, unitId, usageId, dayId, timeId, amountId) {
+		$('#' + medicineId).val('').trigger('change');
+		$('#' + dozeId).val('');
+		$('#' + unitId).val('').trigger('change');
+		$('#' + usageId).val('').trigger('change');
+		$('#' + dayId).val('');
+		$('#' + timeId).val('');
+		$('#' + amountId).val('');
+	}
+</script>
