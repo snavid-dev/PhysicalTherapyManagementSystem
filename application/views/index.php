@@ -1141,6 +1141,28 @@
 			</div>
 			<div class="modal-body">
 
+				<div class="row">
+
+					<div class="col-sm-12 col-md-4">
+						<div class="form-group">
+							<label class="form-label">
+								<?= $ci->lang('patient name') ?> <span class="text-red">*</span>
+							</label>
+							<select name="patient_id" class="form-control select2-show-search form-select"
+									data-placeholder="<?= $ci->lang('select') ?>" id="patientName_rx">
+								<option label="<?= $ci->lang('select') ?>"></option>
+								<?php foreach ($patients as $patient) : ?>
+									<option value="<?= $patient['id'] ?>">
+										<?= $ci->mylibrary->get_patient_name($patient['name'], $patient['lname'], $patient['serial_id'], $patient['gender']) ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="customHr2"></div>
 
 				<div class="row">
 
@@ -2523,6 +2545,8 @@
 
 					</div>
 				</div>
+
+
 			</div>
 
 			<div class="modal-footer">
