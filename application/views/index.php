@@ -379,7 +379,7 @@
 				<div class="card-body">
 					<div class="d-flex mb-4 mt-3">
 						<div class="avatar avatar-md bg-secondary-transparent text-secondary bradius me-3">
-							<i class="fe fe-check"></i>
+							<i class="fa fa-circle-check"></i>
 						</div>
 						<div class="">
 							<h6 class="mb-1 fw-semibold">Delivered Orders</h6>
@@ -392,7 +392,7 @@
 					</div>
 					<div class="d-flex">
 						<div class="avatar  avatar-md bg-pink-transparent text-pink bradius me-3">
-							<i class="fe fe-x"></i>
+							<i class="fa fa-close"></i>
 						</div>
 						<div class="">
 							<h6 class="mb-1 fw-semibold">Cancelled Orders</h6>
@@ -1293,11 +1293,6 @@
 												<div class="btn-txt"><?= $ci->lang('add') ?></div>
 											</button>
 										</div>
-										<!-- <div  style="text-align: center; margin-top: 8px;">
-                      <button class="icon-btn add-btn" type="button" onclick="removeBtn('', 'plusbtn1')">
-                        <div class="btn-txt"><?= $ci->lang('remove') ?></div>
-                      </button>
-                    </div> -->
 									</div>
 
 
@@ -2555,7 +2550,7 @@
 				</button>
 				<button class="btn btn-warning"
 						onclick="submitWithoutDatatable('prescriptions_setMedicines', '<?= base_url() ?>admin/insert_prescription', 'prescriptionTable', 'insertPrescription', print_prescription, 'print')">
-					<?= $ci->lang('save and print') ?> <i class="fe fe-printer"></i>
+					<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i>
 				</button>
 				<button class="btn btn-primary"
 						onclick="submitWithoutDatatable('prescriptions_setMedicines', '<?= base_url() ?>admin/insert_prescription', 'prescriptionTable', 'insertPrescription')">

@@ -149,7 +149,7 @@
 
                           <a class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>
                         <?php else : ?>
-                          <a class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fe fe-unlock fs-14"></span></a>
+                          <a class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-unlock fs-14"></span></a>
                         <?php endif; ?>
                         <a href="javascript:delete_via_alert('<?= $user['id'] ?>', '<?= base_url() ?>admin/delete_user', 'file-datatable', null, true)" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fa fa-trash"></span></a>
                       </div>

@@ -1408,7 +1408,7 @@ $ci = get_instance();
                 </button>
                 <button class="btn btn-warning"
                     onclick="submitWithoutDatatable('prescriptions_setMedicines', '<?= base_url() ?>admin/insert_prescription', 'prescriptionTable', 'insertPrescription', print_prescription, 'print')">
-                    <?= $ci->lang('save and print') ?> <i class="fe fe-printer"></i>
+                    <?= $ci->lang('save and print') ?> <i class="fa fa-printer"></i>
                 </button>
                 <button class="btn btn-primary"
                     onclick="submitWithoutDatatable('prescriptions_setMedicines', '<?= base_url() ?>admin/insert_prescription', 'prescriptionTable', 'insertPrescription')">

@@ -16,7 +16,7 @@
 								<button class="btn btn-primary"
 										onclick="window.location.href='<?= base_url() ?>admin/user_role'"><?= $ci->lang('add new') ?>
 									<i
-										class="fe fe-plus"></i></button>
+										class="fa fa-plus"></i></button>
 							</li>
 						</ul>
 					</div>
