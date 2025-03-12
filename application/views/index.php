@@ -1149,7 +1149,7 @@
 								<?= $ci->lang('patient name') ?> <span class="text-red">*</span>
 							</label>
 							<select name="patient_id" class="form-control select2-show-search form-select"
-									data-placeholder="<?= $ci->lang('select') ?>" id="patientName_rx">
+									data-placeholder="<?= $ci->lang('select') ?>" id="patientName_rx" onchange="document.getElementById('pres_patient_id').value = this.value">
 								<option label="<?= $ci->lang('select') ?>"></option>
 								<?php foreach ($patients as $patient) : ?>
 									<option value="<?= $patient['id'] ?>">
@@ -1177,7 +1177,7 @@
 										<label class="form-label">
 											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
 										</label>
-										<input type="hidden" name="patient_id" value="1">
+										<input type="hidden" name="patient_id" id="pres_patient_id">
 										<!-- this is an important select tag remember it -->
 										<select id="set_medicine1_home" name="medicine_1"
 												class="form-control select2-show-search form-select"
@@ -2548,14 +2548,11 @@
 				<button class="btn btn-secondary" data-bs-dismiss="modal">
 					<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
 				</button>
-				<button class="btn btn-warning"
-						onclick="submitWithoutDatatable('prescriptions_setMedicines', '<?= base_url() ?>admin/insert_prescription', 'prescriptionTable', 'insertPrescription', print_prescription, 'print')">
-					<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i>
-				</button>
-				<button class="btn btn-primary"
-						onclick="submitWithoutDatatable('prescriptions_setMedicines', '<?= base_url() ?>admin/insert_prescription', 'prescriptionTable', 'insertPrescription')">
-					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
-				</button>
+
+				<button class="btn btn-warning" data-bs-dismiss="modal"
+						onclick="submitWithoutDatatable('prescriptions_setMedicines_home', '<?= base_url() ?>admin/insert_prescription', '','rxModal_home', print_prescription, 'print');">
+					<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i></button>
+
 			</div>
 		</div>
 	</div>
@@ -2914,5 +2911,9 @@
 		$('#' + dayId).val('');
 		$('#' + timeId).val('');
 		$('#' + amountId).val('');
+	}
+
+	function print_prescription(prescriptionId) {
+		window.open(`<?= base_url() ?>admin/print_prescription/${prescriptionId}`, '_blank');
 	}
 </script>
