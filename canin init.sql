@@ -1093,7 +1093,7 @@ CREATE TABLE `users`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-INSERT INTO `users` (`id`, `fname`, `lname`, `role`, `username`, `status`, `password`, `photo`, `uniqid`, `role_id`, `working_start_time`, `working_end_time`) VALUES (NULL, 'سید نوید', 'عظیمی', 'admin', 'Navid', 'A', 'b8a1ebd0836b58bca6fe44de5f2ac969', 'default.png', 'sdfsd', '12', '08:00', '17:00');
+INSERT INTO `users` (`id`, `fname`, `lname`, `role`, `username`, `status`, `password`, `photo`, `uniqid`, `role_id`, `working_start_time`, `working_end_time`) VALUES (1, 'سید نوید', 'عظیمی', 'admin', 'Navid', 'A', 'b8a1ebd0836b58bca6fe44de5f2ac969', 'default.png', 'sdfsd', '12', '08:00', '17:00');
 -- --------------------------------------------------------
 
 --
