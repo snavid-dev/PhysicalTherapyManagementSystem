@@ -15,7 +15,7 @@
 							<li>
 								<button class="btn btn-primary" data-bs-toggle="modal"
 										data-bs-target="#extralargemodal_insert"><?= $ci->lang('add new') ?> <i
-										class="fe fe-plus"></i></button>
+										class="fa fa-plus"></i></button>
 							</li>
 						</ul>
 						<!-- Modal Button -->
