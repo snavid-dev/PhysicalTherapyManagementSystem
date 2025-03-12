@@ -63,6 +63,7 @@ class Admin extends CI_Controller
 		$data['sum_paid'] = $this->Admin_model->find_sum_paid_turn($this->mylibrary->getCurrentShamsiDate()['date'])[0]['sum_cr'];
 		$data['sum_expenses'] = $this->Admin_model->find_sum_dr_balance_sheet($this->mylibrary->getCurrentShamsiDate()['date'])[0]['sum_dr'];
 		$data['script'] = $this->mylibrary->generateSelect2();
+		$data['prescriptions'] = $this->Admin_model->list_prescription_samples('sample');
 		$data['medicines'] = $this->Admin_model->get_medicines();
 //		$data['script_single_patient_assets'] = ['assets/js/home.js'];
 		$data['turns'] = $this->Admin_model->get_turns($this->mylibrary->getCurrentShamsiDate()['date']);
@@ -712,6 +713,7 @@ class Admin extends CI_Controller
 		$data['services'] = $this->Admin_model->get_services();
 		$data['script_single_patient_assets'] = ["assets/js/primary_info.js"];
 		$data['medicines'] = $this->Admin_model->get_medicines();
+		$data['prescriptions'] = $this->Admin_model->list_prescription_samples('sample');
 		$data['diagnoses'] = $this->Admin_model->get_diagnoses();
 		$data['categories'] = $this->Admin_model->get_categories();
 		$data['categories_teeth'] = $this->Admin_model->categories_by_type('teeth');
@@ -1838,6 +1840,37 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+	public function single_prescription_sample()
+	{
+		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$data = array();
+			$record = $this->input->post('slug');
+			$datas = array(
+				'id' => $record
+			);
+			$prescription = $this->Admin_model->single_prescription_sample($datas);
+
+			$data['type'] = 'success';
+			if (count($prescription) > 0) {
+				$data['content'] = $prescription[0];
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert']['title'] = $this->lang('error');
+			$data['alert']['text'] = $this->lang('problem');
+			$data['alert']['type'] = 'error';
+		}
+
+		print_r(json_encode($data));
+	}
+
+
 	public function insert_prescription()
 	{
 		// print_r($_POST);
@@ -2168,6 +2201,370 @@ class Admin extends CI_Controller
 		}
 		print_r(json_encode($data));
 	}
+
+
+	public function insert_prescription_sample()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('name', 'name', 'trim|required|is_unique[prescription_samples.name]', array('required' => $this->lang('insert user name error'), 'is_unique' => $this->lang('insert user username unique error')));
+
+
+		// First Row that always exists
+		$this->form_validation->set_rules('medicine_1', 'medicine_1', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+		$this->form_validation->set_rules('doze_1', 'doze_1', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+		$this->form_validation->set_rules('unit_1', 'unit_1', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+		$this->form_validation->set_rules('usageType_1', 'usageType_1', 'trim');
+		$this->form_validation->set_rules('day_1', 'day_1', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+		$this->form_validation->set_rules('time_1', 'time_1', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+		$this->form_validation->set_rules('amount_1', 'amount_1', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		// End First Row
+
+		// Second Row
+		if ($this->input->post('medicine_2') != '') {
+			$this->form_validation->set_rules('medicine_2', 'medicine_2', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_2', 'doze_2', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_2', 'unit_2', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_2', 'usageType_2', 'trim');
+			$this->form_validation->set_rules('day_2', 'day_2', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_2', 'time_2', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_2', 'amount_2', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_2', 'medicine_2', 'trim');
+			$this->form_validation->set_rules('doze_2', 'doze_2', 'trim');
+			$this->form_validation->set_rules('unit_2', 'unit_2', 'trim');
+			$this->form_validation->set_rules('usageType_2', 'usageType_2', 'trim');
+			$this->form_validation->set_rules('day_2', 'day_2', 'trim');
+			$this->form_validation->set_rules('time_2', 'time_2', 'trim');
+			$this->form_validation->set_rules('amount_2', 'amount_2', 'trim');
+		}
+		// end Second Row
+
+		// third Row
+		if ($this->input->post('medicine_3') != '') {
+			$this->form_validation->set_rules('medicine_3', 'medicine_3', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_3', 'doze_3', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_3', 'unit_3', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_3', 'usageType_3', 'trim');
+			$this->form_validation->set_rules('day_3', 'day_3', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_3', 'time_3', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_3', 'amount_3', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_3', 'medicine_3', 'trim');
+			$this->form_validation->set_rules('doze_3', 'doze_3', 'trim');
+			$this->form_validation->set_rules('unit_3', 'unit_3', 'trim');
+			$this->form_validation->set_rules('usageType_3', 'usageType_3', 'trim');
+			$this->form_validation->set_rules('day_3', 'day_3', 'trim');
+			$this->form_validation->set_rules('time_3', 'time_3', 'trim');
+			$this->form_validation->set_rules('amount_3', 'amount_3', 'trim');
+		}
+		// end third Row
+
+		// Fourth Row
+		if ($this->input->post('medicine_4') != '') {
+			$this->form_validation->set_rules('medicine_4', 'medicine_4', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_4', 'doze_4', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_4', 'unit_4', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_4', 'usageType_4', 'trim');
+			$this->form_validation->set_rules('day_4', 'day_4', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_4', 'time_4', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_4', 'amount_4', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_4', 'medicine_4', 'trim');
+			$this->form_validation->set_rules('doze_4', 'doze_4', 'trim');
+			$this->form_validation->set_rules('unit_4', 'unit_4', 'trim');
+			$this->form_validation->set_rules('usageType_4', 'usageType_4', 'trim');
+			$this->form_validation->set_rules('day_4', 'day_4', 'trim');
+			$this->form_validation->set_rules('time_4', 'time_4', 'trim');
+			$this->form_validation->set_rules('amount_4', 'amount_4', 'trim');
+		}
+		// end Fourth Row
+
+		// Fifth Row
+		if ($this->input->post('medicine_5') != '') {
+			$this->form_validation->set_rules('medicine_5', 'medicine_5', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_5', 'doze_5', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_5', 'unit_5', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_5', 'usageType_5', 'trim');
+			$this->form_validation->set_rules('day_5', 'day_5', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_5', 'time_5', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_5', 'amount_5', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_5', 'medicine_5', 'trim');
+			$this->form_validation->set_rules('doze_5', 'doze_5', 'trim');
+			$this->form_validation->set_rules('unit_5', 'unit_5', 'trim');
+			$this->form_validation->set_rules('usageType_5', 'usageType_5', 'trim');
+			$this->form_validation->set_rules('day_5', 'day_5', 'trim');
+			$this->form_validation->set_rules('time_5', 'time_5', 'trim');
+			$this->form_validation->set_rules('amount_5', 'amount_5', 'trim');
+		}
+		// end Fifth Row
+
+		// sixth Row
+		if ($this->input->post('medicine_6') != '') {
+			$this->form_validation->set_rules('medicine_6', 'medicine_6', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_6', 'doze_6', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_6', 'unit_6', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_6', 'usageType_6', 'trim');
+			$this->form_validation->set_rules('day_6', 'day_6', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_6', 'time_6', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_6', 'amount_6', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_6', 'medicine_6', 'trim');
+			$this->form_validation->set_rules('doze_6', 'doze_6', 'trim');
+			$this->form_validation->set_rules('unit_6', 'unit_6', 'trim');
+			$this->form_validation->set_rules('usageType_6', 'usageType_6', 'trim');
+			$this->form_validation->set_rules('day_6', 'day_6', 'trim');
+			$this->form_validation->set_rules('time_6', 'time_6', 'trim');
+			$this->form_validation->set_rules('amount_6', 'amount_6', 'trim');
+		}
+		// end sixth Row
+
+
+		// seventh Row
+		if ($this->input->post('medicine_7') != '') {
+			$this->form_validation->set_rules('medicine_7', 'medicine_7', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_7', 'doze_7', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_7', 'unit_7', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_7', 'usageType_7', 'trim');
+			$this->form_validation->set_rules('day_7', 'day_7', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_7', 'time_7', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_7', 'amount_7', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_7', 'medicine_7', 'trim');
+			$this->form_validation->set_rules('doze_7', 'doze_7', 'trim');
+			$this->form_validation->set_rules('unit_7', 'unit_7', 'trim');
+			$this->form_validation->set_rules('usageType_7', 'usageType_7', 'trim');
+			$this->form_validation->set_rules('day_7', 'day_7', 'trim');
+			$this->form_validation->set_rules('time_7', 'time_7', 'trim');
+			$this->form_validation->set_rules('amount_7', 'amount_7', 'trim');
+		}
+		// end seventh Row
+
+
+		// eightth Row
+		if ($this->input->post('medicine_8') != '') {
+			$this->form_validation->set_rules('medicine_8', 'medicine_8', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_8', 'doze_8', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_8', 'unit_8', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_8', 'usageType_8', 'trim');
+			$this->form_validation->set_rules('day_8', 'day_8', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_8', 'time_8', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_8', 'amount_8', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_8', 'medicine_8', 'trim');
+			$this->form_validation->set_rules('doze_8', 'doze_8', 'trim');
+			$this->form_validation->set_rules('unit_8', 'unit_8', 'trim');
+			$this->form_validation->set_rules('usageType_8', 'usageType_8', 'trim');
+			$this->form_validation->set_rules('day_8', 'day_8', 'trim');
+			$this->form_validation->set_rules('time_8', 'time_8', 'trim');
+			$this->form_validation->set_rules('amount_8', 'amount_8', 'trim');
+		}
+		// end eightth Row
+
+
+		// nineth Row
+		if ($this->input->post('medicine_9') != '') {
+			$this->form_validation->set_rules('medicine_9', 'medicine_9', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_9', 'doze_9', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_9', 'unit_9', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_9', 'usageType_9', 'trim');
+			$this->form_validation->set_rules('day_9', 'day_9', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_9', 'time_9', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_9', 'amount_9', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_9', 'medicine_9', 'trim');
+			$this->form_validation->set_rules('doze_9', 'doze_9', 'trim');
+			$this->form_validation->set_rules('unit_9', 'unit_9', 'trim');
+			$this->form_validation->set_rules('usageType_9', 'usageType_9', 'trim');
+			$this->form_validation->set_rules('day_9', 'day_9', 'trim');
+			$this->form_validation->set_rules('time_9', 'time_9', 'trim');
+			$this->form_validation->set_rules('amount_9', 'amount_9', 'trim');
+		}
+		// end nineth Row
+
+		// tenth Row
+		if ($this->input->post('medicine_10') != '') {
+			$this->form_validation->set_rules('medicine_10', 'medicine_10', 'trim|required', array('required' => $this->lang('insert prescription medicine error')));
+			$this->form_validation->set_rules('doze_10', 'doze_10', 'trim|required', array('required' => $this->lang('insert prescription doze error')));
+			$this->form_validation->set_rules('unit_10', 'unit_10', 'trim|required', array('required' => $this->lang('insert prescription unit error')));
+			$this->form_validation->set_rules('usageType_10', 'usageType_10', 'trim');
+			$this->form_validation->set_rules('day_10', 'day_10', 'trim|required', array('required' => $this->lang('insert prescription day error')));
+			$this->form_validation->set_rules('time_10', 'time_10', 'trim|required', array('required' => $this->lang('insert prescription time error')));
+			$this->form_validation->set_rules('amount_10', 'amount_10', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
+		} else {
+			$this->form_validation->set_rules('medicine_10', 'medicine_10', 'trim');
+			$this->form_validation->set_rules('doze_10', 'doze_10', 'trim');
+			$this->form_validation->set_rules('unit_10', 'unit_10', 'trim');
+			$this->form_validation->set_rules('usageType_10', 'usageType_10', 'trim');
+			$this->form_validation->set_rules('day_10', 'day_10', 'trim');
+			$this->form_validation->set_rules('time_10', 'time_10', 'trim');
+			$this->form_validation->set_rules('amount_10', 'amount_10', 'trim');
+		}
+		// end tenth Row
+
+		if ($this->form_validation->run()) {
+			$date_time = $this->mylibrary->getCurrentShamsiDate();
+			$datas = array(
+				'name' => $this->input->post('name'),
+				'users_id' => $this->session->userdata($this->mylibrary->hash_session('u_id')),
+				'date_time' => $date_time['date'] . ' (' . $date_time['time'] . ')',
+
+
+				'medicine_1' => $this->input->post('medicine_1'),
+				'doze_1' => $this->input->post('doze_1'),
+				'amount_1' => $this->input->post('amount_1'),
+				'time_1' => $this->input->post('time_1'),
+				'day_1' => $this->input->post('day_1'),
+				'usageType_1' => $this->input->post('usageType_1'),
+				'unit_1' => $this->input->post('unit_1'),
+
+
+				'medicine_2' => $this->input->post('medicine_2'),
+				'doze_2' => $this->input->post('doze_2'),
+				'amount_2' => $this->input->post('amount_2'),
+				'time_2' => $this->input->post('time_2'),
+				'day_2' => $this->input->post('day_2'),
+				'usageType_2' => $this->input->post('usageType_2'),
+				'unit_2' => $this->input->post('unit_2'),
+
+
+				'medicine_3' => $this->input->post('medicine_3'),
+				'doze_3' => $this->input->post('doze_3'),
+				'amount_3' => $this->input->post('amount_3'),
+				'time_3' => $this->input->post('time_3'),
+				'day_3' => $this->input->post('day_3'),
+				'usageType_3' => $this->input->post('usageType_3'),
+				'unit_3' => $this->input->post('unit_3'),
+
+				'medicine_4' => $this->input->post('medicine_4'),
+				'doze_4' => $this->input->post('doze_4'),
+				'amount_4' => $this->input->post('amount_4'),
+				'time_4' => $this->input->post('time_4'),
+				'day_4' => $this->input->post('day_4'),
+				'usageType_4' => $this->input->post('usageType_4'),
+				'unit_4' => $this->input->post('unit_4'),
+
+
+				'medicine_5' => $this->input->post('medicine_5'),
+				'doze_5' => $this->input->post('doze_5'),
+				'amount_5' => $this->input->post('amount_5'),
+				'time_5' => $this->input->post('time_5'),
+				'day_5' => $this->input->post('day_5'),
+				'usageType_5' => $this->input->post('usageType_5'),
+				'unit_5' => $this->input->post('unit_5'),
+
+				'medicine_6' => $this->input->post('medicine_6'),
+				'doze_6' => $this->input->post('doze_6'),
+				'amount_6' => $this->input->post('amount_6'),
+				'time_6' => $this->input->post('time_6'),
+				'day_6' => $this->input->post('day_6'),
+				'usageType_6' => $this->input->post('usageType_6'),
+				'unit_6' => $this->input->post('unit_6'),
+
+
+				'medicine_7' => $this->input->post('medicine_7'),
+				'doze_7' => $this->input->post('doze_7'),
+				'amount_7' => $this->input->post('amount_7'),
+				'time_7' => $this->input->post('time_7'),
+				'day_7' => $this->input->post('day_7'),
+				'usageType_7' => $this->input->post('usageType_7'),
+				'unit_7' => $this->input->post('unit_7'),
+
+
+				'medicine_8' => $this->input->post('medicine_8'),
+				'doze_8' => $this->input->post('doze_8'),
+				'amount_8' => $this->input->post('amount_8'),
+				'time_8' => $this->input->post('time_8'),
+				'day_8' => $this->input->post('day_8'),
+				'usageType_8' => $this->input->post('usageType_8'),
+				'unit_8' => $this->input->post('unit_8'),
+
+
+				'medicine_9' => $this->input->post('medicine_9'),
+				'doze_9' => $this->input->post('doze_9'),
+				'amount_9' => $this->input->post('amount_9'),
+				'time_9' => $this->input->post('time_9'),
+				'day_9' => $this->input->post('day_9'),
+				'usageType_9' => $this->input->post('usageType_9'),
+				'unit_9' => $this->input->post('unit_9'),
+
+
+				'medicine_10' => $this->input->post('medicine_10'),
+				'doze_10' => $this->input->post('doze_10'),
+				'amount_10' => $this->input->post('amount_10'),
+				'time_10' => $this->input->post('time_10'),
+				'day_10' => $this->input->post('day_10'),
+				'usageType_10' => $this->input->post('usageType_10'),
+				'unit_10' => $this->input->post('unit_10'),
+			);
+			$insert = $this->Admin_model->insert_prescription_sample($datas);
+			if ($insert[0]) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');
+				$data['alert']['text'] = $this->lang('insert prescription success');
+				$data['alert']['type'] = 'success';
+
+				$data['id'] = $insert[1];
+
+				$btns = '';
+				$btns .= $this->mylibrary->generateBtnUpdate('editPrescription', $data['id']);
+				$btns .= $this->mylibrary->generateBtnDeleteMultiDataTable($data['id'], 'admin/delete_prescription_sample', 'prescription_table');
+
+				$data['tr'] = array(
+					$datas['name'],
+					$this->mylibrary->btn_group($btns)
+				);
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+					$data['title'] = $this->lang('error');
+				}
+			}
+		}
+		print_r(json_encode($data));
+	}
+
+
+	public function delete_prescription_sample()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$datas = array(
+				'id' => $this->input->post('record')
+			);
+
+			if ($this->Admin_model->delete_prescription_sample($datas)) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['text'] = $this->lang('delete service');
+				$data['alert']['type'] = 'success';
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
 
 
 	public function print_prescription($id)

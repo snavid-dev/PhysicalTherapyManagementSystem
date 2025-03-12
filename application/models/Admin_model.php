@@ -1384,9 +1384,18 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 		return $this->db->get_where('prescription', $where)->result_array();
 	}
 
+	function single_prescription_sample($where)
+	{
+		return $this->db->get_where('prescription_samples', $where)->result_array();
+	}
+
 	function list_prescription_patient($patient_id)
 	{
 		return $this->db->query("SELECT prescription.id, CONCAT(users.fname, ' - ', users.lname) AS 'user_name', date_time FROM `prescription` INNER JOIN users ON prescription.users_id = users.id WHERE prescription.patient_id = '$patient_id'")->result_array();
+	}
+
+	function list_prescription_samples($type = null){
+		return $this->db->get_where('prescription_samples', array('type' => $type))->result_array();
 	}
 
 	public function insert_prescription($data = array())
@@ -1397,10 +1406,24 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 		return array($log, $id);
 	}
 
+	public function insert_prescription_sample($data = array())
+	{
+		$log = $this->db->insert('prescription_samples', $data);
+		$id = $this->db->insert_id();
+
+		return array($log, $id);
+	}
+
+	public function delete_prescription_sample($data = array()){
+		return $this->db->delete('prescription_samples', $data);
+	}
+
+
 	function single_prescription_print($id)
 	{
 		return $this->db->query("SELECT `prescription`.*, patient.name, patient.lname, patient.address, patient.age FROM `prescription` INNER JOIN patient ON prescription.patient_id = patient.id WHERE prescription.id = '$id'")->result_array();
 	}
+
 	// end prescription
 
 
