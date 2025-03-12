@@ -63,7 +63,7 @@
 				</div>
 			<?php endif; ?>
 
-<!--			search modal-->
+			<!--			search modal-->
 			<div class="col-lg-4 col-md-4 col-sm-12 col-xl-2" onclick="$(`#searchModal`).modal('toggle');">
 				<div class="card overflow-hidden bg-danger-gradient clickable">
 					<div class="card-body">
@@ -1141,43 +1141,59 @@
 			</div>
 			<div class="modal-body">
 
-				<div class="row">
 
-					<div class="col-sm-12 col-md-4">
-						<div class="form-group">
-							<label class="form-label">
-								<?= $ci->lang('patient name') ?> <span class="text-red">*</span>
-							</label>
-							<select name="patient_id" class="form-control select2-show-search form-select"
-									data-placeholder="<?= $ci->lang('select') ?>" id="patientName_rx" onchange="document.getElementById('pres_patient_id').value = this.value">
-								<option label="<?= $ci->lang('select') ?>"></option>
-								<?php foreach ($patients as $patient) : ?>
-									<option value="<?= $patient['id'] ?>">
-										<?= $ci->mylibrary->get_patient_name($patient['name'], $patient['lname'], $patient['serial_id'], $patient['gender']) ?>
-									</option>
-								<?php endforeach; ?>
-							</select>
+				<form id="prescriptions_setMedicines_home">
+
+					<div class="row">
+
+						<div class="row">
+
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('patient name') ?> <span class="text-red">*</span>
+									</label>
+									<select name="patient_id" class="form-control select2-show-search form-select"
+											data-placeholder="<?= $ci->lang('select') ?>" id="patientName_rx">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<?php foreach ($patients as $patient) : ?>
+											<option value="<?= $patient['id'] ?>">
+												<?= $ci->mylibrary->get_patient_name($patient['name'], $patient['lname'], $patient['serial_id'], $patient['gender']) ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('type') ?>
+									</label>
+									<select class="form-control select2-show-search form-select"
+											data-placeholder="<?= $ci->lang('select') ?>" id="" onchange="viewPrescriptionsMedicines(this.value)">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<?php foreach ($prescriptions as $prescription) : ?>
+											<option value="<?= $prescription['id'] ?>">
+												<?= ucwords($prescription['name']) ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+
 						</div>
-					</div>
+						<div class="customHr2"></div>
+						<div class="col-md-12">
 
-				</div>
-
-				<div class="customHr2"></div>
-
-				<div class="row">
-
-					<div class="col-md-12">
-
-						<form id="prescriptions_setMedicines_home">
 							<!-- row 1 -->
-							<div class="row">
+							<div class="row" id="setMedicien_row1_home">
 
 								<div class="col-sm-12 col-md-2">
 									<div class="form-group">
 										<label class="form-label">
 											<?= $ci->lang('Medicine Name') ?><span class="text-red">*</span>
 										</label>
-										<input type="hidden" name="patient_id" id="pres_patient_id">
 										<!-- this is an important select tag remember it -->
 										<select id="set_medicine1_home" name="medicine_1"
 												class="form-control select2-show-search form-select"
@@ -2536,11 +2552,10 @@
 							<!-- row 10 -->
 
 
-						</form>
-
+						</div>
 					</div>
-				</div>
 
+				</form>
 
 			</div>
 
@@ -2915,5 +2930,256 @@
 
 	function print_prescription(prescriptionId) {
 		window.open(`<?= base_url() ?>admin/print_prescription/${prescriptionId}`, '_blank');
+		}
+
+
+		function viewPrescriptionsMedicines(id) {
+			$.ajax({
+				url: "<?= base_url('admin/single_prescription_sample') ?>",
+				type: 'POST',
+				data: {
+					slug: id
+				},
+				success: function (response) {
+					let result = JSON.parse(response);
+					let medicienDatas = result.content;
+
+					// this part counts how many has to be shown-start
+					var medicineCount = 0;
+
+					for (var key in medicienDatas) {
+						if (key.startsWith("medicine_") && medicienDatas[key] != 0) {
+							console.log(key)
+							medicineCount++;
+						}
+					}
+
+					console.log(medicineCount);
+
+					showRows(medicineCount);
+					// this part counts how many has to be shown-end
+
+					// row1 -------------
+					$('#set_medicine1_home').val(medicienDatas.medicine_1).trigger('change');
+					$('#medicineDoze_Rx1_home').val(medicienDatas.doze_1);
+					$('#medicineUnite_Rx1_home').val(medicienDatas.unit_1).trigger('change');
+					$('#set_medicineUsage1_home').val(medicienDatas.usageType_1).trigger('change');
+					$('#set_medicineDay1_home').val(medicienDatas.day_1);
+					$('#set_medicineTime1_home').val(medicienDatas.time_1);
+					$('#set_medicineAmount1_home').val(medicienDatas.amount_1);
+					// row1 -------------
+
+	// row2 -------------
+					$('#set_medicine2_home').val(medicienDatas.medicine_2).trigger('change');
+					$('#medicineDoze_Rx2_home').val(medicienDatas.doze_2);
+					$('#medicineUnite_Rx2_home').val(medicienDatas.unit_2).trigger('change');
+					$('#set_medicineUsage2_home').val(medicienDatas.usageType_2).trigger('change');
+					$('#set_medicineDay2_home').val(medicienDatas.day_2);
+					$('#set_medicineTime2_home').val(medicienDatas.time_2);
+					$('#set_medicineAmount2_home').val(medicienDatas.amount_2);
+					// row2 -------------
+
+	// row3 -------------
+					$('#set_medicine3_home').val(medicienDatas.medicine_3).trigger('change');
+					$('#medicineDoze_Rx3_home').val(medicienDatas.doze_3);
+					$('#medicineUnite_Rx3_home').val(medicienDatas.unit_3).trigger('change');
+					$('#set_medicineUsage3_home').val(medicienDatas.usageType_3).trigger('change');
+					$('#set_medicineDay3_home').val(medicienDatas.day_3);
+					$('#set_medicineTime3_home').val(medicienDatas.time_3);
+					$('#set_medicineAmount3_home').val(medicienDatas.amount_3);
+					// row3 -------------
+
+	// row4 -------------
+					$('#set_medicine4_home').val(medicienDatas.medicine_4).trigger('change');
+					$('#medicineDoze_Rx4_home').val(medicienDatas.doze_4);
+					$('#medicineUnite_Rx4_home').val(medicienDatas.unit_4).trigger('change');
+					$('#set_medicineUsage4_home').val(medicienDatas.usageType_4).trigger('change');
+					$('#set_medicineDay4_home').val(medicienDatas.day_4);
+					$('#set_medicineTime4_home').val(medicienDatas.time_4);
+					$('#set_medicineAmount4_home').val(medicienDatas.amount_4);
+					// row4 -------------
+
+	// row5 -------------
+					$('#set_medicine5_home').val(medicienDatas.medicine_5).trigger('change');
+					$('#medicineDoze_Rx5_home').val(medicienDatas.doze_5);
+					$('#medicineUnite_Rx5_home').val(medicienDatas.unit_5).trigger('change');
+					$('#set_medicineUsage5_home').val(medicienDatas.usageType_5).trigger('change');
+					$('#set_medicineDay5_home').val(medicienDatas.day_5);
+					$('#set_medicineTime5_home').val(medicienDatas.time_5);
+					$('#set_medicineAmount5_home').val(medicienDatas.amount_5);
+					// row5 -------------
+
+	// row6 -------------
+					$('#set_medicine6_home').val(medicienDatas.medicine_6).trigger('change');
+					$('#medicineDoze_Rx6_home').val(medicienDatas.doze_6);
+					$('#medicineUnite_Rx6_home').val(medicienDatas.unit_6).trigger('change');
+					$('#set_medicineUsage6_home').val(medicienDatas.usageType_6).trigger('change');
+					$('#set_medicineDay6_home').val(medicienDatas.day_6);
+					$('#set_medicineTime6_home').val(medicienDatas.time_6);
+					$('#set_medicineAmount6_home').val(medicienDatas.amount_6);
+					// row6 -------------
+
+	// row7 -------------
+					$('#set_medicine7_home').val(medicienDatas.medicine_7).trigger('change');
+					$('#medicineDoze_Rx7_home').val(medicienDatas.doze_7);
+					$('#medicineUnite_Rx7_home').val(medicienDatas.unit_7).trigger('change');
+					$('#set_medicineUsage7_home').val(medicienDatas.usageType_7).trigger('change');
+					$('#set_medicineDay7_home').val(medicienDatas.day_7);
+					$('#set_medicineTime7_home').val(medicienDatas.time_7);
+					$('#set_medicineAmount7_home').val(medicienDatas.amount_7);
+					// row7 -------------
+
+	// row8 -------------
+					$('#set_medicine8_home').val(medicienDatas.medicine_8).trigger('change');
+					$('#medicineDoze_Rx8_home').val(medicienDatas.doze_8);
+					$('#medicineUnite_Rx8_home').val(medicienDatas.unit_8).trigger('change');
+					$('#set_medicineUsage8_home').val(medicienDatas.usageType_8).trigger('change');
+					$('#set_medicineDay8_home').val(medicienDatas.day_8);
+					$('#set_medicineTime8_home').val(medicienDatas.time_8);
+					$('#set_medicineAmount8_home').val(medicienDatas.amount_8);
+					// row8 -------------
+
+	// row9 -------------
+					$('#set_medicine9_home').val(medicienDatas.medicine_9).trigger('change');
+					$('#medicineDoze_Rx9_home').val(medicienDatas.doze_9);
+					$('#medicineUnite_Rx9_home').val(medicienDatas.unit_9).trigger('change');
+					$('#set_medicineUsage9_home').val(medicienDatas.usageType_9).trigger('change');
+					$('#set_medicineDay9_home').val(medicienDatas.day_9);
+					$('#set_medicineTime9_home').val(medicienDatas.time_9);
+					$('#set_medicineAmount9_home').val(medicienDatas.amount_9);
+					// row9 -------------
+
+	// row10 -------------
+					$('#set_medicine10_home').val(medicienDatas.medicine_10).trigger('change');
+					$('#medicineDoze_Rx10_home').val(medicienDatas.doze_10);
+					$('#medicineUnite_Rx10_home').val(medicienDatas.unit_10).trigger('change');
+					$('#set_medicineUsage10_home').val(medicienDatas.usageType_10).trigger('change');
+					$('#set_medicineDay10_home').val(medicienDatas.day_10);
+					$('#set_medicineTime10_home').val(medicienDatas.time_10);
+					$('#set_medicineAmount10_home').val(medicienDatas.amount_10);
+					// row10 -------------
+
+
+
+
+				}
+			});
+
+			$(`#viewPrescriptionsMedicines`).modal('toggle');
+		}
+
+
+	function showRows(rownumber) {
+		if (rownumber == 1) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").hide();
+			$("#setMedicien_row3_home").hide();
+			$("#setMedicien_row4_home").hide();
+			$("#setMedicien_row5_home").hide();
+			$("#setMedicien_row6_home").hide();
+			$("#setMedicien_row7_home").hide();
+			$("#setMedicien_row8_home").hide();
+			$("#setMedicien_row9_home").hide();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 2) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").hide();
+			$("#setMedicien_row4_home").hide();
+			$("#setMedicien_row5_home").hide();
+			$("#setMedicien_row6_home").hide();
+			$("#setMedicien_row7_home").hide();
+			$("#setMedicien_row8_home").hide();
+			$("#setMedicien_row9_home").hide();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 3) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").show();
+			$("#setMedicien_row4_home").hide();
+			$("#setMedicien_row5_home").hide();
+			$("#setMedicien_row6_home").hide();
+			$("#setMedicien_row7_home").hide();
+			$("#setMedicien_row8_home").hide();
+			$("#setMedicien_row9_home").hide();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 4) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").show();
+			$("#setMedicien_row4_home").show();
+			$("#setMedicien_row5_home").hide();
+			$("#setMedicien_row6_home").hide();
+			$("#setMedicien_row7_home").hide();
+			$("#setMedicien_row8_home").hide();
+			$("#setMedicien_row9_home").hide();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 5) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").show();
+			$("#setMedicien_row4_home").show();
+			$("#setMedicien_row5_home").show();
+			$("#setMedicien_row6_home").hide();
+			$("#setMedicien_row7_home").hide();
+			$("#setMedicien_row8_home").hide();
+			$("#setMedicien_row9_home").hide();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 6) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").show();
+			$("#setMedicien_row4_home").show();
+			$("#setMedicien_row5_home").show();
+			$("#setMedicien_row6_home").show();
+			$("#setMedicien_row7_home").hide();
+			$("#setMedicien_row8_home").hide();
+			$("#setMedicien_row9_home").hide();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 7) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").show();
+			$("#setMedicien_row4_home").show();
+			$("#setMedicien_row5_home").show();
+			$("#setMedicien_row6_home").show();
+			$("#setMedicien_row7_home").show();
+			$("#setMedicien_row8_home").hide();
+			$("#setMedicien_row9_home").hide();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 8) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").show();
+			$("#setMedicien_row4_home").show();
+			$("#setMedicien_row5_home").show();
+			$("#setMedicien_row6_home").show();
+			$("#setMedicien_row7_home").show();
+			$("#setMedicien_row8_home").show();
+			$("#setMedicien_row9_home").hide();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 9) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").show();
+			$("#setMedicien_row4_home").show();
+			$("#setMedicien_row5_home").show();
+			$("#setMedicien_row6_home").show();
+			$("#setMedicien_row7_home").show();
+			$("#setMedicien_row8_home").show();
+			$("#setMedicien_row9_home").show();
+			$("#setMedicien_row10_home").hide();
+		} else if (rownumber == 10) {
+			$("#setMedicien_row1_home").show();
+			$("#setMedicien_row2_home").show();
+			$("#setMedicien_row3_home").show();
+			$("#setMedicien_row4_home").show();
+			$("#setMedicien_row5_home").show();
+			$("#setMedicien_row6_home").show();
+			$("#setMedicien_row7_home").show();
+			$("#setMedicien_row8_home").show();
+			$("#setMedicien_row9_home").show();
+			$("#setMedicien_row10_home").show();
+		}
 	}
 </script>
