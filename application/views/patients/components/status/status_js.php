@@ -81,7 +81,7 @@
 			data: {
 				record: <?= $profile['id'] ?>
 			},
-			success: function(response) {
+			success: function (response) {
 				let result = JSON.parse(response);
 				let labs = result.content.labs;
 				if (result['type'] == 'success') {
@@ -106,6 +106,48 @@
                   <tbody>`;
 
 						labs.map((lab) => {
+							let first_try_status = ``;
+							let second_try_status = ``;
+							let finish = ``;
+							let money = ``;
+							if (lab['first_try_status'] == 'p') {
+								first_try_status += `<a href="javascript:firstTry('${lab['id']}')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-check-circle"></span></a>`;
+							} else {
+								first_try_status += `<a href="javascript:showTry('${lab['id']}', 'first')"
+							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-eye"></span></a>`;
+							}
+
+							if (lab['second_try_status'] == 'p') {
+								second_try_status += `<a href="javascript:secondTry('${lab['id']}')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-check-circle"></span></a>`;
+							} else {
+								second_try_status += `<a href="javascript:showTry('${lab['id']}', 'second')"
+							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-eye"></span></a>`;
+							}
+
+							if (lab['status'] == 'p') {
+								finish += `<a href="javascript:finish('${lab['id']}')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-check-circle"></span></a>`;
+							} else {
+								finish += `<a href="javascript:showfinish('${lab['id']}')"
+							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-eye"></span></a>`;
+							}
+
+							if (lab['status'] != 'm') {
+								let locked = (lab['status'] != 'a') ? 'locked' : '';
+								money += `<a href="javascript:payLab('${lab['id']}')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light ${locked}"><span
+									class="fa fa-money"></span></a>`;
+							}
+
+
 							tableTemplate +=
 								`
                     <tr id="${lab['id']}" class="tableRow">
@@ -119,7 +161,12 @@
                         <td>${lab['remarks']}</td>
                         <td>
                           <div class="g-2">
+
                             <a href="javascript:edit_lab('${lab['id']}')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-edit"></span></a>
+                            ${first_try_status}
+                            ${second_try_status}
+                            ${finish}
+                            ${money}
                             <a href="javascript:print_lab('${lab['id']}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-print"></span></a>
                             <a href="javascript:delete_via_alert('${lab['id']}', '<?= base_url() ?>admin/delete_lab', 'labsTable')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-trash"></span></a>
                           </div>

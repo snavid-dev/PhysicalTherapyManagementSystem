@@ -2566,7 +2566,6 @@ class Admin extends CI_Controller
 	}
 
 
-
 	public function print_prescription($id)
 	{
 		$data['title'] = $this->lang('prescription');
@@ -4075,10 +4074,9 @@ class Admin extends CI_Controller
 				$teethName = '';
 				foreach ($teeths as $tooth) {
 					$info = $this->tooth_by_id($tooth);
+					$teethName .= $info['location'];
 					$teethName .= $info['name'];
-					$teethName .= ' (';
-					$teethName .= $this->dentist->find_location($info['location']);
-					$teethName .= '),';
+					$teethName .= ',';
 				}
 
 
@@ -4098,6 +4096,9 @@ class Admin extends CI_Controller
 					'delivery_time' => $this->dentist->find_time($lab['hour']),
 					'pay_amount' => number_format($lab['dr']),
 					'remarks' => $lab['remarks'],
+					'first_try_status' => $lab['first_try_status'],
+					'second_try_status' => $lab['second_try_status'],
+					'status' => $lab['status'],
 				);
 				$i++;
 			}

@@ -511,6 +511,7 @@ class Language
 			'insert service success' => self::lang_arr('The service was successfully added', 'خدمات موفقانه افزوده شد', 'خدمت په بریالیتوب سره اضافه شو'),
 			'delete receipt' => self::lang_arr('Receipt deleted successfully', 'رسید مالی موفقانه حذف شد', 'رسید په بریالیتوب سره حذف شو'),
 			'delete lab' => self::lang_arr('Laboratory expense deleted successfully', 'مصارف لابراتوار موفقانه حذف شد', 'رسید په بریالیتوب سره حذف شو'),
+			'finish lab' => self::lang_arr('Laboratory case finished successfully', 'کیس لابراتوار موفقانه تحویل گرفته شد', 'رسید په بریالیتوب سره حذف شو'),
 			// TODO:could not translated
 			'delete turn' => self::lang_arr('turn deleted successfully', 'نوبت موفقانه حذف شد', '????'),
 			'accept turn' => self::lang_arr('turn accepted successfully', 'نوبت موفقانه پذیرفته شد', '????'),
@@ -607,8 +608,11 @@ class Language
 			'insert lab hour error' => self::err_gen('delivery time', 'ساعت تحویل دهی', 'د لېږدون وخت'),
 			'insert lab color error' => self::err_gen('teeth color', 'رنگ دندان ها', 'د غاښونو رنګ'),
 			'insert lab dr error' => self::err_gen('pay amount', 'مقدار پرداختی', 'پیسې ورکول'),
+			'insert lab remarks error' => self::err_gen('remarks', 'توضیحات', 'پیسې ورکول'),
 			'insert lab number of unit error' => self::err_gen('number of unit', 'تعداد واحد', 'د واحد شمیر'),
 			'insert lab success' => self::lang_arr('The Laboratory expense was successfully inserted', 'مصارف لابراتوار موفقانه افزوده شد', 'د لابراتوار لګښت په بریالیتوب سره داخل شو'),
+			'first try success' => self::lang_arr('The first try was successfully inserted', 'تست اول موفقانه افزوده شد', 'د لابراتوار لګښت په بریالیتوب سره داخل شو'),
+			'second try success' => self::lang_arr('The second try was successfully inserted', 'تست دوم موفقانه افزوده شد', 'د لابراتوار لګښت په بریالیتوب سره داخل شو'),
 			'update lab success' => self::lang_arr('The Laboratory expense was successfully updated', 'مصارف لابراتوار موفقانه بروزرسانی شد', 'د لابراتوار لګښت په بریالیتوب سره تازه شو'),
 
 			//end lab errors
