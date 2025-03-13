@@ -177,7 +177,7 @@
                     <?= $receipt['date'] ?>
                   </td>
                   <td>
-                    <bdo direction="ltr"><?= $receipt['from_time'] ?> - <?= $receipt['to_time'] ?></bdo>
+                    <bdo dir="ltr"><?= $receipt['from_time'] ?> - <?= $receipt['to_time'] ?></bdo>
                   </td>
                   <td>
                     <div class="g-2">
@@ -365,7 +365,7 @@
             <tr>
               <td>${item.patient_name}</td>
               <td>${item.doctor_name}</td>
-              <td>${item.hour}</td>
+              <td class="english">${item.hour}</td>
             </tr>
           `;
             });
