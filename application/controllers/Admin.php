@@ -3916,6 +3916,45 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+	public function init_lab()
+	{
+
+//		echo $this->input->post('hour');
+//		exit();
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('insert lab customers_id error')));
+		$this->form_validation->set_rules('give_date', 'give_date', 'trim|required', array('required' => $this->lang('insert lab give_date error')));
+		$this->form_validation->set_rules('hour', 'hour', 'trim|required', array('required' => $this->lang('insert lab hour error')));
+		$this->form_validation->set_rules('remarks', 'remarks', 'trim');
+		if ($this->form_validation->run()) {
+			$datas = array(
+				'give_date' => $this->input->post('give_date'),
+				'hour' => $this->input->post('hour'),
+				'init_date' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s'),
+				'remarks' => $this->input->post('remarks'),
+			);
+			$update = $this->Admin_model->update_lab($datas, array('id' => $this->input->post('slug')));
+			if ($update) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');
+				$data['alert']['text'] = $this->lang('update lab success');
+				$data['alert']['type'] = 'success';
+				$data['alert']['type'] = 'success';
+				$data['id'] = $this->input->post('slug');
+				$data['extraFunction'] = true;
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+					$data['title'] = $this->lang('error');
+				}
+			}
+		}
+		print_r(json_encode($data));
+	}
+
 
 	public function delete_lab()
 	{
@@ -4101,6 +4140,7 @@ class Admin extends CI_Controller
 					'number' => $i,
 					'id' => $lab['id'],
 					'lab_name' => $lab['lab_name'],
+					'init_date' => $lab['init_date'],
 					'teeth' => substr($teethName, 0, -1),
 					'type' => substr($typesName, 0, -1),
 					'delivery_date' => $lab['give_date'],

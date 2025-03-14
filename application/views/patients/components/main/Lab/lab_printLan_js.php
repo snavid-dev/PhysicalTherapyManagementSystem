@@ -158,3 +158,10 @@
 	}
 
 </script>
+
+<script>
+	function init_lab(id){
+		$('#init_lab_id').val(id);
+		$("#init_lab").modal('toggle');
+	}
+</script>
