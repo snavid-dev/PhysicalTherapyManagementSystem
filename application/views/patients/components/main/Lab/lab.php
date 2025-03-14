@@ -26,9 +26,8 @@
 				foreach ($teeths as $tooth) {
 					$info = $ci->tooth_by_id($tooth);
 					$teethName .= $info['name'];
-					$teethName .= ' (';
-					$teethName .= $ci->dentist->find_location($info['location']);
-					$teethName .= '),';
+					$teethName .= $info['location'];
+					$teethName .= ',';
 				}
 				?>
 				<td><?= substr($teethName, 0, -1) ?></td>

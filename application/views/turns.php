@@ -23,7 +23,7 @@
 
 							<li style="width: 150px;">
 								<input data-jdp type="text" class="form-control" id="datePicker"
-									   onchange="tableFilter()" placeholder="<?= $ci->lang('date') ?>">
+									   onchange="tableFilter()" placeholder="<?= $ci->lang('date') ?>" autocomplete="off">
 							</li>
 
 							<li style="width: 180px;">
