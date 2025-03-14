@@ -4096,7 +4096,7 @@ class Admin extends CI_Controller
 					$typesName .= $this->lang($type);
 					$typesName .= ',';
 				}
-				$time = ($lab['hour'] != '') ? $lab['hour'] : '';
+				$time = ($lab['hour'] != '') ? $this->mylibrary->from24to12($lab['hour']) : '';
 				$datas[] = array(
 					'number' => $i,
 					'id' => $lab['id'],
@@ -4106,7 +4106,7 @@ class Admin extends CI_Controller
 					'delivery_date' => $lab['give_date'],
 					'delivery_time' => $time,
 					'pay_amount' => number_format($lab['dr']),
-					'remarks' => $lab['remarks'],
+					'remarks' => (is_null($lab['remarks'])) ? '' : $lab['remarks'],
 					'first_try_status' => $lab['first_try_status'],
 					'second_try_status' => $lab['second_try_status'],
 					'status' => $lab['status'],
