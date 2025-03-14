@@ -67,7 +67,7 @@
 
 
 				$('#deliveryDate_edit').val(data.delivery_date).trigger('change');
-				$('#deliveryTime_edit').val(data.delivery_time).trigger('change');
+				$('#deliveryTime_edit').val(data.delivery_time);
 				$('#selectToothColor_edit').val(data.tooth_color).trigger('change');
 				$('#payment_edit').val(data.pay_amount).trigger('change');
 				$('#details_edit').val(data.remarks).trigger('change');

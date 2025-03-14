@@ -3879,8 +3879,8 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('customers_id', 'customers_id', 'trim|required', array('required' => $this->lang('insert lab customers_id error')));
 		$this->form_validation->set_rules('teeth', 'teeth', 'trim|required', array('required' => $this->lang('insert lab teeth error')));
 		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('insert lab type error')));
-		$this->form_validation->set_rules('give_date', 'give_date', 'trim|required', array('required' => $this->lang('insert lab give_date error')));
-		$this->form_validation->set_rules('hour', 'hour', 'trim|required', array('required' => $this->lang('insert lab hour error')));
+		$this->form_validation->set_rules('give_date', 'give_date', 'trim');
+		$this->form_validation->set_rules('hour', 'hour', 'trim');
 		$this->form_validation->set_rules('color', 'color', 'trim|required', array('required' => $this->lang('insert lab color error')));
 		$this->form_validation->set_rules('dr', 'dr', 'trim|required', array('required' => $this->lang('insert lab dr error')));
 		$this->form_validation->set_rules('remarks', 'remarks', 'trim');

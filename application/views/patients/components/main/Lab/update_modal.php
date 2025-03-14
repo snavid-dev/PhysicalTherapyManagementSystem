@@ -100,19 +100,29 @@ $ci = get_instance();
 								<div class="col-sm-12 col-md-3">
 									<div class="form-group">
 										<label class="form-label">
-											<?= $ci->lang('delivery time') ?> <span class="text-red">*</span>
+											<?= $ci->lang('delivery time') ?>
 										</label>
-
-										<select name="hour" class="form-control select2-show-search form-select"
-												data-placeholder="<?= $ci->lang('select') ?>" id="deliveryTime_edit">
-											<option label="<?= $ci->lang('select') ?>"></option>
-											<?php foreach ($ci->dentist->hours() as $hour) :
-												?>
-												<option value="<?= $hour['key'] ?>">
-													<?= $hour['value'] ?>
-												</option>
-											<?php endforeach; ?>
-										</select>
+										<input type="time" name="hour" list="from_times" class="form-control"
+											   id="deliveryTime_edit">
+										<datalist id="from_times">
+											<option value="08:00">
+											<option value="08:30">
+											<option value="09:00">
+											<option value="09:30">
+											<option value="10:00">
+											<option value="10:30">
+											<option value="11:00">
+											<option value="11:30">
+											<option value="12:00">
+											<option value="12:30">
+											<option value="13:00">
+											<option value="13:30">
+											<option value="14:00">
+											<option value="14:30">
+											<option value="15:00">
+											<option value="15:30">
+											<option value="16:00">
+										</datalist>
 
 									</div>
 								</div>
