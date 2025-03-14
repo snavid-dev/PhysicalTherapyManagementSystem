@@ -320,7 +320,30 @@ class Mylibrary
     }
   }
 
-  public function list_user_type()
+	function from24to12($time24) {
+	  if (is_null($time24) || $time24 == ''){
+		  return '';
+	  }
+		// Get the CI instance
+		$ci = get_instance();
+
+		// Split the time string into hours and minutes
+		list($hour, $minute) = explode(':', $time24);
+
+		// Convert hour to integer
+		$hour = (int)$hour;
+
+		// Determine AM or PM using CodeIgniter's language function
+		$ampm = ($hour >= 12) ? $ci->language->languages('pm') : $ci->language->languages('am');
+
+		// Convert to 12-hour format
+		$hour = ($hour % 12 == 0) ? 12 : $hour % 12;
+
+		// Return formatted time with AM/PM translation
+		return "$hour:$minute $ampm";
+	}
+
+	public function list_user_type()
   {
     return array(
       'A' => 'admin',
