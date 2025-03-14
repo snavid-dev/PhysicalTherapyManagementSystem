@@ -217,6 +217,7 @@ class Language
 			'balance' => self::lang_arr('balance', 'الباقی', 'پاتې پیسې'),
 			'update patient success' => self::lang_arr('The Patient Profile was successfully updated', 'پروفایل مریض موفقانه بروزرسانی شد', 'مالي حساب په بریالیتوب سره تازه شو'),
 			'payment status' => self::lang_arr('payment status', 'وضعیت مالی', 'د تادیې حالت'),
+			'case status' => self::lang_arr('case status', 'وضعیت کیس ', 'د تادیې حالت'),
 			// TODO:ask this
 			'payment percent status' => self::lang_arr('(' . $amount . '%) is completed', '(' . $amount . '%)پرداخت شده', ' حساب په بریالیتوب سره تازه شو'),
 
@@ -450,6 +451,8 @@ class Language
 			'delivery time' => self::lang_arr('delivery time', 'ساعت تحویل گیری', 'د سپارنې وخت'),
 			'tooth color' => self::lang_arr('tooth color', 'رنگ دندان', 'د غاښ رنګ'),
 			'insert laboratory expenses' => self::lang_arr('insert laboratory expenses', 'افزودن مصارف لابراتوار', 'د لابراتوار لګښتونه داخل کړئ'),
+			'unpaid' => self::lang_arr('unpaid', 'پرداخت نشده', 'د لابراتوار لګښتونه داخل کړئ'),
+
 			// TODO: pashto not set
 			'Number of units' => self::lang_arr('Number of units', 'تعداد واحد', 'د لابراتوار لګښتونه داخل کړئ'),
 			// end Laboratory expressions

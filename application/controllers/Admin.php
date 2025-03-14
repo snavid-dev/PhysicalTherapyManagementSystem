@@ -3775,6 +3775,20 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+	public function labs()
+	{
+		$data['title'] = $this->lang('laboratory');
+		$data['page'] = "labs";
+		$data['labs'] = $this->Admin_model->list_labs();
+		$data['accounts'] = $this->Admin_model->get_account_with_no_user();
+		$data['script'] = $this->mylibrary->generateSelect2();
+		$data['script_date'] = $this->mylibrary->script_datepicker();
+		$data['script_date'] .= $this->mylibrary->script_datepicker('update_date', 'div#update-date-div', 'update_date');
+		$this->load->view('header', $data);
+		$this->load->view('labs', $data);
+		$this->load->view('footer');
+	}
+
 
 	public function insert_lab()
 	{

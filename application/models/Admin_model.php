@@ -587,6 +587,11 @@ class Admin_model extends CI_Model
 		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name' FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id WHERE labs.patient_id = '$id' ORDER BY labs.give_date ASC")->result_array();
 	}
 
+	function list_labs()
+	{
+		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name' FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id ORDER BY labs.give_date ASC")->result_array();
+	}
+
 
 	public function get_account_with_no_user()
 	{
