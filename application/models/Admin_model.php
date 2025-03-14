@@ -589,7 +589,7 @@ class Admin_model extends CI_Model
 
 	function list_labs()
 	{
-		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name' FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id ORDER BY labs.give_date ASC")->result_array();
+		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.id, patient.name, patient.lname, patient.gender, patient.serial_id FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id INNER JOIN patient ON labs.patient_id = patient.id ORDER BY labs.give_date ASC")->result_array();
 	}
 
 

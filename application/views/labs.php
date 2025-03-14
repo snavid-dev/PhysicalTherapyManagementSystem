@@ -179,6 +179,7 @@
 						<tr>
 							<th class="border-bottom-0">#</th>
 							<th class="border-bottom-0"><?= $ci->lang('laboratory') ?></th>
+							<th class="border-bottom-0"><?= $ci->lang('patient name') ?></th>
 							<th class="border-bottom-0"><?= $ci->lang('teeth') ?></th>
 							<th class="border-bottom-0"><?= $ci->lang('tooth type') ?></th>
 							<th class="border-bottom-0"><?= $ci->lang('delivery date') ?></th>
@@ -194,6 +195,7 @@
 							<tr id="<?= $lab['id'] ?>">
 								<td scope="row"><?= $i ?></td>
 								<td><?= $lab['lab_name'] ?></td>
+								<td><?= $ci->mylibrary->get_patient_name($lab['name'], $lab['lname'], $lab['serial_id'], $lab['gender']) ?></td>
 								<?php
 								$teeths = explode(',', $lab['teeth']);
 								$teethName = '';
@@ -220,6 +222,10 @@
 								<td><?= $lab['remarks'] ?></td>
 								<td>
 									<div class="g-2">
+										<a href="<?= base_url('admin/single_patient/') . $lab['patient_id'] ?>" class="btn btn-icon btn-outline-info rounded-pill btn-wave waves-effect waves-light">
+											<span
+												class="fa fa-user-circle-o"></span>
+										</a>
 										<?php if ($lab['first_try_status'] == 'p'): ?>
 											<a href="javascript:firstTry('<?= $lab['id'] ?>')"
 											   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
