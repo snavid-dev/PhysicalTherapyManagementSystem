@@ -24,7 +24,7 @@ $ci = get_instance();
 						<form id="tableInsert">
 							<div class="row">
 
-								<div class="col-sm-12 col-md-3">
+								<div class="col-sm-12 col-md-4">
 									<div class="form-group">
 										<label class="form-label">
 											<?= $ci->lang('laboratory') ?> <span class="text-red">*</span>
@@ -42,7 +42,7 @@ $ci = get_instance();
 									</div>
 								</div>
 
-								<div class="col-sm-12 col-md-3">
+								<div class="col-sm-12 col-md-4">
 									<div class="form-group">
 										<label class="form-label">
 											<?= $ci->lang('teeth') ?> <span class="text-red">*</span>
@@ -58,7 +58,7 @@ $ci = get_instance();
 									</div>
 								</div>
 
-								<div class="col-sm-12 col-md-3">
+								<div class="col-sm-12 col-md-4">
 									<div class="form-group" id="main-divs">
 										<label class="form-label">
 											<?= $ci->lang('tooth type') ?>
@@ -78,7 +78,7 @@ $ci = get_instance();
 									</div>
 								</div>
 
-								<div class="col-sm-12 col-md-3">
+								<div class="col-sm-12 col-md-4">
 									<div class="form-group">
 										<label class="form-label">
 											<?= $ci->lang('tooth color') ?><span class="text-red">*</span>
@@ -102,43 +102,7 @@ $ci = get_instance();
 									</div>
 								</div>
 
-
-							</div>
-							<div class="row">
-
-								<div class="col-sm-12 col-md-3">
-									<div class="form-group">
-										<label class="form-label">
-											<?= $ci->lang('delivery date') ?> <span class="text-red">*</span>
-										</label>
-
-										<input data-jdp type="text" id="deliveryDate" name="give_date"
-											   class="form-control">
-
-									</div>
-								</div>
-
-								<div class="col-sm-12 col-md-3">
-									<div class="form-group">
-										<label class="form-label">
-											<?= $ci->lang('delivery time') ?> <span class="text-red">*</span>
-										</label>
-
-										<select name="hour" class="form-control select2-show-search form-select"
-												data-placeholder="<?= $ci->lang('select') ?>" id="deliveryTime">
-											<option label="<?= $ci->lang('select') ?>"></option>
-											<?php foreach ($ci->dentist->hours() as $hour) :
-												?>
-												<option value="<?= $hour['key'] ?>">
-													<?= $hour['value'] ?>
-												</option>
-											<?php endforeach; ?>
-										</select>
-
-									</div>
-								</div>
-
-								<div class="col-sm-12 col-md-3">
+								<div class="col-sm-12 col-md-4">
 									<div class="form-group">
 										<label class="form-label">
 											<?= $ci->lang('pay amount') ?> <span class="text-red">*</span>
@@ -148,7 +112,7 @@ $ci = get_instance();
 									</div>
 								</div>
 
-								<div class="col-sm-12 col-md-3">
+								<div class="col-sm-12 col-md-4">
 									<div class="form-group">
 										<label class="form-label">
 											<?= $ci->lang('Number of units') ?> <span class="text-red">*</span>
@@ -158,17 +122,14 @@ $ci = get_instance();
 									</div>
 								</div>
 
-								<div class="col-sm-12 col-md-12">
-									<div class="form-group">
-										<label class="form-label">
-											<?= $ci->lang('description') ?>
-										</label>
-										<textarea class="form-control" name="remarks"
-												  placeholder="<?= $ci->lang('description') ?>" rows="5"></textarea>
-									</div>
-								</div>
 
 							</div>
+
+
+
+
+
+
 						</form>
 
 					</div>
@@ -178,10 +139,6 @@ $ci = get_instance();
 			<div class="modal-footer">
 				<button class="btn btn-secondary" data-bs-dismiss="modal">
 					<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
-				</button>
-				<button class="btn btn-warning"
-						onclick="submitWithoutDatatable('tableInsert', '<?= base_url() ?>admin/insert_lab', 'labsTable', 'laboratoryInsertModal', print_lab ,'print'); list_labs()">
-					<?= $ci->lang('save and print') ?> <i class="fa fa-print"></i>
 				</button>
 				<button class="btn btn-primary"
 						onclick="submitWithoutDatatable('tableInsert', '<?= base_url() ?>admin/insert_lab', 'labsTable', 'laboratoryInsertModal', list_labs)">

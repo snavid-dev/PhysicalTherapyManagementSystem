@@ -3798,8 +3798,6 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('customers_id', 'customers_id', 'trim|required', array('required' => $this->lang('insert lab customers_id error')));
 		$this->form_validation->set_rules('teeth', 'teeth', 'trim|required', array('required' => $this->lang('insert lab teeth error')));
 		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('insert lab type error')));
-		$this->form_validation->set_rules('give_date', 'give_date', 'trim|required', array('required' => $this->lang('insert lab give_date error')));
-		$this->form_validation->set_rules('hour', 'hour', 'trim|required', array('required' => $this->lang('insert lab hour error')));
 		$this->form_validation->set_rules('color', 'color', 'trim|required', array('required' => $this->lang('insert lab color error')));
 		$this->form_validation->set_rules('dr', 'dr', 'trim|required', array('required' => $this->lang('insert lab dr error')));
 		$this->form_validation->set_rules('numberofUnits', 'numberofUnits', 'trim|required', array('required' => $this->lang('insert lab number of unit error')));
@@ -3810,8 +3808,6 @@ class Admin extends CI_Controller
 				'customers_id' => $this->input->post('customers_id'),
 				'teeth' => $this->input->post('teeth'),
 				'type' => $this->input->post('type'),
-				'give_date' => $this->input->post('give_date'),
-				'hour' => $this->input->post('hour'),
 				'color' => $this->input->post('color'),
 				'dr' => $this->input->post('dr'),
 				'unit' => $this->input->post('numberofUnits'),
@@ -4100,6 +4096,7 @@ class Admin extends CI_Controller
 					$typesName .= $this->lang($type);
 					$typesName .= ',';
 				}
+				$time = ($lab['hour'] != '') ? $lab['hour'] : '';
 				$datas[] = array(
 					'number' => $i,
 					'id' => $lab['id'],
@@ -4107,7 +4104,7 @@ class Admin extends CI_Controller
 					'teeth' => substr($teethName, 0, -1),
 					'type' => substr($typesName, 0, -1),
 					'delivery_date' => $lab['give_date'],
-					'delivery_time' => $this->dentist->find_time($lab['hour']),
+					'delivery_time' => $time,
 					'pay_amount' => number_format($lab['dr']),
 					'remarks' => $lab['remarks'],
 					'first_try_status' => $lab['first_try_status'],

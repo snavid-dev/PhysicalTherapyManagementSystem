@@ -41,7 +41,7 @@
 				?>
 				<td><?= substr($typesName, 0, -1) ?></td>
 				<td><?= $lab['give_date'] ?></td>
-				<td><?= $ci->dentist->find_time($lab['hour']) ?></td>
+				<td><?= $ci->mylibrary->from24to12($lab['hour']) ?></td>
 				<td><?= $lab['dr'] ?></td>
 				<td><?= $lab['remarks'] ?></td>
 				<td>
