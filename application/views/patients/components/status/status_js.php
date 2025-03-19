@@ -136,7 +136,7 @@
 								if (lab['status'] == 'p') {
 									finish += `<a href="javascript:finish('${lab['id']}')"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-check-circle"></span></a>`;
+									class="fa fa-tooth"></span></a>`;
 								} else {
 									finish += `<a href="javascript:showfinish('${lab['id']}')"
 							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span

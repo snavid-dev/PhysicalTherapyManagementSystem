@@ -137,7 +137,7 @@
 				</button>
 
 				<button class="btn btn-warning"
-						onclick="submitWithoutDatatable('init_lab_form', '<?= base_url() ?>admin/init_lab', 'labsTable', 'init_lab', print_lab ,'print'); list_labs()">
+						onclick="submitWithoutDatatable('init_lab_form', '<?= base_url() ?>admin/init_lab', 'labsTable', 'init_lab', print_lab ,'print'); list_labs();">
 					ذخیره و چاپ <i class="fa fa-print"></i>
 				</button>
 
