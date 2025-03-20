@@ -4022,6 +4022,42 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+
+	public function install_lab()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$datas = array(
+				'status' => 'a',
+				'install_time' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s'),
+			);
+
+			$update = $this->Admin_model->update_lab($datas, array('id' => $this->input->post('record')));
+			if ($update) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['text'] = $this->lang('finish lab');
+				$data['alert']['type'] = 'success';
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
+
 	public function show_try()
 	{
 		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('problem')));
@@ -4040,6 +4076,10 @@ class Admin extends CI_Controller
 				$data['type'] = 'success';
 
 				if ($type == 'finish') {
+					$data['content'] = array(
+						'datetime' => $lab[0]['receive_datetime']
+					);
+				} elseif ($type == 'install') {
 					$data['content'] = array(
 						'datetime' => $lab[0]['receive_datetime']
 					);
@@ -4149,6 +4189,7 @@ class Admin extends CI_Controller
 					'remarks' => (is_null($lab['remarks'])) ? '' : $lab['remarks'],
 					'first_try_status' => $lab['first_try_status'],
 					'second_try_status' => $lab['second_try_status'],
+					'install_time' => $lab['install_time'],
 					'status' => $lab['status'],
 				);
 				$i++;

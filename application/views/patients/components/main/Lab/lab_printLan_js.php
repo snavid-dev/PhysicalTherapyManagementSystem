@@ -157,6 +157,51 @@
 		})
 	}
 
+
+
+	function showinstall(id){
+		$.ajax({
+			url: "<?= base_url('admin/show_try') ?>",
+			type: 'POST',
+			data: {
+				type: 'install',
+				record: id
+			},
+			success: function (response) {
+				var result = JSON.parse(response);
+				if (result['type'] == 'success') {
+					$('#details_lab').hide();
+					$('#datetime_lab').val(result['content']['datetime']);
+					$("#showtriesModal").modal('toggle');
+				}else{
+					toastr["error"](result['messages'][step], result['title'])
+				}
+
+			}
+		})
+	}
+
+
+	function install(id){
+		$.ajax({
+			url: "<?= base_url('admin/install_lab') ?>",
+			type: 'POST',
+			data: {
+				record: id
+			},
+			success: function (response) {
+				var result = JSON.parse(response);
+				if (result['type'] == 'success') {
+					list_labs();
+					toastr["success"](result['alert']['text'], result['alert']['title'])
+				}else{
+					toastr["error"](result['messages'][step], result['title'])
+				}
+
+			}
+		})
+	}
+
 </script>
 
 <script>
