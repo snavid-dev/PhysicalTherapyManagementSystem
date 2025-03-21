@@ -84,6 +84,7 @@
 			success: function (response) {
 				let result = JSON.parse(response);
 				let labs = result.content.labs;
+				console.log(labs);
 				if (result['type'] == 'success') {
 					if (labs.length != 0) {
 						let tableTemplate =
@@ -110,42 +111,63 @@
 							let second_try_status = ``;
 							let finish = ``;
 							let money = ``;
-							if (lab['first_try_status'] == 'p') {
-								first_try_status += `<a href="javascript:firstTry('${lab['id']}')"
-							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-check-circle"></span></a>`;
-							} else {
-								first_try_status += `<a href="javascript:showTry('${lab['id']}', 'first')"
-							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-eye"></span></a>`;
-							}
+							let init = ``;
+							let install = ``;
 
-							if (lab['second_try_status'] == 'p') {
-								second_try_status += `<a href="javascript:secondTry('${lab['id']}')"
+							if (lab['init_date'] != '') {
+								if (lab['first_try_status'] == 'p') {
+									first_try_status += `<a href="javascript:firstTry('${lab['id']}')"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-check-circle"></span></a>`;
-							} else {
-								second_try_status += `<a href="javascript:showTry('${lab['id']}', 'second')"
+									class="fa fa-check-circle"></span></a> `;
+								} else {
+									first_try_status += `<a href="javascript:showTry('${lab['id']}', 'first')"
 							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-eye"></span></a>`;
-							}
+									class="fa fa-eye"></span></a> `;
+								}
 
-							if (lab['status'] == 'p') {
-								finish += `<a href="javascript:finish('${lab['id']}')"
+								if (lab['second_try_status'] == 'p') {
+									second_try_status += `<a href="javascript:secondTry('${lab['id']}')"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-check-circle"></span></a>`;
-							} else {
-								finish += `<a href="javascript:showfinish('${lab['id']}')"
+									class="fa fa-check-circle"></span></a> `;
+								} else {
+									second_try_status += `<a href="javascript:showTry('${lab['id']}', 'second')"
 							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-eye"></span></a>`;
-							}
+									class="fa fa-eye"></span></a> `;
+								}
 
-							if (lab['status'] != 'm') {
-								let locked = (lab['status'] != 'a') ? 'locked' : '';
-								money += `<a href="javascript:payLab('${lab['id']}')"
+								if (lab['status'] == 'p') {
+									finish += `<a href="javascript:finish('${lab['id']}')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-tooth"></span></a> `;
+								} else {
+									finish += `<a href="javascript:showfinish('${lab['id']}')"
+							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-eye"></span></a> `;
+								}
+
+								if (lab['install_time'] == null) {
+									install += `<a href="javascript:install('${lab['id']}')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-tooth"></span></a> `;
+								} else {
+									install += `<a href="javascript:showinstall('${lab['id']}', 'first')"
+							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-eye"></span></a> `;
+								}
+
+								if (lab['status'] != 'm') {
+									let locked = (lab['status'] != 'a' || lab['install_time'] == null) ? 'locked' : '';
+									money += `<a href="javascript:payLab('${lab['id']}')"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light ${locked}"><span
-									class="fa fa-money"></span></a>`;
+									class="fa fa-money"></span></a> `;
+								}
+							} else {
+								init += `<a href="javascript:init_lab('${lab['id']}')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-check-circle"></span></a> `;
 							}
+
+							let buttons = first_try_status + second_try_status + finish + install + money + init;
 
 
 							tableTemplate +=
@@ -163,10 +185,7 @@
                           <div class="g-2">
 
                             <a href="javascript:edit_lab('${lab['id']}')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-edit"></span></a>
-                            ${first_try_status}
-                            ${second_try_status}
-                            ${finish}
-                            ${money}
+                            ${buttons}
                             <a href="javascript:print_lab('${lab['id']}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-print"></span></a>
                             <a href="javascript:delete_via_alert('${lab['id']}', '<?= base_url() ?>admin/delete_lab', 'labsTable')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-trash"></span></a>
                           </div>

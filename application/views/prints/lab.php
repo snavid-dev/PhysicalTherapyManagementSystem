@@ -478,7 +478,7 @@ foreach ($types as $type) {
 													</tr>
 													<tr>
 														<td>ساعت تحویل گیری</td>
-														<td><bdo dir="ltr"><?= $ci->dentist->find_time($single['hour']) ?></bdo></td>
+														<td><bdo dir="ltr"><?= $ci->mylibrary->from24to12($single['hour']) ?></bdo></td>
 													</tr>
 
 													<?php if (!empty($single['remarks'])) : ?>

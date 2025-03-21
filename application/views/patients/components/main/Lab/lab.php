@@ -51,43 +51,63 @@
 								class="fa-regular fa-pen-to-square fs-14"></span></a>
 
 
-						<?php if ($lab['first_try_status'] == 'p'): ?>
-							<a href="javascript:firstTry('<?= $lab['id'] ?>')"
-							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-check-circle"></span></a>
-						<?php else: ?>
-							<a href="javascript:showTry('<?= $lab['id'] ?>', 'first')"
-							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-eye"></span></a>
-						<?php endif; ?>
+						<?php if ($lab['init_date'] != ''): ?>
+							<?php if ($lab['first_try_status'] == 'p'): ?>
+								<a href="javascript:firstTry('<?= $lab['id'] ?>')"
+								   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+										class="fa fa-check-circle"></span></a>
+							<?php else: ?>
+								<a href="javascript:showTry('<?= $lab['id'] ?>', 'first')"
+								   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+										class="fa fa-eye"></span></a>
+							<?php endif; ?>
 
-						<?php if ($lab['second_try_status'] == 'p'): ?>
-							<a href="javascript:secondTry('<?= $lab['id'] ?>')"
-							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-check-circle"></span></a>
-						<?php else: ?>
-							<a href="javascript:showTry('<?= $lab['id'] ?>', 'second')"
-							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-eye"></span></a>
-						<?php endif; ?>
-						<?php if ($lab['status'] == 'p'): ?>
-							<a href="javascript:finish('<?= $lab['id'] ?>')"
-							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-check-circle"></span></a>
-						<?php else: ?>
-							<a href="javascript:showfinish('<?= $lab['id'] ?>')"
-							   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-									class="fa fa-eye"></span></a>
-						<?php endif; ?>
-						<?php if ($lab['status'] != 'm'): ?>
-							<a href="javascript:payLab('<?= $lab['id'] ?>')"
-							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light <?= ($lab['status'] != 'a') ? 'locked' : '' ?>"><span
-									class="fa fa-money"></span></a>
-						<?php endif; ?>
+							<?php if ($lab['second_try_status'] == 'p'): ?>
+								<a href="javascript:secondTry('<?= $lab['id'] ?>')"
+								   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+										class="fa fa-check-circle"></span></a>
+							<?php else: ?>
+								<a href="javascript:showTry('<?= $lab['id'] ?>', 'second')"
+								   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+										class="fa fa-eye"></span></a>
+							<?php endif; ?>
 
+
+							<?php if ($lab['status'] == 'p'): ?>
+								<a href="javascript:finish('<?= $lab['id'] ?>')"
+								   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+										class="fa fa-check-circle"></span></a>
+							<?php else: ?>
+								<a href="javascript:showfinish('<?= $lab['id'] ?>')"
+								   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+										class="fa fa-eye"></span></a>
+							<?php endif; ?>
+
+							<?php if ($lab['install_time'] == ''): ?>
+								<a href="javascript:install('<?= $lab['id'] ?>')"
+								   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light  <?= ($lab['status'] == 'p') ? 'locked' : '' ?>"><span
+										class="fa fa-tooth"></span></a>
+							<?php else: ?>
+								<a href="javascript:showinstall('<?= $lab['id'] ?>')"
+								   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
+										class="fa fa-eye"></span></a>
+							<?php endif; ?>
+
+							<?php if ($lab['status'] != 'm'): ?>
+								<a href="javascript:payLab('<?= $lab['id'] ?>')"
+								   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light <?= ($lab['status'] != 'a' || is_null($lab['install_time'])) ? 'locked' : '' ?>"><span
+										class="fa fa-money"></span></a>
+							<?php endif; ?>
+
+						<?php else: ?>
+							<a href="javascript:init_lab('<?= $lab['id'] ?>')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-check-circle"></span></a>
+						<?php endif; ?>
 						<a href="javascript:print_lab('<?= $lab['id'] ?>')"
 						   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
 								class="fa-solid fa-print fs-14"></span></a>
+
 						<a href="javascript:delete_via_alert('<?= $lab['id'] ?>', '<?= base_url() ?>admin/delete_lab', 'labsTable')"
 						   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span
 								class="fa-solid fa-trash-can fs-14"></span></a>

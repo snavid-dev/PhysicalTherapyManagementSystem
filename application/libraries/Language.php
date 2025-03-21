@@ -450,6 +450,7 @@ class Language
 			'delivery date' => self::lang_arr('delivery date', 'تاریخ تحویل گیری', 'د سپارنې نېټه'),
 			'delivery time' => self::lang_arr('delivery time', 'ساعت تحویل گیری', 'د سپارنې وخت'),
 			'tooth color' => self::lang_arr('tooth color', 'رنگ دندان', 'د غاښ رنګ'),
+			'lab name' => self::lang_arr('laboratory name', 'نام لابراتوار', 'د غاښ رنګ'),
 			'insert laboratory expenses' => self::lang_arr('insert laboratory expenses', 'افزودن مصارف لابراتوار', 'د لابراتوار لګښتونه داخل کړئ'),
 			'unpaid' => self::lang_arr('unpaid', 'پرداخت نشده', 'د لابراتوار لګښتونه داخل کړئ'),
 

@@ -3780,7 +3780,9 @@ class Admin extends CI_Controller
 		$data['title'] = $this->lang('laboratory');
 		$data['page'] = "labs";
 		$data['labs'] = $this->Admin_model->list_labs();
-		$data['accounts'] = $this->Admin_model->get_account_with_no_user();
+		$data['accounts'] = $this->Admin_model->get_lab_account();
+
+
 		$data['script'] = $this->mylibrary->generateSelect2();
 		$data['script_date'] = $this->mylibrary->script_datepicker();
 		$data['script_date'] .= $this->mylibrary->script_datepicker('update_date', 'div#update-date-div', 'update_date');
@@ -3879,8 +3881,8 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('customers_id', 'customers_id', 'trim|required', array('required' => $this->lang('insert lab customers_id error')));
 		$this->form_validation->set_rules('teeth', 'teeth', 'trim|required', array('required' => $this->lang('insert lab teeth error')));
 		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('insert lab type error')));
-		$this->form_validation->set_rules('give_date', 'give_date', 'trim|required', array('required' => $this->lang('insert lab give_date error')));
-		$this->form_validation->set_rules('hour', 'hour', 'trim|required', array('required' => $this->lang('insert lab hour error')));
+		$this->form_validation->set_rules('give_date', 'give_date', 'trim');
+		$this->form_validation->set_rules('hour', 'hour', 'trim');
 		$this->form_validation->set_rules('color', 'color', 'trim|required', array('required' => $this->lang('insert lab color error')));
 		$this->form_validation->set_rules('dr', 'dr', 'trim|required', array('required' => $this->lang('insert lab dr error')));
 		$this->form_validation->set_rules('remarks', 'remarks', 'trim');
@@ -3902,6 +3904,45 @@ class Admin extends CI_Controller
 				$data['alert']['text'] = $this->lang('update lab success');
 				$data['alert']['type'] = 'success';
 				$data['alert']['type'] = 'success';
+				$data['extraFunction'] = true;
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+					$data['title'] = $this->lang('error');
+				}
+			}
+		}
+		print_r(json_encode($data));
+	}
+
+	public function init_lab()
+	{
+
+//		echo $this->input->post('hour');
+//		exit();
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('insert lab customers_id error')));
+		$this->form_validation->set_rules('give_date', 'give_date', 'trim|required', array('required' => $this->lang('insert lab give_date error')));
+		$this->form_validation->set_rules('hour', 'hour', 'trim|required', array('required' => $this->lang('insert lab hour error')));
+		$this->form_validation->set_rules('remarks', 'remarks', 'trim');
+		if ($this->form_validation->run()) {
+			$datas = array(
+				'give_date' => $this->input->post('give_date'),
+				'hour' => $this->input->post('hour'),
+				'init_date' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s'),
+				'remarks' => $this->input->post('remarks'),
+			);
+			$update = $this->Admin_model->update_lab($datas, array('id' => $this->input->post('slug')));
+			if ($update) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');
+				$data['alert']['text'] = $this->lang('update lab success');
+				$data['alert']['type'] = 'success';
+				$data['alert']['type'] = 'success';
+				$data['id'] = $this->input->post('slug');
 				$data['extraFunction'] = true;
 			}
 		} else {
@@ -3983,6 +4024,42 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+
+	public function install_lab()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$datas = array(
+				'status' => 'a',
+				'install_time' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s'),
+			);
+
+			$update = $this->Admin_model->update_lab($datas, array('id' => $this->input->post('record')));
+			if ($update) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['text'] = $this->lang('finish lab');
+				$data['alert']['type'] = 'success';
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
+
 	public function show_try()
 	{
 		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('problem')));
@@ -4001,6 +4078,10 @@ class Admin extends CI_Controller
 				$data['type'] = 'success';
 
 				if ($type == 'finish') {
+					$data['content'] = array(
+						'datetime' => $lab[0]['receive_datetime']
+					);
+				} elseif ($type == 'install') {
 					$data['content'] = array(
 						'datetime' => $lab[0]['receive_datetime']
 					);
@@ -4096,19 +4177,21 @@ class Admin extends CI_Controller
 					$typesName .= $this->lang($type);
 					$typesName .= ',';
 				}
-				$time = ($lab['hour'] != '') ? $lab['hour'] : '';
+				$time = ($lab['hour'] != '') ? $this->mylibrary->from24to12($lab['hour']) : '';
 				$datas[] = array(
 					'number' => $i,
 					'id' => $lab['id'],
 					'lab_name' => $lab['lab_name'],
+					'init_date' => $lab['init_date'],
 					'teeth' => substr($teethName, 0, -1),
 					'type' => substr($typesName, 0, -1),
 					'delivery_date' => $lab['give_date'],
 					'delivery_time' => $time,
 					'pay_amount' => number_format($lab['dr']),
-					'remarks' => $lab['remarks'],
+					'remarks' => (is_null($lab['remarks'])) ? '' : $lab['remarks'],
 					'first_try_status' => $lab['first_try_status'],
 					'second_try_status' => $lab['second_try_status'],
+					'install_time' => $lab['install_time'],
 					'status' => $lab['status'],
 				);
 				$i++;
@@ -4133,6 +4216,80 @@ class Admin extends CI_Controller
 
 		print_r(json_encode($data));
 	}
+
+	public function list_labs()
+	{
+		$this->form_validation->set_rules('from_date', 'From Date', 'trim');
+		$this->form_validation->set_rules('to_date', 'To Date', 'trim');
+		$this->form_validation->set_rules('lab_name', 'Lab Name', 'trim');
+		$this->form_validation->set_rules('payment_status', 'Payment Status', 'trim');
+		$this->form_validation->set_rules('case_status', 'Case Status', 'trim');
+
+		if ($this->form_validation->run()) {
+			$filters = [
+				'from_date' => $this->input->post('from_date'),
+				'to_date' => $this->input->post('to_date'),
+				'lab_name' => $this->input->post('lab_name'),
+				'payment_filter' => $this->input->post('payment_status'),
+				'case_status' => $this->input->post('case_status')
+			];
+
+			// Fetch filtered labs from the model
+			$labs = $this->Admin_model->get_filtered_labs($filters);
+
+			$datas = [];
+			$i = 1;
+			foreach ($labs as $lab) {
+				$teeths = explode(',', $lab['teeth']);
+				$teethName = implode(',', array_map(fn($tooth) => $this->tooth_by_id($tooth)['location'] . $this->tooth_by_id($tooth)['name'], $teeths));
+
+				$types = explode(',', $lab['type']);
+				$typesName = implode(',', array_map(fn($type) => $this->lang($type), $types));
+
+				$time = !empty($lab['hour']) ? $this->mylibrary->from24to12($lab['hour']) : '';
+
+				$datas[] = [
+					'number' => $i++,
+					'id' => $lab['id'],
+					'lab_name' => $lab['lab_name'],
+					'patient_name' => $this->mylibrary->get_patient_name($lab['patient_name'], $lab['patient_lname'], $lab['serial_id'], $lab['gender']),
+					'init_date' => $lab['init_date'],
+					'teeth' => $teethName,
+					'type' => $typesName,
+					'patient_id' => $lab['patient_id'],
+					'receive_datetime' => $lab['receive_datetime'],
+					'delivery_date' => $lab['give_date'],
+					'delivery_time' => $time,
+					'pay_amount' => number_format($lab['dr']),
+					'remarks' => $lab['remarks'] ?? '',
+					'first_try_status' => $lab['first_try_status'],
+					'second_try_status' => $lab['second_try_status'],
+					'install_time' => $lab['install_time'],
+					'status' => $lab['status'],
+				];
+			}
+
+			$data['content']['labs'] = $datas;
+			$data['type'] = count($labs) >= 0 ? 'success' : 'error';
+			if ($data['type'] === 'error') {
+				$data['alert'] = [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				];
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert'] = [
+				'title' => $this->lang('error'),
+				'text' => $this->lang('problem'),
+				'type' => 'error'
+			];
+		}
+
+		echo json_encode($data);
+	}
+
 
 	public function print_lab($id)
 	{
