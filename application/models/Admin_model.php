@@ -592,6 +592,66 @@ class Admin_model extends CI_Model
 		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.name, patient.lname, patient.gender, patient.serial_id FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id INNER JOIN patient ON labs.patient_id = patient.id ORDER BY labs.give_date ASC")->result_array();
 	}
 
+	public function get_filtered_labs($filters)
+	{
+		$this->db->select(
+			"labs.*, 
+        CONCAT(customers.name, ' - ', customers.lname) AS lab_name, 
+        patient.name AS patient_name, 
+        patient.lname AS patient_lname, 
+        patient.serial_id, 
+        patient.gender"
+		);
+		$this->db->from('labs');
+		$this->db->join('customers', 'labs.customers_id = customers.id', 'inner');
+		$this->db->join('patient', 'labs.patient_id = patient.id', 'inner');
+
+		// Date Range Filter
+		if (!empty($filters['from_date']) && !empty($filters['to_date'])) {
+			$this->db->where("give_date >=", $filters['from_date']);
+			$this->db->where("give_date <=", $filters['to_date']);
+		}
+
+		// Lab Name Filter
+		if (!empty($filters['lab_name'])) {
+			$this->db->where("labs.customers_id", $filters['lab_name']);
+		}
+
+		// Case Status Filter
+		if (!empty($filters['case_status']) && $filters['case_status'] !== '0') {
+			$case_status_array = is_array($filters['case_status']) ? $filters['case_status'] : explode(',', $filters['case_status']);
+			$this->db->group_start();
+			if (in_array('1', $case_status_array)) {
+				$this->db->or_where("labs.init_date IS NULL");
+				$this->db->or_where("labs.init_date", '');
+			}
+			if (in_array('2', $case_status_array)) {
+				$this->db->or_where("labs.first_try_status", 'a');
+			}
+			if (in_array('3', $case_status_array)) {
+				$this->db->or_where("labs.second_try_status", 'a');
+			}
+			if (in_array('4', $case_status_array)) {
+				$this->db->or_where("labs.receive_datetime IS NOT NULL");
+			}
+			if (in_array('5', $case_status_array)) {
+				$this->db->or_where("labs.install_time IS NOT NULL");
+			}
+			$this->db->group_end();
+		}
+
+		// Payment Filter (Paid, Unpaid, All)
+		if (!empty($filters['payment_filter']) && $filters['payment_filter'] !== '0') {
+			if ($filters['payment_filter'] == 'paid') {
+				$this->db->where("labs.status", 'm');
+			} elseif ($filters['payment_filter'] == 'not_paid') {
+				$this->db->where("labs.status !=", 'm');
+			}
+		}
+
+		$this->db->order_by("labs.give_date", "ASC");
+		return $this->db->get()->result_array();
+	}
 
 	public function get_account_with_no_user()
 	{
@@ -782,14 +842,14 @@ class Admin_model extends CI_Model
 		return $this->db->delete('labs', $where);
 	}
 
-	public function get_teeth_with_prosthodontics($patient_id) {
+	public function get_teeth_with_prosthodontics($patient_id)
+	{
 		$this->db->select('tooth.*');
 		$this->db->from('tooth');
 		$this->db->join('prosthodontics', 'tooth.id = prosthodontics.tooth_id', 'inner');
 		$this->db->where('tooth.patient_id', $patient_id);
 		return $this->db->get()->result_array();
 	}
-
 
 
 	function insert_lab($data)
@@ -1052,75 +1112,86 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 		return $this->db->get_where('temp_patient', array('id' => $id))->result_array();
 	}
 
-	public function update_tooth($tooth_id, $data) {
+	public function update_tooth($tooth_id, $data)
+	{
 		$this->db->where('id', $tooth_id);
 		return $this->db->update('tooth', $data);
 	}
 
-	public function update_endo($tooth_id, $data) {
+	public function update_endo($tooth_id, $data)
+	{
 		$this->db->where('tooth_id', $tooth_id);
 		return $this->db->update('endo', $data);
 	}
 
-	public function update_restorative($tooth_id, $data) {
+	public function update_restorative($tooth_id, $data)
+	{
 		$this->db->where('tooth_id', $tooth_id);
 		return $this->db->update('restorative', $data);
 	}
 
-	public function update_prosthodontics($tooth_id, $data) {
+	public function update_prosthodontics($tooth_id, $data)
+	{
 		$this->db->where('tooth_id', $tooth_id);
 		return $this->db->update('prosthodontics', $data);
 	}
 
 	// **Delete Old Restorative Basic Info**
-	public function delete_restorative_basic_info($tooth_id) {
+	public function delete_restorative_basic_info($tooth_id)
+	{
 		$this->db->where('restorative_id', $tooth_id);
 		return $this->db->delete('restorative_has_basic_information_teeth');
 	}
 
 	// **Delete Old Prosthodontic Basic Info**
-	public function delete_prosthodontics_basic_info($tooth_id) {
+	public function delete_prosthodontics_basic_info($tooth_id)
+	{
 		$this->db->where('prosthodontics_id', $tooth_id);
 		return $this->db->delete('prosthodontics_has_basic_information_teeth');
 	}
 
 
 	// **Delete Old Endo Services**
-	public function delete_endo_services($tooth_id) {
+	public function delete_endo_services($tooth_id)
+	{
 		$this->db->where('endo_id', $tooth_id);
 		return $this->db->delete('endo_has_services');
 	}
 
 	// **Delete Old Restorative Services**
-	public function delete_restorative_services($tooth_id) {
+	public function delete_restorative_services($tooth_id)
+	{
 		$this->db->where('restorative_id', $tooth_id);
 		return $this->db->delete('restorative_has_services');
 	}
 
 	// **Delete Old Prosthodontic Services**
-	public function delete_prosthodontics_services($tooth_id) {
+	public function delete_prosthodontics_services($tooth_id)
+	{
 		$this->db->where('prosthodontics_id', $tooth_id);
 		return $this->db->delete('prosthodontics_has_services');
 	}
 
 	// **Delete Old Endo Basic Info**
-	public function delete_endo_basic_info($tooth_id) {
+	public function delete_endo_basic_info($tooth_id)
+	{
 		$this->db->where('endo_id', $tooth_id);
 		return $this->db->delete('endo_has_basic_information_teeth');
 	}
 
 
 	// **Delete Old Tooth Diagnoses**
-	public function delete_tooth_diagnoses($tooth_id) {
+	public function delete_tooth_diagnoses($tooth_id)
+	{
 		$this->db->where('tooth_id', $tooth_id);
 		return $this->db->delete('tooth_has_diagnose');
 	}
 
 	// **Insert New Tooth Diagnoses**
-	public function insert_tooth_has_diagnose($data) {
+	public function insert_tooth_has_diagnose($data)
+	{
 		return $this->db->insert('tooth_has_diagnose', $data);
 	}
-
 
 
 	public function list_insert_tooth_basic_information($category_name, $department = 'restorative')
@@ -1399,7 +1470,8 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 		return $this->db->query("SELECT prescription.id, CONCAT(users.fname, ' - ', users.lname) AS 'user_name', date_time FROM `prescription` INNER JOIN users ON prescription.users_id = users.id WHERE prescription.patient_id = '$patient_id'")->result_array();
 	}
 
-	function list_prescription_samples($type = null){
+	function list_prescription_samples($type = null)
+	{
 		return $this->db->get_where('prescription_samples', array('type' => $type))->result_array();
 	}
 
@@ -1419,7 +1491,8 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 		return array($log, $id);
 	}
 
-	public function delete_prescription_sample($data = array()){
+	public function delete_prescription_sample($data = array())
+	{
 		return $this->db->delete('prescription_samples', $data);
 	}
 

@@ -3780,7 +3780,9 @@ class Admin extends CI_Controller
 		$data['title'] = $this->lang('laboratory');
 		$data['page'] = "labs";
 		$data['labs'] = $this->Admin_model->list_labs();
-		$data['accounts'] = $this->Admin_model->get_account_with_no_user();
+		$data['accounts'] = $this->Admin_model->get_lab_account();
+
+
 		$data['script'] = $this->mylibrary->generateSelect2();
 		$data['script_date'] = $this->mylibrary->script_datepicker();
 		$data['script_date'] .= $this->mylibrary->script_datepicker('update_date', 'div#update-date-div', 'update_date');
@@ -4214,6 +4216,80 @@ class Admin extends CI_Controller
 
 		print_r(json_encode($data));
 	}
+
+	public function list_labs()
+	{
+		$this->form_validation->set_rules('from_date', 'From Date', 'trim');
+		$this->form_validation->set_rules('to_date', 'To Date', 'trim');
+		$this->form_validation->set_rules('lab_name', 'Lab Name', 'trim');
+		$this->form_validation->set_rules('payment_status', 'Payment Status', 'trim');
+		$this->form_validation->set_rules('case_status', 'Case Status', 'trim');
+
+		if ($this->form_validation->run()) {
+			$filters = [
+				'from_date' => $this->input->post('from_date'),
+				'to_date' => $this->input->post('to_date'),
+				'lab_name' => $this->input->post('lab_name'),
+				'payment_filter' => $this->input->post('payment_status'),
+				'case_status' => $this->input->post('case_status')
+			];
+
+			// Fetch filtered labs from the model
+			$labs = $this->Admin_model->get_filtered_labs($filters);
+
+			$datas = [];
+			$i = 1;
+			foreach ($labs as $lab) {
+				$teeths = explode(',', $lab['teeth']);
+				$teethName = implode(',', array_map(fn($tooth) => $this->tooth_by_id($tooth)['location'] . $this->tooth_by_id($tooth)['name'], $teeths));
+
+				$types = explode(',', $lab['type']);
+				$typesName = implode(',', array_map(fn($type) => $this->lang($type), $types));
+
+				$time = !empty($lab['hour']) ? $this->mylibrary->from24to12($lab['hour']) : '';
+
+				$datas[] = [
+					'number' => $i++,
+					'id' => $lab['id'],
+					'lab_name' => $lab['lab_name'],
+					'patient_name' => $this->mylibrary->get_patient_name($lab['patient_name'], $lab['patient_lname'], $lab['serial_id'], $lab['gender']),
+					'init_date' => $lab['init_date'],
+					'teeth' => $teethName,
+					'type' => $typesName,
+					'patient_id' => $lab['patient_id'],
+					'receive_datetime' => $lab['receive_datetime'],
+					'delivery_date' => $lab['give_date'],
+					'delivery_time' => $time,
+					'pay_amount' => number_format($lab['dr']),
+					'remarks' => $lab['remarks'] ?? '',
+					'first_try_status' => $lab['first_try_status'],
+					'second_try_status' => $lab['second_try_status'],
+					'install_time' => $lab['install_time'],
+					'status' => $lab['status'],
+				];
+			}
+
+			$data['content']['labs'] = $datas;
+			$data['type'] = count($labs) >= 0 ? 'success' : 'error';
+			if ($data['type'] === 'error') {
+				$data['alert'] = [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				];
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert'] = [
+				'title' => $this->lang('error'),
+				'text' => $this->lang('problem'),
+				'type' => 'error'
+			];
+		}
+
+		echo json_encode($data);
+	}
+
 
 	public function print_lab($id)
 	{
