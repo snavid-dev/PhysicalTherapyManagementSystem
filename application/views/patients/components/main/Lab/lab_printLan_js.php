@@ -209,4 +209,41 @@
 		$('#init_lab_id').val(id);
 		$("#init_lab").modal('toggle');
 	}
+
+	function payLab(id) {
+		swal({
+			title: '<?= $ci->lang('pay lab alert title') ?>',
+			text: "<?= $ci->lang('pay lab alert text') ?>",
+			icon: "info",
+			buttons: ['<?= $ci->lang('cancel') ?>', '<?= $ci->lang('yes') ?>'],
+			dangerMode: true,
+		}).then((accepts) => {
+			if (accepts) {
+				$.ajax({
+					url: "<?= base_url('admin/pay_lab') ?>",
+					type: 'POST',
+					data: {record: id},
+					success: function (response) {
+						let result = JSON.parse(response);
+
+						if (result.type === 'success') {
+							list_labs(); // refresh table
+							toastr["success"](result.alert.text, result.alert.title);
+
+							// Open print page in new tab
+							if (result.balance_id) {
+								window.open('<?= base_url() ?>admin/print_expense/' + result.balance_id, '_blank');
+							}
+						} else {
+							toastr["error"](
+								result.messages?.[0] || result.alert?.text || '<?= $ci->lang('problem') ?>',
+								result.alert?.title || '<?= $ci->lang('error') ?>'
+							);
+						}
+					}
+				});
+			}
+		});
+	}
+
 </script>

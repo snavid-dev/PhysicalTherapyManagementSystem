@@ -4290,6 +4290,96 @@ class Admin extends CI_Controller
 		echo json_encode($data);
 	}
 
+	public function pay_lab()
+	{
+		$data = ['type' => 'form_error', 'messages' => []];
+
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', [
+			'required' => $this->lang('problem'),
+			'is_natural_no_zero' => $this->lang('problem')
+		]);
+
+		if ($this->form_validation->run()) {
+			$lab_id = $this->input->post('record');
+
+			// Fetch lab record
+			$lab = $this->Admin_model->get_lab_by_id($lab_id);
+			if (!$lab) {
+				$data['type'] = 'error';
+				$data['alert'] = [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('lab not found'),
+					'type' => 'error'
+				];
+				echo json_encode($data);
+				return;
+			}
+
+			// Fetch patient info
+			$patient = $this->Admin_model->get_patient_by_id($lab['patient_id']);
+
+			// Get tooth names from comma-separated IDs
+			$toothNames = [];
+			$toothIds = explode(',', $lab['teeth']);
+			foreach ($toothIds as $toothId) {
+				$toothInfo = $this->tooth_by_id(trim($toothId));
+				if (!empty($toothInfo)) {
+					$toothNames[] = $toothInfo['location'] . $toothInfo['name'];
+				}
+			}
+
+			// Format translated types
+			$types = explode(',', $lab['type']);
+			$translatedTypes = array_map(function ($type) {
+				return $this->lang($type);
+			}, $types);
+
+			// Compose remarks
+			$remarks = $patient['name'] . ' ' . $patient['lname'] . ' - ' . $this->lang('teeth') . ': ' . implode(', ', $toothNames) . ' | ' . implode(', ', $translatedTypes);
+
+			// Build balance_sheet data
+			$balanceData = [
+				'dr' => $lab['dr'],
+				'shamsi' => $this->mylibrary->getCurrentShamsiDate()['date'],
+				'customers_id' => $lab['customers_id'],
+				'users_id' => $this->session->userdata($this->mylibrary->hash_session('u_id')),
+				'remarks' => $remarks
+			];
+
+			// Insert into balance_sheet
+			$insert_id = $this->Admin_model->insert_balance_sheet($balanceData);
+
+			if ($insert_id) {
+				// Update lab status to 'm' (paid)
+				$this->Admin_model->update_lab(['status' => 'm'], ['id' => $lab_id]);
+
+				$data['type'] = 'success';
+				$data['balance_id'] = $insert_id;
+				$data['alert'] = [
+					'title' => $this->lang('success'),
+					'text' => $this->lang('lab payment recorded'),
+					'type' => 'success'
+				];
+			} else {
+				$data['type'] = 'error';
+				$data['alert'] = [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				];
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		echo json_encode($data);
+	}
+
 
 	public function print_lab($id)
 	{

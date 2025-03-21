@@ -653,6 +653,22 @@ class Admin_model extends CI_Model
 		return $this->db->get()->result_array();
 	}
 
+
+	public function get_lab_by_id($lab_id)
+	{
+		return $this->db->get_where('labs', ['id' => $lab_id])->row_array();
+	}
+
+	public function get_patient_by_id($patient_id)
+	{
+		return $this->db->get_where('patient', ['id' => $patient_id])->row_array();
+	}
+
+	public function insert_balance_sheet($data)
+	{
+		$this->db->insert('balance_sheet', $data);
+		return $this->db->insert_id();
+	}
 	public function get_account_with_no_user()
 	{
 		return $this->db->get('customers')->result_array();
