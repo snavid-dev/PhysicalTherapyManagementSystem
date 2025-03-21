@@ -420,7 +420,9 @@
 
 <script>
 	function tableFilter(selectId) {
-		var selectIdValue = $(selectId).val();
+		let selectIdValue = $(selectId).val();
+		let table = $('#file-datatable').DataTable();
+
 		$.ajax({
 			url: "<?= base_url('admin/list_patient_json') ?>",
 			type: 'POST',
@@ -429,58 +431,66 @@
 			},
 			success: function (response) {
 				let result = JSON.parse(response);
-				var table = $('#file-datatable').DataTable();
-				table.rows().remove();
-				result.content.map((item) => {
-					let changeBtnsStatus = ``;
+				table.clear(); // 💡 Clear all rows properly
 
-					if (selectIdValue == 'p') {
-						changeBtnsStatus +=
-							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
-              <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
-					} else if (selectIdValue == 'a') {
-						changeBtnsStatus +=
-							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock"></span></a>
-              <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
-					} else {
-						changeBtnsStatus +=
-							`<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock-o fs-14"></span></a>
-            <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>`;
+				if (result.content && result.content.length > 0) {
+					result.content.forEach(item => {
+						let changeBtnsStatus = '';
 
-					}
-					let buttons = '';
-					if (selectIdValue != 't') {
-						buttons = ` <div class="g-2">
-                <a href="<?= base_url("admin/single_patient/") ?>${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span class="fa fa-user-circle-o fs-14"></span></a>
-                <a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('print') ?>"><span class="fa fa-print fs-14"></span></a>
-                ${changeBtnsStatus}
-                <a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fa fa-trash"></span></a>
-              </div>`;
-					} else {
-						buttons = ` <div class="g-2">
-                      <a href="javascript:temp_to_permenant('${item.id}', '<?= base_url() ?>admin/temp_to_permenant', 'tempTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check fs-14"></span></a>
-                    </div>`;
-					}
+						if (selectIdValue === 'p') {
+							changeBtnsStatus += `
+								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
+								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
+						} else if (selectIdValue === 'a') {
+							changeBtnsStatus += `
+								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock"></span></a>
+								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
+						} else {
+							changeBtnsStatus += `
+								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock-o fs-14"></span></a>
+								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>`;
+						}
 
-					let row = table.row.add([
-						item.number,
-						item.serial_id,
-						item.fullname,
-						item.phone,
-						item.doctor_name,
-						item.history,
-						item.other_pains,
-						item.remarks,
-						buttons
-					]).node();
-					row.id = item.id;
-				});
-				table.draw(false);
+						let buttons = '';
+						if (selectIdValue !== 't') {
+							buttons = `
+								<div class="g-2">
+									<a href="<?= base_url("admin/single_patient/") ?>${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span class="fa fa-user-circle-o fs-14"></span></a>
+									<a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('print') ?>"><span class="fa fa-print fs-14"></span></a>
+									${changeBtnsStatus}
+									<a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fa fa-trash"></span></a>
+								</div>`;
+						} else {
+							buttons = `
+								<div class="g-2">
+									<a href="javascript:temp_to_permenant('${item.id}', '<?= base_url() ?>admin/temp_to_permenant', 'tempTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check fs-14"></span></a>
+								</div>`;
+						}
+
+						// ⚠️ Ensure the number of columns here matches the table definition
+						let row = table.row.add([
+							item.number || '',
+							item.serial_id || '',
+							item.fullname || '',
+							item.phone || '',
+							item.doctor_name || '',
+							item.history || '',
+							item.other_pains || '',
+							item.remarks || '',
+							buttons
+						]).node();
+
+						row.id = item.id;
+					});
+
+					table.draw(false);
+				} else {
+					table.draw(); // Just redraw empty table
+				}
 			}
 		});
 	}
 </script>
-
 
 <script>
 	function list_patients() {
