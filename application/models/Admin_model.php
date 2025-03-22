@@ -632,7 +632,7 @@ class Admin_model extends CI_Model
 				$this->db->or_where("labs.second_try_status", 'a');
 			}
 			if (in_array('4', $case_status_array)) {
-				$this->db->or_where("labs.receive_datetime IS NOT NULL");
+				$this->db->or_where("labs.receive_datetime IS NOT NULL AND labs.receive_datetime != ''");
 			}
 			if (in_array('5', $case_status_array)) {
 				$this->db->or_where("labs.install_time IS NOT NULL");
