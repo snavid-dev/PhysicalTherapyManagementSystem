@@ -589,7 +589,7 @@ class Admin_model extends CI_Model
 
 	function list_labs()
 	{
-		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.name, patient.lname, patient.gender, patient.serial_id FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id INNER JOIN patient ON labs.patient_id = patient.id ORDER BY labs.give_date ASC")->result_array();
+		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.name, patient.lname, patient.gender, patient.serial_id FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id INNER JOIN patient ON labs.patient_id = patient.id WHERE labs.status != 'm' ORDER BY labs.give_date ASC")->result_array();
 	}
 
 	public function get_filtered_labs($filters)
@@ -644,7 +644,7 @@ class Admin_model extends CI_Model
 		if (!empty($filters['payment_filter']) && $filters['payment_filter'] !== '0') {
 			if ($filters['payment_filter'] == 'paid') {
 				$this->db->where("labs.status", 'm');
-			} elseif ($filters['payment_filter'] == 'not_paid') {
+			} elseif ($filters['payment_filter'] == 'unpaid') {
 				$this->db->where("labs.status !=", 'm');
 			}
 		}

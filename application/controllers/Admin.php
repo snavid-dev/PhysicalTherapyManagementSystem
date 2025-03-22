@@ -4233,7 +4233,6 @@ class Admin extends CI_Controller
 				'payment_filter' => $this->input->post('payment_status'),
 				'case_status' => $this->input->post('case_status')
 			];
-
 			// Fetch filtered labs from the model
 			$labs = $this->Admin_model->get_filtered_labs($filters);
 
@@ -4351,7 +4350,7 @@ class Admin extends CI_Controller
 
 			if ($insert_id) {
 				// Update lab status to 'm' (paid)
-				$this->Admin_model->update_lab(['status' => 'm'], ['id' => $lab_id]);
+				$this->Admin_model->update_lab(['pay_datetime' => $this->mylibrary->getCurrentShamsiDate()['date'] . date('H:i:s'), 'status' => 'm'], ['id' => $lab_id]);
 
 				$data['type'] = 'success';
 				$data['balance_id'] = $insert_id;
