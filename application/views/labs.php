@@ -48,12 +48,12 @@
 										class="form-control select2-show-search form-select"
 										data-placeholder="<?= $ci->lang('select') ?>"
 										id="lab_name"
-								onchange="listLabs()">
+										onchange="listLabs()">
 									<option label="<?= $ci->lang('select') ?>"></option>
 									<option value="0"><?= $ci->lang('all') ?></option>
 									<?php foreach ($accounts as $account) : ?>
 										<option value="<?= $account['id'] ?>">
-											 <?= $account['name'] ?> <?= $account['lname'] ?>
+											<?= $account['name'] ?> <?= $account['lname'] ?>
 										</option>
 									<?php endforeach; ?>
 								</select>
@@ -99,9 +99,9 @@
 							<li style="width: 450px;">
 								<select
 									id="case_status"
-										class="form-control select2-show-search form-select"
-										data-placeholder="<?= $ci->lang('select') ?>"
-										onchange="listLabs()" multiple>
+									class="form-control select2-show-search form-select"
+									data-placeholder="<?= $ci->lang('select') ?>"
+									onchange="listLabs()" multiple>
 									<option label="<?= $ci->lang('select') ?>"></option>
 									<option value="0" selected>
 										<?= $ci->lang("all") ?>
@@ -227,12 +227,12 @@
 										$info = $ci->tooth_by_id($tooth);
 										if (is_array($info) && count($info) != 0) {
 
-										$teethName .= $info['name'];
-										$teethName .= $info['location'];
+											$teethName .= $info['name'];
+											$teethName .= $info['location'];
 										}
 										$teethName .= ',';
 									}
-								}else{
+								} else {
 									$teethName = ',';
 								}
 								?>
@@ -252,7 +252,8 @@
 								<td><?= $lab['remarks'] ?></td>
 								<td>
 									<div class="g-2">
-										<a href="<?= base_url('admin/single_patient/') . $lab['patient_id'] ?>" class="btn btn-icon btn-outline-info rounded-pill btn-wave waves-effect waves-light">
+										<a href="<?= base_url('admin/single_patient/') . $lab['patient_id'] ?>"
+										   class="btn btn-icon btn-outline-info rounded-pill btn-wave waves-effect waves-light">
 											<span
 												class="fa fa-user-circle-o"></span>
 										</a>
@@ -435,18 +436,19 @@
 </script>
 
 <script>
-	function firstTry(id){
+	function firstTry(id) {
 		$('#type_try').val('first');
 		$('#hiddenId').val(id);
 		$("#triesModal").modal('toggle');
 	}
-	function secondTry(id){
+
+	function secondTry(id) {
 		$('#type_try').val('second');
 		$('#hiddenId').val(id);
 		$("#triesModal").modal('toggle');
 	}
 
-	function finish(id){
+	function finish(id) {
 		$.ajax({
 			url: "<?= base_url('admin/finish_lab') ?>",
 			type: 'POST',
@@ -458,7 +460,7 @@
 				if (result['type'] == 'success') {
 					listLabs();
 					toastr["success"](result['alert']['text'], result['alert']['title'])
-				}else{
+				} else {
 					toastr["error"](result['messages'][step], result['title'])
 				}
 
@@ -466,7 +468,7 @@
 		})
 	}
 
-	function showTry(id, type){
+	function showTry(id, type) {
 		$.ajax({
 			url: "<?= base_url('admin/show_try') ?>",
 			type: 'POST',
@@ -481,7 +483,7 @@
 					$('#details_lab').val(result['content']['message']);
 					$('#datetime_lab').val(result['content']['datetime']);
 					$("#showtriesModal").modal('toggle');
-				}else{
+				} else {
 					toastr["error"](result['messages'][step], result['title'])
 				}
 
@@ -489,7 +491,7 @@
 		})
 	}
 
-	function showfinish(id){
+	function showfinish(id) {
 		$.ajax({
 			url: "<?= base_url('admin/show_try') ?>",
 			type: 'POST',
@@ -503,7 +505,7 @@
 					$('#details_lab').hide();
 					$('#datetime_lab').val(result['content']['datetime']);
 					$("#showtriesModal").modal('toggle');
-				}else{
+				} else {
 					toastr["error"](result['messages'][step], result['title'])
 				}
 
@@ -512,8 +514,7 @@
 	}
 
 
-
-	function showinstall(id){
+	function showinstall(id) {
 		$.ajax({
 			url: "<?= base_url('admin/show_try') ?>",
 			type: 'POST',
@@ -527,7 +528,7 @@
 					$('#details_lab').hide();
 					$('#datetime_lab').val(result['content']['datetime']);
 					$("#showtriesModal").modal('toggle');
-				}else{
+				} else {
 					toastr["error"](result['messages'][step], result['title'])
 				}
 
@@ -536,7 +537,7 @@
 	}
 
 
-	function install(id){
+	function install(id) {
 		$.ajax({
 			url: "<?= base_url('admin/install_lab') ?>",
 			type: 'POST',
@@ -548,7 +549,7 @@
 				if (result['type'] == 'success') {
 					listLabs();
 					toastr["success"](result['alert']['text'], result['alert']['title'])
-				}else{
+				} else {
 					toastr["error"](result['messages'][step], result['title'])
 				}
 
@@ -556,7 +557,7 @@
 		})
 	}
 
-	function init_lab(id){
+	function init_lab(id) {
 		$('#init_lab_id').val(id);
 		$("#init_lab").modal('toggle');
 	}
@@ -734,29 +735,29 @@
 	//				if (selectIdValue == 'p') {
 	//					changeBtnsStatus +=
 	//						`<a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
-    //          <a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
+	//          <a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
 	//				} else if (selectIdValue == 'a') {
 	//					changeBtnsStatus +=
 	//						`<a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock"></span></a>
-    //          <a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
+	//          <a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
 	//				} else {
 	//					changeBtnsStatus +=
 	//						`<a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock-o fs-14"></span></a>
-    //        <a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>`;
+	//        <a href="javascript:accept_via_alert('${item.id}', '<?php //= base_url() ?>//admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>`;
 	//
 	//				}
 	//				let buttons = '';
 	//				if (selectIdValue != 't') {
 	//					buttons = ` <div class="g-2">
-    //            <a href="<?php //= base_url("admin/single_patient/") ?>//${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?php //= $ci->lang('edit') ?>//"><span class="fa fa-user-circle-o fs-14"></span></a>
-    //            <a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?php //= $ci->lang('print') ?>//"><span class="fa fa-print fs-14"></span></a>
-    //            ${changeBtnsStatus}
-    //            <a href="javascript:delete_via_alert('${item.id}', '<?php //= base_url() ?>//admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?php //= $ci->lang('delete') ?>//"><span class="fa fa-trash"></span></a>
-    //          </div>`;
+	//            <a href="<?php //= base_url("admin/single_patient/") ?>//${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?php //= $ci->lang('edit') ?>//"><span class="fa fa-user-circle-o fs-14"></span></a>
+	//            <a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?php //= $ci->lang('print') ?>//"><span class="fa fa-print fs-14"></span></a>
+	//            ${changeBtnsStatus}
+	//            <a href="javascript:delete_via_alert('${item.id}', '<?php //= base_url() ?>//admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?php //= $ci->lang('delete') ?>//"><span class="fa fa-trash"></span></a>
+	//          </div>`;
 	//				} else {
 	//					buttons = ` <div class="g-2">
-    //                  <a href="javascript:temp_to_permenant('${item.id}', '<?php //= base_url() ?>//admin/temp_to_permenant', 'tempTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check fs-14"></span></a>
-    //                </div>`;
+	//                  <a href="javascript:temp_to_permenant('${item.id}', '<?php //= base_url() ?>//admin/temp_to_permenant', 'tempTable')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check fs-14"></span></a>
+	//                </div>`;
 	//				}
 	//
 	//				let row = table.row.add([
@@ -861,7 +862,6 @@
 	}
 
 
-
 	function createStatusButton(action, lab, key, successIcon, defaultIcon) {
 		return lab[key] === 'p'
 			? createButton(action, lab.id, successIcon, 'success')
@@ -873,6 +873,43 @@
                 class="btn btn-icon btn-outline-${type} rounded-pill btn-wave waves-effect waves-light ${extraClass}">
                 <span class="fa ${icon}"></span>
             </a> `;
+	}
+
+
+	function payLab(id) {
+		swal({
+			title: '<?= $ci->lang('pay lab alert title') ?>',
+			text: "<?= $ci->lang('pay lab alert text') ?>",
+			icon: "info",
+			buttons: ['<?= $ci->lang('cancel') ?>', '<?= $ci->lang('yes') ?>'],
+			dangerMode: true,
+		}).then((accepts) => {
+			if (accepts) {
+				$.ajax({
+					url: "<?= base_url('admin/pay_lab') ?>",
+					type: 'POST',
+					data: {record: id},
+					success: function (response) {
+						let result = JSON.parse(response);
+
+						if (result.type === 'success') {
+							listLabs(); // refresh table
+							toastr["success"](result.alert.text, result.alert.title);
+
+							// Open print page in new tab
+							if (result.balance_id) {
+								window.open('<?= base_url() ?>admin/print_expense/' + result.balance_id, '_blank');
+							}
+						} else {
+							toastr["error"](
+								result.messages?.[0] || result.alert?.text || '<?= $ci->lang('problem') ?>',
+								result.alert?.title || '<?= $ci->lang('error') ?>'
+							);
+						}
+					}
+				});
+			}
+		});
 	}
 
 

@@ -589,7 +589,7 @@ class Admin_model extends CI_Model
 
 	function list_labs()
 	{
-		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.name, patient.lname, patient.gender, patient.serial_id FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id INNER JOIN patient ON labs.patient_id = patient.id ORDER BY labs.give_date ASC")->result_array();
+		return $this->db->query("SELECT labs.*, CONCAT(customers.name, ' - ', customers.lname) AS 'lab_name', patient.name, patient.lname, patient.gender, patient.serial_id FROM `labs` INNER JOIN customers ON labs.customers_id = customers.id INNER JOIN patient ON labs.patient_id = patient.id WHERE labs.status != 'm' ORDER BY labs.give_date ASC")->result_array();
 	}
 
 	public function get_filtered_labs($filters)
@@ -632,7 +632,7 @@ class Admin_model extends CI_Model
 				$this->db->or_where("labs.second_try_status", 'a');
 			}
 			if (in_array('4', $case_status_array)) {
-				$this->db->or_where("labs.receive_datetime IS NOT NULL");
+				$this->db->or_where("labs.receive_datetime IS NOT NULL AND labs.receive_datetime != ''");
 			}
 			if (in_array('5', $case_status_array)) {
 				$this->db->or_where("labs.install_time IS NOT NULL");
@@ -644,7 +644,7 @@ class Admin_model extends CI_Model
 		if (!empty($filters['payment_filter']) && $filters['payment_filter'] !== '0') {
 			if ($filters['payment_filter'] == 'paid') {
 				$this->db->where("labs.status", 'm');
-			} elseif ($filters['payment_filter'] == 'not_paid') {
+			} elseif ($filters['payment_filter'] == 'unpaid') {
 				$this->db->where("labs.status !=", 'm');
 			}
 		}
@@ -653,6 +653,22 @@ class Admin_model extends CI_Model
 		return $this->db->get()->result_array();
 	}
 
+
+	public function get_lab_by_id($lab_id)
+	{
+		return $this->db->get_where('labs', ['id' => $lab_id])->row_array();
+	}
+
+	public function get_patient_by_id($patient_id)
+	{
+		return $this->db->get_where('patient', ['id' => $patient_id])->row_array();
+	}
+
+	public function insert_balance_sheet($data)
+	{
+		$this->db->insert('balance_sheet', $data);
+		return $this->db->insert_id();
+	}
 	public function get_account_with_no_user()
 	{
 		return $this->db->get('customers')->result_array();

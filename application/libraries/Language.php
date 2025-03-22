@@ -451,6 +451,9 @@ class Language
 			'delivery time' => self::lang_arr('delivery time', 'ساعت تحویل گیری', 'د سپارنې وخت'),
 			'tooth color' => self::lang_arr('tooth color', 'رنگ دندان', 'د غاښ رنګ'),
 			'lab name' => self::lang_arr('laboratory name', 'نام لابراتوار', 'د غاښ رنګ'),
+			'pay lab alert title' => self::lang_arr('Pay Laboratory Expense Confirmation', 'تاییدی پرداخت مصرف لابراتوار', 'د غاښ رنګ'),
+			'pay lab alert text' => self::lang_arr('are you sure you want to pay this laboratory expense?', 'آیا مطمئن هستید که این مصرف را پرداخت میکنید؟', 'د غاښ رنګ'),
+			'lab payment recorded' => self::lang_arr('Laboratory Expense paid successfully', 'مصرف لابراتوار موفقانه پرداخت شد', 'د غاښ رنګ'),
 			'insert laboratory expenses' => self::lang_arr('insert laboratory expenses', 'افزودن مصارف لابراتوار', 'د لابراتوار لګښتونه داخل کړئ'),
 			'unpaid' => self::lang_arr('unpaid', 'پرداخت نشده', 'د لابراتوار لګښتونه داخل کړئ'),
 
