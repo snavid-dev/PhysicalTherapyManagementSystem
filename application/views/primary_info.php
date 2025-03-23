@@ -149,28 +149,28 @@
 															<div class="col-sm-12 col-md-2">
 																<button class="btn btn-danger" type="button"
 																		style="margin-top: 36px" id="addRowButton">
-																	add row
+																	<?= $ci->lang('add row') ?>
 																</button>
 															</div>
 
 														</div>
-													</form>
 
-													<div class="percentageRow">
-														<table id="percentageTable" class="table">
-															<thead>
-															<tr>
-																<th>Number of Row</th>
-																<th>Name</th>
-																<th>Percentage</th>
-																<th>Action</th>
-															</tr>
-															</thead>
-															<tbody>
-															<!-- Rows will be dynamically added here -->
-															</tbody>
-														</table>
-													</div>
+														<div class="percentageRow">
+															<table id="percentageTable" class="table">
+																<thead>
+																<tr>
+																	<th><?= $ci->lang('number of row') ?></th>
+																	<th><?= $ci->lang('name') ?></th>
+																	<th><?= $ci->lang('percentage') ?></th>
+																	<th><?= $ci->lang('actions') ?></th>
+																</tr>
+																</thead>
+																<tbody>
+																<!-- Rows will be dynamically added here -->
+																</tbody>
+															</table>
+														</div>
+													</form>
 
 												</div>
 												<div class="modal-footer">
@@ -244,6 +244,28 @@
 																		   placeholder="<?= $ci->lang('price') ?>">
 																</div>
 															</div>
+														</div>
+
+														<!-- Add this inside the modal body after the form -->
+														<div class="percentageRow">
+															<button class="btn btn-danger" type="button"
+																	style="margin-bottom: 15px;" id="editAddRowButton">
+																<?= $ci->lang('add row') ?>
+															</button>
+
+															<table id="edit_percentageTable" class="table">
+																<thead>
+																<tr>
+																	<th><?= $ci->lang('number of row') ?></th>
+																	<th><?= $ci->lang('name') ?></th>
+																	<th><?= $ci->lang('percentage') ?></th>
+																	<th><?= $ci->lang('actions') ?></th>
+																</tr>
+																</thead>
+																<tbody>
+																<!-- Dynamic rows get inserted here -->
+																</tbody>
+															</table>
 														</div>
 													</form>
 
@@ -3339,27 +3361,106 @@
 		$.ajax({
 			url: "<?= base_url('admin/single_service') ?>",
 			type: 'POST',
-			data: {
-				slug: id
-			},
+			data: {slug: id},
 			success: function (response) {
-				var result = JSON.parse(response);
-				if (result['type'] == 'success') {
-					$('#slug_services').val(result['content']['slug']);
-					$('#price').val(result['content']['price']);
-					$('#nameOld').val(result['content']['name']);
-					$('#name').val(result['content']['name']);
-					$('#department').val(result['content']['department']).trigger('change');
+				const result = JSON.parse(response);
+				if (result.type === 'success') {
+					const {slug, price, name, department, processes} = result.content;
+
+					// Populate form fields
+					$('#slug_services').val(slug);
+					$('#price').val(price);
+					$('#nameOld').val(name);
+					$('#name').val(name);
+					$('#department').val(department).trigger('change');
+
+					// Reset dynamic table
+					const tableBody = document.querySelector("#edit_percentageTable tbody");
+					tableBody.innerHTML = "";
+
+					// Reset row count (IMPORTANT)
+					window.editRowCount = 0;
+
+					// Add rows
+					if (Array.isArray(processes)) {
+						processes.forEach((process, index) => {
+							window.editRowCount++; // track dynamically
+
+							const row = document.createElement("tr");
+							row.setAttribute("draggable", "true");
+
+							row.innerHTML = `
+							<td>${editRowCount}</td>
+							<td><input type="text" class="form-control" name="process_name[]" value="${process.name}" placeholder="<?= $ci->lang('name') ?>"></td>
+							<td><input type="number" class="form-control" name="percentage[]" value="${process.percentage}" placeholder="<?= $ci->lang('percentage') ?>"></td>
+							<td><button class="btn btn-danger deleteRow"><?= $ci->lang('delete') ?></button></td>
+						`;
+
+							row.querySelector(".deleteRow").addEventListener("click", () => {
+								row.remove();
+								updateEditRowNumbers();
+							});
+
+							if (typeof addEditDragAndDropEvents === 'function') {
+								addEditDragAndDropEvents(row);
+							}
+
+							tableBody.appendChild(row);
+						});
+
+						updateEditRowNumbers();
+					}
+
 					$('#editServicesModal').modal('toggle');
-				} else if (result['type'] == 'error') {
+				} else {
 					$.growl.error1({
-						title: field['alert']['title'],
-						message: field['alert']['text']
+						title: result.alert?.title || 'Error',
+						message: result.alert?.text || '<?= $ci->lang('problem') ?>'
 					});
 				}
 			}
-		})
+		});
 	}
+
+	function updateEditRowNumbers() {
+		const rows = document.querySelectorAll("#edit_percentageTable tbody tr");
+		rows.forEach((row, index) => {
+			row.querySelector("td:first-child").textContent = index + 1;
+		});
+		window.editRowCount = rows.length; // keep it in sync
+	}
+
+	function addEditDragAndDropEvents(row) {
+		row.addEventListener("dragstart", function () {
+			editDraggedRow = row;
+			setTimeout(() => (row.style.display = "none"), 0);
+		});
+
+		row.addEventListener("dragend", function () {
+			setTimeout(() => (row.style.display = "table-row"), 0);
+			editDraggedRow = null;
+		});
+
+		row.addEventListener("dragover", function (e) {
+			e.preventDefault();
+			const draggedOverRow = e.target.closest("tr");
+			if (draggedOverRow && draggedOverRow !== editDraggedRow) {
+				const bounding = draggedOverRow.getBoundingClientRect();
+				const offset = e.clientY - bounding.top;
+				if (offset > bounding.height / 2) {
+					draggedOverRow.after(editDraggedRow);
+				} else {
+					draggedOverRow.before(editDraggedRow);
+				}
+			}
+		});
+
+		row.addEventListener("drop", function (e) {
+			e.preventDefault();
+			updateEditRowNumbers();
+		});
+	}
+
 </script>
 
 <script>

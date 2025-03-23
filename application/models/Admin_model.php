@@ -640,6 +640,7 @@ class Admin_model extends CI_Model
 			$this->db->group_end();
 		}
 
+
 		// Payment Filter (Paid, Unpaid, All)
 		if (!empty($filters['payment_filter']) && $filters['payment_filter'] !== '0') {
 			if ($filters['payment_filter'] == 'paid') {
@@ -652,6 +653,36 @@ class Admin_model extends CI_Model
 		$this->db->order_by("labs.give_date", "ASC");
 		return $this->db->get()->result_array();
 	}
+
+	public function insert_process($data)
+	{
+		return $this->db->insert('processes', $data);
+	}
+
+	public function update_process_by_name_and_service($service_id, $name, $data)
+	{
+		return $this->db->where('services_id', $service_id)->where('name', $name)->update('processes', $data);
+	}
+
+	public function delete_process_by_id($id)
+	{
+		return $this->db->delete('processes', ['id' => $id]);
+	}
+
+	public function is_process_used_in_turns($process_id)
+	{
+		return $this->db->where('process_id', $process_id)->from('turns')->count_all_results() > 0;
+	}
+
+
+	public function get_processes_by_service_id($service_id)
+	{
+		$this->db->where('services_id', $service_id);
+		$this->db->order_by('number', 'ASC'); // or DESC
+		return $this->db->get('processes')->result_array();
+
+	}
+
 
 
 	public function get_lab_by_id($lab_id)
