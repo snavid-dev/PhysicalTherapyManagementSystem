@@ -50,6 +50,7 @@ $ci = get_instance();
 					<option value="3"><?= $ci->lang('laboratory') ?></option>
 					<option value="4"><?= $ci->lang('prescription') ?></option>
 					<option value="5"><?= $ci->lang('archive') ?></option>
+					<option value="6"><?= $ci->lang('recommended processes') ?></option>
 				</select>
 			</div>
 
@@ -59,5 +60,6 @@ $ci = get_instance();
 	</div>
 
 <?php
+$ci->render('patients/components/status/recommended_process_modal.php');
 $ci->render('patients/components/status/status_js.php')
 ?>
