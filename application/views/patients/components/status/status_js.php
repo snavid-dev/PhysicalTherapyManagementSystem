@@ -29,6 +29,7 @@
 			$("#selectaction").val("").trigger("change");
 		}
 		if (actionValues == 6) {
+			list_teeth_recommended();
 			$(`#recommended_processes`).modal("toggle");
 			$("#selectaction").val("").trigger("change");
 		}
@@ -237,6 +238,115 @@
 			}
 		})
 
+	}
+
+</script>
+
+<script>
+	function list_teeth_recommended(selectId = '#process_teeth') {
+		let patient_id = '<?= $profile['id'] ?>';
+
+		$.ajax({
+			url: "<?= base_url('admin/list_process_teeth') ?>",
+			type: 'POST',
+			data: {
+				record: patient_id
+			},
+			success: function (response) {
+				$(selectId).html('');
+				var result = JSON.parse(response);
+				if (result['type'] == 'success') {
+					let options = ``;
+					result['content'].map((item) => {
+						options += `<option value="${item.id}">${item.location}${item.name}</option>`;
+					})
+					$(selectId).html(options);
+				}
+			}
+		})
+	}
+</script>
+
+
+<script>
+	function get_teeth_process() {
+		const selectedTeeth = $('#process_teeth').val();
+		const container = $('#teeth_processes_container');
+		container.empty();
+
+		if (!selectedTeeth || !selectedTeeth.length) return;
+
+		$.ajax({
+			url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
+			type: 'POST',
+			data: { teeth_ids: selectedTeeth },
+			dataType: 'json',
+			success: function (res) {
+				if (res.type !== 'success' || !Array.isArray(res.content)) return;
+
+				if (res.content.length === 0) return; // No valid teeth data
+
+				res.content.forEach((tooth, toothIndex) => {
+					if (!tooth.departments || !tooth.departments.length) return;
+
+					const toothId = tooth.tooth_id;
+					const toothName = tooth.tooth_name;
+
+					let html = `
+					<div class="row nthHrLine">
+						<div class="col-12 greyline">
+							<div class="customMargin">
+								<div class="processHeader">
+									<h2 style="margin-bottom: 30px">${toothName}</h2>
+									<input type="hidden" name="tooth_id[]" value="${toothId}">
+								</div>
+				`;
+
+					tooth.departments.forEach((dept, deptIndex) => {
+						html += `<h5 class="text-primary">${dept.department}</h5><div class="row">`;
+
+						if (Array.isArray(dept.services)) {
+							dept.services.forEach(service => {
+								if (Array.isArray(service.processes)) {
+									service.processes.forEach(process => {
+										html += `
+										<div class="col-sm-12 col-md-2 customMargin_processCheckbox">
+											<label class="cl-checkbox">
+												<input type="checkbox" name="processes[${toothId}][]" value="${process.name}">
+												<span>${process.name}</span>
+											</label>
+										</div>`;
+									});
+								}
+							});
+						}
+
+						// Per-department "Other" checkbox and textarea
+						const otherId = `other_textarea_${toothIndex}_${deptIndex}`;
+						html += `
+						<div class="col-12 col-md-12 mt-2">
+							<label class="cl-checkbox">
+								<input type="checkbox" data-target="${otherId}" onclick="otherProcess(this)">
+								<span><?= $ci->lang('other') ?></span>
+							</label>
+							<div class="mt-2" id="${otherId}" style="display: none">
+								<label><?= $ci->lang('other') ?></label>
+								<textarea class="form-control" name="custom_process[${toothId}][${dept.department}]"></textarea>
+							</div>
+						</div>`;
+
+						html += '</div>'; // end of department row
+					});
+
+					html += '</div></div></div>'; // end of tooth block
+					container.append(html);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("AJAX error:", error);
+				container.empty(); // ensure it's cleared on error
+			}
+		});
 	}
 
 </script>

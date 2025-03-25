@@ -3924,6 +3924,35 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+	public function list_process_teeth()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+
+			$teeth = $this->Admin_model->get_teeth_for_process($this->input->post('record'));
+			if ($teeth) {
+				$data['type'] = 'success';
+				$data['content'] = $teeth;
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
+
 	public function labs()
 	{
 		$data['title'] = $this->lang('laboratory');

@@ -685,66 +685,53 @@ class Admin_model extends CI_Model
 
 	public function get_department_services_with_processes($tooth_id, $department)
 	{
-		// Map department to their respective table and junction table
 		$map = [
 			'endo' => ['table' => 'endo', 'junction' => 'endo_has_services'],
 			'restorative' => ['table' => 'restorative', 'junction' => 'restorative_has_services'],
 			'prosthodontics' => ['table' => 'prosthodontics', 'junction' => 'prosthodontics_has_services']
 		];
 
-		if (!isset($map[$department])) {
-			return [];
-		}
+		if (!isset($map[$department])) return [];
 
 		$dept_table = $map[$department]['table'];
 		$junction_table = $map[$department]['junction'];
 
-		// Get the department entry by tooth
+		// Get the department record for the tooth
 		$this->db->select('id');
 		$this->db->from($dept_table);
 		$this->db->where('tooth_id', $tooth_id);
 		$dept_record = $this->db->get()->row_array();
 
-		if (!$dept_record) {
-			return [];
-		}
+		if (!$dept_record) return [];
 
 		$dept_id = $dept_record['id'];
 
-		// Join junction → services → processes
-		$this->db->select('s.id as service_id, s.name as service_name, p.name as process_name, p.percentage');
-		$this->db->from($junction_table . ' j');
+
+		// Get services related to the department record
+		$this->db->select('s.id as service_id, s.name as service_name');
+		$this->db->from("$junction_table j");
 		$this->db->join('services s', 's.id = j.services_id', 'inner');
-		$this->db->join('processes p', 'p.services_id = s.id', 'left');
 		$this->db->where("j.{$dept_table}_id", $dept_id);
-		$this->db->order_by('s.id, p.number');
+		$services = $this->db->get()->result_array();
 
-		$results = $this->db->get()->result_array();
+		// For each service, fetch its processes
+		$final = [];
 
-		if (empty($results)) return [];
+		foreach ($services as $service) {
+			$this->db->select('name, percentage');
+			$this->db->from('processes');
+			$this->db->where('services_id', $service['service_id']);
+			$this->db->order_by('number', 'ASC');
+			$processes = $this->db->get()->result_array();
 
-		// Group by service
-		$grouped = [];
-		foreach ($results as $row) {
-			$service_id = $row['service_id'];
-			if (!isset($grouped[$service_id])) {
-				$grouped[$service_id] = [
-					'service_name' => $row['service_name'],
-					'processes' => []
-				];
-			}
-
-			if (!empty($row['process_name'])) {
-				$grouped[$service_id]['processes'][] = [
-					'name' => $row['process_name'],
-					'percentage' => $row['percentage']
-				];
-			}
+			$final[] = [
+				'service_name' => $service['service_name'],
+				'processes' => $processes
+			];
 		}
 
-		return array_values($grouped);
+		return $final;
 	}
-
 
 	public function get_teeth_by_patient_id($patient_id)
 	{
@@ -756,7 +743,6 @@ class Admin_model extends CI_Model
 	}
 
 
-
 	public function get_processes_by_service_id($service_id)
 	{
 		$this->db->where('services_id', $service_id);
@@ -764,7 +750,6 @@ class Admin_model extends CI_Model
 		return $this->db->get('processes')->result_array();
 
 	}
-
 
 
 	public function get_lab_by_id($lab_id)
@@ -782,6 +767,7 @@ class Admin_model extends CI_Model
 		$this->db->insert('balance_sheet', $data);
 		return $this->db->insert_id();
 	}
+
 	public function get_account_with_no_user()
 	{
 		return $this->db->get('customers')->result_array();
@@ -976,6 +962,14 @@ class Admin_model extends CI_Model
 		$this->db->select('tooth.*');
 		$this->db->from('tooth');
 		$this->db->join('prosthodontics', 'tooth.id = prosthodontics.tooth_id', 'inner');
+		$this->db->where('tooth.patient_id', $patient_id);
+		return $this->db->get()->result_array();
+	}
+
+	public function get_teeth_for_process($patient_id)
+	{
+		$this->db->select('tooth.*');
+		$this->db->from('tooth');
 		$this->db->where('tooth.patient_id', $patient_id);
 		return $this->db->get()->result_array();
 	}

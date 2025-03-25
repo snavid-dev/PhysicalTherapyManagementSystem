@@ -735,6 +735,7 @@ class Language
 
 			// other treatment start
 			'other treatments' => self::lang_arr('other treatment', 'سایر درمان ها', '?????'),
+			'other' => self::lang_arr('other', 'متفرقه', '?????'),
 			// other treatment end
 
 			// failed Call
