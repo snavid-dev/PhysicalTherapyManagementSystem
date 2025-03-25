@@ -904,8 +904,11 @@ class Language
 			'no available slots' => self::lang_arr('No Available Slots', 'نوبتی در دسترس نیست', 'not set'),
 			'no available slots text' => self::lang_arr('The doctor is either unavailable or on leave', 'داکتر مورد نظر یا در دسترس نمی باشند یا در مرخصی هستند', 'not set'),
 			'on leave' => self::lang_arr('On Leave', 'در مرخصی هستند', 'not set'),
-
 			//turns errors
+
+			//recommended process start
+			'recommended processes' => self::lang_arr('recommended processes', 'not set', 'not set'),
+			//recommended process end
 
 		];
 

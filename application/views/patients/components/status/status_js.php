@@ -28,6 +28,10 @@
 			$(`#filesModal`).modal("toggle");
 			$("#selectaction").val("").trigger("change");
 		}
+		if (actionValues == 6) {
+			$(`#recommended_processes`).modal("toggle");
+			$("#selectaction").val("").trigger("change");
+		}
 	}
 
 	// TODO: toogleView function please note that this function placed at the cdn/assets/js/teeth.js
