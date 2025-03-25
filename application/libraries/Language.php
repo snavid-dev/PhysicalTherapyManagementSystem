@@ -525,7 +525,6 @@ class Language
 			// End Alerts
 
 			// Start Primary Information
-
 			'primary information' => self::lang_arr('primary information', 'اطلاعات اولیه', 'لومړني معلومات'),
 			'diagnoses' => self::lang_arr('diagnoses', 'تشخیص ها', 'تشخیص'),
 			// TODO: Pashto not set
@@ -536,6 +535,9 @@ class Language
 			'choose the data type' => self::lang_arr('choose the data you want to insert', 'انتخاب نوع اطلاعات مورد نظر', 'not set'),
 			'categories' => self::lang_arr('categories', 'دسته بندی ها', 'not set'),
 			'category' => self::lang_arr('category', 'دسته بندی', 'not set'),
+			'add row' => self::lang_arr('add row', 'افزودن ردیف', 'not set'),
+			'number of row' => self::lang_arr('number of rows', 'تعداد ردیف ها', 'not set'),
+			'percentage' => self::lang_arr('percentage', 'فیصدی', 'not set'),
 
 			// End Primary Information
 
@@ -563,8 +565,12 @@ class Language
 			'insert service name error unique' => self::err_gen('name', 'نام', 'نوم', 'unique'),
 			'insert service error price' => self::err_gen('price', 'قیمت', 'قیمت'),
 			'insert service error department' => self::err_gen('department', 'دیپارتمنت', 'not set'),
+			'at least one process is required' => self::err_gen('process', 'مراحل کاری', 'not set'),
+			'process name is required' => self::err_gen('process name', 'نام مرحله کاری', 'not set'),
 			'problem' => self::lang_arr('something went wrong!!', 'کدام مشکلی پیش آمده است', 'کومه تیروتنه وشوه'),
 			'services delete not allowed' => self::lang_arr('Because the service is used for teeth, you are not allowed to remove it!', 'به این دلیل که تداوی برای دندان ها استفاده شده شما مجاز به حذف آن نیستید!', 'not set'),
+			'percentage must be between 1 and 100' => self::lang_arr('percentage must be between 1 and 100', 'فیصدی باید بین 1 تا 100 باشد', 'not set'),
+			'total percentage must equal 100' => self::lang_arr('total percentage must equal 100', 'مجموعه فیصدی باید 100 شود', 'not set'),
 			// end services errors
 
 

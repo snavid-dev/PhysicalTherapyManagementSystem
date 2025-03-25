@@ -640,6 +640,7 @@ class Admin_model extends CI_Model
 			$this->db->group_end();
 		}
 
+
 		// Payment Filter (Paid, Unpaid, All)
 		if (!empty($filters['payment_filter']) && $filters['payment_filter'] !== '0') {
 			if ($filters['payment_filter'] == 'paid') {
@@ -652,6 +653,118 @@ class Admin_model extends CI_Model
 		$this->db->order_by("labs.give_date", "ASC");
 		return $this->db->get()->result_array();
 	}
+
+	public function insert_process($data)
+	{
+		return $this->db->insert('processes', $data);
+	}
+
+	public function update_process_by_name_and_service($service_id, $name, $data)
+	{
+		return $this->db->where('services_id', $service_id)->where('name', $name)->update('processes', $data);
+	}
+
+	public function delete_process_by_id($id)
+	{
+		return $this->db->delete('processes', ['id' => $id]);
+	}
+
+	public function is_process_used_in_turns($process_id)
+	{
+		return $this->db->where('process_id', $process_id)->from('turns')->count_all_results() > 0;
+	}
+
+	public function get_tooth_basic_info($tooth_id)
+	{
+		$this->db->select('name, location');
+		$this->db->from('tooth');
+		$this->db->where('id', $tooth_id);
+		return $this->db->get()->row_array();
+	}
+
+
+	public function get_department_services_with_processes($tooth_id, $department)
+	{
+		// Map department to their respective table and junction table
+		$map = [
+			'endo' => ['table' => 'endo', 'junction' => 'endo_has_services'],
+			'restorative' => ['table' => 'restorative', 'junction' => 'restorative_has_services'],
+			'prosthodontics' => ['table' => 'prosthodontics', 'junction' => 'prosthodontics_has_services']
+		];
+
+		if (!isset($map[$department])) {
+			return [];
+		}
+
+		$dept_table = $map[$department]['table'];
+		$junction_table = $map[$department]['junction'];
+
+		// Get the department entry by tooth
+		$this->db->select('id');
+		$this->db->from($dept_table);
+		$this->db->where('tooth_id', $tooth_id);
+		$dept_record = $this->db->get()->row_array();
+
+		if (!$dept_record) {
+			return [];
+		}
+
+		$dept_id = $dept_record['id'];
+
+		// Join junction → services → processes
+		$this->db->select('s.id as service_id, s.name as service_name, p.name as process_name, p.percentage');
+		$this->db->from($junction_table . ' j');
+		$this->db->join('services s', 's.id = j.services_id', 'inner');
+		$this->db->join('processes p', 'p.services_id = s.id', 'left');
+		$this->db->where("j.{$dept_table}_id", $dept_id);
+		$this->db->order_by('s.id, p.number');
+
+		$results = $this->db->get()->result_array();
+
+		if (empty($results)) return [];
+
+		// Group by service
+		$grouped = [];
+		foreach ($results as $row) {
+			$service_id = $row['service_id'];
+			if (!isset($grouped[$service_id])) {
+				$grouped[$service_id] = [
+					'service_name' => $row['service_name'],
+					'processes' => []
+				];
+			}
+
+			if (!empty($row['process_name'])) {
+				$grouped[$service_id]['processes'][] = [
+					'name' => $row['process_name'],
+					'percentage' => $row['percentage']
+				];
+			}
+		}
+
+		return array_values($grouped);
+	}
+
+
+	public function get_teeth_by_patient_id($patient_id)
+	{
+		$this->db->select('id, name, location');
+		$this->db->from('tooth');
+		$this->db->where('patient_id', $patient_id);
+		$this->db->order_by('location', 'ASC');
+		return $this->db->get()->result_array();
+	}
+
+
+
+	public function get_processes_by_service_id($service_id)
+	{
+		$this->db->where('services_id', $service_id);
+		$this->db->order_by('number', 'ASC'); // or DESC
+		return $this->db->get('processes')->result_array();
+
+	}
+
 
 
 	public function get_lab_by_id($lab_id)

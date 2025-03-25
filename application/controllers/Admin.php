@@ -857,25 +857,79 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('name', 'name', 'trim|required|is_unique[services.name]', array('required' => $this->lang('insert service name error'), 'is_unique' => $this->lang('insert service name error unique')));
 		$this->form_validation->set_rules('department', 'department', 'trim|required', array('required' => $this->lang('insert service error department')));
 		$this->form_validation->set_rules('price', 'price', 'trim|required', array('required' => $this->lang('insert service error price')));
+
+		$names = $this->input->post('process_name');
+		$percentages = $this->input->post('percentage');
+
+		$hasProcessError = false;
+		$totalPercentage = 0;
+
+		if (empty($names) || !is_array($names) || count($names) < 1) {
+			$data['messages'][] = $this->lang('at least one process is required');
+			$hasProcessError = true;
+		} else {
+			foreach ($names as $index => $name) {
+				$name = trim($name);
+				$percentage = isset($percentages[$index]) ? floatval($percentages[$index]) : 0;
+
+				if ($name === '') {
+					$data['messages'][] = $this->lang('process name is required') . " (" . ($index + 1) . ")";
+					$hasProcessError = true;
+				}
+
+				if ($percentage <= 0 || $percentage > 100) {
+					$data['messages'][] = $this->lang('percentage must be between 1 and 100') . " (" . ($index + 1) . ")";
+					$hasProcessError = true;
+				}
+
+				$totalPercentage += $percentage;
+			}
+
+			if ($totalPercentage != 100) {
+				$data['messages'][] = $this->lang('total percentage must equal 100');
+				$hasProcessError = true;
+			}
+		}
+
+		if ($hasProcessError) {
+			$data['type'] = 'form_error';
+			$data['title'] = $this->lang('error');
+			echo json_encode($data);
+			return;
+		}
+
 		if ($this->form_validation->run()) {
 			$datas = array(
 				'name' => $this->input->post('name'),
 				'department' => $this->input->post('department'),
 				'price' => $this->input->post('price'),
 			);
+
 			$insert = $this->Admin_model->insert_service($datas);
+
 			if ($insert[0]) {
+				$service_id = $insert[1];
+
+				foreach ($names as $index => $name) {
+					$percentage = isset($percentages[$index]) ? $percentages[$index] : 0;
+					$process_data = array(
+						'name' => $name,
+						'percentage' => $percentage,
+						'number' => $index + 1,
+						'services_id' => $service_id
+					);
+					$this->Admin_model->insert_process($process_data);
+				}
+
 				$data['type'] = 'success';
 				$data['alert']['title'] = $this->lang('success');
 				$data['alert']['text'] = $this->lang('insert service success');
 				$data['alert']['type'] = 'success';
-
-				$data['id'] = $insert[1];
+				$data['id'] = $service_id;
 
 				$btns = '';
 				$btns .= $this->mylibrary->generateBtnUpdate('edit_service', $data['id']);
-
-				$btns .= $this->mylibrary->generateBtnDeleteMultiDataTable($insert[1], 'admin/delete_service', 'services_table');
+				$btns .= $this->mylibrary->generateBtnDeleteMultiDataTable($service_id, 'admin/delete_service', 'services_table');
 
 				$data['tr'] = array(
 					$datas['name'],
@@ -898,30 +952,31 @@ class Admin extends CI_Controller
 				}
 			}
 		}
-		print_r(json_encode($data));
-	}
 
+		echo json_encode($data);
+	}
 
 	public function single_service()
 	{
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+
 		if ($this->form_validation->run()) {
 			$data = array();
 			$record = $this->input->post('slug');
-			$datas = array(
-				'id' => $record
-			);
+			$datas = array('id' => $record);
+
 			$service = $this->Admin_model->single_service($datas);
 
-
 			if (count($service) > 0) {
-				$data['type'] = 'success';
+				$processes = $this->Admin_model->get_processes_by_service_id($record);
 
+				$data['type'] = 'success';
 				$data['content'] = array(
 					'slug' => $service[0]['id'],
 					'name' => $service[0]['name'],
 					'department' => $service[0]['department'],
 					'price' => $service[0]['price'],
+					'processes' => $processes
 				);
 			} else {
 				$data['type'] = 'error';
@@ -942,42 +997,134 @@ class Admin extends CI_Controller
 	public function update_service()
 	{
 		$data = array('type' => 'form_error', 'messages' => array());
-		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+
+		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', [
+			'required' => $this->lang('problem'),
+			'is_natural_no_zero' => $this->lang('problem')
+		]);
+
 		if ($this->input->post('nameOld') !== $this->input->post('name')) {
-			$this->form_validation->set_rules('name', 'name', 'trim|required|is_unique[services.name]', array('required' => $this->lang('insert service name error'), 'is_unique' => $this->lang('insert service name error unique')));
+			$this->form_validation->set_rules('name', 'name', 'trim|required|is_unique[services.name]', [
+				'required' => $this->lang('insert service name error'),
+				'is_unique' => $this->lang('insert service name error unique')
+			]);
 		}
-		$this->form_validation->set_rules('price', 'price', 'trim|required', array('required' => $this->lang('insert service error price')));
-		$this->form_validation->set_rules('department', 'department', 'trim|required', array('required' => $this->lang('insert service error department')));
+
+		$this->form_validation->set_rules('price', 'price', 'trim|required', [
+			'required' => $this->lang('insert service error price')
+		]);
+		$this->form_validation->set_rules('department', 'department', 'trim|required', [
+			'required' => $this->lang('insert service error department')
+		]);
+
+		$names = $this->input->post('process_name');
+		$percentages = $this->input->post('percentage');
+
+		$hasProcessError = false;
+		$totalPercentage = 0;
+
+		if (empty($names) || !is_array($names) || count($names) < 1) {
+			$data['messages'][] = $this->lang('at least one process is required');
+			$hasProcessError = true;
+		} else {
+			foreach ($names as $index => $name) {
+				$name = trim($name);
+				$percentage = isset($percentages[$index]) ? floatval($percentages[$index]) : 0;
+
+				if ($name === '') {
+					$data['messages'][] = $this->lang('process name is required') . " (" . ($index + 1) . ")";
+					$hasProcessError = true;
+				}
+
+				if ($percentage <= 0 || $percentage > 100) {
+					$data['messages'][] = $this->lang('percentage must be between 1 and 100') . " (" . ($index + 1) . ")";
+					$hasProcessError = true;
+				}
+
+				$totalPercentage += $percentage;
+			}
+
+			if ($totalPercentage != 100) {
+				$data['messages'][] = $this->lang('total percentage must equal 100');
+				$hasProcessError = true;
+			}
+		}
+
+		if ($hasProcessError) {
+			$data['type'] = 'form_error';
+			$data['title'] = $this->lang('error');
+			echo json_encode($data);
+			return;
+		}
 
 		if ($this->form_validation->run()) {
-			$datas = array(
+			$id = $this->input->post('slug');
+
+			$datas = [
 				'name' => $this->input->post('name'),
 				'department' => $this->input->post('department'),
 				'price' => $this->input->post('price'),
-			);
-			$id = $this->input->post('slug');
+			];
+
 			$update = $this->Admin_model->update_service($datas, $id);
+
 			if ($update) {
+				// Fetch existing processes from DB
+				$existingProcesses = $this->Admin_model->get_processes_by_service_id($id);
+				$existingNames = array_column($existingProcesses, 'name');
+				$submittedNames = array_map('trim', $names);
+
+				// Determine which to keep, update, insert, delete
+				foreach ($submittedNames as $index => $name) {
+					$percentage = $percentages[$index];
+					$number = $index + 1;
+
+					if (in_array($name, $existingNames)) {
+						// UPDATE existing process
+						$this->Admin_model->update_process_by_name_and_service($id, $name, [
+							'percentage' => $percentage,
+							'number' => $number
+						]);
+					} else {
+						// INSERT new process
+						$this->Admin_model->insert_process([
+							'name' => $name,
+							'percentage' => $percentage,
+							'number' => $number,
+							'services_id' => $id
+						]);
+					}
+				}
+
+				// DELETE unused ones (only if not used in turns)
+				foreach ($existingProcesses as $existing) {
+					if (!in_array($existing['name'], $submittedNames)) {
+//						TODO: Check if the process is in use or not!!
+//						$inUse = $this->Admin_model->is_process_used_in_turns($existing['id']);
+						$inUse = false;
+						if (!$inUse) {
+							$this->Admin_model->delete_process_by_id($existing['id']);
+						}
+					}
+				}
+
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
 				$data['alert']['text'] = $this->lang('update service success');
 				$data['alert']['type'] = 'success';
-
 				$data['id'] = $id;
 
 				$btns = '';
+				$btns .= $this->mylibrary->generateBtnUpdate('edit_service', $id);
+				$btns .= $this->mylibrary->generateBtnDeleteMultiDataTable($id, 'admin/delete_service', 'services_table');
 
-				$btns .= $this->mylibrary->generateBtnUpdate('edit_service', $data['id']);
-
-				$btns .= $this->mylibrary->generateBtnDeleteMultiDataTable($data['id'], 'admin/delete_service', 'services_table');
-
-				$service = $this->Admin_model->single_service(array('id' => $id))[0];
-				$data['tr'] = array(
+				$service = $this->Admin_model->single_service(['id' => $id])[0];
+				$data['tr'] = [
 					$service['name'],
 					$this->lang($service['department']),
 					$service['price'],
 					$this->mylibrary->btn_group($btns)
-				);
+				];
 			} else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
@@ -989,12 +1136,14 @@ class Admin extends CI_Controller
 				if (form_error($key) !== '') {
 					$error = form_error($key);
 					$data['messages'][] = substr($error, 3, -4);
+					$data['title'] = $this->lang('error');
 				}
 			}
 		}
 
-		print_r(json_encode($data));
+		echo json_encode($data);
 	}
+
 	// End Services
 
 
@@ -4949,6 +5098,107 @@ class Admin extends CI_Controller
 		$this->load->view('header', $data);
 		$this->load->view('turns', $data);
 		$this->load->view('footer');
+	}
+
+	public function get_teeth_by_patient()
+	{
+		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required|is_natural_no_zero', [
+			'required' => $this->lang('problem'),
+			'is_natural_no_zero' => $this->lang('problem')
+		]);
+
+		if ($this->form_validation->run()) {
+			$patient_id = $this->input->post('patient_id');
+
+			$teeth = $this->Admin_model->get_teeth_by_patient_id($patient_id);
+
+			if (!empty($teeth)) {
+				$data['type'] = 'success';
+				$data['content']['teeth'] = $teeth;
+			} else {
+				$data['type'] = 'error';
+				$data['alert'] = [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('no teeth found'),
+					'type' => 'error'
+				];
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert'] = [
+				'title' => $this->lang('error'),
+				'text' => $this->lang('problem'),
+				'type' => 'error'
+			];
+		}
+
+		echo json_encode($data);
+	}
+
+
+	public function get_tooth_processes_by_teeth()
+	{
+		$this->form_validation->set_rules('teeth_ids[]', 'Teeth IDs', 'required');
+
+		if ($this->form_validation->run()) {
+			$teeth_ids = $this->input->post('teeth_ids');
+
+			if (!is_array($teeth_ids)) {
+				$data = [
+					'type' => 'error',
+					'alert' => [
+						'title' => $this->lang('error'),
+						'text' => $this->lang('invalid tooth data'),
+						'type' => 'error'
+					]
+				];
+				echo json_encode($data);
+				return;
+			}
+
+			$results = [];
+
+			foreach ($teeth_ids as $tooth_id) {
+				$tooth_info = $this->Admin_model->get_tooth_basic_info($tooth_id);
+
+				if ($tooth_info) {
+					$departments = ['endo', 'restorative', 'prosthodontics'];
+					$tooth_data = [
+						'tooth_id' => $tooth_id,
+						'tooth_name' => $tooth_info['location'] . ' ' . $tooth_info['name'],
+						'departments' => []
+					];
+
+					foreach ($departments as $dept) {
+						$dept_data = $this->Admin_model->get_department_services_with_processes($tooth_id, $dept);
+						if (!empty($dept_data)) {
+							$tooth_data['departments'][] = [
+								'department' => $dept,
+								'services' => $dept_data
+							];
+						}
+					}
+
+					$results[] = $tooth_data;
+				}
+			}
+
+			$data = [
+				'type' => 'success',
+				'content' => $results
+			];
+		} else {
+			$data = [
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			];
+		}
+
+		echo json_encode($data);
 	}
 
 

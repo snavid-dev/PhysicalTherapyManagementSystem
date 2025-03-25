@@ -22,9 +22,9 @@ $ci = get_instance();
 
 			row.innerHTML = `
       <td>${rowCount}</td>
-      <td><input type="text" class="form-control" name="name[]" placeholder="Enter name"></td>
-      <td><input type="number" class="form-control" name="percentage[]" placeholder="Enter percentage"></td>
-      <td><button class="btn btn-danger deleteRow">Delete</button></td>
+      <td><input type="text" class="form-control" name="process_name[]" placeholder="<?= $ci->lang('name') ?>"></td>
+      <td><input type="number" class="form-control" name="percentage[]" placeholder="<?= $ci->lang('percentage') ?>"></td>
+      <td><button class="btn btn-danger deleteRow"><?= $ci->lang('delete') ?></button></td>
     `;
 
 			// drag and drop functionality
@@ -89,6 +89,7 @@ $ci = get_instance();
 			tableBody.innerHTML = "";
 			rowCount = 0;
 		}
+
 		window.eraseAllRows = eraseAllRows;
 
 	});
@@ -109,7 +110,7 @@ $ci = get_instance();
 			const percentage = percentageInput ? parseFloat(percentageInput.value) : 0;
 
 			if (name) {
-				data.push({ row: rowNumber, name: name, percentage: percentage });
+				data.push({row: rowNumber, name: name, percentage: percentage});
 			}
 
 			if (!isNaN(percentage)) {
@@ -120,11 +121,90 @@ $ci = get_instance();
 		console.log("Data:", data);
 		console.log("Sum of Percentages:", sum);
 
-		return { data, sum };
+		return {data, sum};
 	}
 
 
 </script>
+
+
+<!--Dynamic rows functions edit-->
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		// Setup for Edit Modal dynamic rows
+		const editTableBody = document.querySelector("#edit_percentageTable tbody");
+		const editAddRowButton = document.getElementById("editAddRowButton");
+		let editRowCount = 0;
+		let editDraggedRow = null;
+
+		if (editAddRowButton) {
+			editAddRowButton.addEventListener("click", function () {
+				editRowCount++;
+
+				const row = document.createElement("tr");
+				row.setAttribute("draggable", "true");
+
+				row.innerHTML = `
+				<td>${editRowCount}</td>
+				<td><input type="text" class="form-control" name="process_name[]" placeholder="<?= $ci->lang('name') ?>"></td>
+				<td><input type="number" class="form-control" name="percentage[]" placeholder="<?= $ci->lang('percentage') ?>"></td>
+				<td><button class="btn btn-danger deleteRow"><?= $ci->lang('delete') ?></button></td>
+			`;
+
+				addEditDragAndDropEvents(row);
+
+				editTableBody.appendChild(row);
+
+				const deleteButton = row.querySelector(".deleteRow");
+				deleteButton.addEventListener("click", function () {
+					row.remove();
+					updateEditRowNumbers();
+				});
+			});
+		}
+
+		function updateEditRowNumbers() {
+			editRowCount = 0;
+			Array.from(editTableBody.children).forEach((row, index) => {
+				editRowCount = index + 1;
+				row.querySelector("td:first-child").textContent = editRowCount;
+			});
+		}
+
+		function addEditDragAndDropEvents(row) {
+			row.addEventListener("dragstart", function () {
+				editDraggedRow = row;
+				setTimeout(() => (row.style.display = "none"), 0);
+			});
+
+			row.addEventListener("dragend", function () {
+				setTimeout(() => (row.style.display = "table-row"), 0);
+				editDraggedRow = null;
+			});
+
+			row.addEventListener("dragover", function (e) {
+				e.preventDefault();
+				const draggedOverRow = e.target.closest("tr");
+				if (draggedOverRow && draggedOverRow !== editDraggedRow) {
+					const bounding = draggedOverRow.getBoundingClientRect();
+					const offset = e.clientY - bounding.top;
+					if (offset > bounding.height / 2) {
+						draggedOverRow.after(editDraggedRow);
+					} else {
+						draggedOverRow.before(editDraggedRow);
+					}
+				}
+			});
+
+			row.addEventListener("drop", function (e) {
+				e.preventDefault();
+				updateEditRowNumbers();
+			});
+		}
+	});
+</script>
+
 
 <!-- TODO: tab10 rx modal-->
 <script>
