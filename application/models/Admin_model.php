@@ -674,6 +674,88 @@ class Admin_model extends CI_Model
 		return $this->db->where('process_id', $process_id)->from('turns')->count_all_results() > 0;
 	}
 
+	public function get_tooth_basic_info($tooth_id)
+	{
+		$this->db->select('name, location');
+		$this->db->from('tooth');
+		$this->db->where('id', $tooth_id);
+		return $this->db->get()->row_array();
+	}
+
+
+	public function get_department_services_with_processes($tooth_id, $department)
+	{
+		// Map department to their respective table and junction table
+		$map = [
+			'endo' => ['table' => 'endo', 'junction' => 'endo_has_services'],
+			'restorative' => ['table' => 'restorative', 'junction' => 'restorative_has_services'],
+			'prosthodontics' => ['table' => 'prosthodontics', 'junction' => 'prosthodontics_has_services']
+		];
+
+		if (!isset($map[$department])) {
+			return [];
+		}
+
+		$dept_table = $map[$department]['table'];
+		$junction_table = $map[$department]['junction'];
+
+		// Get the department entry by tooth
+		$this->db->select('id');
+		$this->db->from($dept_table);
+		$this->db->where('tooth_id', $tooth_id);
+		$dept_record = $this->db->get()->row_array();
+
+		if (!$dept_record) {
+			return [];
+		}
+
+		$dept_id = $dept_record['id'];
+
+		// Join junction → services → processes
+		$this->db->select('s.id as service_id, s.name as service_name, p.name as process_name, p.percentage');
+		$this->db->from($junction_table . ' j');
+		$this->db->join('services s', 's.id = j.services_id', 'inner');
+		$this->db->join('processes p', 'p.services_id = s.id', 'left');
+		$this->db->where("j.{$dept_table}_id", $dept_id);
+		$this->db->order_by('s.id, p.number');
+
+		$results = $this->db->get()->result_array();
+
+		if (empty($results)) return [];
+
+		// Group by service
+		$grouped = [];
+		foreach ($results as $row) {
+			$service_id = $row['service_id'];
+			if (!isset($grouped[$service_id])) {
+				$grouped[$service_id] = [
+					'service_name' => $row['service_name'],
+					'processes' => []
+				];
+			}
+
+			if (!empty($row['process_name'])) {
+				$grouped[$service_id]['processes'][] = [
+					'name' => $row['process_name'],
+					'percentage' => $row['percentage']
+				];
+			}
+		}
+
+		return array_values($grouped);
+	}
+
+
+	public function get_teeth_by_patient_id($patient_id)
+	{
+		$this->db->select('id, name, location');
+		$this->db->from('tooth');
+		$this->db->where('patient_id', $patient_id);
+		$this->db->order_by('location', 'ASC');
+		return $this->db->get()->result_array();
+	}
+
+
 
 	public function get_processes_by_service_id($service_id)
 	{

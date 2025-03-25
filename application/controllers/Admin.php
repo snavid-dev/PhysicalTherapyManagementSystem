@@ -5100,6 +5100,107 @@ class Admin extends CI_Controller
 		$this->load->view('footer');
 	}
 
+	public function get_teeth_by_patient()
+	{
+		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required|is_natural_no_zero', [
+			'required' => $this->lang('problem'),
+			'is_natural_no_zero' => $this->lang('problem')
+		]);
+
+		if ($this->form_validation->run()) {
+			$patient_id = $this->input->post('patient_id');
+
+			$teeth = $this->Admin_model->get_teeth_by_patient_id($patient_id);
+
+			if (!empty($teeth)) {
+				$data['type'] = 'success';
+				$data['content']['teeth'] = $teeth;
+			} else {
+				$data['type'] = 'error';
+				$data['alert'] = [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('no teeth found'),
+					'type' => 'error'
+				];
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert'] = [
+				'title' => $this->lang('error'),
+				'text' => $this->lang('problem'),
+				'type' => 'error'
+			];
+		}
+
+		echo json_encode($data);
+	}
+
+
+	public function get_tooth_processes_by_teeth()
+	{
+		$this->form_validation->set_rules('teeth_ids[]', 'Teeth IDs', 'required');
+
+		if ($this->form_validation->run()) {
+			$teeth_ids = $this->input->post('teeth_ids');
+
+			if (!is_array($teeth_ids)) {
+				$data = [
+					'type' => 'error',
+					'alert' => [
+						'title' => $this->lang('error'),
+						'text' => $this->lang('invalid tooth data'),
+						'type' => 'error'
+					]
+				];
+				echo json_encode($data);
+				return;
+			}
+
+			$results = [];
+
+			foreach ($teeth_ids as $tooth_id) {
+				$tooth_info = $this->Admin_model->get_tooth_basic_info($tooth_id);
+
+				if ($tooth_info) {
+					$departments = ['endo', 'restorative', 'prosthodontics'];
+					$tooth_data = [
+						'tooth_id' => $tooth_id,
+						'tooth_name' => $tooth_info['location'] . ' ' . $tooth_info['name'],
+						'departments' => []
+					];
+
+					foreach ($departments as $dept) {
+						$dept_data = $this->Admin_model->get_department_services_with_processes($tooth_id, $dept);
+						if (!empty($dept_data)) {
+							$tooth_data['departments'][] = [
+								'department' => $dept,
+								'services' => $dept_data
+							];
+						}
+					}
+
+					$results[] = $tooth_data;
+				}
+			}
+
+			$data = [
+				'type' => 'success',
+				'content' => $results
+			];
+		} else {
+			$data = [
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			];
+		}
+
+		echo json_encode($data);
+	}
+
 
 	function list_turns_json()
 	{
