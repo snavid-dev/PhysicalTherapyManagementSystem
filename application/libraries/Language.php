@@ -736,6 +736,8 @@ class Language
 			// other treatment start
 			'other treatments' => self::lang_arr('other treatment', 'سایر درمان ها', '?????'),
 			'other' => self::lang_arr('other', 'متفرقه', '?????'),
+			'invalid patient' => self::lang_arr('invalid patient', 'بیمار نامعتبر است', 'Invalid patient'),
+			'recommended processes inserted' => self::lang_arr('recommended processes inserted', 'فرآیندهای پیشنهادی با موفقیت ثبت شدند', 'Recommended processes inserted'),
 			// other treatment end
 
 			// failed Call

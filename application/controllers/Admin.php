@@ -5168,9 +5168,11 @@ class Admin extends CI_Controller
 	public function get_tooth_processes_by_teeth()
 	{
 		$this->form_validation->set_rules('teeth_ids[]', 'Teeth IDs', 'required');
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required');
 
 		if ($this->form_validation->run()) {
 			$teeth_ids = $this->input->post('teeth_ids');
+			$patient_id = $this->input->post('patient_id');
 
 			if (!is_array($teeth_ids)) {
 				$data = [
@@ -5208,6 +5210,9 @@ class Admin extends CI_Controller
 						}
 					}
 
+					// Include previously recommended data with turn_id = NULL
+					$tooth_data['recommended'] = $this->Admin_model->get_unassigned_recommended_processes($patient_id, $tooth_id);
+
 					$results[] = $tooth_data;
 				}
 			}
@@ -5228,6 +5233,83 @@ class Admin extends CI_Controller
 		}
 
 		echo json_encode($data);
+	}
+
+
+	public function insert_recommended_processes()
+	{
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid patient'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = $this->input->post('patient_id');
+		$tooth_ids = $this->input->post('tooth_id');
+		$processes = $this->input->post('processes');
+		$custom_processes = $this->input->post('custom_process');
+		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
+
+		foreach ($tooth_ids as $tooth_id) {
+			// Save checked processes
+			if (!empty($processes[$tooth_id])) {
+				foreach ($processes[$tooth_id] as $process_id) {
+					$this->Admin_model->insert_recommended_process([
+						'turn_id' => null,
+						'tooth_id' => $tooth_id,
+						'process_id' => $process_id, // ✅ Use actual ID
+						'custom_label' => null,      // ✅ No label needed
+						'remarks' => null,
+						'users_id' => $user_id,
+					]);
+				}
+
+			}
+
+			// Save "other" (custom) text areas
+			if (!empty($custom_processes[$tooth_id])) {
+				foreach ($custom_processes[$tooth_id] as $dept => $label) {
+					if (trim($label) !== '') {
+						$this->Admin_model->insert_recommended_process([
+							'turn_id' => null,
+							'tooth_id' => $tooth_id,
+							'process_id' => null,
+							'custom_label' => $label,
+							'remarks' => $dept,
+							'users_id' => $user_id,
+						]);
+					}
+				}
+			}
+		}
+
+		echo json_encode([
+			'type' => 'success',
+			'alert' => [
+				'title' => $this->lang('success'),
+				'text' => $this->lang('recommended processes inserted'),
+				'type' => 'success'
+			]
+		]);
+	}
+
+	public function assign_recommendations_to_turn($patient_id, $turn_id)
+	{
+		$this->load->model('Admin_model');
+
+		$teeth = $this->Admin_model->get_teeth_ids_by_patient($patient_id);
+		if (empty($teeth)) return;
+
+		$this->db->where('turn_id', 0);
+		$this->db->where_in('tooth_id', $teeth);
+		$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
 	}
 
 
@@ -5789,88 +5871,123 @@ class Admin extends CI_Controller
 
 	public function insert_turn()
 	{
-		$data = array('type' => 'form_error', 'messages' => array());
-		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required', array('required' => $this->lang('insert turn patient_id error')));
-		$this->form_validation->set_rules('date', 'date', 'trim|required', array('required' => $this->lang('insert turn date error')));
-		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', array('required' => $this->lang('insert turn doctor_id error')));
-		$this->form_validation->set_rules('from_time', 'from_time', 'trim|required', array('required' => $this->lang('insert turn hour error')));
-		$this->form_validation->set_rules('to_time', 'to_time', 'trim|required', array('required' => $this->lang('insert turn hour error')));
-		if ($this->form_validation->run()) {
-			// Check for conflicting turns (time overlaps for the same doctor)
-			$conflict = $this->Admin_model->check_turn_conflict(
-				$this->input->post('date'),
-				$this->input->post('doctor_id'),
-				$this->input->post('from_time'),
-				$this->input->post('to_time')
-			);
+		$data = ['type' => 'form_error', 'messages' => []];
 
-			if ($conflict == true) {
-				$data['type'] = 'error';
-				$data['alert']['title'] = $this->lang('error');
-				$data['alert']['text'] = $this->lang('turn conflict');
-				$data['alert']['type'] = 'error';
-				print_r(json_encode($data));
-				return;
-			} else {
-				// Prepare data for turn insertion
-				$datas = array(
-					'patient_id' => $this->input->post('patient_id'),
-					'date' => $this->input->post('date'),
-					'from_time' => $this->input->post('from_time'),
-					'to_time' => $this->input->post('to_time'),
-					'status' => 'p', // Status 'p' means pending
-					'doctor_id' => $this->input->post('doctor_id')
-				);
+		// === Form validation ===
+		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required', [
+			'required' => $this->lang('insert turn patient_id error')
+		]);
+		$this->form_validation->set_rules('date', 'date', 'trim|required', [
+			'required' => $this->lang('insert turn date error')
+		]);
+		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', [
+			'required' => $this->lang('insert turn doctor_id error')
+		]);
+		$this->form_validation->set_rules('from_time', 'from_time', 'trim|required', [
+			'required' => $this->lang('insert turn hour error')
+		]);
+		$this->form_validation->set_rules('to_time', 'to_time', 'trim|required', [
+			'required' => $this->lang('insert turn hour error')
+		]);
 
-				// Insert the turn into the database
-				$insert = $this->Admin_model->insert_turn_form($datas);
-
-				if ($insert[0]) {
-					$data['type'] = 'success';
-					$data['alert']['title'] = $this->lang('success');
-					$data['alert']['text'] = $this->lang('insert turn success');
-					$data['alert']['type'] = 'success';
-
-					$data['extraFunction'] = 'print';
-
-					$data['id'] = $insert[1];
-
-					$btns = '';
-					$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $data['id']);
-					$btns .= $this->mylibrary->generateBtnPrint('print_turn', $data['id']);
-					$btns .= $this->mylibrary->generateBtnStatus($data['id'], 'admin/accept_turn');
-					$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_turn', 'turnsTable', 'update_balance');
-					$turn = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'))[0];
-
-					$hour = $this->input->post('from_time') . ' - ' . $this->input->post('to_time');
-
-					$data['tr'] = array(
-						$turn['doctor_name'],
-						$datas['date'],
-						$hour,
-						$turn['cr'],
-						$this->lang('not paid'),
-						$this->mylibrary->btn_group($btns)
-					);
-				} else {
-					$data['type'] = 'error';
-					$data['alert']['title'] = $this->lang('error');
-					$data['alert']['text'] = $this->lang('problem');
-					$data['alert']['type'] = 'error';
-				}
-			}
-		} else {
+		if (!$this->form_validation->run()) {
 			foreach ($_POST as $key => $value) {
-				if (form_error($key) !== '') {
-					$error = form_error($key);
-					$data['messages'][] = substr($error, 3, -4);
-					$data['title'] = $this->lang('error');
+				if (form_error($key)) {
+					$data['messages'][] = strip_tags(form_error($key));
 				}
 			}
+			$data['title'] = $this->lang('error');
+			echo json_encode($data);
+			return;
 		}
-		print_r(json_encode($data));
-	}
 
+		// === Check for time conflict ===
+		$conflict = $this->Admin_model->check_turn_conflict(
+			$this->input->post('date'),
+			$this->input->post('doctor_id'),
+			$this->input->post('from_time'),
+			$this->input->post('to_time')
+		);
+
+		if ($conflict) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('turn conflict'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// === Insert turn ===
+		$datas = [
+			'patient_id' => $this->input->post('patient_id'),
+			'date' => $this->input->post('date'),
+			'from_time' => $this->input->post('from_time'),
+			'to_time' => $this->input->post('to_time'),
+			'status' => 'p',
+			'doctor_id' => $this->input->post('doctor_id')
+		];
+
+		$insert = $this->Admin_model->insert_turn_form($datas);
+
+		if (!$insert[0]) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$turn_id = $insert[1];
+		$patient_id = $this->input->post('patient_id');
+		$tooth_ids = $this->Admin_model->get_patient_tooth_ids($patient_id);
+
+		// === Assign recommended processes to this turn ===
+		if (!empty($tooth_ids)) {
+			$this->db->where('turn_id IS NULL', null, false); // handles NULL values
+			$this->db->where_in('tooth_id', $tooth_ids);
+			$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
+		}
+
+		// === Generate success response ===
+		$data['type'] = 'success';
+		$data['id'] = $turn_id;
+		$data['extraFunction'] = 'print';
+		$data['alert'] = [
+			'title' => $this->lang('success'),
+			'text' => $this->lang('insert turn success'),
+			'type' => 'success'
+		];
+
+		// === Turn info for display ===
+		$btns = $this->mylibrary->generateBtnUpdate('edit_turn', $turn_id);
+		$btns .= $this->mylibrary->generateBtnPrint('print_turn', $turn_id);
+		$btns .= $this->mylibrary->generateBtnStatus($turn_id, 'admin/accept_turn');
+		$btns .= $this->mylibrary->generateBtnDelete($turn_id, 'admin/delete_turn', 'turnsTable', 'update_balance');
+
+		$turn = $this->Admin_model
+			->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'))[0];
+
+		$hour = $this->input->post('from_time') . ' - ' . $this->input->post('to_time');
+
+		$data['tr'] = [
+			$turn['doctor_name'],
+			$datas['date'],
+			$hour,
+			$turn['cr'],
+			$this->lang('not paid'),
+			$this->mylibrary->btn_group($btns)
+		];
+
+		echo json_encode($data);
+	}
 
 	public function delete_turn()
 	{
