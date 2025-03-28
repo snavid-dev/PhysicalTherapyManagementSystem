@@ -46,15 +46,15 @@
 						<?php endif; ?>
 
 						<?php if ($turn['payment_status'] == 'p') : ?>
-							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/accept_turn')"
+							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/accept_turn');setTimeout(reloadTurnsTable(), 2000)"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
 									class="fa-regular fa-circle-check fs-14"></span></a>
 						<?php else : ?>
-							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/pending_turn')"
+							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/pending_turn');setTimeout(reloadTurnsTable(), 2000)"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
 									class="fa fa-times-circle fs-14"></span></a>
 						<?php endif; ?>
-						<a href="javascript:delete_via_alert('<?= $turn['id'] ?>', '<?= base_url() ?>admin/delete_turn', 'turnsTable', update_balance)"
+						<a href="javascript:delete_via_alert('<?= $turn['id'] ?>', '<?= base_url() ?>admin/delete_turn', 'turnsTable', update_balance);setTimeout(reloadTurnsTable(), 2000)"
 						   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span
 								class="fa-regular fa-trash-can fs-14"></span></a>
 					</div>

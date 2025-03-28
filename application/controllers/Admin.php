@@ -3173,6 +3173,18 @@ class Admin extends CI_Controller
 		}
 	}
 
+	public function ajax_turns_by_patient()
+	{
+		$patient_id = $this->input->post('patient_id');
+		if (!$patient_id) {
+			echo json_encode(['type' => 'error', 'message' => 'Invalid ID']);
+			return;
+		}
+
+		$turns = $this->Admin_model->turns_by_patient_id($patient_id);
+		echo json_encode(['type' => 'success', 'data' => $turns]);
+	}
+
 
 	public function single_tooth()
 	{
@@ -6031,6 +6043,29 @@ class Admin extends CI_Controller
 			return;
 		}
 
+		$patient_id = $this->input->post('patient_id');
+		$tooth_ids = $this->Admin_model->get_patient_tooth_ids($patient_id);
+
+		// === Check if any recommended processes exist for this patient (with NULL turn_id) ===
+		$has_recommended = false;
+		if (!empty($tooth_ids)) {
+			$this->db->where('turn_id IS NULL', null, false);
+			$this->db->where_in('tooth_id', $tooth_ids);
+			$has_recommended = $this->db->count_all_results('turn_tooth_recommended') > 0;
+		}
+
+		if (!$has_recommended) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('please insert recommended processes first'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
 		// === Check for time conflict ===
 		$conflict = $this->Admin_model->check_turn_conflict(
 			$this->input->post('date'),
@@ -6053,7 +6088,7 @@ class Admin extends CI_Controller
 
 		// === Insert turn ===
 		$datas = [
-			'patient_id' => $this->input->post('patient_id'),
+			'patient_id' => $patient_id,
 			'date' => $this->input->post('date'),
 			'from_time' => $this->input->post('from_time'),
 			'to_time' => $this->input->post('to_time'),
@@ -6076,17 +6111,12 @@ class Admin extends CI_Controller
 		}
 
 		$turn_id = $insert[1];
-		$patient_id = $this->input->post('patient_id');
-		$tooth_ids = $this->Admin_model->get_patient_tooth_ids($patient_id);
 
 		// === Assign recommended processes to this turn ===
-		if (!empty($tooth_ids)) {
-			$this->db->where('turn_id IS NULL', null, false); // handles NULL values
-			$this->db->where_in('tooth_id', $tooth_ids);
-			$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
-		}
+		$this->db->where('turn_id IS NULL', null, false);
+		$this->db->where_in('tooth_id', $tooth_ids);
+		$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
 
-		// === Generate success response ===
 		$data['type'] = 'success';
 		$data['id'] = $turn_id;
 		$data['extraFunction'] = 'print';
@@ -6096,15 +6126,12 @@ class Admin extends CI_Controller
 			'type' => 'success'
 		];
 
-		// === Turn info for display ===
 		$btns = $this->mylibrary->generateBtnUpdate('edit_turn', $turn_id);
 		$btns .= $this->mylibrary->generateBtnPrint('print_turn', $turn_id);
 		$btns .= $this->mylibrary->generateBtnStatus($turn_id, 'admin/accept_turn');
 		$btns .= $this->mylibrary->generateBtnDelete($turn_id, 'admin/delete_turn', 'turnsTable', 'update_balance');
 
-		$turn = $this->Admin_model
-			->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'))[0];
-
+		$turn = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'))[0];
 		$hour = $this->input->post('from_time') . ' - ' . $this->input->post('to_time');
 
 		$data['tr'] = [
@@ -6163,14 +6190,6 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->change_payment_status_turn('a', $datas)) {
 				$data['type'] = 'success';
-
-				$btns = '';
-				$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $datas['id']);
-				$btns .= $this->mylibrary->generateBtnPrint('print_turn', $datas['id']);
-				$btns .= $this->mylibrary->generateBtnStatus($datas['id'], 'admin/pending_turn', 'a');
-				$btns .= $this->mylibrary->generateBtnDelete($datas['id'], 'admin/delete_turn', 'turnsTable', 'update_balance');
-
-				$data['content']['btn_group'] = $this->mylibrary->btn_group($btns);
 				$data['alert']['title'] = $this->lang('success');;
 				$data['alert']['text'] = $this->lang('accept turn');
 				$data['alert']['type'] = 'success';
@@ -6204,14 +6223,6 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->change_payment_status_turn('p', $datas)) {
 				$data['type'] = 'success';
-
-				$btns = '';
-				$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $datas['id']);
-				$btns .= $this->mylibrary->generateBtnPrint('print_turn', $datas['id']);
-				$btns .= $this->mylibrary->generateBtnStatus($datas['id'], 'admin/accept_turn');
-				$btns .= $this->mylibrary->generateBtnDelete($datas['id'], 'admin/delete_turn', 'turnsTable', 'update_balance');
-
-				$data['content']['btn_group'] = $this->mylibrary->btn_group($btns);
 				$data['alert']['title'] = $this->lang('success');;
 				$data['alert']['text'] = $this->lang('accept turn');
 				$data['alert']['type'] = 'success';

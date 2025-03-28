@@ -216,5 +216,62 @@
 		}
 	}
 
+	function reloadTurnsTable() {
+		setTimeout(() => {
+			let patient_id = '<?= $profile['id'] ?>';
+			const $tbody = $('#turnsTable tbody');
+			$tbody.empty(); // Clear current table body
+
+			$.ajax({
+				url: "<?= base_url('admin/ajax_turns_by_patient') ?>",
+				type: "POST",
+				data: {patient_id},
+				dataType: "json",
+				success: function (res) {
+					if (res.type === "success" && Array.isArray(res.data)) {
+						let index = 1;
+						res.data.forEach(turn => {
+							const highlighted = turn.paid_user_name ? 'highlighted' : '';
+							const paidUser = turn.paid_user_name || "<?= $ci->lang('not paid') ?>";
+
+							const statusButton = turn.status === 'p'
+								? `<a href="javascript:finishTurn('${turn.id}')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-stethoscope"></span></a>`
+								: `<a href="javascript:changeStatus('${turn.id}', '<?= base_url() ?>admin/pending_turn')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-eye fs-14"></span></a>`;
+
+							const paymentButton = turn.payment_status === 'p'
+								? `<a href="javascript:changeStatus('${turn.id}', '<?= base_url() ?>admin/accept_turn'); setTimeout(() => reloadTurnsTable(), 2000);" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa-regular fa-circle-check fs-14"></span></a>`
+								: `<a href="javascript:changeStatus('${turn.id}', '<?= base_url() ?>admin/pending_turn'); setTimeout(() => reloadTurnsTable(), 2000);" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-times-circle fs-14"></span></a>`;
+
+							const row = `
+							<tr id="${turn.id}" class="tableRow ${highlighted}">
+								<td>${index++}</td>
+								<td>${turn.doctor_name}</td>
+								<td>${turn.date}</td>
+								<td><bdo dir="ltr">${turn.from_time} - ${turn.to_time}</bdo></td>
+								<td>${turn.cr}</td>
+								<td>${paidUser}</td>
+								<td>
+									<div class="g-2">
+										<a href="javascript:edit_turn('${turn.id}')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa-regular fa-pen-to-square fs-14"></span></a>
+										<a href="javascript:print_turn('${turn.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fa-solid fa-print fs-14"></span></a>
+										${statusButton}
+										${paymentButton}
+										<a href="javascript:delete_via_alert('${turn.id}', '<?= base_url() ?>admin/delete_turn', 'turnsTable', update_balance)" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span class="fa-regular fa-trash-can fs-14"></span></a>
+									</div>
+								</td>
+							</tr>`;
+							$tbody.append(row);
+						});
+					} else {
+						$tbody.append(`<tr><td colspan="7" class="text-center">No turns found.</td></tr>`);
+					}
+				},
+				error: function () {
+					$tbody.append(`<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>`);
+				}
+			});
+		}, 1000); // 1	-second delay
+	}
+
 
 </script>

@@ -782,6 +782,8 @@ class Language
 			'insert turn done invalid tooth' => self::lang_arr('insert turn done invalid tooth', 'دندان نامعتبر', 'ناسم غاښ'),
 			'insert turn done invalid process' => self::lang_arr('insert turn done invalid process', 'پروسه نامعتبر است', 'پروسه ناسم ده'),
 			'turn processes saved' => self::lang_arr('turn processes saved', 'پروسه‌های نوبت ذخیره شدند', 'د نوبت پروسې ثبت شوې'),
+			'please insert recommended processes first' => self::lang_arr('please insert recommended processes first', 'لطفاً ابتدا پروسه‌های پیشنهادی را وارد کنید', 'لطفاً ابتدا فرآیندهای پیشنهادی را وارد نمایید'),
+
 			//End Turns Done Process
 
 			//List of Perimissions
