@@ -19,7 +19,7 @@
 					<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
 				</button>
 				<button class="btn btn-primary"
-						onclick="submitWithoutDatatable('finishTurnForm', '<?= base_url('admin/insert_turn_done_processes') ?>', 'turnsTable', 'finishTurnModal', false)">
+						onclick="submitWithoutDatatable('finishTurnForm', '<?= base_url('admin/insert_turn_done_processes') ?>', 'turnsTable', 'finishTurnModal', false); reloadTurnsTable()">
 					<?= $ci->lang('save') ?> <i class="fa fa-check-circle"></i>
 				</button>
 			</div>

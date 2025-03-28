@@ -6148,34 +6148,68 @@ class Admin extends CI_Controller
 
 	public function delete_turn()
 	{
-		$data = array('type' => 'form_error', 'messages' => array());
-		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
-		if ($this->form_validation->run()) {
-			$datas = array(
-				'id' => $this->input->post('record')
-			);
+		$data = ['type' => 'form_error', 'messages' => []];
 
-			if ($this->Admin_model->delete_turn($datas)) {
-				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
-				$data['alert']['text'] = $this->lang('delete turn');
-				$data['alert']['type'] = 'success';
-			} else {
-				$data['type'] = 'error';
-				$data['alert']['title'] = $this->lang('error');
-				$data['alert']['text'] = $this->lang('problem');
-				$data['alert']['type'] = 'error';
-			}
-		} else {
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', [
+			'required' => $this->lang('problem'),
+			'is_natural_no_zero' => $this->lang('problem')
+		]);
+
+		if (!$this->form_validation->run()) {
 			foreach ($_POST as $key => $value) {
-				if (form_error($key) !== '') {
-					$error = form_error($key);
-					$data['messages'][] = substr($error, 3, -4);
+				if (form_error($key)) {
+					$data['messages'][] = strip_tags(form_error($key));
 				}
 			}
+			echo json_encode($data);
+			return;
 		}
 
-		print_r(json_encode($data));
+		$turn_id = $this->input->post('record');
+
+		// Check if there are any done processes linked to this turn
+		$hasDoneProcesses = $this->db
+			->where('turn_id', $turn_id)
+			->count_all_results('turn_tooth_done');
+
+		if ($hasDoneProcesses > 0) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('cannot delete turn with done processes'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// Reset recommended processes (set turn_id = NULL)
+		$this->db->where('turn_id', $turn_id);
+		$this->db->update('turn_tooth_recommended', ['turn_id' => null]);
+
+		// Now delete the turn
+		$deleted = $this->Admin_model->delete_turn(['id' => $turn_id]);
+
+		if ($deleted) {
+			echo json_encode([
+				'type' => 'success',
+				'alert' => [
+					'title' => $this->lang('success'),
+					'text' => $this->lang('delete turn'),
+					'type' => 'success'
+				]
+			]);
+		} else {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+		}
 	}
 
 
