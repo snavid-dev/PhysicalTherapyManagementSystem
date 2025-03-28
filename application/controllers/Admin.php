@@ -5182,70 +5182,71 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('teeth_ids[]', 'Teeth IDs', 'required');
 		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required');
 
-		if ($this->form_validation->run()) {
-			$teeth_ids = $this->input->post('teeth_ids');
-			$patient_id = $this->input->post('patient_id');
-
-			if (!is_array($teeth_ids)) {
-				$data = [
-					'type' => 'error',
-					'alert' => [
-						'title' => $this->lang('error'),
-						'text' => $this->lang('invalid tooth data'),
-						'type' => 'error'
-					]
-				];
-				echo json_encode($data);
-				return;
-			}
-
-			$results = [];
-
-			foreach ($teeth_ids as $tooth_id) {
-				$tooth_info = $this->Admin_model->get_tooth_basic_info($tooth_id);
-
-				if ($tooth_info) {
-					$departments = ['endo', 'restorative', 'prosthodontics'];
-					$tooth_data = [
-						'tooth_id' => $tooth_id,
-						'tooth_name' => $tooth_info['location'] . ' ' . $tooth_info['name'],
-						'departments' => []
-					];
-
-					foreach ($departments as $dept) {
-						$dept_data = $this->Admin_model->get_department_services_with_processes($tooth_id, $dept);
-						if (!empty($dept_data)) {
-							$tooth_data['departments'][] = [
-								'department' => $dept,
-								'services' => $dept_data
-							];
-						}
-					}
-
-					// Include previously recommended data with turn_id = NULL
-					$tooth_data['recommended'] = $this->Admin_model->get_unassigned_recommended_processes($patient_id, $tooth_id);
-
-					$results[] = $tooth_data;
-				}
-			}
-
-			$data = [
-				'type' => 'success',
-				'content' => $results
-			];
-		} else {
-			$data = [
+		if (!$this->form_validation->run()) {
+			echo json_encode([
 				'type' => 'error',
 				'alert' => [
 					'title' => $this->lang('error'),
 					'text' => $this->lang('problem'),
 					'type' => 'error'
 				]
-			];
+			]);
+			return;
 		}
 
-		echo json_encode($data);
+		$teeth_ids = $this->input->post('teeth_ids');
+		$patient_id = $this->input->post('patient_id');
+
+		if (!is_array($teeth_ids)) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid tooth data'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$results = [];
+
+		foreach ($teeth_ids as $tooth_id) {
+			$tooth_info = $this->Admin_model->get_tooth_basic_info($tooth_id);
+
+			if (!$tooth_info) continue;
+
+			$departments = ['endo', 'restorative', 'prosthodontics'];
+			$tooth_data = [
+				'tooth_id' => $tooth_id,
+				'tooth_name' => $tooth_info['location'] . ' ' . $tooth_info['name'],
+				'departments' => []
+			];
+
+			foreach ($departments as $dept) {
+				$dept_data = $this->Admin_model->get_department_services_with_processes($tooth_id, $dept);
+				if (!empty($dept_data)) {
+					$tooth_data['departments'][] = [
+						'department' => $dept,
+						'services' => $dept_data
+					];
+				}
+			}
+
+			// Include recommended processes (with turn_id = NULL)
+			$tooth_data['recommended'] = $this->Admin_model->get_unassigned_recommended_processes($patient_id, $tooth_id);
+
+			// Include already done processes (for disabling in frontend)
+			$tooth_data['done'] = $this->Admin_model->get_done_process_ids_by_tooth($tooth_id);
+			$results[] = $tooth_data;
+		}
+
+		echo json_encode([
+			'type' => 'success',
+			'content' => $results
+		]);
 	}
+
 
 	public function get_recommended_by_turn()
 	{

@@ -279,7 +279,7 @@
 		if (!selectedTeeth || !selectedTeeth.length) return;
 
 		$.ajax({
-			url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
+				url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
 			type: 'POST',
 			data: {
 				teeth_ids: selectedTeeth,
@@ -296,56 +296,63 @@
 					const toothId = tooth.tooth_id;
 					const toothName = tooth.tooth_name;
 					const recommended = tooth.recommended || {};
+					const done = tooth.done || []; // array of process_ids (numbers or strings)
+					const doneSet = new Set(done.map(p => String(p))); // for easy lookup
 
 					let html = `
-					<div class="row nthHrLine">
-						<div class="col-12 greyline">
-							<div class="customMargin">
-								<div class="processHeader">
-									<h2 style="margin-bottom: 30px">${toothName}</h2>
-									<input type="hidden" name="tooth_id[]" value="${toothId}">
-								</div>`;
+				<div class="row nthHrLine">
+					<div class="col-12 greyline">
+						<div class="customMargin">
+							<div class="processHeader">
+								<h2 style="margin-bottom: 30px">${toothName}</h2>
+								<input type="hidden" name="tooth_id[]" value="${toothId}">
+							</div>`;
 
 					tooth.departments.forEach((dept, deptIndex) => {
 						html += `<h5 class="text-primary">${dept.department}</h5><div class="row">`;
 
 						const recommendedIds = (recommended[dept.department] || []).map(p => String(p.process_id));
 						const otherText = recommended[`${dept.department}_other`] || '';
+						const otherId = `other_textarea_${toothIndex}_${deptIndex}`;
+						const otherVisible = otherText.trim() !== '';
 
 						if (Array.isArray(dept.services)) {
 							dept.services.forEach(service => {
 								if (Array.isArray(service.processes)) {
 									service.processes.forEach(process => {
-										const isChecked = recommendedIds.includes(String(process.id));
+										const processId = String(process.id);
+										const isChecked = recommendedIds.includes(processId);
+										const isDone = doneSet.has(processId);
+
 										html += `
-										<div class="col-sm-12 col-md-2 customMargin_processCheckbox">
-											<label class="cl-checkbox">
-												<input type="checkbox" name="processes[${toothId}][]" value="${process.id}" ${isChecked ? 'checked' : ''}>
-												<span>${process.name}</span>
-											</label>
-										</div>`;
+									<div class="col-sm-12 col-md-2 customMargin_processCheckbox">
+										<label class="cl-checkbox">
+											<input type="checkbox"
+												${isDone ? 'disabled' : ''}
+												${isChecked ? 'checked' : ''}
+												${!isDone ? `name="processes[${toothId}][]"` : ''}
+												value="${isDone ? '' : processId}">
+											<span>${process.name}${isDone ? ' 🔒' : ''}</span>
+										</label>
+									</div>`;
 									});
 								}
 							});
 						}
 
-						// Other textarea per department
-						const otherId = `other_textarea_${toothIndex}_${deptIndex}`;
-						const otherVisible = otherText.trim() !== '';
-
 						html += `
-						<div class="col-12 col-md-12 mt-2">
-							<label class="cl-checkbox">
-								<input type="checkbox" data-target="${otherId}" onclick="otherProcess(this)" ${otherVisible ? 'checked' : ''}>
-								<span><?= $ci->lang('other') ?></span>
-							</label>
-							<div class="mt-2" id="${otherId}" style="display: ${otherVisible ? 'block' : 'none'}">
-								<label><?= $ci->lang('other') ?></label>
-								<textarea class="form-control" name="custom_process[${toothId}][${dept.department}]">${otherText}</textarea>
-							</div>
-						</div>`;
+					<div class="col-12 col-md-12 mt-2">
+						<label class="cl-checkbox">
+							<input type="checkbox" data-target="${otherId}" onclick="otherProcess(this)" ${otherVisible ? 'checked' : ''}>
+							<span><?= $ci->lang('other') ?></span>
+						</label>
+						<div class="mt-2" id="${otherId}" style="display: ${otherVisible ? 'block' : 'none'}">
+							<label><?= $ci->lang('other process') ?></label>
+							<textarea class="form-control" name="custom_process[${toothId}][${dept.department}]">${otherText}</textarea>
+						</div>
+					</div>`;
 
-						html += '</div>'; // end department row
+						html += '</div>'; // end dept row
 					});
 
 					html += '</div></div></div>'; // end tooth block
@@ -354,7 +361,7 @@
 			},
 			error: function (xhr, status, error) {
 				console.error("AJAX error:", error);
-				container.empty(); // clean up on failure
+				container.empty();
 			}
 		});
 	}

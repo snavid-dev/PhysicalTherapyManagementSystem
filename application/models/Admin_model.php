@@ -861,8 +861,6 @@ class Admin_model extends CI_Model
 	}
 
 
-
-
 	public function delete_turn_done_processes($turn_id)
 	{
 		$this->db->where('turn_id', $turn_id);
@@ -1127,6 +1125,17 @@ class Admin_model extends CI_Model
 		$this->db->from('tooth');
 		$this->db->where('tooth.patient_id', $patient_id);
 		return $this->db->get()->result_array();
+	}
+
+	public function get_done_process_ids_by_tooth($tooth_id)
+	{
+		$this->db->select('DISTINCT process_id', false); // disable escaping here
+		$this->db->from('turn_tooth_done');
+		$this->db->where('tooth_id', $tooth_id);
+		$this->db->where('process_id IS NOT NULL', null, false); // raw SQL for IS NOT NULL
+
+		$query = $this->db->get();
+		return array_column($query->result_array(), 'process_id');
 	}
 
 
