@@ -23,7 +23,8 @@
 
 							<li style="width: 150px;">
 								<input data-jdp type="text" class="form-control" id="datePicker"
-									   onchange="tableFilter()" placeholder="<?= $ci->lang('date') ?>" autocomplete="off">
+									   onchange="tableFilter()" placeholder="<?= $ci->lang('date') ?>"
+									   autocomplete="off">
 							</li>
 
 							<li style="width: 180px;">
@@ -257,15 +258,9 @@
 										<a href="<?= base_url() ?>admin/single_patient/<?= $receipt['patient_id'] ?>"
 										   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
 												class="fa fa-user-circle-o fs-14"></span></a>
-										<a href="javascript:accept_via_alert('<?= $receipt['id'] ?>', '<?= base_url() ?>admin/accept_turn');alert('navid')"
-										   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-												class="fa fa-check-circle"></span></a>
 										<a href="javascript:print_turn('<?= $receipt['id'] ?>', '<?= base_url() ?>admin/delete_turn')"
 										   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
 												class="fa fa-print"></span></a>
-										<a href="javascript:turnPayment('<?= $receipt['id'] ?>')"
-										   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-												class="fa fa-money fs-14"></span></a>
 									</div>
 								</td>
 							</tr>
@@ -486,15 +481,9 @@
               <a href="<?= base_url() ?>admin/single_patient/${item.patient_id}"
                         class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
                           class="fa fa-user-circle-o fs-14"></span></a>
-                      <a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_turn')"
-                        class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span
-                          class="fa fa-check-circle"></span></a>
                       <a href="javascript:print_turn('${item.id}', '<?= base_url() ?>admin/delete_turn')"
                         class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
                           class="fa fa-print"></span></a>
-                      <a href="javascript:turnPayment('${item.id}')"
-                        class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
-                          class="fa fa-money fs-14"></span></a>
                       </div>`
 						]).node();
 						row.id = item.id;
