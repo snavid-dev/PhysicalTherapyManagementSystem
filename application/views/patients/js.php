@@ -37,7 +37,7 @@ $ci = get_instance();
 	function payment_modal_clicked() {
 		let patient_id = '<?= $profile['id'] ?>';
 		$.ajax({
-			url: "<?= base_url('admin/list_turns_pending') ?>",
+			url: "<?= base_url('admin/list_turns_payment_pending') ?>",
 			type: 'POST',
 			data: {
 				slug: patient_id

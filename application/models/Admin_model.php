@@ -861,6 +861,8 @@ class Admin_model extends CI_Model
 	}
 
 
+
+
 	public function delete_turn_done_processes($turn_id)
 	{
 		$this->db->where('turn_id', $turn_id);
@@ -1342,6 +1344,11 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 	function change_status_turn($status, $data = array())
 	{
 		return $this->db->update('turn', array('status' => $status), $data);
+	}
+
+	function change_payment_status_turn($status, $data = array())
+	{
+		return $this->db->update('turn', array('payment_status' => $status), $data);
 	}
 
 

@@ -45,7 +45,7 @@
 									class="fa fa-eye fs-14"></span></a>
 						<?php endif; ?>
 
-						<?php if ($turn['payment_status'] == null) : ?>
+						<?php if ($turn['payment_status'] == 'p') : ?>
 							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/accept_turn')"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
 									class="fa-regular fa-circle-check fs-14"></span></a>
@@ -54,10 +54,6 @@
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
 									class="fa fa-times-circle fs-14"></span></a>
 						<?php endif; ?>
-
-						<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/accept_turn')"
-						   class="btn btn-icon btn-outline-info rounded-pill btn-wave waves-effect waves-light"><span
-								class="fa fa-money fs-14"></span></a>
 						<a href="javascript:delete_via_alert('<?= $turn['id'] ?>', '<?= base_url() ?>admin/delete_turn', 'turnsTable', update_balance)"
 						   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span
 								class="fa-regular fa-trash-can fs-14"></span></a>

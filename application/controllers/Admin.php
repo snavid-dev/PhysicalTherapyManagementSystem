@@ -5747,6 +5747,38 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+	public function list_turns_payment_pending()
+	{
+		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$data = array();
+			$record = $this->input->post('slug');
+			$datas = array(
+				'patient_id' => $record,
+				'payment_status' => 'p'
+			);
+			$turns = $this->Admin_model->turn_by_patient($datas);
+			if (count($turns) > 0) {
+				$data['type'] = 'success';
+
+				foreach ($turns as $turn) {
+					$data['content']['turns'][] = array('date' => $turn['date'], 'id' => $turn['id'], 'hour_key' => '1', 'hour' => $turn['from_time'] . ' - ' . $turn['to_time']);
+				}
+			} else {
+				$data['type'] = 'success';
+				$data['content']['turns'] = array();
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert']['title'] = $this->lang('error');
+			$data['alert']['text'] = $this->lang('problem');
+			$data['alert']['type'] = 'error';
+		}
+
+		print_r(json_encode($data));
+	}
+
+
 	public function update_turn()
 	{
 		$data = array('type' => 'form_error', 'messages' => array());
@@ -5838,7 +5870,7 @@ class Admin extends CI_Controller
 			$datas = array(
 				'cr' => $this->input->post('cr'),
 				'pay_date' => $this->mylibrary->getCurrentShamsiDate()['date'],
-				'status' => 'a',
+				'payment_status' => 'a',
 				'paid_user_id' => $this->session->userdata($this->mylibrary->hash_session('u_id'))
 			);
 			$id = $this->input->post('slug');
@@ -6129,7 +6161,7 @@ class Admin extends CI_Controller
 				'id' => $this->input->post('record')
 			);
 
-			if ($this->Admin_model->change_status_turn('a', $datas)) {
+			if ($this->Admin_model->change_payment_status_turn('a', $datas)) {
 				$data['type'] = 'success';
 
 				$btns = '';
@@ -6170,7 +6202,7 @@ class Admin extends CI_Controller
 				'id' => $this->input->post('record')
 			);
 
-			if ($this->Admin_model->change_status_turn('p', $datas)) {
+			if ($this->Admin_model->change_payment_status_turn('p', $datas)) {
 				$data['type'] = 'success';
 
 				$btns = '';
