@@ -810,7 +810,6 @@ class Admin_model extends CI_Model
 	}
 
 
-
 	public function get_unassigned_recommended_processes($patient_id)
 	{
 		$this->db->select('turn_tooth_recommended.tooth_id, turn_tooth_recommended.process_id, turn_tooth_recommended.custom_label, turn_tooth_recommended.remarks');
@@ -849,6 +848,76 @@ class Admin_model extends CI_Model
 		}
 
 		return $grouped;
+	}
+
+	public function complete_turn($turn_id)
+	{
+		$ci = get_instance();
+		$this->db->where('id', $turn_id);
+		return $this->db->update('turn', [
+			'status' => 'a',
+			'treatment_date' => $ci->mylibrary->getCurrentShamsiDate()['date'] . date(' H:i:s')
+		]);
+	}
+
+
+	public function delete_turn_done_processes($turn_id)
+	{
+		$this->db->where('turn_id', $turn_id);
+		$this->db->delete('turn_tooth_done');
+	}
+
+	public function insert_done_process($data)
+	{
+		return $this->db->insert('turn_tooth_done', $data);
+	}
+
+	public function get_recommended_by_turn($turn_id)
+	{
+		$this->db->select('r.tooth_id, r.process_id, r.custom_label, r.remarks, t.name, t.location, p.name as process_name, s.department');
+		$this->db->from('turn_tooth_recommended r');
+		$this->db->join('tooth t', 't.id = r.tooth_id');
+		$this->db->join('processes p', 'p.id = r.process_id', 'left');
+		$this->db->join('services s', 's.id = p.services_id', 'left');
+		$this->db->where('r.turn_id', $turn_id);
+		$query = $this->db->get()->result_array();
+
+		$grouped = [];
+
+		foreach ($query as $row) {
+			$tid = $row['tooth_id'];
+			$department = $row['remarks'] ?: ($row['department'] ?? 'unknown');
+
+			$grouped[$tid]['tooth_name'] = $row['location'] . ' ' . $row['name'];
+			if (!isset($grouped[$tid]['departments'][$department])) {
+				$grouped[$tid]['departments'][$department] = [
+					'name' => $department,
+					'processes' => [],
+					'custom' => ''
+				];
+			}
+
+			if ($row['process_id'] !== null) {
+				$grouped[$tid]['departments'][$department]['processes'][] = [
+					'process_id' => $row['process_id'],
+					'label' => $row['custom_label'] ?? $row['process_name']
+				];
+			} elseif ($row['custom_label']) {
+				$grouped[$tid]['departments'][$department]['custom'] = $row['custom_label'];
+			}
+		}
+
+		// Convert to final array format
+		$final = [];
+		foreach ($grouped as $tooth_id => $data) {
+			$final[] = [
+				'tooth_id' => $tooth_id,
+				'tooth_name' => $data['tooth_name'],
+				'departments' => array_values($data['departments'])
+			];
+		}
+
+		return $final;
 	}
 
 

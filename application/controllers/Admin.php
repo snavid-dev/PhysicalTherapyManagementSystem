@@ -5235,6 +5235,29 @@ class Admin extends CI_Controller
 		echo json_encode($data);
 	}
 
+	public function get_recommended_by_turn()
+	{
+		$turn_id = $this->input->post('turn_id');
+		if (!is_numeric($turn_id)) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid turn id'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$recommended = $this->Admin_model->get_recommended_by_turn($turn_id);
+
+		echo json_encode([
+			'type' => 'success',
+			'content' => $recommended
+		]);
+	}
+
 
 	public function insert_recommended_processes()
 	{
@@ -5866,6 +5889,81 @@ class Admin extends CI_Controller
 		}
 
 		print_r(json_encode($data));
+	}
+
+	public function insert_turn_done_processes()
+	{
+		$data = ['type' => 'form_error', 'messages' => []];
+
+		$this->form_validation->set_rules('turn_id', 'Turn ID', 'trim|required|is_natural_no_zero', [
+			'required' => $this->lang('error'),
+			'is_natural_no_zero' => $this->lang('error')
+		]);
+
+		if (!$this->form_validation->run()) {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key)) {
+					$data['messages'][] = strip_tags(form_error($key));
+				}
+			}
+			$data['title'] = $this->lang('error');
+			echo json_encode($data);
+			return;
+		}
+
+		$turn_id = $this->input->post('turn_id');
+		$tooth_ids = $this->input->post('tooth_id');
+		$done_processes = $this->input->post('done_process');
+		$done_custom_processes = $this->input->post('done_custom_process');
+		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
+
+		// Remove existing done processes (optional cleanup)
+		$this->Admin_model->delete_turn_done_processes($turn_id);
+
+		// Insert new done processes
+		foreach ($tooth_ids as $tooth_id) {
+			if (!empty($done_processes[$tooth_id])) {
+				foreach ($done_processes[$tooth_id] as $dept => $process_list) {
+					foreach ($process_list as $item) {
+						$this->Admin_model->insert_done_process([
+							'turn_id' => $turn_id,
+							'tooth_id' => $tooth_id,
+							'process_id' => is_numeric($item) ? $item : null,
+							'custom_label' => is_numeric($item) ? null : $item,
+							'remarks' => $dept,
+							'users_id' => $user_id
+						]);
+					}
+				}
+			}
+
+			if (!empty($done_custom_processes[$tooth_id])) {
+				foreach ($done_custom_processes[$tooth_id] as $dept => $label) {
+					if (trim($label)) {
+						$this->Admin_model->insert_done_process([
+							'turn_id' => $turn_id,
+							'tooth_id' => $tooth_id,
+							'process_id' => null,
+							'custom_label' => $label,
+							'remarks' => $dept,
+							'users_id' => $user_id
+						]);
+					}
+				}
+			}
+		}
+
+		// ✅ Update turn status and treatment_date via model
+		$this->Admin_model->complete_turn($turn_id);
+
+		echo json_encode([
+			'type' => 'success',
+			'alert' => [
+				'title' => $this->lang('success'),
+				'text' => $this->lang('turn processes saved'),
+				'type' => 'success'
+			]
+		]);
 	}
 
 

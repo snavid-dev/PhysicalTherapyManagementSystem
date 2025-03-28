@@ -37,7 +37,6 @@
 </script>
 
 
-
 <script>
 	function check_turns(selectElement = document.getElementById('doctorName'), date = $('#test-date-id-date').val(), doctor = $('#doctorName').val(), tableId = '#queryTable') {
 		const time = document.getElementById("from_time");
@@ -114,5 +113,108 @@
 			}
 		});
 	}
+
+</script>
+
+
+<script>
+	// function finishTurn(id){
+	// 	console.log('id ', id);
+	// }
+	function finishTurn(turn_id) {
+		const container = $('#finish_turn_processes_container');
+		container.empty();
+		$('#finish_turn_id').val(turn_id);
+
+		$.ajax({
+			url: "<?= base_url('admin/get_recommended_by_turn') ?>",
+			type: 'POST',
+			data: {turn_id},
+			dataType: 'json',
+			success: function (res) {
+				if (res.type !== 'success' || !Array.isArray(res.content)) return;
+
+				res.content.forEach((tooth, toothIndex) => {
+					const toothId = tooth.tooth_id;
+					const toothName = tooth.tooth_name;
+
+					let html = `
+				<div class="row nthHrLine">
+					<div class="col-12 greyline">
+						<div class="customMargin">
+							<div class="processHeader">
+								<h2 style="margin-bottom: 30px">${toothName}</h2>
+								<input type="hidden" name="tooth_id[]" value="${toothId}">
+							</div>`;
+
+					tooth.departments.forEach((dept, deptIndex) => {
+						const deptName = dept.name;
+						const processes = dept.processes || [];
+						const customText = dept.custom?.trim() ?? '';
+						const otherId = `finish_other_textarea_${toothIndex}_${deptIndex}`;
+
+						html += `<h5 class="text-primary">${deptName}</h5><div class="row">`;
+
+						// Show processes as checkboxes (both DB and custom)
+						processes.forEach(proc => {
+							const value = proc.process_id ?? proc.label;
+							const isCustom = !proc.process_id;
+							html += `
+							<div class="col-sm-12 col-md-2 customMargin_processCheckbox">
+								<label class="cl-checkbox">
+									<input type="checkbox" name="done_process[${toothId}][${deptName}][]" value="${value}" data-label="${proc.label}" data-department="${deptName}">
+									<span>${proc.label}${isCustom ? ' (Custom)' : ''}</span>
+								</label>
+							</div>`;
+						});
+
+						// If there's a saved "custom" label (from recommended), show it as a checkbox too
+						if (customText) {
+							html += `
+							<div class="col-sm-12 col-md-2 customMargin_processCheckbox">
+								<label class="cl-checkbox">
+									<input type="checkbox" name="done_process[${toothId}][${deptName}][]" value="${customText}" data-label="${customText}" data-department="${deptName}">
+									<span>${customText} (Custom)</span>
+								</label>
+							</div>`;
+						}
+
+						// Always show new Other (unchecked, empty)
+						html += `
+						<div class="col-12 col-md-12 mt-3">
+							<label class="cl-checkbox">
+								<input type="checkbox" data-target="${otherId}" onclick="otherProcess(this)">
+								<span><?= $ci->lang('other') ?></span>
+							</label>
+							<div class="mt-2" id="${otherId}" style="display: none">
+								<label><?= $ci->lang('other process') ?></label>
+								<textarea class="form-control" name="done_custom_process[${toothId}][${deptName}]"></textarea>
+							</div>
+						</div>`;
+
+						html += '</div>'; // end dept row
+					});
+
+					html += '</div></div></div>'; // end tooth block
+					container.append(html);
+				});
+
+				$('#finishTurnModal').modal('show');
+			},
+			error: function (xhr, status, error) {
+				console.error("AJAX error:", error);
+				container.empty();
+			}
+		});
+	}
+
+	function otherProcess(checkbox) {
+		const targetId = checkbox.getAttribute("data-target");
+		const textarea = document.getElementById(targetId);
+		if (textarea) {
+			textarea.style.display = checkbox.checked ? "block" : "none";
+		}
+	}
+
 
 </script>
