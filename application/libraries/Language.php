@@ -784,6 +784,7 @@ class Language
 			'turn processes saved' => self::lang_arr('turn processes saved', 'پروسه‌های نوبت ذخیره شدند', 'د نوبت پروسې ثبت شوې'),
 			'please insert recommended processes first' => self::lang_arr('please insert recommended processes first', 'لطفاً ابتدا پروسه‌های پیشنهادی را وارد کنید', 'لطفاً ابتدا فرآیندهای پیشنهادی را وارد نمایید'),
 			'cannot delete turn with done processes' => self::lang_arr('cannot delete turn with done processes','نمی‌توان نوبتی را که دارای درمان انجام‌شده است حذف کرد', 'نوبت دارای پروسه‌های انجام شده را نمی‌توان حذف کرد'),
+			'view treatment' => self::lang_arr('view treatment','مشاهده درمان', 'not set'),
 
 			//End Turns Done Process
 

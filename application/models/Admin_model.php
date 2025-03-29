@@ -921,6 +921,29 @@ class Admin_model extends CI_Model
 	}
 
 
+	public function get_done_processes_by_turn($turn_id)
+	{
+		$this->db->select('tooth_id, process_id, custom_label, remarks');
+		$this->db->from('turn_tooth_done');
+		$this->db->where('turn_id', $turn_id);
+		return $this->db->get()->result_array();
+	}
+
+	public function get_process_name($process_id)
+	{
+		$this->db->select('name');
+		$this->db->from('processes');
+		$this->db->where('id', $process_id);
+		$result = $this->db->get()->row_array();
+
+		return $result ? $result['name'] : null;
+	}
+
+
+
+
+
+
 	public function get_account_with_no_user()
 	{
 		return $this->db->get('customers')->result_array();

@@ -40,7 +40,7 @@
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
 									class="fa fa-stethoscope"></span></a>
 						<?php else : ?>
-							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/pending_turn')"
+							<a href="javascript:viewTreatment('<?= $turn['id'] ?>')"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
 									class="fa fa-eye fs-14"></span></a>
 						<?php endif; ?>
@@ -67,3 +67,4 @@
 </div>
 
 <?php $ci->render('patients/components/main/Turns/finish_turn_modal.php') ?>
+<?php $ci->render('patients/components/main/Turns/view_treatment.php') ?>

@@ -274,4 +274,84 @@
 	}
 
 
+	// JS Function to display the viewTreatment modal with data
+	function viewTreatment(turn_id) {
+		const container = $('#view_treatment_processes_container');
+		container.empty();
+		$('#view_treatment_turn_id').val(turn_id);
+
+		$.ajax({
+			url: "<?= base_url('admin/get_treatment_summary') ?>",
+			type: 'POST',
+			data: {turn_id},
+			dataType: 'json',
+			success: function (res) {
+				if (res.type !== 'success' || !Array.isArray(res.content)) return;
+
+				res.content.forEach((tooth, toothIndex) => {
+					const toothId = tooth.tooth_id;
+					const toothName = tooth.tooth_name;
+
+					let html = `
+				<div class="row nthHrLine">
+					<div class="col-12 greyline">
+						<div class="customMargin">
+							<div class="processHeader">
+								<h2 style="margin-bottom: 30px">${toothName}</h2>
+							</div>`;
+
+					tooth.departments.forEach((dept, deptIndex) => {
+						const deptName = dept.name;
+						const recommended = Array.isArray(dept.recommended) ? dept.recommended : [];
+						const done = Array.isArray(dept.done) ? dept.done : [];
+						const doneCustomText = dept.done_custom_text || '';
+
+						html += `<h5 class="text-primary">${deptName}</h5><div class="row">`;
+
+						// Merge all recommended + done (if done not in recommended)
+						const combined = [...recommended];
+
+						done.forEach(doneProc => {
+							if (!recommended.some(r => r.label === doneProc.label)) {
+								combined.push({label: doneProc.label, type: doneProc.type || 'custom'});
+							}
+						});
+
+						// Render checkboxes
+						combined.forEach(proc => {
+							const isDone = done.some(d => d.label === proc.label);
+							html += `
+						<div class="col-sm-12 col-md-3 customMargin_processCheckbox">
+							<label class="cl-checkbox">
+								<input type="checkbox" ${isDone ? 'checked' : ''} disabled>
+								<span>${proc.label}</span>
+							</label>
+						</div>`;
+						});
+
+						// Show custom text if exists
+						if (doneCustomText.trim()) {
+							html += `
+						<div class="col-12 mt-2">
+							<label><strong><?= $ci->lang('other process') ?>:</strong></label>
+							<p class="form-control-plaintext">${doneCustomText}</p>
+						</div>`;
+						}
+
+						html += '</div>'; // close department
+					});
+
+					html += '</div></div></div>'; // close tooth
+					container.append(html);
+				});
+
+				$('#viewTreatmentModal').modal('show');
+			},
+			error: function () {
+				container.html('<div class="text-danger">Error loading treatment summary.</div>');
+			}
+		});
+	}
+
+
 </script>

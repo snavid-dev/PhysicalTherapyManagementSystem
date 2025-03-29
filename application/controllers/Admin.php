@@ -5248,6 +5248,99 @@ class Admin extends CI_Controller
 	}
 
 
+	public function get_treatment_summary()
+	{
+		$this->form_validation->set_rules('turn_id', 'Turn ID', 'required|is_natural_no_zero');
+
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'type' => 'error',
+				'message' => $this->lang('error')
+			]);
+			return;
+		}
+
+		$turn_id = $this->input->post('turn_id');
+
+		$this->db->select('ttr.tooth_id, t.name, t.location');
+		$this->db->from('turn_tooth_recommended ttr');
+		$this->db->join('tooth t', 't.id = ttr.tooth_id');
+		$this->db->where('ttr.turn_id', $turn_id);
+		$this->db->group_by('ttr.tooth_id');
+		$teeth = $this->db->get()->result_array();
+
+		$result = [];
+
+		foreach ($teeth as $tooth) {
+			$tooth_id = $tooth['tooth_id'];
+			$tooth_data = [
+				'tooth_id' => $tooth_id,
+				'tooth_name' => $tooth['location'] . ' ' . $tooth['name'],
+				'departments' => []
+			];
+
+			$departments = ['endo', 'restorative', 'prosthodontics'];
+
+			foreach ($departments as $dept) {
+				// Get recommended
+				$this->db->select('ttr.process_id, ttr.custom_label, p.name as process_name');
+				$this->db->from('turn_tooth_recommended ttr');
+				$this->db->join('processes p', 'p.id = ttr.process_id', 'left');
+				$this->db->where('ttr.turn_id', $turn_id);
+				$this->db->where('ttr.tooth_id', $tooth_id);
+				$this->db->where('ttr.remarks', $dept);
+				$recommended = $this->db->get()->result_array();
+
+				$rec_list = [];
+				foreach ($recommended as $rec) {
+					$rec_list[] = [
+						'label' => $rec['custom_label'] ?? $rec['process_name'],
+						'process_id' => $rec['process_id']
+					];
+				}
+
+				// Get done processes
+				$this->db->select('process_id, custom_label, remarks');
+				$this->db->from('turn_tooth_done');
+				$this->db->where('turn_id', $turn_id);
+				$this->db->where('tooth_id', $tooth_id);
+				$this->db->where('remarks', $dept);
+				$done = $this->db->get()->result_array();
+
+				$done_list = [];
+				$custom_text = '';
+
+				foreach ($done as $dp) {
+					$label = $dp['custom_label'] ?? '';
+					if ($dp['process_id']) {
+						$label = $this->Admin_model->get_process_name($dp['process_id']);
+					}
+
+					if ($dp['process_id']) {
+						$done_list[] = ['label' => $label, 'process_id' => $dp['process_id'], 'type' => 'matched'];
+					} elseif ($dp['custom_label']) {
+						$done_list[] = ['label' => $dp['custom_label'], 'process_id' => null, 'type' => 'custom'];
+						$custom_text .= $dp['custom_label'] . ", ";
+					}
+				}
+
+				$tooth_data['departments'][] = [
+					'name' => $dept,
+					'recommended' => $rec_list,
+					'done' => $done_list,
+					'done_custom_text' => rtrim($custom_text, ', ')
+				];
+			}
+
+			$result[] = $tooth_data;
+		}
+
+		echo json_encode([
+			'type' => 'success',
+			'content' => $result
+		]);
+	}
+
 	public function get_recommended_by_turn()
 	{
 		$turn_id = $this->input->post('turn_id');
