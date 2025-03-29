@@ -940,8 +940,69 @@ class Admin_model extends CI_Model
 	}
 
 
+	public function calculate_patient_process_completion($patient_id)
+	{
+		$teeth = $this->db->get_where('tooth', ['patient_id' => $patient_id])->result_array();
+		if (empty($teeth)) return 0;
+
+		$tooth_ids = array_column($teeth, 'id');
+		$total_percentage = 0;
+
+		$departments = [
+			'endo' => ['junction' => 'endo_has_services', 'foreign' => 'endo_id'],
+			'restorative' => ['junction' => 'restorative_has_services', 'foreign' => 'restorative_id'],
+			'prosthodontics' => ['junction' => 'prosthodontics_has_services', 'foreign' => 'prosthodontics_id']
+		];
+
+		$unique_processes = [];
+
+		foreach ($departments as $dept_table => $map) {
+			// Step 1: Get department IDs by tooth_id
+			$dept_ids = $this->db
+				->select('id')
+				->from($dept_table)
+				->where_in('tooth_id', $tooth_ids)
+				->get()
+				->result_array();
+
+			$dept_ids = array_column($dept_ids, 'id');
+			if (empty($dept_ids)) continue;
+
+			// Step 2: Get all processes for the department services
+			$processes = $this->db
+				->select('p.id, p.percentage')
+				->from($map['junction'] . ' j')
+				->join('processes p', 'p.services_id = j.services_id')
+				->where_in("j.{$map['foreign']}", $dept_ids)
+				->get()
+				->result_array();
+
+			// Avoid duplicates
+			foreach ($processes as $p) {
+				$total_percentage += (int)$p['percentage'];
+			}
+		}
 
 
+		if ($total_percentage === 0) return 0;
+
+		// Step 3: Get completed process percentages
+		$done = $this->db
+			->select('p.percentage')
+			->from('turn_tooth_done d')
+			->join('processes p', 'p.id = d.process_id')
+			->join('tooth t', 't.id = d.tooth_id')
+			->where_in('d.tooth_id', $tooth_ids)
+			->where('t.patient_id', $patient_id)
+			->where('d.process_id IS NOT NULL', null, false)
+			->get()
+			->result_array();
+
+		$done_total = array_sum(array_column($done, 'percentage'));
+
+
+		return round(($done_total / $total_percentage) * 100, 2);
+	}
 
 
 	public function get_account_with_no_user()

@@ -5341,6 +5341,32 @@ class Admin extends CI_Controller
 		]);
 	}
 
+
+	public function get_patient_process_completion()
+	{
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'trim|required|is_natural_no_zero');
+
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid patient'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = $this->input->post('patient_id');
+		$percentage = $this->Admin_model->calculate_patient_process_completion($patient_id);
+
+		echo json_encode([
+			'type' => 'success',
+			'completion' => $percentage
+		]);
+	}
+
 	public function get_recommended_by_turn()
 	{
 		$turn_id = $this->input->post('turn_id');
