@@ -366,4 +366,29 @@
 		});
 	}
 
+	function update_process_completion() {
+		let patient_id = '<?= $profile['id'] ?>';
+		$.ajax({
+			url: "<?= base_url('admin/get_patient_process_completion') ?>",
+			type: 'POST',
+			data: { patient_id },
+			dataType: 'json',
+			success: function (response) {
+				if (response.type === 'success') {
+					const percentage = response.percentage || 0;
+
+					// Update text
+					$('#process_percentage').text(response.percentage_text);
+
+					// Update progress bar
+					document.querySelector('.progress-bar.bg-secondary.ronded-1').style.width = percentage + '%';
+				}
+			},
+			error: function () {
+				console.error("Failed to update process completion.");
+			}
+		});
+	}
+
+
 </script>

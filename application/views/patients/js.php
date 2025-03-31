@@ -102,7 +102,8 @@ $ci = get_instance();
 					document.querySelector(".card-body.p-0.main-profile-info").innerHTML = balanceTemplate;
 				}
 			}
-		})
+		});
+		update_process_completion();
 	}
 </script>
 

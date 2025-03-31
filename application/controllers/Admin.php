@@ -3161,6 +3161,9 @@ class Admin extends CI_Controller
 				$data['sum_cr'] = $check['sum_cr'];
 				$data['sum_dr'] = $check['sum_dr'];
 
+				$data['process_percentage'] = $this->Admin_model->calculate_patient_process_completion($id);
+
+
 				$this->load->view('header', $data);
 				$this->load->view('patients/single', $data);
 				$this->load->view('footer');
@@ -5363,7 +5366,8 @@ class Admin extends CI_Controller
 
 		echo json_encode([
 			'type' => 'success',
-			'completion' => $percentage
+			'percentage' => $percentage,
+			'percentage_text' => $this->language->languages('payment percent status', null, $percentage)
 		]);
 	}
 

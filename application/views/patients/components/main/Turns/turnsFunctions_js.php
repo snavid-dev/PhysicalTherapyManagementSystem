@@ -270,6 +270,7 @@
 					$tbody.append(`<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>`);
 				}
 			});
+			update_process_completion();
 		}, 1000); // 1	-second delay
 	}
 
