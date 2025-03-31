@@ -37,7 +37,7 @@ $ci = get_instance();
 	function payment_modal_clicked() {
 		let patient_id = '<?= $profile['id'] ?>';
 		$.ajax({
-			url: "<?= base_url('admin/list_turns_pending') ?>",
+			url: "<?= base_url('admin/list_turns_payment_pending') ?>",
 			type: 'POST',
 			data: {
 				slug: patient_id
@@ -102,7 +102,8 @@ $ci = get_instance();
 					document.querySelector(".card-body.p-0.main-profile-info").innerHTML = balanceTemplate;
 				}
 			}
-		})
+		});
+		update_process_completion();
 	}
 </script>
 

@@ -3161,6 +3161,9 @@ class Admin extends CI_Controller
 				$data['sum_cr'] = $check['sum_cr'];
 				$data['sum_dr'] = $check['sum_dr'];
 
+				$data['process_percentage'] = $this->Admin_model->calculate_patient_process_completion($id);
+
+
 				$this->load->view('header', $data);
 				$this->load->view('patients/single', $data);
 				$this->load->view('footer');
@@ -3171,6 +3174,18 @@ class Admin extends CI_Controller
 			show_404();
 			exit;
 		}
+	}
+
+	public function ajax_turns_by_patient()
+	{
+		$patient_id = $this->input->post('patient_id');
+		if (!$patient_id) {
+			echo json_encode(['type' => 'error', 'message' => 'Invalid ID']);
+			return;
+		}
+
+		$turns = $this->Admin_model->turns_by_patient_id($patient_id);
+		echo json_encode(['type' => 'success', 'data' => $turns]);
 	}
 
 
@@ -3923,6 +3938,35 @@ class Admin extends CI_Controller
 
 		print_r(json_encode($data));
 	}
+
+	public function list_process_teeth()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+
+			$teeth = $this->Admin_model->get_teeth_for_process($this->input->post('record'));
+			if ($teeth) {
+				$data['type'] = 'success';
+				$data['content'] = $teeth;
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
 
 	public function labs()
 	{
@@ -5139,66 +5183,292 @@ class Admin extends CI_Controller
 	public function get_tooth_processes_by_teeth()
 	{
 		$this->form_validation->set_rules('teeth_ids[]', 'Teeth IDs', 'required');
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required');
 
-		if ($this->form_validation->run()) {
-			$teeth_ids = $this->input->post('teeth_ids');
-
-			if (!is_array($teeth_ids)) {
-				$data = [
-					'type' => 'error',
-					'alert' => [
-						'title' => $this->lang('error'),
-						'text' => $this->lang('invalid tooth data'),
-						'type' => 'error'
-					]
-				];
-				echo json_encode($data);
-				return;
-			}
-
-			$results = [];
-
-			foreach ($teeth_ids as $tooth_id) {
-				$tooth_info = $this->Admin_model->get_tooth_basic_info($tooth_id);
-
-				if ($tooth_info) {
-					$departments = ['endo', 'restorative', 'prosthodontics'];
-					$tooth_data = [
-						'tooth_id' => $tooth_id,
-						'tooth_name' => $tooth_info['location'] . ' ' . $tooth_info['name'],
-						'departments' => []
-					];
-
-					foreach ($departments as $dept) {
-						$dept_data = $this->Admin_model->get_department_services_with_processes($tooth_id, $dept);
-						if (!empty($dept_data)) {
-							$tooth_data['departments'][] = [
-								'department' => $dept,
-								'services' => $dept_data
-							];
-						}
-					}
-
-					$results[] = $tooth_data;
-				}
-			}
-
-			$data = [
-				'type' => 'success',
-				'content' => $results
-			];
-		} else {
-			$data = [
+		if (!$this->form_validation->run()) {
+			echo json_encode([
 				'type' => 'error',
 				'alert' => [
 					'title' => $this->lang('error'),
 					'text' => $this->lang('problem'),
 					'type' => 'error'
 				]
-			];
+			]);
+			return;
 		}
 
-		echo json_encode($data);
+		$teeth_ids = $this->input->post('teeth_ids');
+		$patient_id = $this->input->post('patient_id');
+
+		if (!is_array($teeth_ids)) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid tooth data'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$results = [];
+
+		foreach ($teeth_ids as $tooth_id) {
+			$tooth_info = $this->Admin_model->get_tooth_basic_info($tooth_id);
+
+			if (!$tooth_info) continue;
+
+			$departments = ['endo', 'restorative', 'prosthodontics'];
+			$tooth_data = [
+				'tooth_id' => $tooth_id,
+				'tooth_name' => $tooth_info['location'] . ' ' . $tooth_info['name'],
+				'departments' => []
+			];
+
+			foreach ($departments as $dept) {
+				$dept_data = $this->Admin_model->get_department_services_with_processes($tooth_id, $dept);
+				if (!empty($dept_data)) {
+					$tooth_data['departments'][] = [
+						'department' => $dept,
+						'services' => $dept_data
+					];
+				}
+			}
+
+			// Include recommended processes (with turn_id = NULL)
+			$tooth_data['recommended'] = $this->Admin_model->get_unassigned_recommended_processes($patient_id, $tooth_id);
+
+			// Include already done processes (for disabling in frontend)
+			$tooth_data['done'] = $this->Admin_model->get_done_process_ids_by_tooth($tooth_id);
+			$results[] = $tooth_data;
+		}
+
+		echo json_encode([
+			'type' => 'success',
+			'content' => $results
+		]);
+	}
+
+
+	public function get_treatment_summary()
+	{
+		$this->form_validation->set_rules('turn_id', 'Turn ID', 'required|is_natural_no_zero');
+
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'type' => 'error',
+				'message' => $this->lang('error')
+			]);
+			return;
+		}
+
+		$turn_id = $this->input->post('turn_id');
+
+		$this->db->select('ttr.tooth_id, t.name, t.location');
+		$this->db->from('turn_tooth_recommended ttr');
+		$this->db->join('tooth t', 't.id = ttr.tooth_id');
+		$this->db->where('ttr.turn_id', $turn_id);
+		$this->db->group_by('ttr.tooth_id');
+		$teeth = $this->db->get()->result_array();
+
+		$result = [];
+
+		foreach ($teeth as $tooth) {
+			$tooth_id = $tooth['tooth_id'];
+			$tooth_data = [
+				'tooth_id' => $tooth_id,
+				'tooth_name' => $tooth['location'] . ' ' . $tooth['name'],
+				'departments' => []
+			];
+
+			$departments = ['endo', 'restorative', 'prosthodontics'];
+
+			foreach ($departments as $dept) {
+				// Get recommended
+				$this->db->select('ttr.process_id, ttr.custom_label, p.name as process_name');
+				$this->db->from('turn_tooth_recommended ttr');
+				$this->db->join('processes p', 'p.id = ttr.process_id', 'left');
+				$this->db->where('ttr.turn_id', $turn_id);
+				$this->db->where('ttr.tooth_id', $tooth_id);
+				$this->db->where('ttr.remarks', $dept);
+				$recommended = $this->db->get()->result_array();
+
+				$rec_list = [];
+				foreach ($recommended as $rec) {
+					$rec_list[] = [
+						'label' => $rec['custom_label'] ?? $rec['process_name'],
+						'process_id' => $rec['process_id']
+					];
+				}
+
+				// Get done processes
+				$this->db->select('process_id, custom_label, remarks');
+				$this->db->from('turn_tooth_done');
+				$this->db->where('turn_id', $turn_id);
+				$this->db->where('tooth_id', $tooth_id);
+				$this->db->where('remarks', $dept);
+				$done = $this->db->get()->result_array();
+
+				$done_list = [];
+				$custom_text = '';
+
+				foreach ($done as $dp) {
+					$label = $dp['custom_label'] ?? '';
+					if ($dp['process_id']) {
+						$label = $this->Admin_model->get_process_name($dp['process_id']);
+					}
+
+					if ($dp['process_id']) {
+						$done_list[] = ['label' => $label, 'process_id' => $dp['process_id'], 'type' => 'matched'];
+					} elseif ($dp['custom_label']) {
+						$done_list[] = ['label' => $dp['custom_label'], 'process_id' => null, 'type' => 'custom'];
+						$custom_text .= $dp['custom_label'] . ", ";
+					}
+				}
+
+				$tooth_data['departments'][] = [
+					'name' => $dept,
+					'recommended' => $rec_list,
+					'done' => $done_list,
+					'done_custom_text' => rtrim($custom_text, ', ')
+				];
+			}
+
+			$result[] = $tooth_data;
+		}
+
+		echo json_encode([
+			'type' => 'success',
+			'content' => $result
+		]);
+	}
+
+
+	public function get_patient_process_completion()
+	{
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'trim|required|is_natural_no_zero');
+
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid patient'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = $this->input->post('patient_id');
+		$percentage = $this->Admin_model->calculate_patient_process_completion($patient_id);
+
+		echo json_encode([
+			'type' => 'success',
+			'percentage' => $percentage,
+			'percentage_text' => $this->language->languages('payment percent status', null, $percentage)
+		]);
+	}
+
+	public function get_recommended_by_turn()
+	{
+		$turn_id = $this->input->post('turn_id');
+		if (!is_numeric($turn_id)) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid turn id'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$recommended = $this->Admin_model->get_recommended_by_turn($turn_id);
+
+		echo json_encode([
+			'type' => 'success',
+			'content' => $recommended
+		]);
+	}
+
+
+	public function insert_recommended_processes()
+	{
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid patient'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = $this->input->post('patient_id');
+		$tooth_ids = $this->input->post('tooth_id');
+		$processes = $this->input->post('processes');
+		$custom_processes = $this->input->post('custom_process');
+		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
+
+		foreach ($tooth_ids as $tooth_id) {
+			// Save checked processes
+			if (!empty($processes[$tooth_id])) {
+				foreach ($processes[$tooth_id] as $process_id) {
+					$this->Admin_model->insert_recommended_process([
+						'turn_id' => null,
+						'tooth_id' => $tooth_id,
+						'process_id' => $process_id, // ✅ Use actual ID
+						'custom_label' => null,      // ✅ No label needed
+						'remarks' => null,
+						'users_id' => $user_id,
+					]);
+				}
+
+			}
+
+			// Save "other" (custom) text areas
+			if (!empty($custom_processes[$tooth_id])) {
+				foreach ($custom_processes[$tooth_id] as $dept => $label) {
+					if (trim($label) !== '') {
+						$this->Admin_model->insert_recommended_process([
+							'turn_id' => null,
+							'tooth_id' => $tooth_id,
+							'process_id' => null,
+							'custom_label' => $label,
+							'remarks' => $dept,
+							'users_id' => $user_id,
+						]);
+					}
+				}
+			}
+		}
+
+		echo json_encode([
+			'type' => 'success',
+			'alert' => [
+				'title' => $this->lang('success'),
+				'text' => $this->lang('recommended processes inserted'),
+				'type' => 'success'
+			]
+		]);
+	}
+
+	public function assign_recommendations_to_turn($patient_id, $turn_id)
+	{
+		$this->load->model('Admin_model');
+
+		$teeth = $this->Admin_model->get_teeth_ids_by_patient($patient_id);
+		if (empty($teeth)) return;
+
+		$this->db->where('turn_id', 0);
+		$this->db->where_in('tooth_id', $teeth);
+		$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
 	}
 
 
@@ -5613,6 +5883,38 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
+	public function list_turns_payment_pending()
+	{
+		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$data = array();
+			$record = $this->input->post('slug');
+			$datas = array(
+				'patient_id' => $record,
+				'payment_status' => 'p'
+			);
+			$turns = $this->Admin_model->turn_by_patient($datas);
+			if (count($turns) > 0) {
+				$data['type'] = 'success';
+
+				foreach ($turns as $turn) {
+					$data['content']['turns'][] = array('date' => $turn['date'], 'id' => $turn['id'], 'hour_key' => '1', 'hour' => $turn['from_time'] . ' - ' . $turn['to_time']);
+				}
+			} else {
+				$data['type'] = 'success';
+				$data['content']['turns'] = array();
+			}
+		} else {
+			$data['type'] = 'error';
+			$data['alert']['title'] = $this->lang('error');
+			$data['alert']['text'] = $this->lang('problem');
+			$data['alert']['type'] = 'error';
+		}
+
+		print_r(json_encode($data));
+	}
+
+
 	public function update_turn()
 	{
 		$data = array('type' => 'form_error', 'messages' => array());
@@ -5704,7 +6006,7 @@ class Admin extends CI_Controller
 			$datas = array(
 				'cr' => $this->input->post('cr'),
 				'pay_date' => $this->mylibrary->getCurrentShamsiDate()['date'],
-				'status' => 'a',
+				'payment_status' => 'a',
 				'paid_user_id' => $this->session->userdata($this->mylibrary->hash_session('u_id'))
 			);
 			$id = $this->input->post('slug');
@@ -5757,122 +6059,281 @@ class Admin extends CI_Controller
 		print_r(json_encode($data));
 	}
 
-
-	public function insert_turn()
+	public function insert_turn_done_processes()
 	{
-		$data = array('type' => 'form_error', 'messages' => array());
-		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required', array('required' => $this->lang('insert turn patient_id error')));
-		$this->form_validation->set_rules('date', 'date', 'trim|required', array('required' => $this->lang('insert turn date error')));
-		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', array('required' => $this->lang('insert turn doctor_id error')));
-		$this->form_validation->set_rules('from_time', 'from_time', 'trim|required', array('required' => $this->lang('insert turn hour error')));
-		$this->form_validation->set_rules('to_time', 'to_time', 'trim|required', array('required' => $this->lang('insert turn hour error')));
-		if ($this->form_validation->run()) {
-			// Check for conflicting turns (time overlaps for the same doctor)
-			$conflict = $this->Admin_model->check_turn_conflict(
-				$this->input->post('date'),
-				$this->input->post('doctor_id'),
-				$this->input->post('from_time'),
-				$this->input->post('to_time')
-			);
+		$data = ['type' => 'form_error', 'messages' => []];
 
-			if ($conflict == true) {
-				$data['type'] = 'error';
-				$data['alert']['title'] = $this->lang('error');
-				$data['alert']['text'] = $this->lang('turn conflict');
-				$data['alert']['type'] = 'error';
-				print_r(json_encode($data));
-				return;
-			} else {
-				// Prepare data for turn insertion
-				$datas = array(
-					'patient_id' => $this->input->post('patient_id'),
-					'date' => $this->input->post('date'),
-					'from_time' => $this->input->post('from_time'),
-					'to_time' => $this->input->post('to_time'),
-					'status' => 'p', // Status 'p' means pending
-					'doctor_id' => $this->input->post('doctor_id')
-				);
+		$this->form_validation->set_rules('turn_id', 'Turn ID', 'trim|required|is_natural_no_zero', [
+			'required' => $this->lang('error'),
+			'is_natural_no_zero' => $this->lang('error')
+		]);
 
-				// Insert the turn into the database
-				$insert = $this->Admin_model->insert_turn_form($datas);
-
-				if ($insert[0]) {
-					$data['type'] = 'success';
-					$data['alert']['title'] = $this->lang('success');
-					$data['alert']['text'] = $this->lang('insert turn success');
-					$data['alert']['type'] = 'success';
-
-					$data['extraFunction'] = 'print';
-
-					$data['id'] = $insert[1];
-
-					$btns = '';
-					$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $data['id']);
-					$btns .= $this->mylibrary->generateBtnPrint('print_turn', $data['id']);
-					$btns .= $this->mylibrary->generateBtnStatus($data['id'], 'admin/accept_turn');
-					$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_turn', 'turnsTable', 'update_balance');
-					$turn = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'))[0];
-
-					$hour = $this->input->post('from_time') . ' - ' . $this->input->post('to_time');
-
-					$data['tr'] = array(
-						$turn['doctor_name'],
-						$datas['date'],
-						$hour,
-						$turn['cr'],
-						$this->lang('not paid'),
-						$this->mylibrary->btn_group($btns)
-					);
-				} else {
-					$data['type'] = 'error';
-					$data['alert']['title'] = $this->lang('error');
-					$data['alert']['text'] = $this->lang('problem');
-					$data['alert']['type'] = 'error';
+		if (!$this->form_validation->run()) {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key)) {
+					$data['messages'][] = strip_tags(form_error($key));
 				}
 			}
-		} else {
-			foreach ($_POST as $key => $value) {
-				if (form_error($key) !== '') {
-					$error = form_error($key);
-					$data['messages'][] = substr($error, 3, -4);
-					$data['title'] = $this->lang('error');
+			$data['title'] = $this->lang('error');
+			echo json_encode($data);
+			return;
+		}
+
+		$turn_id = $this->input->post('turn_id');
+		$tooth_ids = $this->input->post('tooth_id');
+		$done_processes = $this->input->post('done_process');
+		$done_custom_processes = $this->input->post('done_custom_process');
+		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
+
+		// Remove existing done processes (optional cleanup)
+		$this->Admin_model->delete_turn_done_processes($turn_id);
+
+		// Insert new done processes
+		foreach ($tooth_ids as $tooth_id) {
+			if (!empty($done_processes[$tooth_id])) {
+				foreach ($done_processes[$tooth_id] as $dept => $process_list) {
+					foreach ($process_list as $item) {
+						$this->Admin_model->insert_done_process([
+							'turn_id' => $turn_id,
+							'tooth_id' => $tooth_id,
+							'process_id' => is_numeric($item) ? $item : null,
+							'custom_label' => is_numeric($item) ? null : $item,
+							'remarks' => $dept,
+							'users_id' => $user_id
+						]);
+					}
+				}
+			}
+
+			if (!empty($done_custom_processes[$tooth_id])) {
+				foreach ($done_custom_processes[$tooth_id] as $dept => $label) {
+					if (trim($label)) {
+						$this->Admin_model->insert_done_process([
+							'turn_id' => $turn_id,
+							'tooth_id' => $tooth_id,
+							'process_id' => null,
+							'custom_label' => $label,
+							'remarks' => $dept,
+							'users_id' => $user_id
+						]);
+					}
 				}
 			}
 		}
-		print_r(json_encode($data));
+
+		// ✅ Update turn status and treatment_date via model
+		$this->Admin_model->complete_turn($turn_id);
+
+		echo json_encode([
+			'type' => 'success',
+			'alert' => [
+				'title' => $this->lang('success'),
+				'text' => $this->lang('turn processes saved'),
+				'type' => 'success'
+			]
+		]);
 	}
 
 
-	public function delete_turn()
+	public function insert_turn()
 	{
-		$data = array('type' => 'form_error', 'messages' => array());
-		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
-		if ($this->form_validation->run()) {
-			$datas = array(
-				'id' => $this->input->post('record')
-			);
+		$data = ['type' => 'form_error', 'messages' => []];
 
-			if ($this->Admin_model->delete_turn($datas)) {
-				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
-				$data['alert']['text'] = $this->lang('delete turn');
-				$data['alert']['type'] = 'success';
-			} else {
-				$data['type'] = 'error';
-				$data['alert']['title'] = $this->lang('error');
-				$data['alert']['text'] = $this->lang('problem');
-				$data['alert']['type'] = 'error';
-			}
-		} else {
+		// === Form validation ===
+		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required', [
+			'required' => $this->lang('insert turn patient_id error')
+		]);
+		$this->form_validation->set_rules('date', 'date', 'trim|required', [
+			'required' => $this->lang('insert turn date error')
+		]);
+		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', [
+			'required' => $this->lang('insert turn doctor_id error')
+		]);
+		$this->form_validation->set_rules('from_time', 'from_time', 'trim|required', [
+			'required' => $this->lang('insert turn hour error')
+		]);
+		$this->form_validation->set_rules('to_time', 'to_time', 'trim|required', [
+			'required' => $this->lang('insert turn hour error')
+		]);
+
+		if (!$this->form_validation->run()) {
 			foreach ($_POST as $key => $value) {
-				if (form_error($key) !== '') {
-					$error = form_error($key);
-					$data['messages'][] = substr($error, 3, -4);
+				if (form_error($key)) {
+					$data['messages'][] = strip_tags(form_error($key));
 				}
 			}
+			$data['title'] = $this->lang('error');
+			echo json_encode($data);
+			return;
 		}
 
-		print_r(json_encode($data));
+		$patient_id = $this->input->post('patient_id');
+		$tooth_ids = $this->Admin_model->get_patient_tooth_ids($patient_id);
+
+		// === Check if any recommended processes exist for this patient (with NULL turn_id) ===
+		$has_recommended = false;
+		if (!empty($tooth_ids)) {
+			$this->db->where('turn_id IS NULL', null, false);
+			$this->db->where_in('tooth_id', $tooth_ids);
+			$has_recommended = $this->db->count_all_results('turn_tooth_recommended') > 0;
+		}
+
+		if (!$has_recommended) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('please insert recommended processes first'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// === Check for time conflict ===
+		$conflict = $this->Admin_model->check_turn_conflict(
+			$this->input->post('date'),
+			$this->input->post('doctor_id'),
+			$this->input->post('from_time'),
+			$this->input->post('to_time')
+		);
+
+		if ($conflict) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('turn conflict'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// === Insert turn ===
+		$datas = [
+			'patient_id' => $patient_id,
+			'date' => $this->input->post('date'),
+			'from_time' => $this->input->post('from_time'),
+			'to_time' => $this->input->post('to_time'),
+			'status' => 'p',
+			'doctor_id' => $this->input->post('doctor_id')
+		];
+
+		$insert = $this->Admin_model->insert_turn_form($datas);
+
+		if (!$insert[0]) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$turn_id = $insert[1];
+
+		// === Assign recommended processes to this turn ===
+		$this->db->where('turn_id IS NULL', null, false);
+		$this->db->where_in('tooth_id', $tooth_ids);
+		$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
+
+		$data['type'] = 'success';
+		$data['id'] = $turn_id;
+		$data['extraFunction'] = 'print';
+		$data['alert'] = [
+			'title' => $this->lang('success'),
+			'text' => $this->lang('insert turn success'),
+			'type' => 'success'
+		];
+
+		$btns = $this->mylibrary->generateBtnUpdate('edit_turn', $turn_id);
+		$btns .= $this->mylibrary->generateBtnPrint('print_turn', $turn_id);
+		$btns .= $this->mylibrary->generateBtnStatus($turn_id, 'admin/accept_turn');
+		$btns .= $this->mylibrary->generateBtnDelete($turn_id, 'admin/delete_turn', 'turnsTable', 'update_balance');
+
+		$turn = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'))[0];
+		$hour = $this->input->post('from_time') . ' - ' . $this->input->post('to_time');
+
+		$data['tr'] = [
+			$turn['doctor_name'],
+			$datas['date'],
+			$hour,
+			$turn['cr'],
+			$this->lang('not paid'),
+			$this->mylibrary->btn_group($btns)
+		];
+
+		echo json_encode($data);
+	}
+
+	public function delete_turn()
+	{
+		$data = ['type' => 'form_error', 'messages' => []];
+
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', [
+			'required' => $this->lang('problem'),
+			'is_natural_no_zero' => $this->lang('problem')
+		]);
+
+		if (!$this->form_validation->run()) {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key)) {
+					$data['messages'][] = strip_tags(form_error($key));
+				}
+			}
+			echo json_encode($data);
+			return;
+		}
+
+		$turn_id = $this->input->post('record');
+
+		// Check if there are any done processes linked to this turn
+		$hasDoneProcesses = $this->db
+			->where('turn_id', $turn_id)
+			->count_all_results('turn_tooth_done');
+
+		if ($hasDoneProcesses > 0) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('cannot delete turn with done processes'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// Reset recommended processes (set turn_id = NULL)
+		$this->db->where('turn_id', $turn_id);
+		$this->db->update('turn_tooth_recommended', ['turn_id' => null]);
+
+		// Now delete the turn
+		$deleted = $this->Admin_model->delete_turn(['id' => $turn_id]);
+
+		if ($deleted) {
+			echo json_encode([
+				'type' => 'success',
+				'alert' => [
+					'title' => $this->lang('success'),
+					'text' => $this->lang('delete turn'),
+					'type' => 'success'
+				]
+			]);
+		} else {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+		}
 	}
 
 
@@ -5885,16 +6346,8 @@ class Admin extends CI_Controller
 				'id' => $this->input->post('record')
 			);
 
-			if ($this->Admin_model->change_status_turn('a', $datas)) {
+			if ($this->Admin_model->change_payment_status_turn('a', $datas)) {
 				$data['type'] = 'success';
-
-				$btns = '';
-				$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $datas['id']);
-				$btns .= $this->mylibrary->generateBtnPrint('print_turn', $datas['id']);
-				$btns .= $this->mylibrary->generateBtnStatus($datas['id'], 'admin/pending_turn', 'a');
-				$btns .= $this->mylibrary->generateBtnDelete($datas['id'], 'admin/delete_turn', 'turnsTable', 'update_balance');
-
-				$data['content']['btn_group'] = $this->mylibrary->btn_group($btns);
 				$data['alert']['title'] = $this->lang('success');;
 				$data['alert']['text'] = $this->lang('accept turn');
 				$data['alert']['type'] = 'success';
@@ -5926,16 +6379,8 @@ class Admin extends CI_Controller
 				'id' => $this->input->post('record')
 			);
 
-			if ($this->Admin_model->change_status_turn('p', $datas)) {
+			if ($this->Admin_model->change_payment_status_turn('p', $datas)) {
 				$data['type'] = 'success';
-
-				$btns = '';
-				$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $datas['id']);
-				$btns .= $this->mylibrary->generateBtnPrint('print_turn', $datas['id']);
-				$btns .= $this->mylibrary->generateBtnStatus($datas['id'], 'admin/accept_turn');
-				$btns .= $this->mylibrary->generateBtnDelete($datas['id'], 'admin/delete_turn', 'turnsTable', 'update_balance');
-
-				$data['content']['btn_group'] = $this->mylibrary->btn_group($btns);
 				$data['alert']['title'] = $this->lang('success');;
 				$data['alert']['text'] = $this->lang('accept turn');
 				$data['alert']['type'] = 'success';

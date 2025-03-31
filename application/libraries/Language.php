@@ -735,12 +735,24 @@ class Language
 
 			// other treatment start
 			'other treatments' => self::lang_arr('other treatment', 'سایر درمان ها', '?????'),
+			'other' => self::lang_arr('other', 'متفرقه', '?????'),
+			'invalid patient' => self::lang_arr('invalid patient', 'بیمار نامعتبر است', 'Invalid patient'),
+			'recommended processes inserted' => self::lang_arr('recommended processes inserted', 'فرآیندهای پیشنهادی با موفقیت ثبت شدند', 'Recommended processes inserted'),
 			// other treatment end
+
 
 			// failed Call
 			'Failed Call Info' => self::lang_arr('Failed Call Info', 'اطلاعات تماس های ناموفق', 'ناکامه تلیفون معلومات'),
 			'Call Failure Reason' => self::lang_arr('Call Failure Reason', 'علت تماس ناموفق', 'د کال د ناکامۍ دلیل'),
 			// failed Call
+
+			'finish turn' => self::lang_arr('finish turn', 'پایان نوبت', 'پایان شفا'),
+			'done processes' => self::lang_arr('done processes', 'پروسه‌های انجام شده', 'پروسه‌های تمام شده'),
+			'done' => self::lang_arr('done', 'انجام شد', 'تمام شد'),
+			'process' => self::lang_arr('process', 'پروسه', 'پروسه'),
+			'other process' => self::lang_arr('other process', 'پروسه متفرقه', 'نور پروسه'),
+			'finish turn success' => self::lang_arr('finish turn success', 'پایان نوبت با موفقیت انجام شد', 'شفا بریالۍ پای ته ورسیده'),
+			'no recommended processes' => self::lang_arr('no recommended processes', 'پروسه‌ای پیشنهاد نشده است', 'سپارښتل شوي پروسې نشته'),
 
 			// phonebook information
 			'phonebook' => self::lang_arr('call log', 'تاریخچه تماس', 'د تلیفون کتاب'),
@@ -761,6 +773,21 @@ class Language
 			'User Management' => self::lang_arr('User Management', 'مدیریت کاربران', 'د کاروونکو مدیریت'),
 			'Patient Profile Details' => self::lang_arr('Patient Profile Details', 'جزئیات پروفایل بیمار	', 'د ناروغ د پروفایل جزئیات'),
 			//Perimissions Categories
+
+			//Turns Done Process
+			'insert turn done success' => self::lang_arr('insert turn done success', 'ثبت پروسه‌های انجام‌شده با موفقیت انجام شد', 'د اجرأ شوې پروسې بریالۍ ثبت شوې'),
+			'insert turn done error' => self::lang_arr('insert turn done error', 'خطا در ثبت پروسه‌های انجام‌شده', 'د اجرأ شوې پروسې ثبت کې تېروتنه'),
+			'insert turn done missing turn_id' => self::lang_arr('insert turn done missing turn_id', 'نوبت مشخص نیست', 'نوبت نه دی ټاکل شوی'),
+			'insert turn done no processes' => self::lang_arr('insert turn done no processes', 'هیچ پروسه‌ای برای ذخیره انتخاب نشده است', 'هیڅ پروسه د ثبت لپاره نه ده غوره شوې'),
+			'insert turn done invalid tooth' => self::lang_arr('insert turn done invalid tooth', 'دندان نامعتبر', 'ناسم غاښ'),
+			'insert turn done invalid process' => self::lang_arr('insert turn done invalid process', 'پروسه نامعتبر است', 'پروسه ناسم ده'),
+			'turn processes saved' => self::lang_arr('turn processes saved', 'پروسه‌های نوبت ذخیره شدند', 'د نوبت پروسې ثبت شوې'),
+			'please insert recommended processes first' => self::lang_arr('please insert recommended processes first', 'لطفاً ابتدا پروسه‌های پیشنهادی را وارد کنید', 'لطفاً ابتدا فرآیندهای پیشنهادی را وارد نمایید'),
+			'cannot delete turn with done processes' => self::lang_arr('cannot delete turn with done processes','نمی‌توان نوبتی را که دارای درمان انجام‌شده است حذف کرد', 'نوبت دارای پروسه‌های انجام شده را نمی‌توان حذف کرد'),
+			'view treatment' => self::lang_arr('view treatment','مشاهده درمان', 'not set'),
+			'treatment status' => self::lang_arr('treatment status','وضعیت درمان', 'not set'),
+
+			//End Turns Done Process
 
 			//List of Perimissions
 			'Create Patient' => self::lang_arr('Create Patient', 'ایجاد بیمار', 'د ناروغ جوړول'),

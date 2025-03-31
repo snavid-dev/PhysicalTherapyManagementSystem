@@ -29,6 +29,9 @@
 			$("#selectaction").val("").trigger("change");
 		}
 		if (actionValues == 6) {
+			$('#patient_id').val(<?= $profile['id'] ?>); // Dynamically set patient ID
+
+			list_teeth_recommended();
 			$(`#recommended_processes`).modal("toggle");
 			$("#selectaction").val("").trigger("change");
 		}
@@ -238,5 +241,154 @@
 		})
 
 	}
+
+</script>
+
+<script>
+	function list_teeth_recommended(selectId = '#process_teeth') {
+		let patient_id = '<?= $profile['id'] ?>';
+
+		$.ajax({
+			url: "<?= base_url('admin/list_process_teeth') ?>",
+			type: 'POST',
+			data: {
+				record: patient_id
+			},
+			success: function (response) {
+				$(selectId).html('');
+				var result = JSON.parse(response);
+				if (result['type'] == 'success') {
+					let options = ``;
+					result['content'].map((item) => {
+						options += `<option value="${item.id}">${item.location}${item.name}</option>`;
+					})
+					$(selectId).html(options);
+				}
+			}
+		})
+	}
+</script>
+
+
+<script>
+	function get_teeth_process() {
+		const selectedTeeth = $('#process_teeth').val();
+		const container = $('#teeth_processes_container');
+		container.empty();
+
+		if (!selectedTeeth || !selectedTeeth.length) return;
+
+		$.ajax({
+				url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
+			type: 'POST',
+			data: {
+				teeth_ids: selectedTeeth,
+				patient_id: '<?= $profile['id'] ?>'
+			},
+			dataType: 'json',
+			success: function (res) {
+				if (res.type !== 'success' || !Array.isArray(res.content)) return;
+				if (res.content.length === 0) return;
+
+				res.content.forEach((tooth, toothIndex) => {
+					if (!Array.isArray(tooth.departments)) return;
+
+					const toothId = tooth.tooth_id;
+					const toothName = tooth.tooth_name;
+					const recommended = tooth.recommended || {};
+					const done = tooth.done || []; // array of process_ids (numbers or strings)
+					const doneSet = new Set(done.map(p => String(p))); // for easy lookup
+
+					let html = `
+				<div class="row nthHrLine">
+					<div class="col-12 greyline">
+						<div class="customMargin">
+							<div class="processHeader">
+								<h2 style="margin-bottom: 30px">${toothName}</h2>
+								<input type="hidden" name="tooth_id[]" value="${toothId}">
+							</div>`;
+
+					tooth.departments.forEach((dept, deptIndex) => {
+						html += `<h5 class="text-primary">${dept.department}</h5><div class="row">`;
+
+						const recommendedIds = (recommended[dept.department] || []).map(p => String(p.process_id));
+						const otherText = recommended[`${dept.department}_other`] || '';
+						const otherId = `other_textarea_${toothIndex}_${deptIndex}`;
+						const otherVisible = otherText.trim() !== '';
+
+						if (Array.isArray(dept.services)) {
+							dept.services.forEach(service => {
+								if (Array.isArray(service.processes)) {
+									service.processes.forEach(process => {
+										const processId = String(process.id);
+										const isChecked = recommendedIds.includes(processId);
+										const isDone = doneSet.has(processId);
+
+										html += `
+									<div class="col-sm-12 col-md-2 customMargin_processCheckbox">
+										<label class="cl-checkbox">
+											<input type="checkbox"
+												${isDone ? 'disabled' : ''}
+												${isChecked ? 'checked' : ''}
+												${!isDone ? `name="processes[${toothId}][]"` : ''}
+												value="${isDone ? '' : processId}">
+											<span>${process.name}${isDone ? ' 🔒' : ''}</span>
+										</label>
+									</div>`;
+									});
+								}
+							});
+						}
+
+						html += `
+					<div class="col-12 col-md-12 mt-2">
+						<label class="cl-checkbox">
+							<input type="checkbox" data-target="${otherId}" onclick="otherProcess(this)" ${otherVisible ? 'checked' : ''}>
+							<span><?= $ci->lang('other') ?></span>
+						</label>
+						<div class="mt-2" id="${otherId}" style="display: ${otherVisible ? 'block' : 'none'}">
+							<label><?= $ci->lang('other process') ?></label>
+							<textarea class="form-control" name="custom_process[${toothId}][${dept.department}]">${otherText}</textarea>
+						</div>
+					</div>`;
+
+						html += '</div>'; // end dept row
+					});
+
+					html += '</div></div></div>'; // end tooth block
+					container.append(html);
+				});
+			},
+			error: function (xhr, status, error) {
+				console.error("AJAX error:", error);
+				container.empty();
+			}
+		});
+	}
+
+	function update_process_completion() {
+		let patient_id = '<?= $profile['id'] ?>';
+		$.ajax({
+			url: "<?= base_url('admin/get_patient_process_completion') ?>",
+			type: 'POST',
+			data: { patient_id },
+			dataType: 'json',
+			success: function (response) {
+				if (response.type === 'success') {
+					const percentage = response.percentage || 0;
+
+					// Update text
+					$('#process_percentage').text(response.percentage_text);
+
+					// Update progress bar
+					document.querySelector('.progress-bar.bg-secondary.ronded-1').style.width = percentage + '%';
+				}
+			},
+			error: function () {
+				console.error("Failed to update process completion.");
+			}
+		});
+	}
+
 
 </script>

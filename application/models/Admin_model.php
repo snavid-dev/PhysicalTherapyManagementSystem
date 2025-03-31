@@ -685,64 +685,76 @@ class Admin_model extends CI_Model
 
 	public function get_department_services_with_processes($tooth_id, $department)
 	{
-		// Map department to their respective table and junction table
 		$map = [
 			'endo' => ['table' => 'endo', 'junction' => 'endo_has_services'],
 			'restorative' => ['table' => 'restorative', 'junction' => 'restorative_has_services'],
 			'prosthodontics' => ['table' => 'prosthodontics', 'junction' => 'prosthodontics_has_services']
 		];
 
-		if (!isset($map[$department])) {
-			return [];
-		}
+		if (!isset($map[$department])) return [];
 
 		$dept_table = $map[$department]['table'];
 		$junction_table = $map[$department]['junction'];
 
-		// Get the department entry by tooth
+		// Get the department record for the tooth
 		$this->db->select('id');
 		$this->db->from($dept_table);
 		$this->db->where('tooth_id', $tooth_id);
 		$dept_record = $this->db->get()->row_array();
 
-		if (!$dept_record) {
-			return [];
-		}
+		if (!$dept_record) return [];
 
 		$dept_id = $dept_record['id'];
 
-		// Join junction → services → processes
-		$this->db->select('s.id as service_id, s.name as service_name, p.name as process_name, p.percentage');
-		$this->db->from($junction_table . ' j');
+
+		// Get services related to the department record
+		$this->db->select('s.id as service_id, s.name as service_name');
+		$this->db->from("$junction_table j");
 		$this->db->join('services s', 's.id = j.services_id', 'inner');
-		$this->db->join('processes p', 'p.services_id = s.id', 'left');
 		$this->db->where("j.{$dept_table}_id", $dept_id);
-		$this->db->order_by('s.id, p.number');
+		$services = $this->db->get()->result_array();
 
-		$results = $this->db->get()->result_array();
+		// For each service, fetch its processes
+		$final = [];
 
-		if (empty($results)) return [];
+		foreach ($services as $service) {
+			$this->db->select('id, name, percentage');
+			$this->db->from('processes');
+			$this->db->where('services_id', $service['service_id']);
+			$this->db->order_by('number', 'ASC');
+			$processes = $this->db->get()->result_array();
 
-		// Group by service
-		$grouped = [];
-		foreach ($results as $row) {
-			$service_id = $row['service_id'];
-			if (!isset($grouped[$service_id])) {
-				$grouped[$service_id] = [
-					'service_name' => $row['service_name'],
-					'processes' => []
-				];
-			}
-
-			if (!empty($row['process_name'])) {
-				$grouped[$service_id]['processes'][] = [
-					'name' => $row['process_name'],
-					'percentage' => $row['percentage']
-				];
-			}
+			$final[] = [
+				'service_name' => $service['service_name'],
+				'processes' => $processes
+			];
 		}
 
-		return array_values($grouped);
+		return $final;
+	}
+
+	public function get_teeth_ids_by_patient($patient_id)
+	{
+		$this->db->select('id');
+		$this->db->from('tooth');
+		$this->db->where('patient_id', $patient_id);
+		$query = $this->db->get();
+		return array_column($query->result_array(), 'id');
+	}
+
+	public function assign_turn_to_recommended_processes($turn_id, $patient_id)
+	{
+		$this->db->select('id');
+		$this->db->from('tooth');
+		$this->db->where('patient_id', $patient_id);
+		$tooth_ids = array_column($this->db->get()->result_array(), 'id');
+
+		if (!empty($tooth_ids)) {
+			$this->db->where('turn_id', 0);
+			$this->db->where_in('tooth_id', $tooth_ids);
+			$this->db->where('process_id IS NOT NULL', null, false); // Only update those with process_id
+			$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
+		}
 	}
 
 
@@ -755,6 +767,16 @@ class Admin_model extends CI_Model
 		return $this->db->get()->result_array();
 	}
 
+	public function get_patient_tooth_ids($patient_id)
+	{
+		$this->db->select('id');
+		$this->db->from('tooth');
+		$this->db->where('patient_id', $patient_id);
+
+		$result = $this->db->get()->result_array();
+
+		return array_column($result, 'id');
+	}
 
 
 	public function get_processes_by_service_id($service_id)
@@ -764,7 +786,6 @@ class Admin_model extends CI_Model
 		return $this->db->get('processes')->result_array();
 
 	}
-
 
 
 	public function get_lab_by_id($lab_id)
@@ -782,6 +803,208 @@ class Admin_model extends CI_Model
 		$this->db->insert('balance_sheet', $data);
 		return $this->db->insert_id();
 	}
+
+	public function insert_recommended_process($data)
+	{
+		return $this->db->insert('turn_tooth_recommended', $data);
+	}
+
+
+	public function get_unassigned_recommended_processes($patient_id)
+	{
+		$this->db->select('turn_tooth_recommended.tooth_id, turn_tooth_recommended.process_id, turn_tooth_recommended.custom_label, turn_tooth_recommended.remarks');
+		$this->db->from('turn_tooth_recommended');
+		$this->db->join('tooth', 'tooth.id = turn_tooth_recommended.tooth_id', 'inner');
+		$this->db->where('tooth.patient_id', $patient_id);
+		$this->db->where('turn_tooth_recommended.turn_id IS NULL', null, false);
+		$query = $this->db->get();
+
+		$grouped = [];
+
+		foreach ($query->result_array() as $row) {
+			$tooth_id = $row['tooth_id'];
+			$dept = $row['remarks'] ?? null;
+			$label = $row['custom_label'];
+			$pid = $row['process_id'];
+
+			if (!isset($grouped[$tooth_id])) {
+				$grouped[$tooth_id] = [];
+			}
+
+			// For "Other" custom label per department
+			if ($dept && $label && is_null($pid)) {
+				$grouped[$tooth_id][$dept . '_other'] = $label;
+			}
+
+			// For recommended process by process_id
+			if ($dept && $pid) {
+				if (!isset($grouped[$tooth_id][$dept])) {
+					$grouped[$tooth_id][$dept] = [];
+				}
+				$grouped[$tooth_id][$dept][] = [
+					'process_id' => $pid,
+				];
+			}
+		}
+
+		return $grouped;
+	}
+
+	public function complete_turn($turn_id)
+	{
+		$ci = get_instance();
+		$this->db->where('id', $turn_id);
+		return $this->db->update('turn', [
+			'status' => 'a',
+			'treatment_date' => $ci->mylibrary->getCurrentShamsiDate()['date'] . date(' H:i:s')
+		]);
+	}
+
+
+	public function delete_turn_done_processes($turn_id)
+	{
+		$this->db->where('turn_id', $turn_id);
+		$this->db->delete('turn_tooth_done');
+	}
+
+	public function insert_done_process($data)
+	{
+		return $this->db->insert('turn_tooth_done', $data);
+	}
+
+	public function get_recommended_by_turn($turn_id)
+	{
+		$this->db->select('r.tooth_id, r.process_id, r.custom_label, r.remarks, t.name, t.location, p.name as process_name, s.department');
+		$this->db->from('turn_tooth_recommended r');
+		$this->db->join('tooth t', 't.id = r.tooth_id');
+		$this->db->join('processes p', 'p.id = r.process_id', 'left');
+		$this->db->join('services s', 's.id = p.services_id', 'left');
+		$this->db->where('r.turn_id', $turn_id);
+		$query = $this->db->get()->result_array();
+
+		$grouped = [];
+
+		foreach ($query as $row) {
+			$tid = $row['tooth_id'];
+			$department = $row['remarks'] ?: ($row['department'] ?? 'unknown');
+
+			$grouped[$tid]['tooth_name'] = $row['location'] . ' ' . $row['name'];
+			if (!isset($grouped[$tid]['departments'][$department])) {
+				$grouped[$tid]['departments'][$department] = [
+					'name' => $department,
+					'processes' => [],
+					'custom' => ''
+				];
+			}
+
+			if ($row['process_id'] !== null) {
+				$grouped[$tid]['departments'][$department]['processes'][] = [
+					'process_id' => $row['process_id'],
+					'label' => $row['custom_label'] ?? $row['process_name']
+				];
+			} elseif ($row['custom_label']) {
+				$grouped[$tid]['departments'][$department]['custom'] = $row['custom_label'];
+			}
+		}
+
+		// Convert to final array format
+		$final = [];
+		foreach ($grouped as $tooth_id => $data) {
+			$final[] = [
+				'tooth_id' => $tooth_id,
+				'tooth_name' => $data['tooth_name'],
+				'departments' => array_values($data['departments'])
+			];
+		}
+
+		return $final;
+	}
+
+
+	public function get_done_processes_by_turn($turn_id)
+	{
+		$this->db->select('tooth_id, process_id, custom_label, remarks');
+		$this->db->from('turn_tooth_done');
+		$this->db->where('turn_id', $turn_id);
+		return $this->db->get()->result_array();
+	}
+
+	public function get_process_name($process_id)
+	{
+		$this->db->select('name');
+		$this->db->from('processes');
+		$this->db->where('id', $process_id);
+		$result = $this->db->get()->row_array();
+
+		return $result ? $result['name'] : null;
+	}
+
+
+	public function calculate_patient_process_completion($patient_id)
+	{
+		$teeth = $this->db->get_where('tooth', ['patient_id' => $patient_id])->result_array();
+		if (empty($teeth)) return 0;
+
+		$tooth_ids = array_column($teeth, 'id');
+		$total_percentage = 0;
+
+		$departments = [
+			'endo' => ['junction' => 'endo_has_services', 'foreign' => 'endo_id'],
+			'restorative' => ['junction' => 'restorative_has_services', 'foreign' => 'restorative_id'],
+			'prosthodontics' => ['junction' => 'prosthodontics_has_services', 'foreign' => 'prosthodontics_id']
+		];
+
+		$unique_processes = [];
+
+		foreach ($departments as $dept_table => $map) {
+			// Step 1: Get department IDs by tooth_id
+			$dept_ids = $this->db
+				->select('id')
+				->from($dept_table)
+				->where_in('tooth_id', $tooth_ids)
+				->get()
+				->result_array();
+
+			$dept_ids = array_column($dept_ids, 'id');
+			if (empty($dept_ids)) continue;
+
+			// Step 2: Get all processes for the department services
+			$processes = $this->db
+				->select('p.id, p.percentage')
+				->from($map['junction'] . ' j')
+				->join('processes p', 'p.services_id = j.services_id')
+				->where_in("j.{$map['foreign']}", $dept_ids)
+				->get()
+				->result_array();
+
+			// Avoid duplicates
+			foreach ($processes as $p) {
+				$total_percentage += (int)$p['percentage'];
+			}
+		}
+
+
+		if ($total_percentage === 0) return 0;
+
+		// Step 3: Get completed process percentages
+		$done = $this->db
+			->select('p.percentage')
+			->from('turn_tooth_done d')
+			->join('processes p', 'p.id = d.process_id')
+			->join('tooth t', 't.id = d.tooth_id')
+			->where_in('d.tooth_id', $tooth_ids)
+			->where('t.patient_id', $patient_id)
+			->where('d.process_id IS NOT NULL', null, false)
+			->get()
+			->result_array();
+
+		$done_total = array_sum(array_column($done, 'percentage'));
+
+
+		return round(($done_total / $total_percentage) * 100, 2);
+	}
+
+
 	public function get_account_with_no_user()
 	{
 		return $this->db->get('customers')->result_array();
@@ -978,6 +1201,25 @@ class Admin_model extends CI_Model
 		$this->db->join('prosthodontics', 'tooth.id = prosthodontics.tooth_id', 'inner');
 		$this->db->where('tooth.patient_id', $patient_id);
 		return $this->db->get()->result_array();
+	}
+
+	public function get_teeth_for_process($patient_id)
+	{
+		$this->db->select('tooth.*');
+		$this->db->from('tooth');
+		$this->db->where('tooth.patient_id', $patient_id);
+		return $this->db->get()->result_array();
+	}
+
+	public function get_done_process_ids_by_tooth($tooth_id)
+	{
+		$this->db->select('DISTINCT process_id', false); // disable escaping here
+		$this->db->from('turn_tooth_done');
+		$this->db->where('tooth_id', $tooth_id);
+		$this->db->where('process_id IS NOT NULL', null, false); // raw SQL for IS NOT NULL
+
+		$query = $this->db->get();
+		return array_column($query->result_array(), 'process_id');
 	}
 
 
@@ -1195,6 +1437,11 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 	function change_status_turn($status, $data = array())
 	{
 		return $this->db->update('turn', array('status' => $status), $data);
+	}
+
+	function change_payment_status_turn($status, $data = array())
+	{
+		return $this->db->update('turn', array('payment_status' => $status), $data);
 	}
 
 

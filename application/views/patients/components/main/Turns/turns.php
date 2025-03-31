@@ -34,16 +34,27 @@
 						<a href="javascript:print_turn('<?= $turn['id'] ?>')"
 						   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
 								class="fa-solid fa-print fs-14"></span></a>
+
 						<?php if ($turn['status'] == 'p') : ?>
-							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/accept_turn')"
+							<a href="javascript:finishTurn('<?= $turn['id'] ?>')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-stethoscope"></span></a>
+						<?php else : ?>
+							<a href="javascript:viewTreatment('<?= $turn['id'] ?>')"
+							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
+									class="fa fa-eye fs-14"></span></a>
+						<?php endif; ?>
+
+						<?php if ($turn['payment_status'] == 'p') : ?>
+							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/accept_turn');setTimeout(reloadTurnsTable(), 2000)"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
 									class="fa-regular fa-circle-check fs-14"></span></a>
 						<?php else : ?>
-							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/pending_turn')"
+							<a href="javascript:changeStatus('<?= $turn['id'] ?>', '<?= base_url() ?>admin/pending_turn');setTimeout(reloadTurnsTable(), 2000)"
 							   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span
 									class="fa fa-times-circle fs-14"></span></a>
 						<?php endif; ?>
-						<a href="javascript:delete_via_alert('<?= $turn['id'] ?>', '<?= base_url() ?>admin/delete_turn', 'turnsTable', update_balance)"
+						<a href="javascript:delete_via_alert('<?= $turn['id'] ?>', '<?= base_url() ?>admin/delete_turn', 'turnsTable', update_balance);setTimeout(reloadTurnsTable(), 2000)"
 						   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span
 								class="fa-regular fa-trash-can fs-14"></span></a>
 					</div>
@@ -54,3 +65,6 @@
 		</tbody>
 	</table>
 </div>
+
+<?php $ci->render('patients/components/main/Turns/finish_turn_modal.php') ?>
+<?php $ci->render('patients/components/main/Turns/view_treatment.php') ?>
