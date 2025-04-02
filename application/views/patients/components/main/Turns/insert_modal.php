@@ -101,10 +101,10 @@
 					<button class="btn btn-secondary" data-bs-dismiss="modal"><?= $ci->lang('cancel') ?> <i
 							class="fa fa-close"></i></button>
 					<button class="btn btn-warning"
-							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable','extralargemodal', print_turn, 'print'); setTimeout(reloadTurnsTable(), 500)"><?= $ci->lang('save and print') ?>
+							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable','extralargemodal', print_turn, 'print'); reloadTurnsTable();"><?= $ci->lang('save and print') ?>
 						<i class="fa fa-print"></i></button>
 					<button class="btn btn-primary"
-							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable', 'extralargemodal', false); setTimeout(reloadTurnsTable(), 500)"><?= $ci->lang('save') ?>
+							onclick="submitWithoutDatatable('insertTurn', '<?= base_url() ?>admin/insert_turn', 'turnsTable', 'extralargemodal', false); reloadTurnsTable();"><?= $ci->lang('save') ?>
 						<i class="fa fa-plus"></i></button>
 				</div>
 			</div>
