@@ -4,31 +4,38 @@
 		$.ajax({
 			url: "<?= base_url('admin/single_turn') ?>",
 			type: 'POST',
-			data: {
-				slug: id
-			},
+			data: {slug: id},
 			success: function (response) {
-				var result = JSON.parse(response);
-				if (result['type'] == 'success') {
-					$('#slug_turn').val(result['content']['slug']);
-					$('#date_turn').val(result['content']['date']);
-					$('#dateTurnOld').val(result['content']['date']);
-					$('#hourTurnOld').val(result['content']['hour']);
-					$('#doctorTurnOld').val(result['content']['doctor_id']);
-					let doctor = $('#doctor_id_turn').html();
-					replacer(doctor, result['content']['doctor_id'], 'doctor_id_turn');
+				const result = JSON.parse(response);
+				if (result.type === 'success') {
+					$('#slug_turn').val(result.content.slug);
+					$('#date_turn').val(result.content.date);
+					$('#dateTurnOld').val(result.content.date);
+					$('#doctorTurnOld').val(result.content.doctor_id);
+					$('#from_time_turn').val(result.content.from_time);
+					$('#fromTimeTurnOld').val(result.content.from_time);
+					$('#to_time_turn').val(result.content.to_time);
+					$('#toTimeTurnOld').val(result.content.to_time);
 
-					let hour = $('#hour_turn').html();
-					replacer(hour, result['content']['hour'], 'hour_turn');
-					$('#update_turn').modal('toggle');
-				} else if (result['type'] == 'error') {
+					let doctor = $('#doctor_id_turn').html();
+					replacer(doctor, result.content.doctor_id, 'doctor_id_turn');
+
+					check_turns(
+						document.getElementById('doctor_id_turn'),
+						$('#date_turn').val(),
+						$('#doctor_id_turn').val(),
+						'#turnsTableModalupdate'
+					);
+
+					$('#update_turn').modal('show');
+				} else if (result.type === 'error') {
 					$.growl.error1({
-						title: result['alert']['title'],
-						message: result['alert']['text']
+						title: result.alert.title,
+						message: result.alert.text
 					});
 				}
 			}
-		})
+		});
 	}
 
 	function print_turn(turnId) {

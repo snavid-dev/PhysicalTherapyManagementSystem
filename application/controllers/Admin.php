@@ -5834,7 +5834,8 @@ class Admin extends CI_Controller
 					'slug' => $turn[0]['id'],
 					'date' => $turn[0]['date'],
 					'doctor_id' => $turn[0]['doctor_id'],
-					'hour' => $turn[0]['hour'],
+					'from_time' => $turn[0]['from_time'],
+					'to_time' => $turn[0]['to_time'],
 				);
 			} else {
 				$data['type'] = 'error';
@@ -5917,85 +5918,124 @@ class Admin extends CI_Controller
 
 	public function update_turn()
 	{
-		$data = array('type' => 'form_error', 'messages' => array());
-		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required', array('required' => $this->lang('insert turn patient_id error')));
-		$this->form_validation->set_rules('date', 'date', 'trim|required', array('required' => $this->lang('insert turn date error')));
-		$this->form_validation->set_rules('dateOld', 'date', 'trim|required', array('required' => $this->lang('insert turn date error')));
-		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', array('required' => $this->lang('insert turn doctor_id error')));
-		$this->form_validation->set_rules('doctorOld', 'doctor_id', 'trim|required', array('required' => $this->lang('insert turn doctor_id error')));
-		$this->form_validation->set_rules('hour', 'hour', 'trim|required', array('required' => $this->lang('insert turn hour error')));
-		$this->form_validation->set_rules('hourOld', 'hour', 'trim|required', array('required' => $this->lang('insert turn hour error')));
+//		print_r($_POST);
+//		exit();
+		$data = ['type' => 'form_error', 'messages' => []];
 
-		if ($this->form_validation->run()) {
-			$turns = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $this->input->post('hour'));
+		// === Validation Rules ===
+		$this->form_validation->set_rules('patient_id', 'patient_id', 'trim|required', [
+			'required' => $this->lang('insert turn patient_id error')
+		]);
+		$this->form_validation->set_rules('date', 'date', 'trim|required', [
+			'required' => $this->lang('insert turn date error')
+		]);
+		$this->form_validation->set_rules('dateOld', 'date', 'trim|required', [
+			'required' => $this->lang('insert turn date error')
+		]);
+		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', [
+			'required' => $this->lang('insert turn doctor_id error')
+		]);
+		$this->form_validation->set_rules('doctorOld', 'doctor_id', 'trim|required', [
+			'required' => $this->lang('insert turn doctor_id error')
+		]);
+		$this->form_validation->set_rules('from_time', 'from_time', 'trim|required', [
+			'required' => $this->lang('insert turn hour error')
+		]);
+		$this->form_validation->set_rules('to_time', 'to_time', 'trim|required', [
+			'required' => $this->lang('insert turn hour error')
+		]);
+		$this->form_validation->set_rules('fromTimeOld', 'from_time', 'trim|required');
+		$this->form_validation->set_rules('toTimeOld', 'to_time', 'trim|required');
 
-			$dateOld = $this->input->post('dateOld');
-			$date = $this->input->post('date');
-			$doctorOld = $this->input->post('doctorOld');
-			$doctor_id = $this->input->post('doctor_id');
-			$hourOld = $this->input->post('hourOld');
-			$hour = $this->input->post('hour');
-
-			if ((count($turns) == 0) || (($date == $dateOld) && ($doctor_id == $doctorOld) && ($hour == $hourOld))) {
-				$datas = array(
-					'date' => $this->input->post('date'),
-					'hour' => $this->input->post('hour'),
-					'doctor_id' => $this->input->post('doctor_id'),
-				);
-				$id = $this->input->post('slug');
-				$update = $this->Admin_model->update_turn($datas, $id);
-				if ($update) {
-					$data['type'] = 'success';
-					$data['alert']['title'] = $this->lang('success');;
-					$data['alert']['text'] = $this->lang('update service success');
-					$data['alert']['type'] = 'success';
-
-					$data['id'] = $id;
-
-					$btns = '';
-
-
-					$turn = $this->Admin_model->check_turns($this->input->post('date'), $this->input->post('doctor_id'), $hour)[0];
-
-					$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $data['id']);
-					$btns .= $this->mylibrary->generateBtnPrint('print_turn', $data['id']);
-					if ($turn['status'] == 'p') {
-						$btns .= $this->mylibrary->generateBtnStatus($data['id'], 'admin/accept_turn');
-					} else {
-						$btns .= $this->mylibrary->generateBtnStatus($data['id'], 'admin/pending_turn', 'a');
-					}
-
-					$btns .= $this->mylibrary->generateBtnDelete($data['id'], 'admin/delete_turn', 'turnsTable', 'update_balance');
-					$data['tr'] = array(
-						$turn['doctor_name'],
-						$datas['date'],
-						$this->dentist->find_time($datas['hour']),
-						$turn['cr'],
-						$this->mylibrary->btn_group($btns)
-					);
-				} else {
-					$data['type'] = 'error';
-					$data['alert']['title'] = $this->lang('error');
-					$data['alert']['text'] = $this->lang('problem');
-					$data['alert']['type'] = 'error';
-				}
-			} else {
-				$data['type'] = 'error';
-				$data['alert']['title'] = $this->lang('error');
-				$data['alert']['text'] = $this->lang('turn already taken');
-				$data['alert']['type'] = 'error';
-			}
-		} else {
+		if (!$this->form_validation->run()) {
 			foreach ($_POST as $key => $value) {
-				if (form_error($key) !== '') {
-					$error = form_error($key);
-					$data['messages'][] = substr($error, 3, -4);
+				if (form_error($key)) {
+					$data['messages'][] = strip_tags(form_error($key));
 				}
 			}
+			$data['title'] = $this->lang('error');
+			echo json_encode($data);
+			return;
 		}
 
-		print_r(json_encode($data));
+		// === Extract and Compare Times ===
+		$dateOld = $this->input->post('dateOld');
+		$date = $this->input->post('date');
+		$fromOld = $this->input->post('fromTimeOld');
+		$fromNew = $this->input->post('from_time');
+		$toOld = $this->input->post('toTimeOld');
+		$toNew = $this->input->post('to_time');
+		$doctorOld = $this->input->post('doctorOld');
+		$doctor_id = $this->input->post('doctor_id');
+		$id = $this->input->post('slug');
+
+		$isSameTime = ($date === $dateOld) && ($fromOld === $fromNew) && ($toOld === $toNew);
+
+		$hasConflict = $this->Admin_model->check_turn_conflict($date, $doctor_id, $fromNew, $toNew);
+
+		if (!$isSameTime && $hasConflict) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('turn conflict'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// === Update Turn ===
+		$datas = [
+			'date' => $date,
+			'from_time' => $fromNew,
+			'to_time' => $toNew,
+			'doctor_id' => $doctor_id,
+		];
+
+		$update = $this->Admin_model->update_turn($datas, $id);
+
+		if (!$update) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// === Success Response ===
+		$data['type'] = 'success';
+		$data['id'] = $id;
+		$data['alert'] = [
+			'title' => $this->lang('success'),
+			'text' => $this->lang('update service success'),
+			'type' => 'success'
+		];
+
+		$btns = '';
+		$turns = $this->Admin_model->check_turns($date, $doctor_id, $fromNew);
+		$turn = !empty($turns) ? $turns[0] : null;
+
+
+		$btns .= $this->mylibrary->generateBtnUpdate('edit_turn', $id);
+		$btns .= $this->mylibrary->generateBtnPrint('print_turn', $id);
+		$btns .= $this->mylibrary->generateBtnDelete($id, 'admin/delete_turn', 'turnsTable', 'update_balance');
+
+		$data['tr'] = [
+			$turn ? $turn['doctor_name'] : '',
+			$date,
+			"<bdo dir='ltr'>{$fromNew} - {$toNew}</bdo>",
+			$turn ? $turn['cr'] : '',
+			$this->mylibrary->btn_group($btns)
+		];
+
+		echo json_encode($data);
 	}
+
 
 	public function pay_turn()
 	{
