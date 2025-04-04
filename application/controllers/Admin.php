@@ -2858,21 +2858,22 @@ class Admin extends CI_Controller
 
 	public function patients()
 	{
-		{
-			$data['title'] = $this->lang('patients');
-			$data['page'] = "patients";
-			$data['patients'] = $this->Admin_model->get_patients();
-			$data['doctors'] = $this->Admin_model->get_doctors();
-			$data['script'] = $this->mylibrary->generateSelect2();
-			$data['script_single_patient_assets'] = ['assets/js/home.js'];
+		$this->check_permission_page('Read Patients');
 
-			//$data['script_date'] = $this->mylibrary->script_datepicker();
+		$data['title'] = $this->lang('patients');
+		$data['page'] = "patients";
+		$data['patients'] = $this->Admin_model->get_patients();
+		$data['doctors'] = $this->Admin_model->get_doctors();
+		$data['script'] = $this->mylibrary->generateSelect2();
+		$data['script_single_patient_assets'] = ['assets/js/home.js'];
+
+		//$data['script_date'] = $this->mylibrary->script_datepicker();
 
 
-			$this->load->view('header', $data);
-			$this->load->view('patients/index', $data);
-			$this->load->view('footer');
-		}
+		$this->load->view('header', $data);
+		$this->load->view('patients/index', $data);
+		$this->load->view('footer');
+
 	}
 
 	function list_patient_json()
@@ -5798,8 +5799,10 @@ class Admin extends CI_Controller
 		echo json_encode($response);
 	}
 
+
 	public function list_patients()
 	{
+
 		$this->form_validation->set_rules('serial_id', 'serial_id', 'trim');
 		$this->form_validation->set_rules('fullname', 'fullname', 'trim');
 		if ($this->form_validation->run()) {
@@ -7913,6 +7916,14 @@ class Admin extends CI_Controller
 			return $this->load->view($file_path, $data);
 		} else {
 			return $this->load->view($file_path);
+		}
+	}
+
+	function check_permission_page($permission_name)
+	{
+		if (!$this->auth->has_permission($permission_name)) {
+			show_404();
+			exit();
 		}
 	}
 
