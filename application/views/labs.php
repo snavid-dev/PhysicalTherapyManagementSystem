@@ -252,11 +252,13 @@
 								<td><?= $lab['remarks'] ?></td>
 								<td>
 									<div class="g-2">
-										<a href="<?= base_url('admin/single_patient/') . $lab['patient_id'] ?>"
-										   class="btn btn-icon btn-outline-info rounded-pill btn-wave waves-effect waves-light">
+										<?php if ($ci->auth->has_permission('Read Patient Profile')): ?>
+											<a href="<?= base_url('admin/single_patient/') . $lab['patient_id'] ?>"
+											   class="btn btn-icon btn-outline-info rounded-pill btn-wave waves-effect waves-light">
 											<span
 												class="fa fa-user-circle-o"></span>
-										</a>
+											</a>
+										<?php endif; ?>
 										<?php if ($lab['init_date'] != ''): ?>
 											<?php if ($lab['first_try_status'] == 'p'): ?>
 												<a href="javascript:firstTry('<?= $lab['id'] ?>')"
@@ -791,7 +793,7 @@
 		};
 
 		$.ajax({
-			url: "<?= base_url('admin/list_labs') ?>",
+				url: "<?= base_url('admin/list_labs') ?>",
 			type: 'POST',
 			data: filters,
 			success: function (response) {
@@ -851,11 +853,17 @@
 			buttons += createButton('init_lab', lab.id, 'fa-check-circle', 'success');
 		}
 
+		let profile = '';
+
+		if (lab.profile_access){
+			profile = `<a href="<?= base_url('admin/single_patient/') ?>${lab.patient_id}" class="btn btn-icon btn-outline-info rounded-pill btn-wave waves-effect waves-light">
+				<span class="fa fa-user-circle-o"></span>
+			</a> `;
+		}
+
 		return `
 		<div class="g-2">
-			<a href="<?= base_url('admin/single_patient/') ?>${lab.patient_id}" class="btn btn-icon btn-outline-info rounded-pill btn-wave waves-effect waves-light">
-				<span class="fa fa-user-circle-o"></span>
-			</a>
+			${profile}
 			${buttons}
 			${createButton('print_lab', lab.id, 'fa-print', 'warning')}
 		</div>`;

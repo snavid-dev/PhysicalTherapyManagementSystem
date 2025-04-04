@@ -2907,6 +2907,7 @@ class Admin extends CI_Controller
 						'history' => $patient['pains'],
 						'other_pains' => $patient['other_pains'],
 						'remarks' => $patient['remarks'],
+						'has_access' => $this->auth->has_permission('Read Patient Profile'),
 					);
 
 					$i++;
@@ -4460,6 +4461,7 @@ class Admin extends CI_Controller
 					'second_try_status' => $lab['second_try_status'],
 					'install_time' => $lab['install_time'],
 					'status' => $lab['status'],
+					'profile_access' => $this->auth->has_permission('Read Patient Profile'),
 				];
 			}
 
@@ -5587,6 +5589,7 @@ class Admin extends CI_Controller
 						'doctor_name' => $turn['doctor_name'],
 						'date' => $turn['date'],
 						'time' => $turn['from_time'] . ' - ' . $turn['to_time'],
+						'profile_access' => $this->auth->has_permission('Read Patient Profile'),
 					);
 					$i++;
 				}
@@ -5639,7 +5642,8 @@ class Admin extends CI_Controller
 						'patient_id' => $turn['patient_id'],
 						'doctor_name' => $turn['doctor_name'],
 						'date' => $turn['date'],
-						'hour' => $turn['from_time'] . ' - ' . $turn['to_time'] // Combine time range
+						'hour' => $turn['from_time'] . ' - ' . $turn['to_time'], // Combine time range
+						'profile_access' => $this->auth->has_permission('Read Patient Profile'),
 					);
 					$i++;
 				}
@@ -5834,6 +5838,7 @@ class Admin extends CI_Controller
 					'id' => $patient['id'],
 					'doctor_name' => $patient['doctor_name'],
 					'pains' => $patient['pains'],
+					'profile_access' => $this->auth->has_permission('Read Patient Profile'),
 				);
 			}
 
@@ -7799,7 +7804,9 @@ class Admin extends CI_Controller
 				foreach ($turns as $turn) {
 					$btns = '';
 
-					$btns .= $this->mylibrary->generateBtnProfilePatient($turn['patient_id']);
+					if ($this->auth->has_permission('Read Patient Profile')) {
+						$btns .= $this->mylibrary->generateBtnProfilePatient($turn['patient_id']);
+					}
 
 					// $btns .= $this->mylibrary->generateBtnAccept($turn['id'], 'admin/accept_turn');
 					// $btns .= $this->mylibrary->generateBtnPayment($turn['id'], 'admin/accept_turn');
@@ -7828,7 +7835,7 @@ class Admin extends CI_Controller
 						'patient_id' => $turn['patient_id'],
 						'doctor_name' => $turn['doctor_name'],
 						'date' => $turn['date'],
-						'time' => $this->dentist->find_time($turn['hour']),
+						'time' => $turn['from_time'] . ' - ' . $turn['to_time'],
 						'btns' => $btns
 					);
 					$i++;

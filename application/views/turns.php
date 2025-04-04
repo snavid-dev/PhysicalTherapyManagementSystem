@@ -255,9 +255,11 @@
 								</td>
 								<td>
 									<div class="g-2">
-										<a href="<?= base_url() ?>admin/single_patient/<?= $receipt['patient_id'] ?>"
-										   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
-												class="fa fa-user-circle-o fs-14"></span></a>
+										<?php if ($ci->auth->has_permission('Read Patient Profile')): ?>
+											<a href="<?= base_url() ?>admin/single_patient/<?= $receipt['patient_id'] ?>"
+											   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
+													class="fa fa-user-circle-o fs-14"></span></a>
+										<?php endif; ?>
 										<a href="javascript:print_turn('<?= $receipt['id'] ?>', '<?= base_url() ?>admin/delete_turn')"
 										   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
 												class="fa fa-print"></span></a>
@@ -470,6 +472,12 @@
 				table.rows().remove();
 				if (result.content.length > 0) {
 					result.content.map((item) => {
+						let profile = '';
+						if (item.profile_access) {
+							profile = ` <a href="<?= base_url() ?>admin/single_patient/${item.patient_id}"
+                        class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
+                          class="fa fa-user-circle-o fs-14"></span></a>`;
+						}
 						item.time = `<bdo dir="ltr">${item.time}</bdo>`;
 						let row = table.row.add([
 							item.number,
@@ -478,9 +486,7 @@
 							item.date,
 							item.time,
 							` <div class="g-2">
-              <a href="<?= base_url() ?>admin/single_patient/${item.patient_id}"
-                        class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
-                          class="fa fa-user-circle-o fs-14"></span></a>
+             ${profile}
                       <a href="javascript:print_turn('${item.id}', '<?= base_url() ?>admin/delete_turn')"
                         class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
                           class="fa fa-print"></span></a>

@@ -294,11 +294,15 @@
 								</td>
 								<td>
 									<div class="g-2">
-										<a href="<?= base_url("admin/single_patient/" . $patient['id'] . "") ?>"
-										   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"
-										   data-bs-toggle="tooltip"
-										   data-bs-original-title="<?= $ci->lang('edit') ?>"><span
-												class="fa fa-user-circle-o fs-14"></span></a>
+
+										<?php if ($ci->auth->has_permission('Read Patient Profile')): ?>
+											<a href="<?= base_url("admin/single_patient/" . $patient['id'] . "") ?>"
+											   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"
+											   data-bs-toggle="tooltip"
+											   data-bs-original-title="<?= $ci->lang('edit') ?>"><span
+													class="fa fa-user-circle-o fs-14"></span></a>
+										<?php endif; ?>
+
 										<a href="javascript:print_patient('<?= $patient['id'] ?>')"
 										   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"
 										   data-bs-toggle="tooltip"
@@ -452,10 +456,15 @@
 						}
 
 						let buttons = '';
+
 						if (selectIdValue !== 't') {
+							let profile = '';
+							if (item.has_access){
+								profile = `<a href="<?= base_url("admin/single_patient/") ?>${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span class="fa fa-user-circle-o fs-14"></span></a> `;
+							}
 							buttons = `
 								<div class="g-2">
-									<a href="<?= base_url("admin/single_patient/") ?>${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span class="fa fa-user-circle-o fs-14"></span></a>
+								${profile}
 									<a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('print') ?>"><span class="fa fa-print fs-14"></span></a>
 									${changeBtnsStatus}
 									<a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fa fa-trash"></span></a>
