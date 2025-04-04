@@ -3087,6 +3087,7 @@ class Admin extends CI_Controller
 
 	public function single_patient($id = null)
 	{
+		$this->check_permission_page('Read Patient Profile');
 		if (!is_null($id)) {
 			$profile = $this->Admin_model->profile_patient($id);
 
