@@ -1282,6 +1282,24 @@ class Admin_model extends CI_Model
 		// Execute query with parameters
 		return $this->db->query($sql, $params)->result_array();
 	}
+
+	public function get_patient_teeth($patient_id)
+	{
+		// Ensure the patient ID is a valid number
+		if (!is_numeric($patient_id)) {
+			return [];
+		}
+
+		// Query to retrieve teeth associated with the patient
+		$this->db->select('id, name, location');
+		$this->db->from('tooth');
+		$this->db->where('patient_id', $patient_id);
+		$query = $this->db->get();
+
+		// Return the result as an array
+		return $query->result_array();
+	}
+
 	// Fetch doctor working hours
 // Fetch doctor's working hours
 	public function get_doctor_working_hours($doctor_id)

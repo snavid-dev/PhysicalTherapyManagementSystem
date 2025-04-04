@@ -125,9 +125,6 @@
 
 
 <script>
-	// function finishTurn(id){
-	// 	console.log('id ', id);
-	// }
 	function finishTurn(turn_id) {
 		const container = $('#finish_turn_processes_container');
 		container.empty();
@@ -243,7 +240,7 @@
 
 							const statusButton = turn.status === 'p'
 								? `<a href="javascript:finishTurn('${turn.id}')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-stethoscope"></span></a>`
-								: `<a href="javascript:changeStatus('${turn.id}', '<?= base_url() ?>admin/pending_turn')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-eye fs-14"></span></a>`;
+								: `<a href="javascript:viewTreatment('${turn.id}')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-eye fs-14"></span></a>`;
 
 							const paymentButton = turn.payment_status === 'p'
 								? `<a href="javascript:changeStatus('${turn.id}', '<?= base_url() ?>admin/accept_turn'); setTimeout(() => reloadTurnsTable(), 2000);" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa-regular fa-circle-check fs-14"></span></a>`

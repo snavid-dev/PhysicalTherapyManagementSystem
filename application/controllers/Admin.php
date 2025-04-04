@@ -5182,6 +5182,7 @@ class Admin extends CI_Controller
 
 	public function get_tooth_processes_by_teeth()
 	{
+
 		$this->form_validation->set_rules('teeth_ids[]', 'Teeth IDs', 'required');
 		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required');
 
@@ -5265,6 +5266,7 @@ class Admin extends CI_Controller
 
 		$turn_id = $this->input->post('turn_id');
 
+		// Get teeth related to this turn (whether recommended or done processes)
 		$this->db->select('ttr.tooth_id, t.name, t.location');
 		$this->db->from('turn_tooth_recommended ttr');
 		$this->db->join('tooth t', 't.id = ttr.tooth_id');
@@ -5274,6 +5276,18 @@ class Admin extends CI_Controller
 
 		$result = [];
 
+		// Check if no recommended processes were found, in that case fetch done processes directly
+		if (empty($teeth)) {
+			// No recommended processes found, so we'll get the done processes directly for all teeth
+			$this->db->select('t.id as tooth_id, t.name, t.location');
+			$this->db->from('tooth t');
+			$this->db->join('turn_tooth_done ttd', 'ttd.tooth_id = t.id');
+			$this->db->where('ttd.turn_id', $turn_id);
+			$this->db->group_by('t.id');
+			$teeth = $this->db->get()->result_array();
+		}
+
+		// Loop through each tooth and handle the departments, recommended and done processes
 		foreach ($teeth as $tooth) {
 			$tooth_id = $tooth['tooth_id'];
 			$tooth_data = [
@@ -5285,7 +5299,7 @@ class Admin extends CI_Controller
 			$departments = ['endo', 'restorative', 'prosthodontics'];
 
 			foreach ($departments as $dept) {
-				// Get recommended
+				// Check if there are recommended processes for this department
 				$this->db->select('ttr.process_id, ttr.custom_label, p.name as process_name');
 				$this->db->from('turn_tooth_recommended ttr');
 				$this->db->join('processes p', 'p.id = ttr.process_id', 'left');
@@ -5302,37 +5316,48 @@ class Admin extends CI_Controller
 					];
 				}
 
-				// Get done processes
-				$this->db->select('process_id, custom_label, remarks');
-				$this->db->from('turn_tooth_done');
-				$this->db->where('turn_id', $turn_id);
-				$this->db->where('tooth_id', $tooth_id);
-				$this->db->where('remarks', $dept);
-				$done = $this->db->get()->result_array();
+				// If no recommended processes, we fall back to done processes
+				if (empty($rec_list)) {
+					// Get done processes for the department
+					$this->db->select('process_id, custom_label, remarks');
+					$this->db->from('turn_tooth_done');
+					$this->db->where('turn_id', $turn_id);
+					$this->db->where('tooth_id', $tooth_id);
+					$this->db->where('remarks', $dept);
+					$done = $this->db->get()->result_array();
 
-				$done_list = [];
-				$custom_text = '';
+					$done_list = [];
+					$custom_text = '';
 
-				foreach ($done as $dp) {
-					$label = $dp['custom_label'] ?? '';
-					if ($dp['process_id']) {
-						$label = $this->Admin_model->get_process_name($dp['process_id']);
+					foreach ($done as $dp) {
+						$label = $dp['custom_label'] ?? '';
+						if ($dp['process_id']) {
+							$label = $this->Admin_model->get_process_name($dp['process_id']);
+						}
+
+						if ($dp['process_id']) {
+							$done_list[] = ['label' => $label, 'process_id' => $dp['process_id'], 'type' => 'matched'];
+						} elseif ($dp['custom_label']) {
+							$done_list[] = ['label' => $dp['custom_label'], 'process_id' => null, 'type' => 'custom'];
+							$custom_text .= $dp['custom_label'] . ", ";
+						}
 					}
 
-					if ($dp['process_id']) {
-						$done_list[] = ['label' => $label, 'process_id' => $dp['process_id'], 'type' => 'matched'];
-					} elseif ($dp['custom_label']) {
-						$done_list[] = ['label' => $dp['custom_label'], 'process_id' => null, 'type' => 'custom'];
-						$custom_text .= $dp['custom_label'] . ", ";
-					}
+					$tooth_data['departments'][] = [
+						'name' => $dept,
+						'recommended' => $rec_list,
+						'done' => $done_list,
+						'done_custom_text' => rtrim($custom_text, ', ')
+					];
+				} else {
+					// If recommended processes are available, return them
+					$tooth_data['departments'][] = [
+						'name' => $dept,
+						'recommended' => $rec_list,
+						'done' => [],  // Empty done list as recommended is available
+						'done_custom_text' => ''
+					];
 				}
-
-				$tooth_data['departments'][] = [
-					'name' => $dept,
-					'recommended' => $rec_list,
-					'done' => $done_list,
-					'done_custom_text' => rtrim($custom_text, ', ')
-				];
 			}
 
 			$result[] = $tooth_data;
@@ -5374,6 +5399,7 @@ class Admin extends CI_Controller
 	public function get_recommended_by_turn()
 	{
 		$turn_id = $this->input->post('turn_id');
+
 		if (!is_numeric($turn_id)) {
 			echo json_encode([
 				'type' => 'error',
@@ -5386,14 +5412,75 @@ class Admin extends CI_Controller
 			return;
 		}
 
+		$this->db->select('patient_id');
+		$this->db->from('turn');
+		$this->db->where('id', $turn_id);
+		$turn = $this->db->get()->row_array();
+
+		if (!$turn) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('turn not found'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
 		$recommended = $this->Admin_model->get_recommended_by_turn($turn_id);
+
+		if (empty($recommended)) {
+			// Fallback to show all processes for patient's teeth if none are recommended
+			$teeth = $this->Admin_model->get_patient_teeth($turn['patient_id']); // Make sure this returns an array of teeth with id, name, location
+			$fallback = [];
+
+			foreach ($teeth as $tooth) {
+				$departments = ['endo', 'restorative', 'prosthodontics'];
+				$toothData = [
+					'tooth_id' => $tooth['id'],
+					'tooth_name' => $tooth['location'] . ' ' . $tooth['name'],
+					'departments' => []
+				];
+
+				foreach ($departments as $dept) {
+					$services = $this->Admin_model->get_department_services_with_processes($tooth['id'], $dept);
+					$deptProcesses = [];
+
+					foreach ($services as $service) {
+						if (!empty($service['processes'])) {
+							foreach ($service['processes'] as $proc) {
+								$deptProcesses[] = [
+									'process_id' => $proc['id'],
+									'label' => $proc['name']
+								];
+							}
+						}
+					}
+
+					$toothData['departments'][] = [
+						'name' => $dept,
+						'processes' => $deptProcesses,
+						'custom' => ''
+					];
+				}
+
+				$fallback[] = $toothData;
+			}
+
+			echo json_encode([
+				'type' => 'success',
+				'content' => $fallback
+			]);
+			return;
+		}
 
 		echo json_encode([
 			'type' => 'success',
 			'content' => $recommended
 		]);
 	}
-
 
 	public function insert_recommended_processes()
 	{
