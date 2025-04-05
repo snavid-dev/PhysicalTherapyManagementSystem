@@ -224,36 +224,38 @@ $ci = get_instance();
 	// 	$('#total_price_update').val(sum);
 	// }
 
-	function calculate_sum_update(restoPrice = null, endo_price = null, pro_price = null) {
+function calculate_sum_update() {
+	const isRestoChecked = $('#checkbox_update_resto').is(':checked');
+	const isEndoChecked = $('#checkbox_update_endo').is(':checked');
+	const isProChecked = $('#checkbox_update_prosthodontics').is(':checked');
 
-		restoPrice = $('#price_tooth_restorative_update').val();
+	const restoPrice = parseInt($('#price_tooth_restorative_update').val()) || 0;
+	const endoPrice = parseInt($('#price_tooth_endo_update').val()) || 0;
+	const proPrice = parseInt($('#price_tooth_pro_update').val()) || 0;
+
+	// Include only if the corresponding checkbox is checked
+	const priceRestoUpdate = isRestoChecked ? restoPrice : 0;
+	const priceService = isEndoChecked ? endoPrice : 0;
+	const priceProsthodontics = isProChecked ? proPrice : 0;
+
+	const sum = priceRestoUpdate + priceService + priceProsthodontics;
+
+	console.log({
+		priceRestoUpdate,
+		priceService,
+		priceProsthodontics,
+		sum
+	});
+
+	// Update all total fields
+	$('#priceTag_resto_update').val(sum);
+	$('#priceTag_endo_update').val(sum);
+	$('#priceTag_pro_update').val(sum);
+	$('#total_price_update').val(sum);
+}
 
 
-		const priceRestoUpdate = restoPrice !== null
-			? parseInt(restoPrice)
-			: parseInt($('#price_tooth_restorative_update').val()) || 0;
-
-		const priceService = endo_price !== null
-			? parseInt(endo_price)
-			: parseInt($('#price_tooth_endo_update').val()) || 0;
-
-		const priceProsthodontics = pro_price !== null
-			? parseInt(pro_price)
-			: parseInt($('#price_tooth_pro_update').val()) || 0;
-
-		const sum = priceRestoUpdate + priceService + priceProsthodontics;
-
-		console.log({ priceRestoUpdate, priceService, priceProsthodontics, sum });
-
-		// Update all total fields, regardless of checkbox state
-		$('#priceTag_resto_update').val(sum);
-		$('#priceTag_endo_update').val(sum);
-		$('#priceTag_pro_update').val(sum);
-		$('#total_price_update').val(sum);
-	}
-
-
-	// ✅ Helper function to safely get numeric values from input fields
+// ✅ Helper function to safely get numeric values from input fields
 	function getNumericValue(selector) {
 		return parseFloat($(selector).val()) || 0;
 	}
@@ -270,25 +272,59 @@ $ci = get_instance();
 		calculate_sum_update(null, null, price);
 	}
 
-	document.addEventListener("DOMContentLoaded", function () {
-		// Add event listeners for all inputs
-		const elements = [
-			"#price_tooth_restorative_update",
-			"#price_tooth_endo_update",
-			"#price_tooth_pro_update"
-		];
+	// document.addEventListener("DOMContentLoaded", function () {
+	// 	// Add event listeners for all inputs
+	// 	const elements = [
+	// 		"#price_tooth_restorative_update",
+	// 		"#price_tooth_endo_update",
+	// 		"#price_tooth_pro_update"
+	// 	];
+	//
+	// 	elements.forEach(selector => {
+	// 		const el = document.querySelector(selector);
+	// 		if (el) {
+	// 			el.addEventListener("input", calculate_sum_update);
+	// 			el.addEventListener("change", calculate_sum_update);
+	// 		}
+	// 	});
+	//
+	// 	// Initial calculation
+	// 	calculate_sum_update();
+	// });
 
-		elements.forEach(selector => {
-			const el = document.querySelector(selector);
-			if (el) {
-				el.addEventListener("input", calculate_sum_update);
-				el.addEventListener("change", calculate_sum_update);
-			}
-		});
+document.addEventListener("DOMContentLoaded", function () {
+	const inputSelectors = [
+		"#price_tooth_restorative_update",
+		"#price_tooth_endo_update",
+		"#price_tooth_pro_update"
+	];
 
-		// Initial calculation
-		calculate_sum_update();
+	const checkboxSelectors = [
+		"#checkbox_update_resto",
+		"#checkbox_update_endo",
+		"#checkbox_update_prosthodontics"
+	];
+
+	// Trigger on input/change in price fields
+	inputSelectors.forEach(selector => {
+		const el = document.querySelector(selector);
+		if (el) {
+			el.addEventListener("input", calculate_sum_update);
+			el.addEventListener("change", calculate_sum_update);
+		}
 	});
+
+	// Trigger on checkbox toggle
+	checkboxSelectors.forEach(selector => {
+		const el = document.querySelector(selector);
+		if (el) {
+			el.addEventListener("change", calculate_sum_update);
+		}
+	});
+
+	// Initial load
+	calculate_sum_update();
+});
 
 
 
