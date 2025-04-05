@@ -159,71 +159,6 @@ $ci = get_instance();
 </script>
 
 <script>
-//TODO: old calculate_sum function please do not delete this comment
-	// function calculate_sum_update(restoPrice = null, endo_price = null, pro_price = null) {
-	//
-	//
-	// 	// Check which departments are selected
-	// 	let is_endo = $('#checkbox_update_endo').is(':checked');
-	// 	let is_resto = $('#checkbox_update_resto').is(':checked');
-	// 	let is_prosthodontics = $('#checkbox_update_prosthodontics').is(':checked');
-	//
-	// 	let priceService = 0;
-	// 	let priceRestoUpdate = 0;
-	// 	let priceProsthodontics = 0;
-	//
-	//
-	// 	// Retrieve price values safely
-	// 	if (is_endo == true) {
-	// 		if (endo_price != null) {
-	// 			priceService = parseInt(endo_price);
-	// 		} else {
-	// 			priceService = parseInt($('#price_tooth_endo_update').val()) || 0;
-	// 		}
-	// 	}
-	//
-	// 	if (is_resto == true) {
-	// 		if (restoPrice != null) {
-	// 			priceRestoUpdate = parseInt(restoPrice);
-	// 		} else {
-	// 			priceRestoUpdate = parseInt($('#price_tooth_restorative_update').val()) || 0;
-	// 		}
-	// 	}
-	//
-	// 	if (is_prosthodontics == true) {
-	// 		if(pro_price != null){
-	// 			priceProsthodontics = parseInt(pro_price);
-	// 		}else{
-	// 		priceProsthodontics = parseInt($('#price_tooth_pro_update').val()) || 0;
-	// 		}
-	// 	}
-	//
-	// 	if(isNaN(priceProsthodontics)){
-	// 		priceProsthodontics = 0;
-	// 	}
-	//
-	// 	if(isNaN(priceRestoUpdate)){
-	// 		priceRestoUpdate = 0;
-	// 	}
-	//
-	// 	if(isNaN(priceService)){
-	// 		priceService = 0;
-	// 	}
-	//
-	// 	let sum = 0;
-	//
-	//
-	// 	sum = priceRestoUpdate + priceService + priceProsthodontics;
-	// 	console.log({priceRestoUpdate, priceService, priceProsthodontics, sum});
-	//
-	// 	// Update only the price fields related to selected checkboxes
-	// 	if (is_resto) $('#priceTag_resto_update').val(sum);
-	// 	if (is_endo) $('#priceTag_endo_update').val(sum);
-	// 	if (is_prosthodontics) $('#priceTag_pro_update').val(sum);
-	//
-	// 	$('#total_price_update').val(sum);
-	// }
-
 function calculate_sum_update() {
 	const isRestoChecked = $('#checkbox_update_resto').is(':checked');
 	const isEndoChecked = $('#checkbox_update_endo').is(':checked');
@@ -271,26 +206,6 @@ function calculate_sum_update() {
 	function insert_pro_price_update(price) {
 		calculate_sum_update(null, null, price);
 	}
-
-	// document.addEventListener("DOMContentLoaded", function () {
-	// 	// Add event listeners for all inputs
-	// 	const elements = [
-	// 		"#price_tooth_restorative_update",
-	// 		"#price_tooth_endo_update",
-	// 		"#price_tooth_pro_update"
-	// 	];
-	//
-	// 	elements.forEach(selector => {
-	// 		const el = document.querySelector(selector);
-	// 		if (el) {
-	// 			el.addEventListener("input", calculate_sum_update);
-	// 			el.addEventListener("change", calculate_sum_update);
-	// 		}
-	// 	});
-	//
-	// 	// Initial calculation
-	// 	calculate_sum_update();
-	// });
 
 document.addEventListener("DOMContentLoaded", function () {
 	const inputSelectors = [
