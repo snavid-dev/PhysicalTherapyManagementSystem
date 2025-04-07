@@ -303,24 +303,35 @@
 													class="fa fa-user-circle-o fs-14"></span></a>
 										<?php endif; ?>
 
+										<?php if ('') ?>
 										<a href="javascript:print_patient('<?= $patient['id'] ?>')"
 										   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"
 										   data-bs-toggle="tooltip"
 										   data-bs-original-title="<?= $ci->lang('print') ?>"><span
 												class="fa fa-print fs-14"></span></a>
-										<a href="javascript:accept_via_alert('<?= $patient['id'] ?>', '<?= base_url() ?>admin/accept_patient')"
-										   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"
-										   data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('accept') ?>"><span
-												class="fa-regular fa-circle-check fs-14"></span></a>
-										<a href="javascript:accept_via_alert('<?= $patient['id'] ?>', '<?= base_url() ?>admin/block_patient')"
-										   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"
-										   data-bs-toggle="tooltip"
-										   data-bs-original-title="<?= $ci->lang('block') ?>"><span
-												class="fa-solid fa-minus fs-14"></span></a>
-										<a href="javascript:delete_via_alert('<?= $patient['id'] ?>', '<?= base_url() ?>admin/delete_patient')"
-										   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"
-										   data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span
-												class="fa-solid fa-trash-can fs-14"></span></a>
+
+										<?php if ($ci->auth->has_permission('Update Patient Acceptance')): ?>
+											<a href="javascript:accept_via_alert('<?= $patient['id'] ?>', '<?= base_url() ?>admin/accept_patient')"
+											   class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"
+											   data-bs-toggle="tooltip"
+											   data-bs-original-title="<?= $ci->lang('accept') ?>"><span
+													class="fa-regular fa-circle-check fs-14"></span></a>
+										<?php endif; ?>
+
+										<?php if ($ci->auth->has_permission('Update Blocked Patient')): ?>
+											<a href="javascript:accept_via_alert('<?= $patient['id'] ?>', '<?= base_url() ?>admin/block_patient')"
+											   class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"
+											   data-bs-toggle="tooltip"
+											   data-bs-original-title="<?= $ci->lang('block') ?>"><span
+													class="fa-solid fa-minus fs-14"></span></a>
+										<?php endif; ?>
+										<?php if ($ci->auth->has_permission('Delete Patient')): ?>
+											<a href="javascript:delete_via_alert('<?= $patient['id'] ?>', '<?= base_url() ?>admin/delete_patient')"
+											   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"
+											   data-bs-toggle="tooltip"
+											   data-bs-original-title="<?= $ci->lang('delete') ?>"><span
+													class="fa-solid fa-trash-can fs-14"></span></a>
+										<?php endif; ?>
 									</div>
 								</td>
 							</tr>
@@ -440,26 +451,47 @@
 				if (result.content && result.content.length > 0) {
 					result.content.forEach(item => {
 						let changeBtnsStatus = '';
+						let pending_button = '';
+						let accept_button = '';
+						let block_button = '';
+						let delete_button = '';
+
+						if (item.pending_access) {
+							pending_button = `<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock"></span></a> `;
+						}
+
+						if (item.accept_access) {
+							accept_button = `<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a> `;
+						}
+
+						if (item.block_access) {
+							block_button = `<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a> `;
+						}
 
 						if (selectIdValue === 'p') {
 							changeBtnsStatus += `
-								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>
-								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
+								${accept_button}
+								${block_button}`;
 						} else if (selectIdValue === 'a') {
 							changeBtnsStatus += `
-								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock"></span></a>
-								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/block_patient')" class="btn btn-icon btn-outline-primary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-minus-circle"></span></a>`;
+								${pending_button}
+								${block_button}`;
 						} else {
 							changeBtnsStatus += `
-								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/pending_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-clock-o fs-14"></span></a>
-								<a href="javascript:accept_via_alert('${item.id}', '<?= base_url() ?>admin/accept_patient')" class="btn btn-icon btn-outline-success rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-check-circle"></span></a>`;
+							${pending_button}
+							${accept_button}`;
+						}
+
+						if (item.delete_access){
+							delete_button = `<a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fa fa-trash"></span></a> `;
 						}
 
 						let buttons = '';
 
 						if (selectIdValue !== 't') {
 							let profile = '';
-							if (item.has_access){
+
+							if (item.profile_access) {
 								profile = `<a href="<?= base_url("admin/single_patient/") ?>${item.id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span class="fa fa-user-circle-o fs-14"></span></a> `;
 							}
 							buttons = `
@@ -467,8 +499,8 @@
 								${profile}
 									<a href="javascript:print_patient('${item.id}')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('print') ?>"><span class="fa fa-print fs-14"></span></a>
 									${changeBtnsStatus}
-									<a href="javascript:delete_via_alert('${item.id}', '<?= base_url() ?>admin/delete_patient')" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light" data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span class="fa fa-trash"></span></a>
-								</div>`;
+									${delete_button}
+									</div>`;
 						} else {
 							buttons = `
 								<div class="g-2">

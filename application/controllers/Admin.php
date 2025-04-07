@@ -2907,7 +2907,11 @@ class Admin extends CI_Controller
 						'history' => $patient['pains'],
 						'other_pains' => $patient['other_pains'],
 						'remarks' => $patient['remarks'],
-						'has_access' => $this->auth->has_permission('Read Patient Profile'),
+						'profile_access' => $this->auth->has_permission('Read Patient Profile'),
+						'accept_access' => $this->auth->has_permission('Update Patient Acceptance'),
+						'block_access' => $this->auth->has_permission('Update Blocked Patient'),
+						'pending_access' => $this->auth->has_permission('Update Patient Pending'),
+						'delete_access' => $this->auth->has_permission('Delete Patient'),
 					);
 
 					$i++;
