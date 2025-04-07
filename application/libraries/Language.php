@@ -794,6 +794,7 @@ class Language
 			'Read Patients' => self::lang_arr('Read Patients', 'خواندن بیماران', 'د ناروغان لوستل'),
 			'Read Patient Profile' => self::lang_arr('Read Patient Profile', 'خواندن پروفایل بیمار', 'د ناروغ پروفایل لوستل'),
 			'Update Patient Acceptance' => self::lang_arr('Update Patient Acceptance', 'به‌روزرسانی پذیرش بیمار', 'د ناروغ د منلو تازه کول'),
+			'Update Patient Pending' => self::lang_arr('Update Patient Pending', 'به‌روزرسانی وضعیت معلق بیمار', 'د ناروغ د منلو تازه کول'),
 			'Update Blocked Patient' => self::lang_arr('Update Blocked Patient', 'به‌روزرسانی بیمار مسدود شده', 'بند شوی ناروغ تازه کول'),
 			'Delete Patient' => self::lang_arr('Delete Patient', 'حذف بیمار', 'د ناروغ حذف کول'),
 			'Create New Patient' => self::lang_arr('Create New Patient', 'ایجاد بیمار جدید', 'نوی ناروغ جوړول'),

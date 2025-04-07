@@ -2858,21 +2858,22 @@ class Admin extends CI_Controller
 
 	public function patients()
 	{
-		{
-			$data['title'] = $this->lang('patients');
-			$data['page'] = "patients";
-			$data['patients'] = $this->Admin_model->get_patients();
-			$data['doctors'] = $this->Admin_model->get_doctors();
-			$data['script'] = $this->mylibrary->generateSelect2();
-			$data['script_single_patient_assets'] = ['assets/js/home.js'];
+		$this->check_permission_page('Read Patients');
 
-			//$data['script_date'] = $this->mylibrary->script_datepicker();
+		$data['title'] = $this->lang('patients');
+		$data['page'] = "patients";
+		$data['patients'] = $this->Admin_model->get_patients();
+		$data['doctors'] = $this->Admin_model->get_doctors();
+		$data['script'] = $this->mylibrary->generateSelect2();
+		$data['script_single_patient_assets'] = ['assets/js/home.js'];
+
+		//$data['script_date'] = $this->mylibrary->script_datepicker();
 
 
-			$this->load->view('header', $data);
-			$this->load->view('patients/index', $data);
-			$this->load->view('footer');
-		}
+		$this->load->view('header', $data);
+		$this->load->view('patients/index', $data);
+		$this->load->view('footer');
+
 	}
 
 	function list_patient_json()
@@ -2906,6 +2907,11 @@ class Admin extends CI_Controller
 						'history' => $patient['pains'],
 						'other_pains' => $patient['other_pains'],
 						'remarks' => $patient['remarks'],
+						'profile_access' => $this->auth->has_permission('Read Patient Profile'),
+						'accept_access' => $this->auth->has_permission('Update Patient Acceptance'),
+						'block_access' => $this->auth->has_permission('Update Blocked Patient'),
+						'pending_access' => $this->auth->has_permission('Update Patient Pending'),
+						'delete_access' => $this->auth->has_permission('Delete Patient'),
 					);
 
 					$i++;
@@ -3086,6 +3092,7 @@ class Admin extends CI_Controller
 
 	public function single_patient($id = null)
 	{
+		$this->check_permission_page('Read Patient Profile');
 		if (!is_null($id)) {
 			$profile = $this->Admin_model->profile_patient($id);
 
@@ -4458,6 +4465,7 @@ class Admin extends CI_Controller
 					'second_try_status' => $lab['second_try_status'],
 					'install_time' => $lab['install_time'],
 					'status' => $lab['status'],
+					'profile_access' => $this->auth->has_permission('Read Patient Profile'),
 				];
 			}
 
@@ -5585,6 +5593,7 @@ class Admin extends CI_Controller
 						'doctor_name' => $turn['doctor_name'],
 						'date' => $turn['date'],
 						'time' => $turn['from_time'] . ' - ' . $turn['to_time'],
+						'profile_access' => $this->auth->has_permission('Read Patient Profile'),
 					);
 					$i++;
 				}
@@ -5637,7 +5646,8 @@ class Admin extends CI_Controller
 						'patient_id' => $turn['patient_id'],
 						'doctor_name' => $turn['doctor_name'],
 						'date' => $turn['date'],
-						'hour' => $turn['from_time'] . ' - ' . $turn['to_time'] // Combine time range
+						'hour' => $turn['from_time'] . ' - ' . $turn['to_time'], // Combine time range
+						'profile_access' => $this->auth->has_permission('Read Patient Profile'),
 					);
 					$i++;
 				}
@@ -5798,8 +5808,10 @@ class Admin extends CI_Controller
 		echo json_encode($response);
 	}
 
+
 	public function list_patients()
 	{
+
 		$this->form_validation->set_rules('serial_id', 'serial_id', 'trim');
 		$this->form_validation->set_rules('fullname', 'fullname', 'trim');
 		if ($this->form_validation->run()) {
@@ -5830,6 +5842,7 @@ class Admin extends CI_Controller
 					'id' => $patient['id'],
 					'doctor_name' => $patient['doctor_name'],
 					'pains' => $patient['pains'],
+					'profile_access' => $this->auth->has_permission('Read Patient Profile'),
 				);
 			}
 
@@ -7795,7 +7808,9 @@ class Admin extends CI_Controller
 				foreach ($turns as $turn) {
 					$btns = '';
 
-					$btns .= $this->mylibrary->generateBtnProfilePatient($turn['patient_id']);
+					if ($this->auth->has_permission('Read Patient Profile')) {
+						$btns .= $this->mylibrary->generateBtnProfilePatient($turn['patient_id']);
+					}
 
 					// $btns .= $this->mylibrary->generateBtnAccept($turn['id'], 'admin/accept_turn');
 					// $btns .= $this->mylibrary->generateBtnPayment($turn['id'], 'admin/accept_turn');
@@ -7824,7 +7839,7 @@ class Admin extends CI_Controller
 						'patient_id' => $turn['patient_id'],
 						'doctor_name' => $turn['doctor_name'],
 						'date' => $turn['date'],
-						'time' => $this->dentist->find_time($turn['hour']),
+						'time' => $turn['from_time'] . ' - ' . $turn['to_time'],
 						'btns' => $btns
 					);
 					$i++;
@@ -7913,6 +7928,14 @@ class Admin extends CI_Controller
 			return $this->load->view($file_path, $data);
 		} else {
 			return $this->load->view($file_path);
+		}
+	}
+
+	function check_permission_page($permission_name)
+	{
+		if (!$this->auth->has_permission($permission_name)) {
+			show_404();
+			exit();
 		}
 	}
 

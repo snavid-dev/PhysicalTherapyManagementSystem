@@ -261,9 +261,11 @@
 								<td><?= $turn['from_time'] . ' - ' . $turn['to_time'] ?></td>
 								<td>
 									<div class="g-2">
-										<a href="<?= base_url() ?>admin/single_patient/<?= $turn['patient_id'] ?>"
-										   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
-												class="fa fa-user-circle-o fs-14"></span></a>
+										<?php if ($ci->auth->has_permission('Read Patient Profile')): ?>
+											<a href="<?= base_url() ?>admin/single_patient/<?= $turn['patient_id'] ?>"
+											   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
+													class="fa fa-user-circle-o fs-14"></span></a>
+										<?php endif; ?>
 										<a href="javascript:print_turn('<?= $turn['id'] ?>', '<?= base_url() ?>admin/delete_turn')"
 										   class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span
 												class="fa-solid fa-print fs-14"></span></a>
@@ -509,6 +511,10 @@
 
 						let counter = 1;
 						result.content.map((item) => {
+							let profile = '';
+							if (item.profile_access) {
+								profile = ` <a href="<?= base_url() ?>admin/single_patient/${item.patient_id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-user-circle-o fs-14"></span></a> `;
+							}
 							querytable += `
             <tr class="tableRow">
               <td>${counter}</td>
@@ -518,7 +524,7 @@
               <td>${item.hour}</td>
               <td>
                     <div class="g-2">
-                      <a href="<?= base_url() ?>admin/single_patient/${item.patient_id}" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-user-circle-o fs-14"></span></a>
+                    ${profile}
                       <a href="javascript:print_turn('${item.id}', '<?= base_url() ?>admin/delete_turn')" class="btn btn-icon btn-outline-warning rounded-pill btn-wave waves-effect waves-light"><span class="fa fa-print"></span></a>
                     </div>
                   </td>
@@ -1163,7 +1169,8 @@
 										<?= $ci->lang('type') ?>
 									</label>
 									<select class="form-control select2-show-search form-select"
-											data-placeholder="<?= $ci->lang('select') ?>" id="" onchange="viewPrescriptionsMedicines(this.value)">
+											data-placeholder="<?= $ci->lang('select') ?>" id=""
+											onchange="viewPrescriptionsMedicines(this.value)">
 										<option label="<?= $ci->lang('select') ?>"></option>
 										<?php foreach ($prescriptions as $prescription) : ?>
 											<option value="<?= $prescription['id'] ?>">
@@ -2596,6 +2603,7 @@
 					if (result['content']['patients'].length < 1) {
 						var querytable = ``;
 					} else {
+
 						var querytable = `
           <table class="table text-nowrap table-striped">
             <thead>
@@ -2621,10 +2629,16 @@
         `;
 
 						result["content"]["patients"].map((item) => {
+							let profile = '';
+							if (item.profile_access) {
+								profile = `<td><a href="<?= base_url('admin/single_patient/') ?>${item.id}" target="_blank">${item.fullname}</a></td> `;
+							} else {
+								profile = `<td>${item.fullname}</td> `;
+							}
 							querytable += `
             <tr>
               <td dir="ltr" style="text-align:right;">${item.serial_id}</td>
-              <td><a href="<?= base_url('admin/single_patient/') ?>${item.id}" target="_blank">${item.fullname}</a></td>
+			  ${profile}
               <td>${item.phone1}</td>
               <td>${item.pains}</td>
               <td>${item.doctor_name}</td>
@@ -2922,143 +2936,141 @@
 
 	function print_prescription(prescriptionId) {
 		window.open(`<?= base_url() ?>admin/print_prescription/${prescriptionId}`, '_blank');
-		}
+	}
 
 
-		function viewPrescriptionsMedicines(id) {
-			$.ajax({
-				url: "<?= base_url('admin/single_prescription_sample') ?>",
-				type: 'POST',
-				data: {
-					slug: id
-				},
-				success: function (response) {
-					let result = JSON.parse(response);
-					let medicienDatas = result.content;
+	function viewPrescriptionsMedicines(id) {
+		$.ajax({
+			url: "<?= base_url('admin/single_prescription_sample') ?>",
+			type: 'POST',
+			data: {
+				slug: id
+			},
+			success: function (response) {
+				let result = JSON.parse(response);
+				let medicienDatas = result.content;
 
-					// this part counts how many has to be shown-start
-					var medicineCount = 0;
+				// this part counts how many has to be shown-start
+				var medicineCount = 0;
 
-					for (var key in medicienDatas) {
-						if (key.startsWith("medicine_") && medicienDatas[key] != 0) {
-							console.log(key)
-							medicineCount++;
-						}
+				for (var key in medicienDatas) {
+					if (key.startsWith("medicine_") && medicienDatas[key] != 0) {
+						console.log(key)
+						medicineCount++;
 					}
-
-					console.log(medicineCount);
-
-					showRows(medicineCount);
-					// this part counts how many has to be shown-end
-
-					// row1 -------------
-					$('#set_medicine1_home').val(medicienDatas.medicine_1).trigger('change');
-					$('#medicineDoze_Rx1_home').val(medicienDatas.doze_1);
-					$('#medicineUnite_Rx1_home').val(medicienDatas.unit_1).trigger('change');
-					$('#set_medicineUsage1_home').val(medicienDatas.usageType_1).trigger('change');
-					$('#set_medicineDay1_home').val(medicienDatas.day_1);
-					$('#set_medicineTime1_home').val(medicienDatas.time_1);
-					$('#set_medicineAmount1_home').val(medicienDatas.amount_1);
-					// row1 -------------
-
-	// row2 -------------
-					$('#set_medicine2_home').val(medicienDatas.medicine_2).trigger('change');
-					$('#medicineDoze_Rx2_home').val(medicienDatas.doze_2);
-					$('#medicineUnite_Rx2_home').val(medicienDatas.unit_2).trigger('change');
-					$('#set_medicineUsage2_home').val(medicienDatas.usageType_2).trigger('change');
-					$('#set_medicineDay2_home').val(medicienDatas.day_2);
-					$('#set_medicineTime2_home').val(medicienDatas.time_2);
-					$('#set_medicineAmount2_home').val(medicienDatas.amount_2);
-					// row2 -------------
-
-	// row3 -------------
-					$('#set_medicine3_home').val(medicienDatas.medicine_3).trigger('change');
-					$('#medicineDoze_Rx3_home').val(medicienDatas.doze_3);
-					$('#medicineUnite_Rx3_home').val(medicienDatas.unit_3).trigger('change');
-					$('#set_medicineUsage3_home').val(medicienDatas.usageType_3).trigger('change');
-					$('#set_medicineDay3_home').val(medicienDatas.day_3);
-					$('#set_medicineTime3_home').val(medicienDatas.time_3);
-					$('#set_medicineAmount3_home').val(medicienDatas.amount_3);
-					// row3 -------------
-
-	// row4 -------------
-					$('#set_medicine4_home').val(medicienDatas.medicine_4).trigger('change');
-					$('#medicineDoze_Rx4_home').val(medicienDatas.doze_4);
-					$('#medicineUnite_Rx4_home').val(medicienDatas.unit_4).trigger('change');
-					$('#set_medicineUsage4_home').val(medicienDatas.usageType_4).trigger('change');
-					$('#set_medicineDay4_home').val(medicienDatas.day_4);
-					$('#set_medicineTime4_home').val(medicienDatas.time_4);
-					$('#set_medicineAmount4_home').val(medicienDatas.amount_4);
-					// row4 -------------
-
-	// row5 -------------
-					$('#set_medicine5_home').val(medicienDatas.medicine_5).trigger('change');
-					$('#medicineDoze_Rx5_home').val(medicienDatas.doze_5);
-					$('#medicineUnite_Rx5_home').val(medicienDatas.unit_5).trigger('change');
-					$('#set_medicineUsage5_home').val(medicienDatas.usageType_5).trigger('change');
-					$('#set_medicineDay5_home').val(medicienDatas.day_5);
-					$('#set_medicineTime5_home').val(medicienDatas.time_5);
-					$('#set_medicineAmount5_home').val(medicienDatas.amount_5);
-					// row5 -------------
-
-	// row6 -------------
-					$('#set_medicine6_home').val(medicienDatas.medicine_6).trigger('change');
-					$('#medicineDoze_Rx6_home').val(medicienDatas.doze_6);
-					$('#medicineUnite_Rx6_home').val(medicienDatas.unit_6).trigger('change');
-					$('#set_medicineUsage6_home').val(medicienDatas.usageType_6).trigger('change');
-					$('#set_medicineDay6_home').val(medicienDatas.day_6);
-					$('#set_medicineTime6_home').val(medicienDatas.time_6);
-					$('#set_medicineAmount6_home').val(medicienDatas.amount_6);
-					// row6 -------------
-
-	// row7 -------------
-					$('#set_medicine7_home').val(medicienDatas.medicine_7).trigger('change');
-					$('#medicineDoze_Rx7_home').val(medicienDatas.doze_7);
-					$('#medicineUnite_Rx7_home').val(medicienDatas.unit_7).trigger('change');
-					$('#set_medicineUsage7_home').val(medicienDatas.usageType_7).trigger('change');
-					$('#set_medicineDay7_home').val(medicienDatas.day_7);
-					$('#set_medicineTime7_home').val(medicienDatas.time_7);
-					$('#set_medicineAmount7_home').val(medicienDatas.amount_7);
-					// row7 -------------
-
-	// row8 -------------
-					$('#set_medicine8_home').val(medicienDatas.medicine_8).trigger('change');
-					$('#medicineDoze_Rx8_home').val(medicienDatas.doze_8);
-					$('#medicineUnite_Rx8_home').val(medicienDatas.unit_8).trigger('change');
-					$('#set_medicineUsage8_home').val(medicienDatas.usageType_8).trigger('change');
-					$('#set_medicineDay8_home').val(medicienDatas.day_8);
-					$('#set_medicineTime8_home').val(medicienDatas.time_8);
-					$('#set_medicineAmount8_home').val(medicienDatas.amount_8);
-					// row8 -------------
-
-	// row9 -------------
-					$('#set_medicine9_home').val(medicienDatas.medicine_9).trigger('change');
-					$('#medicineDoze_Rx9_home').val(medicienDatas.doze_9);
-					$('#medicineUnite_Rx9_home').val(medicienDatas.unit_9).trigger('change');
-					$('#set_medicineUsage9_home').val(medicienDatas.usageType_9).trigger('change');
-					$('#set_medicineDay9_home').val(medicienDatas.day_9);
-					$('#set_medicineTime9_home').val(medicienDatas.time_9);
-					$('#set_medicineAmount9_home').val(medicienDatas.amount_9);
-					// row9 -------------
-
-	// row10 -------------
-					$('#set_medicine10_home').val(medicienDatas.medicine_10).trigger('change');
-					$('#medicineDoze_Rx10_home').val(medicienDatas.doze_10);
-					$('#medicineUnite_Rx10_home').val(medicienDatas.unit_10).trigger('change');
-					$('#set_medicineUsage10_home').val(medicienDatas.usageType_10).trigger('change');
-					$('#set_medicineDay10_home').val(medicienDatas.day_10);
-					$('#set_medicineTime10_home').val(medicienDatas.time_10);
-					$('#set_medicineAmount10_home').val(medicienDatas.amount_10);
-					// row10 -------------
-
-
-
-
 				}
-			});
 
-			$(`#viewPrescriptionsMedicines`).modal('toggle');
-		}
+				console.log(medicineCount);
+
+				showRows(medicineCount);
+				// this part counts how many has to be shown-end
+
+				// row1 -------------
+				$('#set_medicine1_home').val(medicienDatas.medicine_1).trigger('change');
+				$('#medicineDoze_Rx1_home').val(medicienDatas.doze_1);
+				$('#medicineUnite_Rx1_home').val(medicienDatas.unit_1).trigger('change');
+				$('#set_medicineUsage1_home').val(medicienDatas.usageType_1).trigger('change');
+				$('#set_medicineDay1_home').val(medicienDatas.day_1);
+				$('#set_medicineTime1_home').val(medicienDatas.time_1);
+				$('#set_medicineAmount1_home').val(medicienDatas.amount_1);
+				// row1 -------------
+
+				// row2 -------------
+				$('#set_medicine2_home').val(medicienDatas.medicine_2).trigger('change');
+				$('#medicineDoze_Rx2_home').val(medicienDatas.doze_2);
+				$('#medicineUnite_Rx2_home').val(medicienDatas.unit_2).trigger('change');
+				$('#set_medicineUsage2_home').val(medicienDatas.usageType_2).trigger('change');
+				$('#set_medicineDay2_home').val(medicienDatas.day_2);
+				$('#set_medicineTime2_home').val(medicienDatas.time_2);
+				$('#set_medicineAmount2_home').val(medicienDatas.amount_2);
+				// row2 -------------
+
+				// row3 -------------
+				$('#set_medicine3_home').val(medicienDatas.medicine_3).trigger('change');
+				$('#medicineDoze_Rx3_home').val(medicienDatas.doze_3);
+				$('#medicineUnite_Rx3_home').val(medicienDatas.unit_3).trigger('change');
+				$('#set_medicineUsage3_home').val(medicienDatas.usageType_3).trigger('change');
+				$('#set_medicineDay3_home').val(medicienDatas.day_3);
+				$('#set_medicineTime3_home').val(medicienDatas.time_3);
+				$('#set_medicineAmount3_home').val(medicienDatas.amount_3);
+				// row3 -------------
+
+				// row4 -------------
+				$('#set_medicine4_home').val(medicienDatas.medicine_4).trigger('change');
+				$('#medicineDoze_Rx4_home').val(medicienDatas.doze_4);
+				$('#medicineUnite_Rx4_home').val(medicienDatas.unit_4).trigger('change');
+				$('#set_medicineUsage4_home').val(medicienDatas.usageType_4).trigger('change');
+				$('#set_medicineDay4_home').val(medicienDatas.day_4);
+				$('#set_medicineTime4_home').val(medicienDatas.time_4);
+				$('#set_medicineAmount4_home').val(medicienDatas.amount_4);
+				// row4 -------------
+
+				// row5 -------------
+				$('#set_medicine5_home').val(medicienDatas.medicine_5).trigger('change');
+				$('#medicineDoze_Rx5_home').val(medicienDatas.doze_5);
+				$('#medicineUnite_Rx5_home').val(medicienDatas.unit_5).trigger('change');
+				$('#set_medicineUsage5_home').val(medicienDatas.usageType_5).trigger('change');
+				$('#set_medicineDay5_home').val(medicienDatas.day_5);
+				$('#set_medicineTime5_home').val(medicienDatas.time_5);
+				$('#set_medicineAmount5_home').val(medicienDatas.amount_5);
+				// row5 -------------
+
+				// row6 -------------
+				$('#set_medicine6_home').val(medicienDatas.medicine_6).trigger('change');
+				$('#medicineDoze_Rx6_home').val(medicienDatas.doze_6);
+				$('#medicineUnite_Rx6_home').val(medicienDatas.unit_6).trigger('change');
+				$('#set_medicineUsage6_home').val(medicienDatas.usageType_6).trigger('change');
+				$('#set_medicineDay6_home').val(medicienDatas.day_6);
+				$('#set_medicineTime6_home').val(medicienDatas.time_6);
+				$('#set_medicineAmount6_home').val(medicienDatas.amount_6);
+				// row6 -------------
+
+				// row7 -------------
+				$('#set_medicine7_home').val(medicienDatas.medicine_7).trigger('change');
+				$('#medicineDoze_Rx7_home').val(medicienDatas.doze_7);
+				$('#medicineUnite_Rx7_home').val(medicienDatas.unit_7).trigger('change');
+				$('#set_medicineUsage7_home').val(medicienDatas.usageType_7).trigger('change');
+				$('#set_medicineDay7_home').val(medicienDatas.day_7);
+				$('#set_medicineTime7_home').val(medicienDatas.time_7);
+				$('#set_medicineAmount7_home').val(medicienDatas.amount_7);
+				// row7 -------------
+
+				// row8 -------------
+				$('#set_medicine8_home').val(medicienDatas.medicine_8).trigger('change');
+				$('#medicineDoze_Rx8_home').val(medicienDatas.doze_8);
+				$('#medicineUnite_Rx8_home').val(medicienDatas.unit_8).trigger('change');
+				$('#set_medicineUsage8_home').val(medicienDatas.usageType_8).trigger('change');
+				$('#set_medicineDay8_home').val(medicienDatas.day_8);
+				$('#set_medicineTime8_home').val(medicienDatas.time_8);
+				$('#set_medicineAmount8_home').val(medicienDatas.amount_8);
+				// row8 -------------
+
+				// row9 -------------
+				$('#set_medicine9_home').val(medicienDatas.medicine_9).trigger('change');
+				$('#medicineDoze_Rx9_home').val(medicienDatas.doze_9);
+				$('#medicineUnite_Rx9_home').val(medicienDatas.unit_9).trigger('change');
+				$('#set_medicineUsage9_home').val(medicienDatas.usageType_9).trigger('change');
+				$('#set_medicineDay9_home').val(medicienDatas.day_9);
+				$('#set_medicineTime9_home').val(medicienDatas.time_9);
+				$('#set_medicineAmount9_home').val(medicienDatas.amount_9);
+				// row9 -------------
+
+				// row10 -------------
+				$('#set_medicine10_home').val(medicienDatas.medicine_10).trigger('change');
+				$('#medicineDoze_Rx10_home').val(medicienDatas.doze_10);
+				$('#medicineUnite_Rx10_home').val(medicienDatas.unit_10).trigger('change');
+				$('#set_medicineUsage10_home').val(medicienDatas.usageType_10).trigger('change');
+				$('#set_medicineDay10_home').val(medicienDatas.day_10);
+				$('#set_medicineTime10_home').val(medicienDatas.time_10);
+				$('#set_medicineAmount10_home').val(medicienDatas.amount_10);
+				// row10 -------------
+
+
+			}
+		});
+
+		$(`#viewPrescriptionsMedicines`).modal('toggle');
+	}
 
 
 	function showRows(rownumber) {
