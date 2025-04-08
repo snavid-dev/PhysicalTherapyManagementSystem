@@ -864,6 +864,7 @@ class Language
 			'Update Lab Entry' => self::lang_arr('Update Lab Entry', 'به‌روزرسانی ورودی آزمایشگاه', 'د لابراتوار ننوتنه تازه کړئ'),
 			'Delete Lab Entry' => self::lang_arr('Delete Lab Entry', 'حذف ورودی آزمایشگاه', 'د لابراتوار ننوتنه حذف کړئ'),
 
+			'do not have access to this function' => self::lang_arr('sorry, you do not have access to this functionality', 'با عرض پوزش، شما به این قابلیت دسترسی ندارید', 'بخښنه غواړم، تاسو دې فعالیت ته لاسرسی نلرئ.'),
 			//List of Perimissions
 
 			// Restorative Tab

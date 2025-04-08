@@ -2934,6 +2934,7 @@ class Admin extends CI_Controller
 
 	function delete_patient()
 	{
+		$this->check_permission_function('Delete Patient');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -2980,6 +2981,7 @@ class Admin extends CI_Controller
 
 	function accept_patient()
 	{
+		$this->check_permission_function('Update Patient Acceptance');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -3023,6 +3025,7 @@ class Admin extends CI_Controller
 
 	function block_patient()
 	{
+		$this->check_permission_function('Update Blocked Patient');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -3058,6 +3061,7 @@ class Admin extends CI_Controller
 
 	function pending_patient()
 	{
+		$this->check_permission_function('Update Patient Pending');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -7936,6 +7940,18 @@ class Admin extends CI_Controller
 		if (!$this->auth->has_permission($permission_name)) {
 			show_404();
 			exit();
+		}
+	}
+
+	function check_permission_function($permission_name)
+	{
+		if (!$this->auth->has_permission($permission_name)) {
+			$data['type'] = 'error';
+			$data['alert']['title'] = $this->lang('error');
+			$data['alert']['text'] = $this->language->languages('do not have access to this function');
+			$data['alert']['type'] = 'error';
+			print_r(json_encode($data));
+			exit;
 		}
 	}
 
