@@ -3481,6 +3481,7 @@ class Admin extends CI_Controller
 
 	public function update_patient()
 	{
+		$this->check_permission_function('Update Personal Information');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('insert patient name error')));
 		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert patient name error')));
