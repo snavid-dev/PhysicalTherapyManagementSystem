@@ -4,20 +4,22 @@ $ci = get_instance();
 
 ?>
 <div class="col-xxl-2">
-	<div class="card custom-card">
-		<div class="p-4 border-bottom border-block-end-dashed">
-			<p class="fs-15 mb-2 fw-semibold"><?= $ci->lang('payment status') ?> :</p>
-			<?php
-			$percentage = ($sum_dr != 0) ? ($sum_cr * 100) / $sum_dr : 100;
-			?>
-			<p class="fw-semibold mb-2"
-			   id="percentage"><?= $ci->language->languages('payment percent status', null, round($percentage)) ?></p>
-			<div class="progress progress-sm progress-animate ">
-				<div class="progress-bar bg-primary  ronded-1" role="progressbar" aria-valuenow="60"
-					 aria-valuemin="0" aria-valuemax="100" style="width: <?= $percentage ?>%"></div>
+	<?php if ($ci->auth->has_permission('Personal Payment Status')): ?>
+		<div class="card custom-card">
+			<div class="p-4 border-bottom border-block-end-dashed">
+				<p class="fs-15 mb-2 fw-semibold"><?= $ci->lang('payment status') ?> :</p>
+				<?php
+				$percentage = ($sum_dr != 0) ? ($sum_cr * 100) / $sum_dr : 100;
+				?>
+				<p class="fw-semibold mb-2"
+				   id="percentage"><?= $ci->language->languages('payment percent status', null, round($percentage)) ?></p>
+				<div class="progress progress-sm progress-animate ">
+					<div class="progress-bar bg-primary  ronded-1" role="progressbar" aria-valuenow="60"
+						 aria-valuemin="0" aria-valuemax="100" style="width: <?= $percentage ?>%"></div>
+				</div>
 			</div>
 		</div>
-	</div>
+	<?php endif; ?>
 
 	<div class="card custom-card">
 		<div class="p-4 border-bottom border-block-end-dashed">
