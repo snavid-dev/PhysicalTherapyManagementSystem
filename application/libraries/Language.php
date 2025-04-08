@@ -791,6 +791,9 @@ class Language
 
 			//List of Perimissions
 			'Create Patient' => self::lang_arr('Create Patient', 'ایجاد بیمار', 'د ناروغ جوړول'),
+			'View Phone Numbers' => self::lang_arr('View Phone Numbers', 'مشاهده شماره تماس ها', 'not set'),
+			'Personal Payment Status' => self::lang_arr('Personal Payment Status', 'مشاهده وضعیت مالی', 'not set'),
+			'Personal Treatment Status' => self::lang_arr('Personal Treatment Status', 'مشاهده وضعیت درمان', 'not set'),
 			'Read Patients' => self::lang_arr('Read Patients', 'خواندن بیماران', 'د ناروغان لوستل'),
 			'Read Patient Profile' => self::lang_arr('Read Patient Profile', 'خواندن پروفایل بیمار', 'د ناروغ پروفایل لوستل'),
 			'Update Patient Acceptance' => self::lang_arr('Update Patient Acceptance', 'به‌روزرسانی پذیرش بیمار', 'د ناروغ د منلو تازه کول'),
@@ -800,6 +803,7 @@ class Language
 			'Create New Patient' => self::lang_arr('Create New Patient', 'ایجاد بیمار جدید', 'نوی ناروغ جوړول'),
 			'Update Personal Information' => self::lang_arr('Update Personal Information', 'به‌روزرسانی اطلاعات شخصی', 'شخصي معلومات تازه کول'),
 			'Delete Teeth' => self::lang_arr('Delete Teeth', 'حذف دندان‌ها', 'غاښونه حذف کړئ'),
+			'Update Teeth' => self::lang_arr('Update Teeth', 'ویرایش دندان‌ها', 'غاښونه آپدیت کړئ'),
 			'Delete Personal Turn' => self::lang_arr('Delete Personal Turn', 'حذف نوبت شخصی', 'شخصي نوبت حذف کړئ'),
 			'Create Turn' => self::lang_arr('Create Turn', 'ایجاد نوبت', 'نوبت جوړول'),
 			'Read Today\'s Turn List' => self::lang_arr('Read Today\'s Turn List', 'خواندن لیست نوبت‌های امروز', 'د نن ورځې د نوبتونو لیست لوستل'),

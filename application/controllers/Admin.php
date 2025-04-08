@@ -6939,6 +6939,7 @@ class Admin extends CI_Controller
 
 	public function update_tooth()
 	{
+		$this->check_permission_function('Update Teeth');
 		// Determine which sections are active based on checkboxes
 		$is_endo = isset($_POST['checkbox2']);
 		$is_restorative = isset($_POST['checkbox1']);
@@ -7190,6 +7191,7 @@ class Admin extends CI_Controller
 
 			$data['content']['teeth'] = $datas;
 			$data['content']['delete_access'] = $this->auth->has_permission('Delete Teeth');
+			$data['content']['update_access'] = $this->auth->has_permission('Update Teeth');
 
 			if (count($teeth) >= 0) {
 				$data['type'] = 'success';

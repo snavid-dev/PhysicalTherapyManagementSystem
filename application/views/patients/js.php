@@ -139,8 +139,13 @@ $ci = get_instance();
 
 						teeth.map((tooth) => {
 							let delete_button = '';
+							let update_button = '';
 							if (result.content.delete_access) {
 								delete_button = `<a href="javascript:delete_via_alert('${tooth['id']}', '<?= base_url() ?>admin/delete_tooth', 'teethTable', update_balance)" class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span class="fa-solid fa-trash-can fs-14"></span></a>`;
+							}
+
+							if (result.content.update_access) {
+								update_button = `<a href="javascript:updateTeeth('${tooth['id']}')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa-regular fa-pen-to-square fs-14"></span></a>`;
 							}
 							tableTemplate +=
 								`
@@ -153,8 +158,8 @@ $ci = get_instance();
                         <td>${tooth['price']}</td>
                         <td>
                           <div class="g-2">
-                            <a href="javascript:updateTeeth('${tooth['id']}')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa-regular fa-pen-to-square fs-14"></span></a>
-${delete_button}
+							${update_button}
+                            ${delete_button}
                            </div>
                         </td>
                       </tr>
