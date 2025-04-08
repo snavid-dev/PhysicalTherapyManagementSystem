@@ -1,6 +1,6 @@
 <?php $ci = get_instance(); ?>
 <!-- turns Modal -->
-<?php if ($ci->auth->has_permission('Create Turn')): ?>
+<?php if ($ci->auth->has_permission('Create New Turn')): ?>
 	<div class="modal fade effect-scale" id="extralargemodal" role="dialog">
 		<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
 			<div class="modal-content">
