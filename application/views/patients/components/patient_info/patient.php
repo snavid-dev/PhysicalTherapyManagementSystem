@@ -41,19 +41,21 @@ $ci = get_instance();
 			<ul class="list-group">
 				<li class="list-group-item border-0">
 					<div class="text-muted" id="contact">
-						<p class="mb-3">
+						<?php if ($ci->auth->has_permission('View Phone Numbers')): ?>
+							<p class="mb-3">
                 <span class="avatar avatar-sm avatar-rounded me-2 bg-warning-transparent rounded">
                   <i class="fa-solid fa-phone-volume fs-14"></i>
                 </span>
-							<bdo dir="ltr">(+93) <?= $profile['phone1'] ?></bdo>
-						</p>
-						<?php if ($profile['phone2'] != 0) : ?>
-							<p class="mb-3">
+								<bdo dir="ltr">(+93) <?= $profile['phone1'] ?></bdo>
+							</p>
+							<?php if ($profile['phone2'] != 0) : ?>
+								<p class="mb-3">
                   <span class="avatar avatar-sm avatar-rounded me-2 bg-warning-transparent rounded">
                     <i class="fa-solid fa-phone-volume fs-14"></i>
                   </span>
-								<bdo dir="ltr">(+93) <?= $profile['phone2'] ?></bdo>
-							</p>
+									<bdo dir="ltr">(+93) <?= $profile['phone2'] ?></bdo>
+								</p>
+							<?php endif; ?>
 						<?php endif; ?>
 						<div class="d-flex">
 							<p class="mb-0">
@@ -125,18 +127,20 @@ $ci = get_instance();
 				<?php endif; ?>
 			</ul>
 		</div>
-		<div class="p-4 border-bottom border-block-end-dashed">
+		<?php if ($ci->auth->has_permission('Update Personal Information')): ?>
+			<div class="p-4 border-bottom border-block-end-dashed">
 
-			<button type="button" class="btn btn-primary-gradient btn-wave custom-btn" data-bs-toggle="modal"
-					data-bs-target="#edit_patient" onclick="edit_profile()"
-					style=" display: flex;align-items: center; width: 100%; justify-content: space-between;"><?= $ci->lang('edit') ?>
-				<i class="fa fa-edit"></i>
-			</button>
+				<button type="button" class="btn btn-primary-gradient btn-wave custom-btn" data-bs-toggle="modal"
+						data-bs-target="#edit_patient" onclick="edit_profile()"
+						style=" display: flex;align-items: center; width: 100%; justify-content: space-between;"><?= $ci->lang('edit') ?>
+					<i class="fa fa-edit"></i>
+				</button>
 
-			<!-- patients edit profile modal codes goes here - start -->
-			<?php $ci->render('patients/components/patient_info/edit_patients_profile_modal.php') ?>
-			<!-- patients edit profile modal codes goes here - end -->
+				<!-- patients edit profile modal codes goes here - start -->
+				<?php $ci->render('patients/components/patient_info/edit_patients_profile_modal.php') ?>
+				<!-- patients edit profile modal codes goes here - end -->
 
-		</div>
+			</div>
+		<?php endif; ?>
 	</div>
 </div>

@@ -2934,6 +2934,7 @@ class Admin extends CI_Controller
 
 	function delete_patient()
 	{
+		$this->check_permission_function('Delete Patient');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -2980,6 +2981,7 @@ class Admin extends CI_Controller
 
 	function accept_patient()
 	{
+		$this->check_permission_function('Update Patient Acceptance');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -3023,6 +3025,7 @@ class Admin extends CI_Controller
 
 	function block_patient()
 	{
+		$this->check_permission_function('Update Blocked Patient');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -3058,6 +3061,7 @@ class Admin extends CI_Controller
 
 	function pending_patient()
 	{
+		$this->check_permission_function('Update Patient Pending');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -3477,6 +3481,7 @@ class Admin extends CI_Controller
 
 	public function update_patient()
 	{
+		$this->check_permission_function('Update Personal Information');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('insert patient name error')));
 		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert patient name error')));
@@ -3518,8 +3523,13 @@ class Admin extends CI_Controller
 				$patient = $this->Admin_model->profile_patient($id)[0];
 				$data['name'] = $patient['name'];
 				$data['lname'] = $patient['lname'];
-				$data['phone1'] = $patient['phone1'];
-				$data['phone2'] = $patient['phone2'];
+				if ($this->auth->has_permission('View Phone Numbers')) {
+					$data['phone1'] = $patient['phone1'];
+					$data['phone2'] = $patient['phone2'];
+				} else {
+					$data['phone1'] = null;
+					$data['phone2'] = null;
+				}
 				$data['age'] = $patient['age'];
 				$data['address'] = $patient['address'];
 				$data['pains'] = $patient['pains'];
@@ -6934,6 +6944,7 @@ class Admin extends CI_Controller
 
 	public function update_tooth()
 	{
+		$this->check_permission_function('Update Teeth');
 		// Determine which sections are active based on checkboxes
 		$is_endo = isset($_POST['checkbox2']);
 		$is_restorative = isset($_POST['checkbox1']);
@@ -7129,6 +7140,7 @@ class Admin extends CI_Controller
 
 	public function delete_tooth()
 	{
+		$this->check_permission_function('Delete Teeth');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -7183,6 +7195,8 @@ class Admin extends CI_Controller
 			}
 
 			$data['content']['teeth'] = $datas;
+			$data['content']['delete_access'] = $this->auth->has_permission('Delete Teeth');
+			$data['content']['update_access'] = $this->auth->has_permission('Update Teeth');
 
 			if (count($teeth) >= 0) {
 				$data['type'] = 'success';
@@ -7936,6 +7950,18 @@ class Admin extends CI_Controller
 		if (!$this->auth->has_permission($permission_name)) {
 			show_404();
 			exit();
+		}
+	}
+
+	function check_permission_function($permission_name)
+	{
+		if (!$this->auth->has_permission($permission_name)) {
+			$data['type'] = 'error';
+			$data['alert']['title'] = $this->lang('error');
+			$data['alert']['text'] = $this->language->languages('do not have access to this function');
+			$data['alert']['type'] = 'error';
+			print_r(json_encode($data));
+			exit;
 		}
 	}
 
