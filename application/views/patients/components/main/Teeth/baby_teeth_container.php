@@ -6,7 +6,7 @@
 
 		<div class="qi">
 
-			<div class="babytooth" onclick="toggleModal(this, toothj)">
+			<div class="babytooth" onclick="insertBaby(this, toothe)">
 				<h6>E</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/j.png"
@@ -14,7 +14,7 @@
 			</div>
 
 
-			<div class="babytooth" onclick="toggleModal(this, toothi)">
+			<div class="babytooth" onclick="insertBaby(this, toothi)">
 				<h6>D</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/i.png"
@@ -176,7 +176,7 @@
 				<h6>D</h6>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, tootht)">
+			<div class="babytooth" onclick="insertBaby_test(this, tootht)" style="border: 3px solid red">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/t.png"
 					alt="" class="babytoothimg "/>
@@ -189,3 +189,60 @@
 
 
 </div>
+
+<script>
+	function insertBaby(div, ToothFunction) {
+		resetinputs_baby();
+		var imageSrc = div.querySelector("img").src;
+		var titleText = div.querySelector("h6").textContent;
+		var modalImage = document.getElementById("modalImageb");
+		var modalTitle = document.getElementById("modalTitleb");
+		modalImage.src = imageSrc;
+		let imageUrl = modalImage.src;
+		let imagePath = imageUrl.substring(imageUrl.indexOf("/v2"));
+		$("#child_teeth_location").val(imagePath);
+		modalTitle.textContent = titleText;
+		ToothFunction();
+		$(`#teethmodal_baby`).modal("toggle");
+
+	}
+
+	function insertBaby_test(div, toothFunction) {
+		// Get image source and title from clicked .babytooth div
+		const imgSrc = div.querySelector('img').getAttribute('src');
+		const title = div.querySelector('h6').innerText;
+
+		// Update all modal titles
+		document.querySelectorAll('#teethmodal_baby .modal-Title').forEach(el => {
+			el.innerText = title;
+		});
+
+		// Update all three modal images
+		document.getElementById('modalImage_baby').setAttribute('src', imgSrc);
+		document.getElementById('modalImage2_baby').setAttribute('src', imgSrc);
+		document.getElementById('modalImage3_baby').setAttribute('src', imgSrc);
+
+		toothFunction(); // Leave it as-is, as requested
+		// Show the modal
+		$(`#teethmodal_baby`).modal("toggle");
+	}
+
+
+
+	function insertTooth_baby(div, toothFunction) {
+		resetinputs_baby();
+		var imageSrc = div.querySelector("img").src;
+		var titleText = div.querySelector("h6").textContent;
+		var modalImage = document.getElementById("modalImageb");
+		var modalTitle = document.getElementById("modalTitleb");
+		modalImage.src = imageSrc;
+		let imageUrl = modalImage.src;
+		let imagePath = imageUrl.substring(imageUrl.indexOf("/v2"));
+		$("#child_teeth_location").val(imagePath);
+		modalTitle.textContent = titleText;
+		toothFunction();
+		$(`#extralargemodalxx`).modal("toggle");
+	}
+
+
+</script>

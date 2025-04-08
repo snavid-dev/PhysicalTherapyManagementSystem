@@ -155,6 +155,86 @@ $ci = get_instance();
 		service_price_pro('#services_pro', '#services_input_pro', '#price_tooth_pro', handlePriceProsthodontics);
 	}
 
+	function calculate_sum_baby() {
+		let priceResto = 0;
+		let priceService = 0;
+		let priceProsthodontics = 0;
+
+		let is_endo = ($('#checkbox_endo_baby').is(':checked')) ? true : false;
+		let is_resto = ($('#checkbox_resto_baby').is(':checked')) ? true : false;
+		let is_prosthodontics = ($('#checkbox_prosthodontics_baby').is(':checked')) ? true : false;
+
+		// Callback function for service_price_resto
+		function handlePriceResto(price) {
+			if (is_resto) {
+				priceResto = price;
+				handleResults();
+			}
+		}
+
+		function handlePriceProsthodontics(price) {
+			if (is_prosthodontics) {
+				priceProsthodontics = price;
+				handleResults();
+			}
+		}
+
+
+		// Callback function for service_price
+		function handlePriceService(price) {
+			if (is_endo) {
+				priceService = price;
+				handleResults();
+			}
+		}
+
+		// Function to handle the results and update the inputs accordingly
+		function handleResults() {
+			// Calculate the sum
+			const sum = priceResto + priceService + priceProsthodontics;
+
+			// Determine which inputs to update based on the values of priceResto and priceService
+			if (priceResto === 0 && priceService !== 0) {
+				// If priceResto is zero, update only the "priceTag_resto" input
+				$('#priceTag_endo_baby').val(sum);
+				$('#priceTag_resto_baby').val(sum);
+				$('#priceTag_pro_baby').val(sum);
+			} else if (priceService === 0 && priceResto !== 0) {
+				// If priceService is zero, update only the "priceTag_endo" input
+				$('#priceTag_resto_baby').val(sum);
+				$('#priceTag_endo_baby').val(sum);
+				$('#priceTag_pro_baby').val(sum);
+
+			} else {
+				// If both priceResto and priceService have non-zero values, update both inputs
+				$('#priceTag_resto_baby').val(sum);
+				$('#priceTag_endo_baby').val(sum);
+				$('#priceTag_pro_baby').val(sum);
+			}
+		}
+
+		// Add event listeners to handle changes in price_tooth_restorative and price_tooth inputs
+		document.getElementById('price_tooth_restorative_baby').addEventListener('change', () => {
+			priceResto = parseFloat(document.getElementById('price_tooth_restorative_baby').value) || 0;
+			handleResults();
+		});
+
+		document.getElementById('price_tooth_pro_baby').addEventListener('change', () => {
+			priceProsthodontics = parseFloat(document.getElementById('price_tooth_pro_baby').value) || 0;
+			handleResults();
+		});
+
+		document.getElementById('price_tooth_baby').addEventListener('change', () => {
+			priceService = parseFloat(document.getElementById('price_tooth_baby').value) || 0;
+			handleResults();
+		});
+
+		// Call the functions with the appropriate callback functions
+		service_price_resto('#services_restorative_baby', '#services_input_restorative_baby', '#price_tooth_restorative_baby', handlePriceResto);
+		service_price('#services_baby', '#services_input_baby', '#price_tooth_baby', handlePriceService);
+		service_price_pro('#services_pro_baby', '#services_input_pro_baby', '#price_tooth_pro_baby', handlePriceProsthodontics);
+	}
+
 	// TODO: the fucking services end
 </script>
 
