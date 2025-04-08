@@ -20,18 +20,19 @@ $ci = get_instance();
 			</div>
 		</div>
 	<?php endif; ?>
-
-	<div class="card custom-card">
-		<div class="p-4 border-bottom border-block-end-dashed">
-			<p class="fs-15 mb-2 fw-semibold"><?= $ci->lang('treatment status') ?> :</p>
-			<p class="fw-semibold mb-2"
-			   id="process_percentage"><?= $ci->language->languages('payment percent status', null, round($process_percentage)) ?></p>
-			<div class="progress progress-sm progress-animate ">
-				<div class="progress-bar bg-secondary  ronded-1" role="progressbar" aria-valuenow="60"
-					 aria-valuemin="0" aria-valuemax="100" style="width: <?= $process_percentage ?>%"></div>
+	<?php if ($ci->auth->has_permission('Personal Treatment Status')): ?>
+		<div class="card custom-card">
+			<div class="p-4 border-bottom border-block-end-dashed">
+				<p class="fs-15 mb-2 fw-semibold"><?= $ci->lang('treatment status') ?> :</p>
+				<p class="fw-semibold mb-2"
+				   id="process_percentage"><?= $ci->language->languages('payment percent status', null, round($process_percentage)) ?></p>
+				<div class="progress progress-sm progress-animate ">
+					<div class="progress-bar bg-secondary  ronded-1" role="progressbar" aria-valuenow="60"
+						 aria-valuemin="0" aria-valuemax="100" style="width: <?= $process_percentage ?>%"></div>
+				</div>
 			</div>
 		</div>
-	</div>
+	<?php endif; ?>
 	<!-- dxdiag -->
 	<div class="card custom-card" style="padding: 1rem !important;">
 		<div class="form-group">
