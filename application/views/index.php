@@ -1,4 +1,7 @@
 <?php $ci = get_instance(); ?>
+<?php
+$balance_permission = $ci->auth->has_permission('Read Today Balance');
+?>
 <!-- ROW-1 -->
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xl-12">
@@ -210,7 +213,7 @@
 
 <!-- ROW-3 -->
 <div class="row">
-	<div class="col-xl-9 col-md-12">
+	<div class="col-xl-<?= ($balance_permission) ? '9' : '12' ?> col-md-12">
 		<div class="card">
 			<div class="card-header turens_header">
 				<h4 class="card-title fw-semibold"><?= $ci->lang('turns list') ?></h4>
@@ -283,58 +286,65 @@
 		</div>
 	</div>
 
-	<div class="col-sm-12 col-md-12 col-lg-12 col-xl-3">
-		<div class="card overflow-hidden">
-			<div class="card-body pb-0 bg-recentorder">
-				<h3 class="card-title text-white"><?= $ci->lang('today balance') ?></h3>
-				<div class="chartjs-wrapper-demo">
-					<canvas id="recentorders" class="chart-dropshadow"></canvas>
-				</div>
-			</div>
-			<div id="flotback-chart" class="flot-background"></div>
-			<div class="card-body">
-				<div class="d-flex mb-4 mt-3">
-					<div class="avatar avatar-md bg-secondary-transparent text-secondary bradius me-3">
-						<i class="fa fa-check"></i>
-					</div>
-					<div class="">
-						<h6 class="mb-1 fw-semibold"><?= $ci->lang('income') ?></h6>
-						<p class="fw-normal fs-12"><span class="text-success">3.5%</span>
-							increased </p>
-					</div>
-					<div class=" ms-auto my-auto">
-						<p class="fw-bold fs-20"> <?= number_format($sum_income) ?> </p>
+	<?php
+	if ($balance_permission):
+		?>
+
+		<div class="col-sm-12 col-md-12 col-lg-12 col-xl-3">
+			<div class="card overflow-hidden">
+				<div class="card-body pb-0 bg-recentorder">
+					<h3 class="card-title text-white"><?= $ci->lang('today balance') ?></h3>
+					<div class="chartjs-wrapper-demo">
+						<canvas id="recentorders" class="chart-dropshadow"></canvas>
 					</div>
 				</div>
-				<div class="d-flex mb-4 mt-3">
-					<div class="avatar  avatar-md bg-pink-transparent text-pink bradius me-3">
-						<i class="fa fa-times"></i>
+				<div id="flotback-chart" class="flot-background"></div>
+				<div class="card-body">
+					<div class="d-flex mb-4 mt-3">
+						<div class="avatar avatar-md bg-secondary-transparent text-secondary bradius me-3">
+							<i class="fa fa-check"></i>
+						</div>
+						<div class="">
+							<h6 class="mb-1 fw-semibold"><?= $ci->lang('income') ?></h6>
+							<p class="fw-normal fs-12"><span class="text-success">3.5%</span>
+								increased </p>
+						</div>
+						<div class=" ms-auto my-auto">
+							<p class="fw-bold fs-20"> <?= number_format($sum_income) ?> </p>
+						</div>
 					</div>
-					<div class="">
-						<h6 class="mb-1 fw-semibold"><?= $ci->lang('paid') ?></h6>
-						<p class="fw-normal fs-12"><span class="text-success">1.2%</span>
-							increased </p>
+					<div class="d-flex mb-4 mt-3">
+						<div class="avatar  avatar-md bg-pink-transparent text-pink bradius me-3">
+							<i class="fa fa-times"></i>
+						</div>
+						<div class="">
+							<h6 class="mb-1 fw-semibold"><?= $ci->lang('paid') ?></h6>
+							<p class="fw-normal fs-12"><span class="text-success">1.2%</span>
+								increased </p>
+						</div>
+						<div class=" ms-auto my-auto">
+							<p class="fw-bold fs-20 mb-0"> <?= number_format($sum_paid) ?> </p>
+						</div>
 					</div>
-					<div class=" ms-auto my-auto">
-						<p class="fw-bold fs-20 mb-0"> <?= number_format($sum_paid) ?> </p>
-					</div>
-				</div>
-				<div class="d-flex mb-4 mt-3">
-					<div class="avatar  avatar-md bg-pink-transparent text-pink bradius me-3">
-						<i class="fa fa-times"></i>
-					</div>
-					<div class="">
-						<h6 class="mb-1 fw-semibold"><?= $ci->lang('expenses') ?></h6>
-						<p class="fw-normal fs-12"><span class="text-success">1.2%</span>
-							increased </p>
-					</div>
-					<div class=" ms-auto my-auto">
-						<p class="fw-bold fs-20 mb-0"> <?= number_format($sum_expenses) ?> </p>
+					<div class="d-flex mb-4 mt-3">
+						<div class="avatar  avatar-md bg-pink-transparent text-pink bradius me-3">
+							<i class="fa fa-times"></i>
+						</div>
+						<div class="">
+							<h6 class="mb-1 fw-semibold"><?= $ci->lang('expenses') ?></h6>
+							<p class="fw-normal fs-12"><span class="text-success">1.2%</span>
+								increased </p>
+						</div>
+						<div class=" ms-auto my-auto">
+							<p class="fw-bold fs-20 mb-0"> <?= number_format($sum_expenses) ?> </p>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	<?php
+	endif;
+	?>
 </div>
 <!-- ROW-3 END -->
 
@@ -1055,9 +1065,11 @@
 									</label>
 									<select name="type" id="" class="form-control form-select">
 										<option label="<?= $ci->lang('select') ?>"></option>
-										<option value="cr">
-											<?= $ci->lang('cr') ?>
-										</option>
+										<?php if ($ci->auth->has_permission('Create Payment')): ?>
+											<option value="cr">
+												<?= $ci->lang('cr') ?>
+											</option>
+										<?php endif; ?>
 										<option value="dr">
 											<?= $ci->lang('dr') ?>
 										</option>
