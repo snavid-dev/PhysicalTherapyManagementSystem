@@ -4703,6 +4703,7 @@ class Admin extends CI_Controller
 
 	public function delete_account()
 	{
+		$this->check_permission_function('Delete Account');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -4747,6 +4748,7 @@ class Admin extends CI_Controller
 
 	public function insert_account()
 	{
+		$this->check_permission_function('Create New Account');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert account name error')));
 		$this->form_validation->set_rules('phone', 'phone', 'trim');
@@ -4844,6 +4846,7 @@ class Admin extends CI_Controller
 
 	public function update_account()
 	{
+		$this->check_permission_function('Update Account');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert account name error')));
 		$this->form_validation->set_rules('phone', 'phone', 'trim');
@@ -4915,6 +4918,7 @@ class Admin extends CI_Controller
 
 	public function insert_receipt()
 	{
+		$this->check_permission_function('Create Expenses');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('customers_id', 'customers_id', 'trim|required', array('required' => $this->lang('insert receipt customers_id error')));
 		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('insert receipt type error')));
@@ -5028,6 +5032,7 @@ class Admin extends CI_Controller
 
 	public function update_receipt()
 	{
+		$this->check_permission_function('Update Receipt');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('insert receipt customers_id error')));
 		$this->form_validation->set_rules('customers_id', 'customers_id', 'trim|required', array('required' => $this->lang('insert receipt customers_id error')));
@@ -5116,6 +5121,7 @@ class Admin extends CI_Controller
 
 	public function delete_receipt()
 	{
+		$this->check_permission_function('Delete Receipt');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -7273,6 +7279,8 @@ class Admin extends CI_Controller
 						'remarks' => $receipt['remarks'],
 						'user_name' => $receipt['user_name'],
 						'type' => $type,
+						'delete_access' => $this->auth->has_permission('Delete Receipt'),
+						'update_access' => $this->auth->has_permission('Update Receipt'),
 					);
 					$sum_cr += $receipt['cr'];
 					$sum_dr += $receipt['dr'];

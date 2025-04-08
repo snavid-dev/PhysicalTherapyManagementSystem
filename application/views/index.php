@@ -1065,9 +1065,11 @@ $balance_permission = $ci->auth->has_permission('Read Today Balance');
 									</label>
 									<select name="type" id="" class="form-control form-select">
 										<option label="<?= $ci->lang('select') ?>"></option>
-										<option value="cr">
-											<?= $ci->lang('cr') ?>
-										</option>
+										<?php if ($ci->auth->has_permission('Create Payment')): ?>
+											<option value="cr">
+												<?= $ci->lang('cr') ?>
+											</option>
+										<?php endif; ?>
 										<option value="dr">
 											<?= $ci->lang('dr') ?>
 										</option>
