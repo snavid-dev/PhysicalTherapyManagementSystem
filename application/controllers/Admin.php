@@ -3523,8 +3523,13 @@ class Admin extends CI_Controller
 				$patient = $this->Admin_model->profile_patient($id)[0];
 				$data['name'] = $patient['name'];
 				$data['lname'] = $patient['lname'];
-				$data['phone1'] = $patient['phone1'];
-				$data['phone2'] = $patient['phone2'];
+				if ($this->auth->has_permission('View Phone Numbers')) {
+					$data['phone1'] = $patient['phone1'];
+					$data['phone2'] = $patient['phone2'];
+				} else {
+					$data['phone1'] = null;
+					$data['phone2'] = null;
+				}
 				$data['age'] = $patient['age'];
 				$data['address'] = $patient['address'];
 				$data['pains'] = $patient['pains'];

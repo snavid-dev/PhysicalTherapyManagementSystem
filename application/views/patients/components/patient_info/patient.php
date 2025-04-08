@@ -41,19 +41,21 @@ $ci = get_instance();
 			<ul class="list-group">
 				<li class="list-group-item border-0">
 					<div class="text-muted" id="contact">
-						<p class="mb-3">
+						<?php if ($ci->auth->has_permission('View Phone Numbers')): ?>
+							<p class="mb-3">
                 <span class="avatar avatar-sm avatar-rounded me-2 bg-warning-transparent rounded">
                   <i class="fa-solid fa-phone-volume fs-14"></i>
                 </span>
-							<bdo dir="ltr">(+93) <?= $profile['phone1'] ?></bdo>
-						</p>
-						<?php if ($profile['phone2'] != 0) : ?>
-							<p class="mb-3">
+								<bdo dir="ltr">(+93) <?= $profile['phone1'] ?></bdo>
+							</p>
+							<?php if ($profile['phone2'] != 0) : ?>
+								<p class="mb-3">
                   <span class="avatar avatar-sm avatar-rounded me-2 bg-warning-transparent rounded">
                     <i class="fa-solid fa-phone-volume fs-14"></i>
                   </span>
-								<bdo dir="ltr">(+93) <?= $profile['phone2'] ?></bdo>
-							</p>
+									<bdo dir="ltr">(+93) <?= $profile['phone2'] ?></bdo>
+								</p>
+							<?php endif; ?>
 						<?php endif; ?>
 						<div class="d-flex">
 							<p class="mb-0">
