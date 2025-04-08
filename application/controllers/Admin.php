@@ -4691,6 +4691,7 @@ class Admin extends CI_Controller
 
 	public function accounts()
 	{
+		$this->check_permission_page('View Accounts');
 		$data['title'] = $this->lang('accounts');
 		$data['page'] = "accounts";
 		$data['accounts'] = $this->Admin_model->get_accounts();
