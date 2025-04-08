@@ -7134,6 +7134,7 @@ class Admin extends CI_Controller
 
 	public function delete_tooth()
 	{
+		$this->check_permission_function('Delete Teeth');
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
@@ -7188,6 +7189,7 @@ class Admin extends CI_Controller
 			}
 
 			$data['content']['teeth'] = $datas;
+			$data['content']['delete_access'] = $this->auth->has_permission('Delete Teeth');
 
 			if (count($teeth) >= 0) {
 				$data['type'] = 'success';

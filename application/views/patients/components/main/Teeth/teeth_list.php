@@ -31,9 +31,11 @@
 								<a href="javascript:updateTeeth('<?= $tooth['id'] ?>', '<?= $profile['id'] ?>')"
 								   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span
 										class="fa-regular fa-pen-to-square fs-14"></span></a>
+								<?php if($ci->auth->has_permission('Delete Teeth')): ?>
 								<a href="javascript:delete_via_alert('<?= $tooth['id'] ?>', '<?= base_url() ?>admin/delete_tooth', 'teethTable', update_balance)"
 								   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span
 										class="fa-solid fa-trash-can fs-14"></span></a>
+								<?php endif; ?>
 							</div>
 						</td>
 					</tr>
