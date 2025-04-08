@@ -75,25 +75,16 @@
 			dataType: 'json',
 			success: function (response) {
 				if (response.status === 'success') {
-					$.growl.notice1({
-						title: response.title,
-						message: response.message
-					});
+					toastr["success"](response.message, response.title)
 				} else {
-					$.growl.error1({
-						title: response.title,
-						message: response.message
-					});
+					toastr["error"](response.message, response.title)
 				}
 
 				cancelAllToggles();
 				location.reload();
 			},
 			error: function () {
-				$.growl.error1({
-					title: "<?= $ci->lang('error') ?>",
-					message: "something went wrong . . . "
-				});
+				toastr["error"]("something went wrong . . . ", '<?= $ci->lang('error') ?>')
 			}
 		});
 	}
