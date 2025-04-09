@@ -402,6 +402,8 @@ class Admin extends CI_Controller
 					$btns .= $this->mylibrary->generateBtnBan($data['id'], 'admin/change_status_user');
 				}
 				$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_user');
+				$btns .= $this->mylibrary->generateBtnUpdate($insert[1], 'updateUser');
+
 				$this->load->model('Role_model');
 				$role_name = $this->Role_model->get_role($datas['role_id'])[0]->role_name;
 
@@ -409,6 +411,87 @@ class Admin extends CI_Controller
 					$datas['fname'],
 					$datas['lname'],
 					$datas['username'],
+					$this->mylibrary->generateUserBadge($this->input->post('status')),
+					$role_name,
+					$this->lang($this->mylibrary->check_user_type($datas['role'])),
+					$this->mylibrary->btn_group($btns)
+				);
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['title'] = $this->lang('error');
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
+
+	public function update_user()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert user name error')));
+		$this->form_validation->set_rules('lname', 'lname', 'trim|required', array('required' => $this->lang('insert user lname error')));
+		$this->form_validation->set_rules('role', 'role', 'trim|required', array('required' => $this->lang('insert user role error')));
+		$this->form_validation->set_rules('user_role', 'user_role', 'trim|required', array('required' => $this->lang('insert user role error')));
+		$this->form_validation->set_rules('status', 'status', 'trim|required', array('required' => $this->lang('insert user status error')));
+		if ($this->input->post('password') != '') {
+			$this->form_validation->set_rules('password', 'password', 'trim|required', array('required' => $this->lang('insert user password error')));
+			$this->form_validation->set_rules('confirm', 'confirm', 'trim|required|matches[password]', array('required' => $this->lang('insert user confirm error'), 'matches' => $this->lang('insert user confirm matches error')));
+		}
+
+		$this->form_validation->set_rules('working_start_time', 'working_start_time', 'trim');
+		$this->form_validation->set_rules('working_end_time', 'working_end_time', 'trim');
+
+		if ($this->form_validation->run()) {
+
+			$datas = array(
+				'fname' => $this->input->post('name'),
+				'lname' => $this->input->post('lname'),
+				'role' => $this->input->post('role'),
+				'role_id' => $this->input->post('user_role'),
+				'status' => $this->input->post('status'),
+				'working_start_time' => $this->input->post('working_start_time'),
+				'working_end_time' => $this->input->post('working_end_time'),
+			);
+			if ($this->input->post('password') != '') {
+				$datas['password'] = $this->mylibrary->hash($this->input->post('password'));
+			}
+			$update = $this->Admin_model->update_user($datas, $this->input->post('id'));
+			if ($update) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');
+				$data['alert']['text'] = $this->lang('insert user success');
+				$data['alert']['type'] = 'success';
+
+				$id = $this->input->post('id');
+
+				$data['id'] = $id;
+
+				$btns = '';
+				if ($this->input->post('status') == 'P') {
+					$btns .= $this->mylibrary->generateBtnUnlock($data['id'], 'admin/change_status_user');
+				} elseif ($this->input->post('status') == 'A') {
+					$btns .= $this->mylibrary->generateBtnBan($data['id'], 'admin/change_status_user');
+				}
+				$btns .= $this->mylibrary->generateBtnDelete($id, 'admin/delete_user');
+				$btns .= $this->mylibrary->generateBtnUpdate($id, 'updateUser');
+				$this->load->model('Role_model');
+				$role_name = $this->Role_model->get_role($datas['role_id'])[0]->role_name;
+
+				$data['tr'] = array(
+					$datas['fname'],
+					$datas['lname'],
+					$this->input->post('username'),
 					$this->mylibrary->generateUserBadge($this->input->post('status')),
 					$role_name,
 					$this->lang($this->mylibrary->check_user_type($datas['role'])),
