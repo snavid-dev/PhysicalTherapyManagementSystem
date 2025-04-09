@@ -133,13 +133,21 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('password') ?> <span
 																class="text-red">*</span></label>
-														<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
-															<input type="password" name="password" class="form-control" id="userPassword"
+														<div
+															style="display: flex; gap: 10px; justify-content: center; align-items: center">
+															<input type="password" name="password" class="form-control"
+																   id="userPassword"
 																   placeholder="<?= $ci->lang('password') ?>"
 																   autocomplete="off">
 
-															<span class="eyeIcon" id="userPasswordIcon" onclick="activePassword('userPassword', 'userPasswordIcon')">
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+															<span class="eyeIcon" id="userPasswordIcon"
+																  onclick="activePassword('userPassword', 'userPasswordIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+											 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+											 stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path
+												d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12"
+																										  cy="12"
+																										  r="3"/></svg>
 									</span>
 														</div>
 
@@ -150,13 +158,21 @@
 														<label class="form-label"><?= $ci->lang('confirm password') ?>
 															<span class="text-red">*</span></label>
 
-														<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
-															<input type="password" name="confirm" class="form-control" id="userConfirmPassword"
+														<div
+															style="display: flex; gap: 10px; justify-content: center; align-items: center">
+															<input type="password" name="confirm" class="form-control"
+																   id="userConfirmPassword"
 																   placeholder="<?= $ci->lang('confirm password') ?>"
 																   autocomplete="off">
 
-															<span class="eyeIcon" id="userConfirmPasswordIcon" onclick="activePassword('userConfirmPassword', 'userConfirmPasswordIcon')">
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+															<span class="eyeIcon" id="userConfirmPasswordIcon"
+																  onclick="activePassword('userConfirmPassword', 'userConfirmPasswordIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+											 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+											 stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path
+												d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12"
+																										  cy="12"
+																										  r="3"/></svg>
 									</span>
 														</div>
 
@@ -210,24 +226,14 @@
 									<div class="modal-body">
 										<form id="update_user">
 											<div class="row">
-												<div class="col-sm-12 col-md-4">
-													<div class="form-group">
-														<label class="form-label"><?= $ci->lang('image') ?> <span
-																class="text-red">*</span></label>
-														<input type="file" id="inputImage_update" class="form-control">
-														<input type="hidden" id="inputImageHiddenInput_update"
-															   name="uploadedImage" class="form-control">
-													</div>
-												</div>
-											</div>
-											<div class="row">
 
 												<!--first name-->
 												<div class="col-sm-12 col-md-4">
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('name') ?> <span
 																class="text-red">*</span></label>
-														<input type="text" name="name" id="firstName_update" class="form-control"
+														<input type="text" name="name" id="firstName_update"
+															   class="form-control"
 															   placeholder="<?= $ci->lang('name') ?>">
 													</div>
 												</div>
@@ -236,7 +242,8 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('lname') ?> <span
 																class="text-red">*</span></label>
-														<input type="text" name="lname" id="lastName_update" class="form-control"
+														<input type="text" name="lname" id="lastName_update"
+															   class="form-control"
 															   placeholder="<?= $ci->lang('lname') ?>">
 													</div>
 												</div>
@@ -245,9 +252,11 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('username') ?> <span
 																class="text-red">*</span></label>
-														<input type="text" name="username" id="userName_update" class="form-control"
+														<input type="text" name="username" id="userName_update"
+															   class="form-control"
 															   placeholder="<?= $ci->lang('username') ?>"
 															   autocomplete="username" disabled>
+														<input type="hidden" id="usernameHidden" name="username">
 													</div>
 												</div>
 												<!--user role -->
@@ -255,7 +264,8 @@
 													<div class="form-group">
 														<label class="form-label"><?= ucwords('role') ?> <span
 																class="text-red">*</span></label>
-														<select class="form-control form-select" name="user_role" id="userRole_update"
+														<select class="form-control form-select" name="user_role"
+																id="userRole_update"
 																data-bs-placeholder="Select" tabindex="-1"
 																aria-hidden="true">
 															<option label="<?= $ci->lang('select') ?>"></option>
@@ -271,7 +281,8 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('account type') ?> <span
 																class="text-red">*</span></label>
-														<select class="form-control form-select" name="role" id="accountType_update"
+														<select class="form-control form-select" name="role"
+																id="accountType_update"
 																data-bs-placeholder="Select" tabindex="-1"
 																aria-hidden="true"
 																onchange="if (this.value == 'D') {$('.working_time').show()} else{$('.working_time').hide()}">
@@ -288,7 +299,8 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('status') ?> <span
 																class="text-red">*</span></label>
-														<select name="status" id="status_update" class="form-control form-select">
+														<select name="status" id="status_update"
+																class="form-control form-select">
 															<option value="A"
 																	selected><?= $ci->lang('accepted') ?></option>
 															<option value="P"><?= $ci->lang('pending') ?></option>
@@ -300,13 +312,21 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('password') ?> <span
 																class="text-red">*</span></label>
-														<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
-															<input type="password" name="password" id="password_update" class="form-control"
+														<div
+															style="display: flex; gap: 10px; justify-content: center; align-items: center">
+															<input type="password" name="password" id="password_update"
+																   class="form-control"
 																   placeholder="<?= $ci->lang('password') ?>"
 																   autocomplete="off">
 
-															<span class="eyeIcon" id="password_updateIcon" onclick="activePassword('password_update', 'password_updateIcon')">
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+															<span class="eyeIcon" id="password_updateIcon"
+																  onclick="activePassword('password_update', 'password_updateIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+											 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+											 stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path
+												d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12"
+																										  cy="12"
+																										  r="3"/></svg>
 									</span>
 														</div>
 
@@ -317,12 +337,20 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('confirm password') ?>
 															<span class="text-red">*</span></label>
-														<div style="display: flex; gap: 10px; justify-content: center; align-items: center">
-															<input type="password" name="confirm" id="confirmPassword_update" class="form-control"
+														<div
+															style="display: flex; gap: 10px; justify-content: center; align-items: center">
+															<input type="password" name="confirm"
+																   id="confirmPassword_update" class="form-control"
 																   placeholder="<?= $ci->lang('confirm password') ?>"
 																   autocomplete="off">
-															<span class="eyeIcon" id="confirmPassword_updateIcon" onclick="activePassword('confirmPassword_update', 'confirmPassword_updateIcon')">
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+															<span class="eyeIcon" id="confirmPassword_updateIcon"
+																  onclick="activePassword('confirmPassword_update', 'confirmPassword_updateIcon')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+											 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+											 stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path
+												d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12"
+																										  cy="12"
+																										  r="3"/></svg>
 									</span>
 
 														</div>
@@ -334,7 +362,8 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('start time') ?>
 															<span class="text-red">*</span></label>
-														<input type="time" name="working_start_time" id="startTime_update"
+														<input type="time" name="working_start_time"
+															   id="startTime_update"
 															   class="form-control"
 															   placeholder="<?= $ci->lang('start time') ?>"
 															   autocomplete="off">
@@ -345,9 +374,11 @@
 													<div class="form-group">
 														<label class="form-label"><?= $ci->lang('end time') ?>
 															<span class="text-red">*</span></label>
-														<input type="time" name="working_end_time" id="endTime_update" class="form-control"
+														<input type="time" name="working_end_time" id="endTime_update"
+															   class="form-control"
 															   placeholder="<?= $ci->lang('end time') ?>"
 															   autocomplete="off">
+														<input id="slug" name="id">
 													</div>
 												</div>
 											</div>
@@ -358,7 +389,7 @@
 												data-bs-dismiss="modal"><?= $ci->lang('cancel') ?><i
 												class="fa fa-close"></i></button>
 										<button class="btn btn-primary"
-												onclick="xhrSubmitMultiTable('insert_user', '<?= base_url('admin/insert_user') ?>', 'file-datatable', 'extralargemodal_update')"><?= $ci->lang('save') ?>
+												onclick="xhrUpdate('update_user', '<?= base_url('admin/update_user') ?>', 'extralargemodal_update')"><?= $ci->lang('save') ?>
 											<i class="fa fa-plus"></i></button>
 									</div>
 								</div>
@@ -513,22 +544,22 @@
 
 				$('#firstName_update').val(contents.fname).trigger('change');
 				$('#lastName_update').val(contents.lname).trigger('change');
+				$('#usernameHidden').val(contents.username).trigger('change');
 				$('#userName_update').val(contents.username).trigger('change');
 				$('#userRole_update').val(contents.role_id).trigger('change');
 				$('#accountType_update').val(contents.role).trigger('change');
 				$('#status_update').val(contents.status).trigger('change');
+				$('#slug').val(id);
 
 				// need to get sure start
 				let accountType = contents.role;
-				if (accountType === 'D'){
+				if (accountType === 'D') {
 					$('#startTime_update').val(contents.working_start_time).trigger('change');
 					$('#endTime_update').val(contents.working_end_time).trigger('change');
-				}else{
+				} else {
 					$('#startTime_update').val(' ')
 					$('#endTime_update').val(' ');
 				}
-				console.log(accountType);
-				// need to get sure end
 
 				$(`#extralargemodal_update`).modal('toggle');
 			}
