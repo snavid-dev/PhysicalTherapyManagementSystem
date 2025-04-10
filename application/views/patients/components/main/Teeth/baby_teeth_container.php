@@ -6,7 +6,7 @@
 
 		<div class="qi">
 
-			<div class="babytooth" onclick="insertBaby(this, toothe)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothe)">
 				<h6>E</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/j.png"
@@ -14,28 +14,28 @@
 			</div>
 
 
-			<div class="babytooth" onclick="insertBaby(this, toothi)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothi)">
 				<h6>D</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/i.png"
 					alt="" class="babytoothimg"/>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothh)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothh)">
 				<h6>C</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/h.png"
 					alt="" class="babytoothimg"/>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothg)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothg)">
 				<h6>B</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/g.png"
 					alt="" class="babytoothimg"/>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothf)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothf)">
 				<h6>A</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/f.png"
@@ -49,7 +49,7 @@
 
 		<div class="qii">
 
-			<div class="babytooth" onclick="toggleModal(this, toothe)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothe)">
 				<h6>A</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/e.png"
@@ -57,28 +57,28 @@
 			</div>
 
 
-			<div class="babytooth" onclick="toggleModal(this, toothd)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothd)">
 				<h6>B</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/d.png"
 					alt="" class="babytoothimg"/>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothc)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothc)">
 				<h6>C</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/c.png"
 					alt="" class="babytoothimg bigtooth"/>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothb)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothb)">
 				<h6>D</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/b.png"
 					alt="" class="babytoothimg bigtooth"/>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, tootha)">
+			<div class="babytooth" onclick="insertBaby_test(this, tootha)">
 				<h6>E</h6>
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/a.png"
@@ -96,7 +96,7 @@
 
 		<div class="qi">
 
-			<div class="babytooth" onclick="toggleModal(this, toothk)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothk)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/k.png"
 					alt="" class="babytoothimg bigtooth"/>
@@ -111,7 +111,7 @@
 				<h6>D</h6>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothm)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothm)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/m.png"
 					alt="" class="babytoothimg  bigtooth"/>
@@ -119,7 +119,7 @@
 				<h6>C</h6>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothn)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothn)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/n.png"
 					alt="" class="babytoothimg "/>
@@ -127,7 +127,7 @@
 				<h6>B</h6>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, tootho)">
+			<div class="babytooth" onclick="insertBaby_test(this, tootho)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/o.png"
 					alt="" class="babytoothimg "/>
@@ -142,7 +142,7 @@
 
 		<div class="qii">
 
-			<div class="babytooth" onclick="toggleModal(this, toothp)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothp)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/p.png"
 					alt="" class="babytoothimg "/>
@@ -150,7 +150,7 @@
 				<h6>A</h6>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothq)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothq)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/q.png"
 					alt="" class="babytoothimg "/>
@@ -159,7 +159,7 @@
 			</div>
 
 
-			<div class="babytooth" onclick="toggleModal(this, toothr)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothr)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/r.png"
 					alt="" class="babytoothimg "/>
@@ -168,7 +168,7 @@
 			</div>
 
 
-			<div class="babytooth" onclick="toggleModal(this, tooths)">
+			<div class="babytooth" onclick="insertBaby_test(this, tooths)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/s.png"
 					alt="" class="babytoothimg "/>
@@ -176,7 +176,7 @@
 				<h6>D</h6>
 			</div>
 
-			<div class="babytooth" onclick="insertBaby_test(this, tootht)" style="border: 3px solid red">
+			<div class="babytooth" onclick="insertBaby_test(this, tootht)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/t.png"
 					alt="" class="babytoothimg "/>
