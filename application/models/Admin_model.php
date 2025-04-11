@@ -431,6 +431,23 @@ class Admin_model extends CI_Model
 		return $this->db->insert('endo_has_services', $data);
 	}
 
+	public function get_endodontic_id_by_tooth_id($tooth_id)
+	{
+		$this->db->select('id');
+		$this->db->from('endo');
+		$this->db->where('tooth_id', $tooth_id);
+		$result = $this->db->get()->row_array();
+
+		return $result ? $result['id'] : null;
+	}
+
+	public function create_endo_record($endo_data)
+	{
+		$this->db->insert('endo', $endo_data);
+		return $this->db->insert_id();  // Get the last inserted ID (the new `endo_id`)
+	}
+
+
 	public function get_endo_has_service($where = array())
 	{
 		return $this->db->get_where('endo_has_services', $where)->result_array();
@@ -1533,44 +1550,128 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 	// **Delete Old Restorative Basic Info**
 	public function delete_restorative_basic_info($tooth_id)
 	{
-		$this->db->where('restorative_id', $tooth_id);
-		return $this->db->delete('restorative_has_basic_information_teeth');
+		// Get the restorative_id based on tooth_id
+		$restorative_id = $this->get_restorative_id_by_tooth($tooth_id);
+
+		// If restorative_id exists, delete the related records
+		if ($restorative_id) {
+			$this->db->where('restorative_id', $restorative_id);
+			return $this->db->delete('restorative_has_basic_information_teeth');
+		}
+
+		return true;
 	}
 
-	// **Delete Old Prosthodontic Basic Info**
+// **Delete Old Prosthodontic Basic Info**
 	public function delete_prosthodontics_basic_info($tooth_id)
 	{
-		$this->db->where('prosthodontics_id', $tooth_id);
-		return $this->db->delete('prosthodontics_has_basic_information_teeth');
+		// Get the prosthodontics_id based on tooth_id
+		$prosthodontics_id = $this->get_prosthodontics_id_by_tooth($tooth_id);
+
+		// If prosthodontics_id exists, delete the related records
+		if ($prosthodontics_id) {
+			$this->db->where('prosthodontics_id', $prosthodontics_id);
+			return $this->db->delete('prosthodontics_has_basic_information_teeth');
+		}
+
+		return true;
 	}
 
-
-	// **Delete Old Endo Services**
+// **Delete Old Endo Services**
 	public function delete_endo_services($tooth_id)
 	{
-		$this->db->where('endo_id', $tooth_id);
-		return $this->db->delete('endo_has_services');
+		// Get the endo_id based on tooth_id
+		$endo_id = $this->get_endo_id_by_tooth($tooth_id);
+
+		// If endo_id exists, delete the related records
+		if ($endo_id) {
+			$this->db->where('endo_id', $endo_id);
+			return $this->db->delete('endo_has_services');
+		}
+
+		return true;
 	}
 
-	// **Delete Old Restorative Services**
+// **Delete Old Restorative Services**
 	public function delete_restorative_services($tooth_id)
 	{
-		$this->db->where('restorative_id', $tooth_id);
-		return $this->db->delete('restorative_has_services');
+		// Get the restorative_id based on tooth_id
+		$restorative_id = $this->get_restorative_id_by_tooth($tooth_id);
+
+		// If restorative_id exists, delete the related records
+		if ($restorative_id) {
+			$this->db->where('restorative_id', $restorative_id);
+			return $this->db->delete('restorative_has_services');
+		}
+
+		return true;
 	}
 
-	// **Delete Old Prosthodontic Services**
+// **Delete Old Prosthodontic Services**
 	public function delete_prosthodontics_services($tooth_id)
 	{
-		$this->db->where('prosthodontics_id', $tooth_id);
-		return $this->db->delete('prosthodontics_has_services');
+		// Get the prosthodontics_id based on tooth_id
+		$prosthodontics_id = $this->get_prosthodontics_id_by_tooth($tooth_id);
+
+		// If prosthodontics_id exists, delete the related records
+		if ($prosthodontics_id) {
+			$this->db->where('prosthodontics_id', $prosthodontics_id);
+			return $this->db->delete('prosthodontics_has_services');
+		}
+
+		return true;
 	}
 
-	// **Delete Old Endo Basic Info**
+// **Delete Old Endo Basic Info**
 	public function delete_endo_basic_info($tooth_id)
 	{
-		$this->db->where('endo_id', $tooth_id);
-		return $this->db->delete('endo_has_basic_information_teeth');
+		// Get the endo_id based on tooth_id
+		$endo_id = $this->get_endo_id_by_tooth($tooth_id);
+
+		// If endo_id exists, delete the related records
+		if ($endo_id) {
+			$this->db->where('endo_id', $endo_id);
+			return $this->db->delete('endo_has_basic_information_teeth');
+		}
+
+		return true;
+	}
+
+// Helper methods to get the related ids based on tooth_id
+	private function get_endo_id_by_tooth($tooth_id)
+	{
+		// Fetch the related endo_id based on the tooth_id
+		$this->db->select('id');
+		$this->db->from('endo');
+		$this->db->where('tooth_id', $tooth_id);
+		$query = $this->db->get();
+
+		$result = $query->row_array();
+		return $result ? $result['id'] : null;
+	}
+
+	private function get_restorative_id_by_tooth($tooth_id)
+	{
+		// Fetch the related restorative_id based on the tooth_id
+		$this->db->select('id');
+		$this->db->from('restorative');
+		$this->db->where('tooth_id', $tooth_id);
+		$query = $this->db->get();
+
+		$result = $query->row_array();
+		return $result ? $result['id'] : null;
+	}
+
+	private function get_prosthodontics_id_by_tooth($tooth_id)
+	{
+		// Fetch the related prosthodontics_id based on the tooth_id
+		$this->db->select('id');
+		$this->db->from('prosthodontics');
+		$this->db->where('tooth_id', $tooth_id);
+		$query = $this->db->get();
+
+		$result = $query->row_array();
+		return $result ? $result['id'] : null;
 	}
 
 
