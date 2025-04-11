@@ -7079,7 +7079,6 @@ class Admin extends CI_Controller
 			$update_status = $this->Admin_model->update_tooth($tooth_id, $main_data);
 
 			if ($update_status) {
-
 				// **Delete existing basic info & services**
 				$this->Admin_model->delete_endo_basic_info($tooth_id);
 				$this->Admin_model->delete_restorative_basic_info($tooth_id);
@@ -7108,14 +7107,25 @@ class Admin extends CI_Controller
 						'r_width5' => $this->input->post('r_width5'),
 					);
 
-					$this->Admin_model->update_endo($tooth_id, $endo_data);
 
-					// Insert Endo Services
+					$endos = $this->Admin_model->single_endo_by_tooth_id($tooth_id);
+
+
+					if (count($endos) == 1) {
+						$this->Admin_model->update_endo($tooth_id, $endo_data);
+						$endo = $endos[0];
+					} else {
+						$endo_data['tooth_id'] = $tooth_id;
+						$this->Admin_model->insert_endo($endo_data);
+						$endo = $this->Admin_model->single_endo_by_tooth_id($tooth_id)[0];
+					}
+
+					// Insert Endo Services (use endo_id instead of tooth_id)
 					$endo_services = explode(',', $this->input->post('endo_services'));
-					foreach ($endo_services as $endo_service) {
+					foreach ($endo_services as $service_id) {
 						$this->Admin_model->insert_endo_has_services(array(
-							'endo_id' => $tooth_id,
-							'services_id' => $endo_service
+							'endo_id' => $endo['id'],  // Using endo_id correctly
+							'services_id' => $service_id
 						));
 					}
 
@@ -7123,14 +7133,14 @@ class Admin extends CI_Controller
 					foreach (['typeObturation', 'TypeSealer', 'TypeIrrigation'] as $key) {
 						if ($this->input->post($key)) {
 							$this->Admin_model->insert_endo_basic_info(array(
-								'endo_id' => $tooth_id,
+								'endo_id' => $endo['id'],
 								'basic_information_teeth_id' => $this->input->post($key)
 							));
 						}
 					}
 				}
 
-				// Handle Restorative Data
+				// Handle Restorative Data (same logic for checking services, and avoiding duplicates)
 				if ($is_restorative) {
 					$restorative_data = array(
 						'services' => $this->input->post('restorative_services'),
@@ -7139,21 +7149,34 @@ class Admin extends CI_Controller
 						'modify_date' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' - ' . date('H:i:s'),
 					);
 
-					$this->Admin_model->update_restorative($tooth_id, $restorative_data);
+					$restorative_check = $this->Admin_model->single_restorative_by_tooth_id($tooth_id);
+
+					if (count($restorative_check) == 1) {
+						$this->Admin_model->update_restorative($tooth_id, $restorative_data);
+						$restorative = $restorative_check[0];
+					} else {
+						$restorative_data['tooth_id'] = $tooth_id;
+						$this->Admin_model->insert_restorative($restorative_data);
+						$restorative_check = $this->Admin_model->single_restorative_by_tooth_id($tooth_id);
+						$restorative = $restorative_check[0];
+					}
+
+
 					// Insert Restorative Services
 					$restorative_services = explode(',', $this->input->post('restorative_services'));
 					foreach ($restorative_services as $restorative_service) {
-						$this->Admin_model->insert_restorative_has_services(array(
-							'restorative_id' => $tooth_id,
-							'services_id' => $restorative_service
-						));
+
+							$this->Admin_model->insert_restorative_has_services(array(
+								'restorative_id' => $restorative['id'],
+								'services_id' => $restorative_service
+							));
 					}
 
 					// Insert Restorative Basic Info
 					foreach (['CariesDepth', 'Material', 'RestorativeMaterial', 'CompositeBrand', 'bondingBrand', 'AmalgamBrand'] as $key) {
 						if ($this->input->post($key)) {
 							$this->Admin_model->insert_restorative_basic_info(array(
-								'restorative_id' => $tooth_id,
+								'restorative_id' => $restorative['id'],
 								'basic_information_teeth_id' => $this->input->post($key)
 							));
 						}
@@ -7169,12 +7192,24 @@ class Admin extends CI_Controller
 						'modify_date' => $this->mylibrary->getCurrentShamsiDate()['date'] . ' - ' . date('H:i:s'),
 					);
 
-					$this->Admin_model->update_prosthodontics($tooth_id, $prosthodontics_data);
+					$pro_check = $this->Admin_model->single_prosthodontic_by_tooth_id($tooth_id);
+
+					if(count($pro_check) == 1){
+						$this->Admin_model->update_prosthodontics($tooth_id, $prosthodontics_data);
+						$pro = $pro_check[0];
+					}else{
+						$prosthodontics_data['tooth_id'] = $tooth_id;
+						$this->Admin_model->insert_prosthodontics($prosthodontics_data);
+						$pro_check = $this->Admin_model->single_prosthodontic_by_tooth_id($tooth_id);
+						$pro = $pro_check[0];
+					}
+
+
 					// Insert Prosthodontic Services
 					$pro_services = explode(',', $this->input->post('pro_services'));
 					foreach ($pro_services as $pro_service) {
 						$this->Admin_model->insert_prosthodontics_has_services(array(
-							'prosthodontics_id' => $tooth_id,
+							'prosthodontics_id' => $pro['id'],
 							'services_id' => $pro_service
 						));
 					}
@@ -7183,7 +7218,7 @@ class Admin extends CI_Controller
 					foreach (['type_restoration', 'filling_material', 'post', 'PrefabricatedPost', 'customPost', 'crown_material', 'pontic_design', 'impression_technique', 'impression_material', 'CementMaterial'] as $key) {
 						if ($this->input->post($key)) {
 							$this->Admin_model->insert_prosthodontics_basic_info(array(
-								'prosthodontics_id' => $tooth_id,
+								'prosthodontics_id' => $pro['id'],
 								'basic_information_teeth_id' => $this->input->post($key)
 							));
 						}
