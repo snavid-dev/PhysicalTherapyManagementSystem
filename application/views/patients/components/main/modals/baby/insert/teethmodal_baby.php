@@ -29,7 +29,7 @@ $ci = get_instance();
 						</label>
 						<select class="form-control select2-show-search form-select" name="diagnoses"
 							style="width: 300px !important;"
-							onchange="multiple_value('#select_diagnose', '#diagnose_adult')" id="select_diagnose"
+							onchange="multiple_value('#select_diagnose', '#diagnose_adult')" id="select_diagnose_baby"
 							data-placeholder="<?= $ci->lang('select') ?>" multiple>
 							<option label="<?= $ci->lang('select') ?>" value=""></option>
 
@@ -107,7 +107,7 @@ $ci = get_instance();
 				</button>
 
 				<button class="btn btn-primary"
-					onclick="submitWithoutDatatableMulti(['insertTooth', 'demo_form', 'insertFixing', 'insertPro', 'checkboxes'], '<?= base_url() ?>admin/insert_tooth', '','teethmodal', list_teeth)">
+					onclick="submitWithoutDatatableMulti(['insertTooth_baby', 'demo_form_baby', 'insertFixing_baby', 'insertPro_baby', 'checkboxes_baby'], '<?= base_url() ?>admin/insert_tooth', '','teethmodal', list_teeth)">
 					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
 				</button>
 
