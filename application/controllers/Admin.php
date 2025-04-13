@@ -74,6 +74,7 @@ class Admin extends CI_Controller
 
 	public function users()
 	{
+		$this->check_permission_page();
 		$this->load->model('Role_model');
 		$data['title'] = $this->lang('users');
 		$data['page'] = "users";
@@ -88,6 +89,7 @@ class Admin extends CI_Controller
 
 	public function leave()
 	{
+		$this->check_permission_page();
 		$data['title'] = $this->lang('doctors leave requests');
 		$data['page'] = "leave";
 		$data['leaves'] = ($this->Admin_model->get_leave_requests()) ? $this->Admin_model->get_leave_requests() : array();
@@ -791,6 +793,7 @@ class Admin extends CI_Controller
 
 	public function primary_info()
 	{
+		$this->check_permission_page();
 		$data['title'] = $this->lang('primary information');
 		$data['page'] = "primary_info";
 		$data['services'] = $this->Admin_model->get_services();
@@ -7166,10 +7169,10 @@ class Admin extends CI_Controller
 					$restorative_services = explode(',', $this->input->post('restorative_services'));
 					foreach ($restorative_services as $restorative_service) {
 
-							$this->Admin_model->insert_restorative_has_services(array(
-								'restorative_id' => $restorative['id'],
-								'services_id' => $restorative_service
-							));
+						$this->Admin_model->insert_restorative_has_services(array(
+							'restorative_id' => $restorative['id'],
+							'services_id' => $restorative_service
+						));
 					}
 
 					// Insert Restorative Basic Info
@@ -7194,10 +7197,10 @@ class Admin extends CI_Controller
 
 					$pro_check = $this->Admin_model->single_prosthodontic_by_tooth_id($tooth_id);
 
-					if(count($pro_check) == 1){
+					if (count($pro_check) == 1) {
 						$this->Admin_model->update_prosthodontics($tooth_id, $prosthodontics_data);
 						$pro = $pro_check[0];
-					}else{
+					} else {
 						$prosthodontics_data['tooth_id'] = $tooth_id;
 						$this->Admin_model->insert_prosthodontics($prosthodontics_data);
 						$pro_check = $this->Admin_model->single_prosthodontic_by_tooth_id($tooth_id);
@@ -8003,6 +8006,7 @@ class Admin extends CI_Controller
 	public
 	function roles()
 	{
+		$this->check_permission_page();
 		$this->load->model('Role_model');
 		$data['title'] = $this->lang('role and permission');
 		$data['page'] = "users";
@@ -8072,12 +8076,27 @@ class Admin extends CI_Controller
 		}
 	}
 
-	function check_permission_page($permission_name)
+	function check_permission_page($permission_name = 'admin')
 	{
-		if (!$this->auth->has_permission($permission_name)) {
+		if ($permission_name == 'admin') {
+			if ($this->session->userdata($this->mylibrary->hash_session('u_role')) != ucwords('A')) {
+
+				show_404();
+				exit();
+			}
+
+		} elseif (!$this->auth->has_permission($permission_name)) {
 			show_404();
 			exit();
 		}
+	}
+
+	function isAdmin()
+	{
+		if ($this->session->userdata($this->mylibrary->hash_session('u_role')) == ucwords('A')) {
+			return true;
+		}
+		return false;
 	}
 
 	function check_permission_function($permission_name)
