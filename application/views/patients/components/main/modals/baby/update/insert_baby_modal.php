@@ -46,8 +46,8 @@
 																				<option value="D">D</option>
 																				<option value="E">E</option>
 																			</select>
-																			<input type="hidden" name=""
-																				   id="" value="">
+																			<input type="hidden" name="imgAddress"
+																				   id="child_teeth_location" value="">
 																			<input type="hidden" name="patient_id"
 																				   value="<?= $profile['id'] ?>">
 

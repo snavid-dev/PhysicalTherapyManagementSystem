@@ -103,7 +103,7 @@
 				<h6>E</h6>
 			</div>
 
-			<div class="babytooth" onclick="toggleModal(this, toothl)">
+			<div class="babytooth" onclick="insertBaby_test(this, toothl)">
 				<img
 					src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/baby/l.png"
 					alt="" class="babytoothimg  bigtooth"/>
@@ -210,6 +210,8 @@
 	function insertBaby_test(div, toothFunction) {
 		// Get image source and title from clicked .babytooth div
 		const imgSrc = div.querySelector('img').getAttribute('src');
+		let imagePath = imgSrc.substring(imgSrc.indexOf("/v2"));
+		$("#child_teeth_location").val(imagePath);
 		const title = div.querySelector('h6').innerText;
 
 		// Update all modal titles

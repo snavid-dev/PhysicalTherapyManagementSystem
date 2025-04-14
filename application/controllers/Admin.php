@@ -6654,10 +6654,10 @@ class Admin extends CI_Controller
 		$is_restorative = ($this->input->post('checkbox1') == 'restorative') ? TRUE : FALSE;
 		$is_prosthodontics = ($this->input->post('checkbox3') == 'Prosthodontics') ? TRUE : FALSE;
 
-		// echo '<pre>';
-		// print_r($_POST);
-		// echo '<pre>';
-		// exit;
+//		 echo '<pre>';
+//		 print_r($_POST);
+//		 echo '<pre>';
+//		 exit;
 
 		$data = array('type' => 'form_error', 'messages' => array());
 

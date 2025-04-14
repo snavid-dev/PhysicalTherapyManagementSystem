@@ -38,3 +38,5 @@ $ci->render('patients/components/main/modals/adult/update/teethmodal_update.php'
 //insert baby
 $ci->render('patients/components/main/modals/baby/insert/teethmodal_baby.php');
 
+//update baby
+$ci->render('patients/components/main/modals/baby/update/teethmodal_baby_update.php');
