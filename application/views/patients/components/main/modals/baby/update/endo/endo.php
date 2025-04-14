@@ -1,14 +1,14 @@
 <?php
 $ci = get_instance();
 ?>
-<div class="tab-pane fade p-0 border-0 bg-white p-4 rounded-3" id="endo-pane_baby" role="tabpanel"
+<div class="tab-pane fade p-0 border-0 bg-white p-4 rounded-3" id="endo-pane_baby_update" role="tabpanel"
 	 aria-labelledby="Endo-pane" tabindex="0">
 
 	<div class="modal-body">
 		<div class="row">
 			<div class="col-md-10">
 
-				<form id="insertTooth_baby">
+				<form id="insertTooth_baby_update">
 					<div class="row">
 
 						<div class="col-sm-12 col-md-4">
@@ -18,7 +18,7 @@ $ci = get_instance();
 								<label class="form-label">
 									<?= $ci->lang('tooth name') ?> <span class="text-red">*</span>
 								</label>
-								<select id="selectName_baby" name="name"
+								<select id="selectName_baby_update" name="name"
 										class="form-control select2-show-search form-select"
 										data-placeholder="<?= $ci->lang('select') ?>">
 									<option label="<?= $ci->lang('select') ?>"></option>
@@ -37,7 +37,7 @@ $ci = get_instance();
 									<?= $ci->lang('tooth location') ?> <span class="text-red">*</span>
 								</label>
 
-								<select id="locationSelector_baby" name="location"
+								<select id="locationSelector_baby_update" name="location"
 										class="form-control select2-show-search form-select"
 										data-placeholder="<?= $ci->lang('select') ?>">
 									<option label="<?= $ci->lang('select') ?>"></option>
@@ -50,15 +50,15 @@ $ci = get_instance();
 						</div>
 
 						<div class="col-sm-12 col-md-4">
-							<div class="form-group jdp" id="main-divs_baby">
+							<div class="form-group jdp" id="main-divs_baby_update">
 								<label class="form-label">
 									<?= $ci->lang('number of canal') ?>
 								</label>
 
-								<select id="canalselector_baby" name="root_number"
+								<select id="canalselector_baby_update" name="root_number"
 										class="form-control select2-show-search form-select"
 										data-placeholder="<?= $ci->lang('select') ?>"
-										onchange="showRow('#canalselector_baby', '#firstRow_baby', '#secoundRow_baby', '#thirdRow_baby', '#fourthRow_baby', '#fifthRow_baby')">
+										onchange="showRow('#canalselector_baby_update', '#firstRow_baby_update', '#secoundRow_baby_update', '#thirdRow_baby_update', '#fourthRow_baby_update', '#fifthRow_baby_update')">
 									<option label="<?= $ci->lang('select') ?>"></option>
 
 									<option value="0">none</option>
@@ -77,7 +77,7 @@ $ci = get_instance();
 						<!-- Repeated canal rows -->
 						<?php for ($i = 1; $i <= 5; $i++): ?>
 							<div class="row"
-								 id="<?= ['first', 'secound', 'third', 'fourth', 'fifth'][$i - 1] ?>Row_baby"
+								 id="<?= ['first', 'secound', 'third', 'fourth', 'fifth'][$i - 1] ?>Row_baby_update"
 								 style="display: none;">
 								<div class="col-sm-12 col-md-6">
 									<div class="form-group">
@@ -86,7 +86,7 @@ $ci = get_instance();
 										</label>
 										<select name="r_name<?= $i ?>"
 												class="form-control select2-show-search form-select"
-												id="canalLocation<?= $i ?>_baby"
+												id="canalLocation<?= $i ?>_baby_update"
 												data-placeholder="<?= $ci->lang('select') ?>">
 											<option label="<?= $ci->lang('select') ?>"></option>
 											<?php foreach ($ci->dentist->canal_names() as $key => $value) : ?>
@@ -118,7 +118,7 @@ $ci = get_instance();
 								</label>
 								<select name="typeObturation"
 										class="form-control select2-show-search form-select"
-										id="instypeObturation_baby"
+										id="instypeObturation_baby_update"
 										data-placeholder="<?= $ci->lang('type of obturation') ?>">
 									<option label="<?= $ci->lang('select') ?>"></option>
 									<?php foreach ($typeOfAbturationList as $typeOfAbturation) : ?>
@@ -137,7 +137,7 @@ $ci = get_instance();
 								</label>
 								<select name="TypeSealer"
 										class="form-control select2-show-search form-select"
-										id="insTypeSealer_baby"
+										id="insTypeSealer_baby_update"
 										data-placeholder="<?= $ci->lang('type of sealer') ?>">
 									<option label="<?= $ci->lang('select') ?>"></option>
 									<?php foreach ($typeOfSealerList as $typeOfSealer) : ?>
@@ -155,7 +155,7 @@ $ci = get_instance();
 								</label>
 								<select name="TypeIrrigation"
 										class="form-control select2-show-search form-select"
-										id="insTypeIrrigation_baby"
+										id="insTypeIrrigation_baby_update"
 										data-placeholder="<?= $ci->lang('type of irrigation') ?>">
 									<option label="<?= $ci->lang('select') ?>"></option>
 									<?php foreach ($typeOfIrregationList as $typeOfIrregation) : ?>
@@ -172,16 +172,17 @@ $ci = get_instance();
 								<label class="form-label">
 									<?= $ci->lang('treatment') ?> <span class="text-red">*</span>
 								</label>
-								<input type="hidden" name="diagnose" id="diagnose_adultOld_baby">
+								<input type="hidden" name="diagnose" id="diagnose_adultOld_baby_update">
 								<select class="form-control select2-show-search form-select"
-										id="services_baby" onchange="service_price('#services_baby', '#services_input_baby', '#price_tooth_baby'), calculate_sum_baby()"
+										id="services_baby_update"
+										onchange="service_price('#services_baby_update', '#services_input_baby_update', '#price_tooth_baby_update'), calculate_sum_baby()"
 										data-placeholder="<?= $ci->lang('select') ?>" multiple>
 									<?php foreach ($endo_services as $service) : ?>
 										<option value="<?= $service['id'] ?>"><?= $service['name'] ?></option>
 									<?php endforeach; ?>
 								</select>
-								<input type="hidden" name="" id="adulth_teeth_location_baby" value="">
-								<input type="hidden" name="endo_services" id="services_input_baby">
+								<input type="hidden" name="imgAddress" id="adulth_teeth_location_baby_update" value="">
+								<input type="hidden" name="endo_services" id="services_input_baby_update">
 							</div>
 						</div>
 
@@ -191,7 +192,7 @@ $ci = get_instance();
 								<label class="form-label">
 									<?= $ci->lang('pay amount') ?> <span class="text-red">*</span>
 								</label>
-								<input type="number" name="price" id="price_tooth_baby" class="form-control"
+								<input type="number" name="price" id="price_tooth_baby_update" class="form-control"
 									   placeholder="<?= $ci->lang('pay amount') ?>">
 							</div>
 						</div>
@@ -214,21 +215,20 @@ $ci = get_instance();
 				<div class="modal-image-area">
 					<h2 class="modal-Title"></h2>
 					<img src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/up/PNG/1upup.png"
-						 class="modalimg" id="modalImage_baby">
+						 class="modalimg" id="modalImage_baby_update">
 					<div>
 						<label class="form-label">
 							<?= $ci->lang('pay amount') ?>
 						</label>
-						<input type="text" id="priceTag_endo_baby" class="form-control" name="total_price">
+						<input type="text" id="priceTag_endo_baby_update" class="form-control" name="total_price">
 					</div>
 				</div>
 			</div>
 
-<!--			teeth location_img-->
-			<input id="child_teeth_location" type="hidden" name="imgAddress">
 			</form>
 		</div>
 	</div>
+
 
 	<!-- TODO: tooltip div Endo -->
 	<div class="item-hints">
