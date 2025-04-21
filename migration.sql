@@ -13,7 +13,7 @@ SELECT id,
 	   NULL,
 	   '08:00',
 	   '17:00'
-FROM haidari.users ON DUPLICATE KEY
+FROM homayoun.users ON DUPLICATE KEY
 UPDATE
 	fname =
 VALUES (fname), lname =
@@ -24,7 +24,7 @@ VALUES (status);
 -- services
 INSERT INTO canin.services (id, name, price, department)
 SELECT id, name, price, department
-FROM haidari.services ON DUPLICATE KEY
+FROM homayoun.services ON DUPLICATE KEY
 UPDATE
 	name =
 VALUES (name), price =
@@ -35,7 +35,7 @@ VALUES (department);
 INSERT
 INTO canin.customers (id, name, lname, phone, type, users_id)
 SELECT id, name, lname, phone, type, users_id
-FROM haidari.customers ON DUPLICATE KEY
+FROM homayoun.customers ON DUPLICATE KEY
 UPDATE
 	name =
 VALUES (name), lname =
@@ -57,7 +57,7 @@ SELECT `id`,
 	   `shamsi`,
 	   `customers_id`,
 	   `users_id`
-FROM haidari.`balance_sheet`;
+FROM homayoun.`balance_sheet`;
 
 -- Patient
 
@@ -80,19 +80,17 @@ SELECT `id`,
 	   `status`,
 	   `remarks`,
 	   `doctor_id`
-FROM haidari.`patient`;
+FROM homayoun.`patient`;
 
 
 -- Turn
 
 
 INSERT
-INTO canin.turn (id, patient_id, date, from_time, to_time, status, cr, pay_date, doctor_id)
+INTO canin.turn (id, patient_id, date, from_time, to_time, status, cr, pay_date, doctor_id, user_id, payment_status)
 SELECT id,
-	   patient_id, date, SUBSTRING_INDEX(hour, ',', 1) AS from_time, -- Extract first part
-	SUBSTRING_INDEX(hour, ',', -1) AS to_time,                       -- Extract second part
-	status, cr, pay_date, doctor_id
-FROM haidari.turn;
+	   patient_id, date, from_time, to_time, status, cr, pay_date, doctor_id, 1, status,
+FROM homayoun.turn;
 
 
 -- teeth
@@ -107,7 +105,7 @@ SELECT `id`,
 	   `price`,
 	   `users_id`,
 	   `patient_id`
-FROM haidari.`tooth`;
+FROM homayoun.`tooth`;
 
 
 -- Tooth has diagnose
@@ -116,7 +114,7 @@ INSERT
 INTO canin.`tooth_has_diagnose` (`tooth_id`, `diagnose_id`)
 SELECT `tooth_id`,
 	   `diagnose_id`
-FROM haidari.`tooth_has_diagnose`;
+FROM homayoun.`tooth_has_diagnose`;
 
 
 -- endo
@@ -141,7 +139,7 @@ SELECT `id`,
 	   `root_number`,
 	   `modify_date`,
 	   `tooth_id`
-FROM haidari.`endo`;
+FROM homayoun.`endo`;
 
 
 -- endo has basic information
@@ -150,7 +148,7 @@ INSERT
 INTO canin.`endo_has_basic_information_teeth` (`endo_id`, `basic_information_teeth_id`)
 SELECT `endo_id`,
 	   `basic_information_teeth_id`
-FROM haidari.`endo_has_basic_information_teeth`;
+FROM homayoun.`endo_has_basic_information_teeth`;
 
 
 -- endo has service
@@ -158,14 +156,14 @@ INSERT
 INTO canin.`endo_has_services` (`endo_id`, `services_id`)
 SELECT `endo_id`,
 	   `services_id`
-FROM haidari.`endo_has_services`;
+FROM homayoun.`endo_has_services`;
 
 
 -- restorative
 INSERT
 INTO canin.`restorative` (`id`, `details`, `services`, `price`, `modify_date`, `tooth_id`)
 SELECT `id`, `details`, `services`, `price`, `modify_date`, `tooth_id`
-FROM haidari.`restorative`;
+FROM homayoun.`restorative`;
 
 
 -- restorative has basic information
@@ -174,7 +172,7 @@ INSERT
 INTO canin.`restorative_has_basic_information_teeth` (`restorative_id`, `basic_information_teeth_id`)
 SELECT `restorative_id`,
 	   `basic_information_teeth_id`
-FROM haidari.`restorative_has_basic_information_teeth`;
+FROM homayoun.`restorative_has_basic_information_teeth`;
 
 -- restorative has service
 
@@ -182,14 +180,14 @@ INSERT
 INTO canin.`restorative_has_services` (`restorative_id`, `services_id`)
 SELECT `restorative_id`,
 	   `services_id`
-FROM haidari.`restorative_has_services`;
+FROM homayoun.`restorative_has_services`;
 
 
 -- prosthodontics
 INSERT
 INTO canin.`prosthodontics` (`id`, `details`, `services`, `price`, `modify_date`, `tooth_id`)
 SELECT `id`, `details`, `services`, `price`, `modify_date`, `tooth_id`
-FROM haidari.`prosthodontics`;
+FROM homayoun.`prosthodontics`;
 
 
 -- prosthodontics has basic information
@@ -198,7 +196,7 @@ INSERT
 INTO canin.`prosthodontics_has_basic_information_teeth` (`prosthodontics_id`, `basic_information_teeth_id`)
 SELECT `prosthodontics_id`,
 	   `basic_information_teeth_id`
-FROM haidari.`prosthodontics_has_basic_information_teeth`;
+FROM homayoun.`prosthodontics_has_basic_information_teeth`;
 
 -- prosthodontics has service
 
@@ -206,23 +204,23 @@ INSERT
 INTO canin.`prosthodontics_has_services` (`prosthodontics_id`, `services_id`)
 SELECT `prosthodontics_id`,
 	   `services_id`
-FROM haidari.`prosthodontics_has_services`;
+FROM homayoun.`prosthodontics_has_services`;
 
 
 -- prescription
 
 INSERT
 INTO canin.`prescription` (`id`, `medicine_1`, `usageType_1`, `day_1`, `time_1`, `doze_1`, `unit_1`, `amount_1`,
-				   `medicine_2`, `usageType_2`, `day_2`, `time_2`, `doze_2`, `unit_2`, `amount_2`,
-				   `medicine_3`, `usageType_3`, `day_3`, `time_3`, `doze_3`, `unit_3`, `amount_3`,
-				   `medicine_4`, `usageType_4`, `day_4`, `time_4`, `doze_4`, `unit_4`, `amount_4`,
-				   `medicine_5`, `usageType_5`, `day_5`, `time_5`, `doze_5`, `unit_5`, `amount_5`,
-				   `medicine_6`, `usageType_6`, `day_6`, `time_6`, `doze_6`, `unit_6`, `amount_6`,
-				   `medicine_7`, `usageType_7`, `day_7`, `time_7`, `doze_7`, `unit_7`, `amount_7`,
-				   `medicine_8`, `usageType_8`, `day_8`, `time_8`, `doze_8`, `unit_8`, `amount_8`,
-				   `medicine_9`, `usageType_9`, `day_9`, `time_9`, `doze_9`, `unit_9`, `amount_9`,
-				   `medicine_10`, `usageType_10`, `day_10`, `time_10`, `doze_10`, `unit_10`, `amount_10`,
-				   `patient_id`, `users_id`, `date_time`)
+						   `medicine_2`, `usageType_2`, `day_2`, `time_2`, `doze_2`, `unit_2`, `amount_2`,
+						   `medicine_3`, `usageType_3`, `day_3`, `time_3`, `doze_3`, `unit_3`, `amount_3`,
+						   `medicine_4`, `usageType_4`, `day_4`, `time_4`, `doze_4`, `unit_4`, `amount_4`,
+						   `medicine_5`, `usageType_5`, `day_5`, `time_5`, `doze_5`, `unit_5`, `amount_5`,
+						   `medicine_6`, `usageType_6`, `day_6`, `time_6`, `doze_6`, `unit_6`, `amount_6`,
+						   `medicine_7`, `usageType_7`, `day_7`, `time_7`, `doze_7`, `unit_7`, `amount_7`,
+						   `medicine_8`, `usageType_8`, `day_8`, `time_8`, `doze_8`, `unit_8`, `amount_8`,
+						   `medicine_9`, `usageType_9`, `day_9`, `time_9`, `doze_9`, `unit_9`, `amount_9`,
+						   `medicine_10`, `usageType_10`, `day_10`, `time_10`, `doze_10`, `unit_10`, `amount_10`,
+						   `patient_id`, `users_id`, `date_time`)
 SELECT `id`,
 	   `medicine_1`,
 	   `usageType_1`,
@@ -297,4 +295,4 @@ SELECT `id`,
 	   `patient_id`,
 	   `users_id`,
 	   `date_time`
-FROM haidari.`prescription`;
+FROM homayoun.`prescription`;
