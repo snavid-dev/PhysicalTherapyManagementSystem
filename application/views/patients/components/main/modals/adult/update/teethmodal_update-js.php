@@ -12,8 +12,6 @@ $ci = get_instance();
 				let result = JSON.parse(response);
 				let contents = result.content;
 				console.log(contents);
-				let aduthNameSelectDiv = document.getElementById('adulthToothName');
-				let babyNameSelectDiv = document.getElementById('babyToothName');
 
 				if (typeof contents.name === 'string' && !isNaN(contents.name)) {
 					clearFields(); // Clears all fields before setting new data
@@ -26,37 +24,12 @@ $ci = get_instance();
 					updateImages(contents.imgAddress);
 					initializeCheckboxes(contents);
 
-					aduthNameSelectDiv.classList.remove('nonDisplay');
-					babyNameSelectDiv.classList.add('nonDisplay');
-
 					if (contents.is_endo === "true") handleEndo(contents.endo);
 					if (contents.is_restorative === "true") handleRestorative(contents.restorative);
 					if (contents.is_prosthodontic === "true") handleProsthodontic(contents.prosthodontic);
 
 					$("#teethmodal_update").modal('toggle');
 				}
-
-				if (typeof contents.name === 'string' && /^[A-Ea-e]$/.test(contents.name)) {
-					clearFields(); // Clears all fields before setting new data
-
-					$('#patient_id_update').val(patient_id);
-					$('#tooth_id_update').val(id);
-
-					updateInputFields_baby(contents);
-					updateDiagnoseSelect(contents.diagnose);
-					updateImages(contents.imgAddress);
-					initializeCheckboxes(contents);
-
-					aduthNameSelectDiv.classList.add('nonDisplay');
-					babyNameSelectDiv.classList.remove('nonDisplay');
-
-					if (contents.is_endo === "true") handleEndo(contents.endo);
-					if (contents.is_restorative === "true") handleRestorative(contents.restorative);
-					if (contents.is_prosthodontic === "true") handleProsthodontic(contents.prosthodontic);
-
-					$("#teethmodal_update").modal('toggle');
-				}
-				
 			}
 		});
 	}
@@ -70,18 +43,8 @@ $ci = get_instance();
 
 	// ✅ Updates Basic Input Fields
 	function updateInputFields(contents) {
-
 		updateFields({
 			"#selectName_update": contents.name,
-			"#locationSelector_update": contents.location
-		});
-	}
-
-	// ✅ Updates Basic Input Fields
-	function updateInputFields_baby(contents) {
-
-		updateFields({
-			"#selectName_update_baby": contents.name,
 			"#locationSelector_update": contents.location
 		});
 	}
@@ -106,7 +69,7 @@ $ci = get_instance();
 	// ✅ Updates Images
 	function updateImages(imgAddress) {
 		const imgUrl = `https://canin-cdn.cyborgtech.co/assets/images/tooth${imgAddress}`;
-		$('#modalImage, #modalImage2').attr('src', imgUrl);
+		$('#modalImage2_update_restro, #modalImage_update').attr('src', imgUrl);
 	}
 
 	// ✅ Handles Endodontic Updates

@@ -11,7 +11,7 @@ $ci = get_instance();
 				<form id="updateTooth">
 					<div class="row">
 
-						<div class="col-sm-12 col-md-4 nonDisplay" id="adulthToothName">
+						<div class="col-sm-12 col-md-4">
 							<div class="form-group">
 								<input type="hidden" name="id" id="patient_id_update">
 								<input type="hidden" name="tooth_id" id="tooth_id_update" value="<?= $profile['id'] ?>">
@@ -34,28 +34,6 @@ $ci = get_instance();
 								</select>
 							</div>
 						</div>
-
-						<div class="col-sm-12 col-md-4 nonDisplay" id="babyToothName">
-							<div class="form-group">
-								<input type="hidden" name="id" id="patient_id_update">
-								<input type="hidden" name="tooth_id" id="tooth_id_update" value="<?= $profile['id'] ?>">
-								<label class="form-label">
-									<?= $ci->lang('tooth name') ?> <span class="text-red">*</span>
-								</label>
-								<!-- this is an important select tag remember it -->
-								<select id="selectName_update_baby" name="name"
-										class="form-control select2-show-search form-select"
-										data-placeholder="<?= $ci->lang('select') ?>">
-									<option label="<?= $ci->lang('select') ?>"></option>
-									<option value="A">A</option>
-									<option value="B">B</option>
-									<option value="C">C</option>
-									<option value="D">D</option>
-									<option value="E">E</option>
-								</select>
-							</div>
-						</div>
-
 
 						<div class="col-sm-12 col-md-4">
 							<div class="form-group">

@@ -199,7 +199,7 @@ $ci = get_instance();
 										<div class="form-group">
 											<label class="form-label"><?= $ci->lang('treatment') ?> <span
 													class="text-red">*</span></label>
-											<input type="hidden" name="diagnose" id="diagnose_baby">
+											<input type="hidden" name="diagnose" id="diagnose_adult_baby">
 											<select class="form-control select2-show-search form-select"
 													id="services_pro_baby"
 													onchange="service_price_pro('#services_pro_baby', '#services_input_pro_baby', '#price_tooth_pro_baby'), calculate_sum_baby()"
@@ -246,7 +246,7 @@ $ci = get_instance();
 						 class="modalimg" id="modalImage2_baby">
 					<div>
 						<label class="form-label"><?= $ci->lang('pay amount') ?></label>
-						<input type="text" id="priceTag_pro_baby" class="form-control">
+						<input type="text" id="priceTag_pro_baby" class="form-control" name="total_price">
 					</div>
 				</div>
 			</div>

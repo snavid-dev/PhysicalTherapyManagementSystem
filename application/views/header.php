@@ -301,6 +301,7 @@ $ci = get_instance();
 									class="side-menu__label"><?= $ci->lang('laboratory') ?></span>
 							</a>
 						</li>
+						<?php if($ci->auth->has_permission('View Receipts')): ?>
 						<li class="slide">
 							<a class="side-menu__item" data-bs-toggle="slide"
 							   href="<?= ($page == 'receipts') ? 'javascript:void(0)' : base_url('admin/receipts') ?>"><i
@@ -308,13 +309,16 @@ $ci = get_instance();
 									class="side-menu__label"><?= $ci->lang('receipts') ?></span>
 							</a>
 						</li>
-						<li class="slide">
-							<a class="side-menu__item" data-bs-toggle="slide"
-							   href="<?= ($page == 'accounts') ? 'javascript:void(0)' : base_url('admin/accounts') ?>"><i
-									class="side-menu__icon fa fa-id-card"></i><span
-									class="side-menu__label"><?= $ci->lang('financial accounts') ?></span>
-							</a>
-						</li>
+						<?php endif; ?>
+						<?php if ($ci->auth->has_permission('View Accounts')): ?>
+							<li class="slide">
+								<a class="side-menu__item" data-bs-toggle="slide"
+								   href="<?= ($page == 'accounts') ? 'javascript:void(0)' : base_url('admin/accounts') ?>"><i
+										class="side-menu__icon fa fa-id-card"></i><span
+										class="side-menu__label"><?= $ci->lang('financial accounts') ?></span>
+								</a>
+							</li>
+						<?php endif; ?>
 						<li class="sub-category">
 							<h3><?= $ci->lang('reports') ?></h3>
 						</li>

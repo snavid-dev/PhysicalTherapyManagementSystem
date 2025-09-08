@@ -180,7 +180,7 @@ $ci = get_instance();
 										<option value="<?= $service['id'] ?>"><?= $service['name'] ?></option>
 									<?php endforeach; ?>
 								</select>
-								<input type="hidden" name="" id="adulth_teeth_location_baby" value="">
+								<input type="hidden" name="imgAddress" id="adulth_teeth_location_baby" value="">
 								<input type="hidden" name="endo_services" id="services_input_baby">
 							</div>
 						</div>
@@ -224,8 +224,6 @@ $ci = get_instance();
 				</div>
 			</div>
 
-<!--			teeth location_img-->
-			<input id="child_teeth_location" type="hidden" name="imgAddress">
 			</form>
 		</div>
 	</div>

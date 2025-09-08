@@ -241,7 +241,11 @@
 								$types = explode(',', $lab['type']);
 								$typesName = '';
 								foreach ($types as $type) {
+								    if($type !== ''){
 									$typesName .= $ci->lang($type);
+								    }else{
+								        $typesName = '';
+								    }
 									$typesName .= ',';
 								}
 								?>
