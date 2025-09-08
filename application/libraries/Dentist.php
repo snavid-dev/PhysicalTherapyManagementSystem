@@ -3,7 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Dentist
 {
-	public $usage_type = 'offline';
+	public $usage_type = 'online';
 	public function __construct()
 	{
 	}
@@ -265,9 +265,9 @@ class Dentist
 				return $ci->language->languages('up right');
 			case 2:
 				return $ci->language->languages('up left');
-			case 3:
-				return $ci->language->languages('down right');
 			case 4:
+				return $ci->language->languages('down right');
+			case 3:
 				return $ci->language->languages('down left');
 
 			default:

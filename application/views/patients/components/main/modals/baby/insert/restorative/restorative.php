@@ -143,7 +143,7 @@ $ci = get_instance();
 													value="<?= $service['id'] ?>"><?= $service['name'] ?></option>
 											<?php endforeach; ?>
 										</select>
-										<input type="hidden" name=""
+										<input type="hidden" name="imgAddress"
 											   id="adulth_teeth_location_baby" value="">
 										<input type="hidden" name="restorative_services"
 											   id="services_input_restorative_baby">
@@ -192,7 +192,7 @@ $ci = get_instance();
 						<label class="form-label">
 							<?= $ci->lang('pay amount') ?>
 						</label>
-						<input type="text" id="priceTag_resto_baby" class="form-control">
+						<input type="text" id="priceTag_resto_baby" class="form-control" name="total_price">
 					</div>
 
 				</div>

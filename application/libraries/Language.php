@@ -816,6 +816,7 @@ class Language
 			'Create Expenses' => self::lang_arr('Create Expenses', 'ایجاد هزینه‌ها', 'لګښتونه جوړ کړئ'),
 			'Read Today Balance' => self::lang_arr('Read Today\'s Balance Sheet', 'خواندن ترازنامه امروز', 'د نن ورځې د بیلانس پاڼه لوستل'),
 			'View Accounts' => self::lang_arr('View Accounts', 'مشاهده حساب های مالی', 'not set'),
+			'View Receipts' => self::lang_arr('View Receipts', 'مشاهده رسیدات مالی', 'not set'),
 			'Create Payment' => self::lang_arr('Create Payment', 'ایجاد پرداخت', 'تادیه جوړول'),
 			'Read Printed Payment' => self::lang_arr('Read Printed Payment', 'خواندن پرداخت‌های چاپ‌شده', 'چاپ شوي تادیات لوستل'),
 			'Create New Account' => self::lang_arr('Create New Account', 'ایجاد حساب جدید', 'نوې حساب جوړ کړئ'),

@@ -4990,6 +4990,7 @@ class Admin extends CI_Controller
 
 	public function receipts()
 	{
+		$this->check_permission_page('View Receipts');
 		$data['title'] = $this->lang('receipts');
 		$data['page'] = "receipts";
 		$data['receipts'] = $this->Admin_model->get_receipts();
@@ -5243,6 +5244,7 @@ class Admin extends CI_Controller
 
 	public function turns()
 	{
+		$this->check_permission_page('Read Turns Index');
 		$data['title'] = $this->lang('turns');
 		$data['page'] = "turns";
 		$data['receipts'] = $this->Admin_model->get_turns_page();
@@ -6657,10 +6659,10 @@ class Admin extends CI_Controller
 		$is_restorative = ($this->input->post('checkbox1') == 'restorative') ? TRUE : FALSE;
 		$is_prosthodontics = ($this->input->post('checkbox3') == 'Prosthodontics') ? TRUE : FALSE;
 
-//		 echo '<pre>';
-//		 print_r($_POST);
-//		 echo '<pre>';
-//		 exit;
+		// echo '<pre>';
+		// print_r($_POST);
+		// echo '<pre>';
+		// exit;
 
 		$data = array('type' => 'form_error', 'messages' => array());
 
@@ -7784,9 +7786,12 @@ class Admin extends CI_Controller
 	public
 	function phoneBook()
 	{
+		$this->check_permission_function('Read Call Log Index');
 		$data['title'] = $this->lang('phonebook');
 		$data['page'] = "phonebook";
 		$data['receipts'] = $this->Admin_model->get_turns_phonebook();
+// 		print_r($data['receipts']);
+// 		exit;
 		$data['script'] = $this->mylibrary->generateSelect2();
 		$data['script_date'] = $this->mylibrary->script_datepicker();
 		$this->load->view('header', $data);
@@ -7862,7 +7867,7 @@ class Admin extends CI_Controller
 					$this->mylibrary->get_patient_name($service['name'], $service['lname'], $service['serial_id'], $service['gender']),
 					$service['doctor_name'],
 					$service['date'],
-					$this->dentist->find_time($service['hour']),
+					$service['from_time'] . ' - ' . $service['to_time'],
 					$this->mylibrary->btn_group($btns)
 				);
 			} else {
