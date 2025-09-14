@@ -23,7 +23,11 @@ $ci = get_instance();
 			row.innerHTML = `
       <td>${rowCount}</td>
       <td><input type="text" class="form-control" name="process_name[]" placeholder="<?= $ci->lang('name') ?>"></td>
+      <td>
+		<textarea rows="1" class="form-control" name="remarks[]" placeholder="<?= $ci->lang('desc') ?>"></textarea>
+      </td>
       <td><input type="number" class="form-control" name="percentage[]" placeholder="<?= $ci->lang('percentage') ?>"></td>
+
       <td><button class="btn btn-danger deleteRow"><?= $ci->lang('delete') ?></button></td>
     `;
 
@@ -148,6 +152,9 @@ $ci = get_instance();
 				row.innerHTML = `
 				<td>${editRowCount}</td>
 				<td><input type="text" class="form-control" name="process_name[]" placeholder="<?= $ci->lang('name') ?>"></td>
+				<td>
+					<textarea rows="1" class="form-control" name="remarks[]" placeholder="<?= $ci->lang('desc') ?>"></textarea>
+      			</td>
 				<td><input type="number" class="form-control" name="percentage[]" placeholder="<?= $ci->lang('percentage') ?>"></td>
 				<td><button class="btn btn-danger deleteRow"><?= $ci->lang('delete') ?></button></td>
 			`;
