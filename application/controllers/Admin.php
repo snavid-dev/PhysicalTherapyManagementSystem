@@ -945,6 +945,7 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('price', 'price', 'trim|required', array('required' => $this->lang('insert service error price')));
 
 		$names = $this->input->post('process_name');
+		$remarks = $this->input->post('remarks');
 		$percentages = $this->input->post('percentage');
 
 		$hasProcessError = false;
@@ -998,9 +999,11 @@ class Admin extends CI_Controller
 
 				foreach ($names as $index => $name) {
 					$percentage = isset($percentages[$index]) ? $percentages[$index] : 0;
+					$remark = isset($remarks[$index]) ? $remarks[$index] : 0;
 					$process_data = array(
 						'name' => $name,
 						'percentage' => $percentage,
+						'remarks' => $remark,
 						'number' => $index + 1,
 						'services_id' => $service_id
 					);
@@ -1105,6 +1108,7 @@ class Admin extends CI_Controller
 
 		$names = $this->input->post('process_name');
 		$percentages = $this->input->post('percentage');
+		$remarks = $this->input->post('remarks');
 
 		$hasProcessError = false;
 		$totalPercentage = 0;
@@ -1163,12 +1167,14 @@ class Admin extends CI_Controller
 				// Determine which to keep, update, insert, delete
 				foreach ($submittedNames as $index => $name) {
 					$percentage = $percentages[$index];
+					$remark = $remarks[$index];
 					$number = $index + 1;
 
 					if (in_array($name, $existingNames)) {
 						// UPDATE existing process
 						$this->Admin_model->update_process_by_name_and_service($id, $name, [
 							'percentage' => $percentage,
+							'remarks' => $remark,
 							'number' => $number
 						]);
 					} else {
@@ -1176,6 +1182,7 @@ class Admin extends CI_Controller
 						$this->Admin_model->insert_process([
 							'name' => $name,
 							'percentage' => $percentage,
+							'remarks' => $remark,
 							'number' => $number,
 							'services_id' => $id
 						]);

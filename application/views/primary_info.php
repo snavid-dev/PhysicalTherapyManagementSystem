@@ -155,12 +155,15 @@
 
 														</div>
 
+
+
 														<div class="percentageRow">
 															<table id="percentageTable" class="table">
 																<thead>
 																<tr>
 																	<th><?= $ci->lang('number of row') ?></th>
 																	<th><?= $ci->lang('name') ?></th>
+																	<th><?= $ci->lang('desc') ?></th>
 																	<th><?= $ci->lang('percentage') ?></th>
 																	<th><?= $ci->lang('actions') ?></th>
 																</tr>
@@ -258,6 +261,7 @@
 																<tr>
 																	<th><?= $ci->lang('number of row') ?></th>
 																	<th><?= $ci->lang('name') ?></th>
+																	<th><?= $ci->lang('desc') ?></th>
 																	<th><?= $ci->lang('percentage') ?></th>
 																	<th><?= $ci->lang('actions') ?></th>
 																</tr>
@@ -3392,6 +3396,9 @@
 							row.innerHTML = `
 							<td>${editRowCount}</td>
 							<td><input type="text" class="form-control" name="process_name[]" value="${process.name}" placeholder="<?= $ci->lang('name') ?>"></td>
+							<td>
+								<textarea rows="1" class="form-control" name="remarks[]" placeholder="<?= $ci->lang('desc') ?>" value="${process.remarks}">${process.remarks}</textarea>
+      						</td>
 							<td><input type="number" class="form-control" name="percentage[]" value="${process.percentage}" placeholder="<?= $ci->lang('percentage') ?>"></td>
 							<td><button class="btn btn-danger deleteRow"><?= $ci->lang('delete') ?></button></td>
 						`;
