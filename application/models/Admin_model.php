@@ -774,6 +774,30 @@ class Admin_model extends CI_Model
 		}
 	}
 
+	public function get_patient_treatment_plan($patient_id)
+	{
+		return $this->db->query("
+			SELECT 
+				tr.id,
+				p.id AS patient_id,
+				p.name AS patient_name,
+				COALESCE(NULLIF(tr.name, ''), 'No Name') AS recommendation_name,  -- Replace empty or NULL with 'No Name'
+				COUNT(*) AS total_recommendations
+			FROM 
+				`turn_tooth_recommended` tr
+			JOIN 
+				`tooth` t ON tr.tooth_id = t.id
+			JOIN 
+				`patient` p ON t.patient_id = p.id
+			WHERE
+				p.id = '$patient_id'
+			GROUP BY 
+				p.id, recommendation_name
+			ORDER BY 
+				p.id, recommendation_name;
+		")->result_array();
+	}
+
 
 	public function get_teeth_by_patient_id($patient_id)
 	{

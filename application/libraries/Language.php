@@ -383,6 +383,8 @@ class Language
 			'teeth' => self::lang_arr('teeth', 'دندان ها', 'غاښونه'),
 			'turns' => self::lang_arr('turns', 'نوبت ها', '??????'),
 			'archive' => self::lang_arr('Archive', 'آرشیف', 'آرشیف'),
+			'treatment plan' => self::lang_arr('treatment plan', 'پلان درمانی', 'آرشیف'),
+			'sum of recommendation' => self::lang_arr('sum of recommendation', 'مجموعه پروسه های پیشنهادی', 'آرشیف'),
 			'experiments' => self::lang_arr('experiments', 'آزمایشات', 'آزمایشات'),
 
 			'block' => self::lang_arr('block', 'معلق کردن', 'بند کول'),

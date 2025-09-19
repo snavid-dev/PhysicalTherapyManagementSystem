@@ -31,7 +31,14 @@ $ci = get_instance();
 									<button class="nav-link" id="gallery-tab" data-bs-toggle="tab"
 											data-bs-target="#gallery-tab-pane" type="button" role="tab"
 											aria-controls="gallery-tab-pane" aria-selected="false"><i
-											class="fa fa-user-friends me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('turns') ?>
+											class="fa fa-calendar me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('turns') ?>
+									</button>
+								</li>
+								<li class="nav-item rounded" role="presentation">
+									<button class="nav-link" id="followers-tab" data-bs-toggle="tab"
+											data-bs-target="#treatment-plan-tab-pane" type="button" role="tab"
+											aria-controls="treatment-plan-tab-pane" aria-selected="false"><i
+											class="fa fa-clipboard me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('treatment plan') ?>
 									</button>
 								</li>
 								<li class="nav-item rounded" role="presentation">
@@ -55,6 +62,7 @@ $ci = get_instance();
 											class="fa fa-archive me-1 align-middle d-inline-block fs-16"></i><?= $ci->lang('archive') ?>
 									</button>
 								</li>
+
 							</ul>
 						</div>
 					</div>
@@ -123,6 +131,16 @@ $ci = get_instance();
 								 aria-labelledby="archive-tab" tabindex="0">
 								<!-- Archive tab contents start -->
 								<?php $ci->render('patients/components/main/Archive/archive.php') ?>
+								<!-- Archive tab contents end -->
+							</div>
+							<!-- Archive tab end -->
+
+
+							<!-- Archive tab start -->
+							<div class="tab-pane fade p-0 border-0" id="treatment-plan-tab-pane" role="tabpanel"
+								 aria-labelledby="treatment-plan-tab" tabindex="0">
+								<!-- Archive tab contents start -->
+								<?php $ci->render('patients/components/main/TreatmentPlan/treatment_plan.php') ?>
 								<!-- Archive tab contents end -->
 							</div>
 							<!-- Archive tab end -->

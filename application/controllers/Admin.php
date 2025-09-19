@@ -3239,6 +3239,10 @@ class Admin extends CI_Controller
 
 				// End List of primary information for insert teeth
 
+				// Start List of Treatment Plans
+				$data['treatment_plans'] = $this->Admin_model->get_patient_treatment_plan($id);
+				// End List of Treatment Plans
+
 
 				// Start List of primary information for files
 				$data['categories_files'] = $this->Admin_model->categories_by_type('files');
