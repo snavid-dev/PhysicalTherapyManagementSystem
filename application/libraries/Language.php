@@ -608,6 +608,7 @@ class Language
 			'insert turn doctor_id error' => self::err_gen('reference doctor', 'داکتر مربوطه', 'حواله ډاکټر'),
 			'insert turn date error' => self::err_gen('date', 'تاریخ', 'نیټه'),
 			'insert turn hour error' => self::err_gen('hour', 'ساعت', 'ساعت'),
+			'insert turn plan error' => self::err_gen('treatment plan', 'پلان درمانی', 'not set'),
 			// TODO: could not be treanslated
 			'insert turn success' => self::lang_arr('The turn was successfully added', 'نوبت موفقانه افزوده شد', '????'),
 			'turn already taken' => self::lang_arr('On the selected date and time, the relevant doctor has a patient', 'در تاریخ و ساعت انتخاب شده داکتر مربوطه مریض دارد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),

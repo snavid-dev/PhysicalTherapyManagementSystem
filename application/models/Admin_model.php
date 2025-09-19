@@ -850,6 +850,16 @@ class Admin_model extends CI_Model
 		return $this->db->insert('turn_tooth_recommended', $data);
 	}
 
+	public function update_recommended_by_turn_id($turn_id, $name, $patient_id)
+	{
+		return $this->db->query("UPDATE turn_tooth_recommended ttr
+									JOIN tooth t ON ttr.tooth_id = t.id
+									JOIN patient p ON t.patient_id = p.id
+									SET ttr.turn_id = '$turn_id'
+									WHERE p.id = '$patient_id'   -- your patient_id
+									AND ttr.name = '$name'");
+	}
+
 
 	public function get_unassigned_recommended_processes($patient_id)
 	{

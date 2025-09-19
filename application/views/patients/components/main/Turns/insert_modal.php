@@ -50,7 +50,27 @@
 									</select>
 								</div>
 							</div>
-							<div class="col-sm-12 col-md-6">
+							<div class="col-sm-12 col-md-4">
+								<div class="form-group">
+									<label class="form-label">
+										<?= $ci->lang('treatment plan') ?> <span class="text-red">*</span>
+									</label>
+									<select name="plan" class="form-control select2-show-search form-select"
+											data-placeholder="<?= $ci->lang('select') ?>" id="">
+										<option label="<?= $ci->lang('select') ?>"></option>
+										<option value="all">
+											<?= $ci->lang("select") ?>
+										</option>
+										<?php foreach ($treatment_plans as $treatment_plan) : ?>
+											<option value="<?= $treatment_plan['recommendation_name'] ?>">
+												<?= $treatment_plan['recommendation_name'] ?>
+												(<?= $treatment_plan['total_recommendations'] ?>)
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+							<div class="col-sm-12 col-md-4">
 								<div class="form-group">
 									<label class="form-label">
 										<?= $ci->lang('hour') ?> <span class="text-red">*</span>
@@ -78,7 +98,7 @@
 									</datalist>
 								</div>
 							</div>
-							<div class="col-sm-12 col-md-6">
+							<div class="col-sm-12 col-md-4">
 								<div class="form-group">
 									<label class="form-label">
 										<?= $ci->lang('hour') ?> <span class="text-red">*</span>

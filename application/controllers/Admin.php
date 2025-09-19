@@ -5626,8 +5626,8 @@ class Admin extends CI_Controller
 		$name = $this->input->post('name');
 		$recommendations = $this->Admin_model->get_patient_treatment_plan($patient_id);
 
-		foreach($recommendations as $recommendation){
-			if ($recommendation['recommendation_name'] == $name){
+		foreach ($recommendations as $recommendation) {
+			if ($recommendation['recommendation_name'] == $name) {
 				echo json_encode([
 					'type' => 'error',
 					'alert' => [
@@ -6424,12 +6424,16 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', [
 			'required' => $this->lang('insert turn doctor_id error')
 		]);
+		$this->form_validation->set_rules('plan', 'plan', 'trim|required', [
+			'required' => $this->lang('insert turn plan error')
+		]);
 		$this->form_validation->set_rules('from_time', 'from_time', 'trim|required', [
 			'required' => $this->lang('insert turn hour error')
 		]);
 		$this->form_validation->set_rules('to_time', 'to_time', 'trim|required', [
 			'required' => $this->lang('insert turn hour error')
 		]);
+
 
 		if (!$this->form_validation->run()) {
 			foreach ($_POST as $key => $value) {
@@ -6443,22 +6447,25 @@ class Admin extends CI_Controller
 		}
 
 		$patient_id = $this->input->post('patient_id');
-		$tooth_ids = $this->Admin_model->get_patient_tooth_ids($patient_id);
-
+		$planName = $this->input->post('plan');
 		// === Check if any recommended processes exist for this patient (with NULL turn_id) ===
-		$has_recommended = false;
-		if (!empty($tooth_ids)) {
-			$this->db->where('turn_id IS NULL', null, false);
-			$this->db->where_in('tooth_id', $tooth_ids);
-			$has_recommended = $this->db->count_all_results('turn_tooth_recommended') > 0;
+
+		$patient_plans = $this->Admin_model->get_patient_treatment_plan($patient_id);
+
+		$hasRecommended = false;
+		foreach ($patient_plans as $patient_plan) {
+			if ($patient_plan['recommendation_name'] == $planName) {
+				$hasRecommended = true;
+			}
 		}
 
-		if (!$has_recommended) {
+
+		if ($hasRecommended !== true) {
 			echo json_encode([
 				'type' => 'error',
 				'alert' => [
 					'title' => $this->lang('error'),
-					'text' => $this->lang('please insert recommended processes first'),
+					'text' => $this->lang('please insert recommended processes first or the recommended is wrong'),
 					'type' => 'error'
 				]
 			]);
@@ -6511,11 +6518,9 @@ class Admin extends CI_Controller
 
 		$turn_id = $insert[1];
 
-		// === Assign recommended processes to this turn ===
-		$this->db->where('turn_id IS NULL', null, false);
-		$this->db->where_in('tooth_id', $tooth_ids);
-		$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
+		$update_recommendeds = $this->Admin_model->update_recommended_by_turn_id($turn_id, $planName, $patient_id);
 
+		// === Assign recommended processes to this turn ===
 		$data['type'] = 'success';
 		$data['id'] = $turn_id;
 		$data['extraFunction'] = 'print';
