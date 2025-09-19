@@ -66,6 +66,7 @@ $ci = get_instance();
 				<option value="4"><?= $ci->lang('prescription') ?></option>
 				<option value="5"><?= $ci->lang('archive') ?></option>
 				<option value="6"><?= $ci->lang('recommended processes') ?></option>
+				<option value="7"><?= $ci->lang('treatment plan') ?></option>
 			</select>
 		</div>
 

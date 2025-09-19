@@ -35,6 +35,10 @@
 			$(`#recommended_processes`).modal("toggle");
 			$("#selectaction").val("").trigger("change");
 		}
+
+		if (actionValues == 7){
+			$(`#multiTurnModal`).modal("toggle");
+	}
 	}
 
 	// TODO: toogleView function please note that this function placed at the cdn/assets/js/teeth.js

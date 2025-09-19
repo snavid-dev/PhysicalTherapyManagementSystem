@@ -351,6 +351,12 @@ class Language
 
 			// Start Turns Page
 			'insert turn' => self::lang_arr('insert turn', 'افزودن نوبت', 'وار اضافه کړئ'),
+			'insert multiple turns' => self::lang_arr('insert turn', 'افزودن نوبت', 'وار اضافه کړئ'),
+			'plan' => self::lang_arr('plan', 'پلان', 'وار اضافه کړئ'),
+			'from' => self::lang_arr('from', 'از', 'وار اضافه کړئ'),
+			'to' => self::lang_arr('to', 'به', 'وار اضافه کړئ'),
+			'add another turn' => self::lang_arr('add another turn', 'افزودن نوبت دیگر', 'وار اضافه کړئ'),
+			'save all' => self::lang_arr('save all', 'ثبت همه', 'وار اضافه کړئ'),
 			'update turn' => self::lang_arr('update turn', 'ویرایش نوبت', 'وار تازه کړئ'),
 			// TODO what is the meaning of this word (لست نوب ها)?
 			'turns list' => self::lang_arr('List of turns', 'لیست نوبت ها', 'مالي حساب'),
