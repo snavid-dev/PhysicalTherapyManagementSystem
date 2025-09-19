@@ -15,6 +15,10 @@
 				<!-- Teeth Selection -->
 				<div class="row mb-3">
 					<div class="col-md-6">
+						<label><?= $ci->lang('name') ?></label>
+						<input type="text" class="form-control" name="name" form="processForm">
+					</div>
+					<div class="col-md-6">
 						<label><?= $ci->lang('teeth') ?></label>
 						<select class="form-control select2-show-search form-select" name="teeth[]" id="process_teeth"
 								onchange="get_teeth_process()" data-placeholder="<?= $ci->lang('select') ?>" multiple>
@@ -39,7 +43,7 @@
 				</button>
 
 				<button class="btn btn-primary"
-						onclick="submitWithoutDatatable('processForm', '<?= base_url() ?>admin/insert_recommended_processes', 'labsTable', 'recommended_processes', list_labs)">
+						onclick="submitWithoutDatatable('processForm', '<?= base_url() ?>admin/insert_recommended_processes', 'labsTable', 'recommended_processes', list_treatment_plan)">
 					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
 				</button>
 			</div>

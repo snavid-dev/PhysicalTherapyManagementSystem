@@ -5608,6 +5608,7 @@ class Admin extends CI_Controller
 
 	public function insert_recommended_processes()
 	{
+		$this->form_validation->set_rules('name', 'name', 'required');
 		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
 		if (!$this->form_validation->run()) {
 			echo json_encode([
@@ -5622,6 +5623,23 @@ class Admin extends CI_Controller
 		}
 
 		$patient_id = $this->input->post('patient_id');
+		$name = $this->input->post('name');
+		$recommendations = $this->Admin_model->get_patient_treatment_plan($patient_id);
+
+		foreach($recommendations as $recommendation){
+			if ($recommendation['recommendation_name'] == $name){
+				echo json_encode([
+					'type' => 'error',
+					'alert' => [
+						'title' => $this->lang('error'),
+						'text' => $this->lang('duplicate process name'),
+						'type' => 'error'
+					]
+				]);
+				return;
+			}
+		}
+
 		$tooth_ids = $this->input->post('tooth_id');
 		$processes = $this->input->post('processes');
 		$custom_processes = $this->input->post('custom_process');
@@ -5632,6 +5650,7 @@ class Admin extends CI_Controller
 			if (!empty($processes[$tooth_id])) {
 				foreach ($processes[$tooth_id] as $process_id) {
 					$this->Admin_model->insert_recommended_process([
+						'name' => $name,
 						'turn_id' => null,
 						'tooth_id' => $tooth_id,
 						'process_id' => $process_id, // ✅ Use actual ID

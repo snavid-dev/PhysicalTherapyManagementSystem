@@ -269,6 +269,13 @@
 	}
 </script>
 
+<script>
+	function list_treatment_plan() {
+		const id = '<?= $profile['id'] ?>';
+		console.log("the patient id is:", id);
+	}
+</script>
+
 
 <script>
 	function get_teeth_process() {
@@ -279,7 +286,7 @@
 		if (!selectedTeeth || !selectedTeeth.length) return;
 
 		$.ajax({
-				url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
+			url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
 			type: 'POST',
 			data: {
 				teeth_ids: selectedTeeth,
@@ -371,7 +378,7 @@
 		$.ajax({
 			url: "<?= base_url('admin/get_patient_process_completion') ?>",
 			type: 'POST',
-			data: { patient_id },
+			data: {patient_id},
 			dataType: 'json',
 			success: function (response) {
 				if (response.type === 'success') {
