@@ -779,6 +779,7 @@ class Admin_model extends CI_Model
 		return $this->db->query("
 			SELECT 
 				tr.id,
+				tr.turn_id,
 				p.id AS patient_id,
 				p.name AS patient_name,
 				COALESCE(NULLIF(tr.name, ''), 'No Name') AS recommendation_name,  -- Replace empty or NULL with 'No Name'
@@ -796,6 +797,32 @@ class Admin_model extends CI_Model
 			ORDER BY 
 				p.id, recommendation_name;
 		")->result_array();
+	}
+
+	public function get_doctor_for_patient_plan($planName, $patientId)
+	{
+		// This query assumes 'turn_tooth_recommended' table has a 'doctor_id' column.
+		$this->db->select('tr.doctor_id');
+		$this->db->from('turn_tooth_recommended tr');
+
+		// Join from the recommendation to the tooth
+		$this->db->join('tooth t', 'tr.tooth_id = t.id', 'inner');
+
+		// Join from the tooth to the patient
+		$this->db->join('patient p', 't.patient_id = p.id', 'inner');
+
+		// Specify the exact patient we are looking for
+		$this->db->where('p.id', $patientId);
+
+		// Specify the exact recommendation name
+		$this->db->where('tr.name', $planName);
+
+		// We only need one result, as the doctor should be the same for all teeth in that plan
+		$this->db->limit(1);
+
+		$query = $this->db->get();
+
+		return $query->row_array(); // Returns ['doctor_id' => '...'] or null
 	}
 
 
@@ -1551,6 +1578,72 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 	public function profile_patient($id)
 	{
 		return $this->db->query("SELECT `patient`.*, CONCAT(users.fname, ' (', users.lname, ')') AS doctor_name FROM `patient` INNER JOIN users ON patient.doctor_id = users.id WHERE patient.id = '$id'")->result_array();
+	}
+
+	// In your model file (e.g., Treatment_model.php)
+	public function get_treatment_plan_for_patient($patient_id)
+	{
+		// The SQL query with the '?' placeholder
+		$sql = "-- FOR TESTING IN A SQL CLIENT (like phpMyAdmin)
+-- Replace 123 with a valid patient_id from your database.
+
+SELECT
+    t.id AS turn_id,
+    t.date,
+    t.from_time,
+    t.status,
+    teeth_agg.aggregated_teeth,
+    process_agg.aggregated_processes
+FROM
+    turn t
+LEFT JOIN (
+    SELECT
+        ttr.turn_id,
+        GROUP_CONCAT(DISTINCT CONCAT(th.location, th.name) ORDER BY th.location, th.name SEPARATOR '، ') AS aggregated_teeth
+    FROM
+        turn_tooth_recommended ttr
+    JOIN
+        tooth th ON ttr.tooth_id = th.id
+    GROUP BY
+        ttr.turn_id
+) AS teeth_agg ON t.id = teeth_agg.turn_id
+LEFT JOIN (
+    SELECT
+        turn_id,
+        GROUP_CONCAT(
+            CASE
+                WHEN cnt > 1 THEN CONCAT(process_desc, ' x', cnt)
+                ELSE process_desc
+            END
+            ORDER BY process_desc SEPARATOR '، '
+        ) AS aggregated_processes
+    FROM (
+        SELECT
+            ttr.turn_id,
+            COALESCE(NULLIF(p.remarks, ''), p.name) AS process_desc,
+            COUNT(*) as cnt
+        FROM
+            turn_tooth_recommended ttr
+        JOIN
+            processes p ON ttr.process_id = p.id
+        GROUP BY
+            ttr.turn_id, process_desc
+    ) AS process_counts
+    GROUP BY
+        turn_id
+) AS process_agg ON t.id = process_agg.turn_id
+WHERE
+    t.patient_id = ? -- <-- REPLACED THE '?' WITH AN EXAMPLE ID
+    AND (teeth_agg.aggregated_teeth IS NOT NULL OR process_agg.aggregated_processes IS NOT NULL)
+ORDER BY
+    STR_TO_DATE(t.date, '%Y/%m/%d'),
+    STR_TO_DATE(t.from_time, '%H:%i');";
+
+		// CodeIgniter's query binding securely replaces '?' with $patient_id
+		$query = $this->db->query($sql, array($patient_id));
+
+		// Return the results as an array
+		return $query->result_array();
 	}
 
 	public function single_temp_patient($id)

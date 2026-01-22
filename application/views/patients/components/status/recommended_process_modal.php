@@ -14,7 +14,23 @@
 
 				<!-- Teeth Selection -->
 				<div class="row mb-3">
-					<div class="col-md-6">
+					<div class="col-md-3">
+						<label><?= $ci->lang('doctor') ?></label>
+						<select name="doctor_id" class="form-control select2-show-search form-select"
+								data-placeholder="<?= $ci->lang('select') ?>" id="doctor_id" form="processForm">
+							<option label="<?= $ci->lang('select') ?>"></option>
+							<option value="all">
+								<?= $ci->lang("select") ?>
+							</option>
+							<?php foreach ($doctors as $doctor) : ?>
+								<option value="<?= $doctor['id'] ?>">
+									<?= $ci->mylibrary->user_name($doctor['fname'], $doctor['lname']) ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+
+					</div>
+					<div class="col-md-3">
 						<label><?= $ci->lang('name') ?></label>
 						<input type="text" class="form-control" name="name" form="processForm">
 					</div>

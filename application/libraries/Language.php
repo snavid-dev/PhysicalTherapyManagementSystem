@@ -370,12 +370,15 @@ class Language
 			'paid amount' => self::lang_arr('paid amount', 'مقدار پرداخت شده', 'تادیه شوی مقدار'),
 			'received by' => self::lang_arr('received by', 'تسلیم شده توسط', 'تادیه شوی مقدار'),
 			'not paid' => self::lang_arr('not paid', 'پرداخت نشده', 'تادیه شوی مقدار'),
+
 			// End Turns page
 
 			// Start Payment
 			'insert payment' => self::lang_arr('add payment', 'افزودن پول پرداختی', 'تادیه اضافه کړئ'),
 			'insert payment turn error' => self::err_gen('Select Turn', 'انتخاب نوبت', '??????'),
 			'insert payment amount error' => self::err_gen('Paid amount', 'مقدار پرداختی ', 'قدار پرداختی '),
+			'no turn data submitted' => self::lang_arr('no turn data submitted', 'هیچ نوبتی ثبت نشد', 'قدار پرداختی '),
+			'patient not identified' => self::lang_arr('patient not identified', 'مریض شناخته نشد', 'قدار پرداختی '),
 			'insert payment success' => self::lang_arr('The Patient payment was successfully inserted', 'پرداخت مریض موفقانه افزوده شد', ' حساب په بریالیتوب سره اضافه شو'),
 			// End Payment
 
@@ -619,7 +622,10 @@ class Language
 			'insert turn success' => self::lang_arr('The turn was successfully added', 'نوبت موفقانه افزوده شد', '????'),
 			'turn already taken' => self::lang_arr('On the selected date and time, the relevant doctor has a patient', 'در تاریخ و ساعت انتخاب شده داکتر مربوطه مریض دارد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
 			'turn conflict' => self::lang_arr('On the selected date and time, the relevant doctor has a patient', 'در تاریخ و ساعت انتخاب شده داکتر مربوطه مریض دارد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
+			'insert turn success multiple' => self::lang_arr('insert turn success multiple', 'افزودن چندین نوبت موفقانه انجام شد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
+			'insert turn failed multiple' => self::lang_arr('insert turn failed multiple', 'افزودن چندین نوبت موفقانه انجام نشد!', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
 			'update turn success' => self::lang_arr('The turn was successfully updated', 'نوبت موفقانه بروزرسانی شد', '????'),
+			'please insert recommended processes first or the recommended is wrong' => self::lang_arr('please insert recommended processes first or the recommended is wrong', 'اول پروسه های پیشنهادی انتخاب کنید', '????'),
 			// end turn errors
 
 			// lab errors

@@ -225,7 +225,27 @@ class Mylibrary
     return array('date' => $dateupdate, 'time' => $time, 'serial' => $serial);
   }
 
-  private  function gregorian_to_jalali($g_y, $g_m, $g_d, $str)
+	/**
+	 * Converts English digits within a string to their Persian equivalents.
+	 *
+	 * @param  string|int  $input The string or number to be converted.
+	 * @return string The converted string with Persian numbers.
+	 */
+	public function persion_number($input)
+	{
+		// Ensure the input is treated as a string
+		$input = (string) $input;
+
+		// Define the mapping from English to Persian numbers
+		$englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+		$persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+
+		// Use str_replace with arrays to perform the conversion in one pass
+		return str_replace($englishNumbers, $persianNumbers, $input);
+	}
+
+
+	private  function gregorian_to_jalali($g_y, $g_m, $g_d, $str)
   {
     $g_days_in_month = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
     $j_days_in_month = array(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29);

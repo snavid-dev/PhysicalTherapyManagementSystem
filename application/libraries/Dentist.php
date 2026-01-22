@@ -69,7 +69,7 @@ class Dentist
 			'title' => 'شفاخانه تخصصی ثنا کوثر',
 			'sub_title' => 'دیپارتمنت دندان',
 			'print_patient_title' => 'دوسیه ثبت مریضان',
-			'phone' => "+93 793 14 66 12",
+			'phone' => "+93 793 14 66 12 - +93 781 796 467",
 			'tagline' => 'لطفا 30 دقیقه قبل از آغاز تداوی تان در اینجا حضور داشته باشید. در غیر این صورت، نوبت شما به روز بعد موکول خواهد شد.',
 			'address' => 'هرات، چهار راهی نمبر یک',
 			'logoName' => 'logo.png',
@@ -97,6 +97,22 @@ class Dentist
 	}
 
 	public function customer_name($name, $fname, $page = '')
+	{
+		$fullname = $name;
+		if ($fname !== '') {
+			$fullname .= ' - ';
+			$fullname .= $fname;
+		}
+		if ($page !== '' && $page !== '0') {
+			$fullname .= ' (';
+			$fullname .= $page;
+			$fullname .= ')';
+		}
+
+		return $fullname;
+	}
+
+	public function patient_name($name, $fname, $page = '')
 	{
 		$fullname = $name;
 		if ($fname !== '') {

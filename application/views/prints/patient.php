@@ -1,679 +1,314 @@
 <?php $ci = get_instance(); ?>
-<html>
-
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
 <head>
-    <title><?= (isset($title)) ? $title : 'سایبورگ تک' ?></title>
-    <link href="<?= $ci->dentist->assets_url() . 'assets/' ?>favicon.png" rel="shortcut icon">
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>برنامه جامع درمانی بیمار</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap');
 
-    <link rel="stylesheet" href="<?= $ci->dentist->assets_url() ?>assets/css/rtl.css">
-    <link rel="stylesheet" href="">
-    <style>
-        body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #FAFAFA;
-            font: 12pt "Tahoma";
-        }
+		/* General Styles */
+		body {
+			margin: 0;
+			padding: 20px 0;
+			background-color: #e9edf2;
+			font-family: 'Vazirmatn', sans-serif;
+			color: #2c3e50;
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
+		}
 
-        .page {
-            /* min-height: 217.47mm; */
-            width: 100%;
-            /* padding: 5mm 20mm 5mm 5mm; */
-            /* margin: 0mm auto; */
-            border: 1px #D3D3D3 solid;
-            background: white;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
+		.treatment-plan-container {
+			position: relative; /* Needed for the watermark pseudo-element */
+			max-width: 850px;
+			background-color: #ffffff;
+			margin: 30px auto;
+			padding: 40px;
+			box-shadow: 0 15px 40px rgba(44, 62, 80, 0.1);
+			border-radius: 12px;
+			border-top: 5px solid #0056b3;
+			box-sizing: border-box;
+			overflow: hidden; /* Ensures pseudo-element doesn't overflow */
+		}
 
-        .subpage {
-            /* padding: 1cm; */
-            /* border: 5px red solid; */
-            height: fit-content;
-        }
+		/* Watermark */
+		.treatment-plan-container::before {
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 400px;
+			height: 400px;
+			/* --- IMPORTANT: REPLACE WITH YOUR LOGO URL --- */
+			background-image: url('<?= base_url() ?>path/to/your/watermark-logo.png');
+			background-repeat: no-repeat;
+			background-position: center;
+			background-size: contain;
+			opacity: 0.06;
+			z-index: 1;
+		}
 
-        .company-extra.text-right {
-            margin-right: 5px;
-        }
+		.main-content {
+			position: relative;
+			z-index: 2; /* Ensures content is on top of the watermark */
+		}
 
-        /* our custom css start here */
-        .invoice-w {
-            max-width: 100%;
-            position: relative;
-            overflow: hidden;
-        }
+		@media print {
+			body {
+				background-color: #fff;
+				padding: 0;
+			}
+			.treatment-plan-container {
+				box-shadow: none;
+				margin: 0;
+				border-radius: 0;
+				border-top: none;
+				max-width: 100%;
+			}
+		}
 
-        .invoice-w,
-        .invoice-heading,
-        .invoice-body,
-        .invoice-footer {
-            text-align: right;
-            padding: 0 13px;
-        }
+		@media screen and (max-width: 768px) {
+			.treatment-plan-container {
+				width: 95%;
+				margin: 15px auto;
+				padding: 25px;
+			}
+		}
 
-        .invoice-w .infos {
-            position: relative;
-            display: -webkit-box;
-            display: -ms-flexbox;
-            display: flex;
-            -webkit-box-pack: justify;
-            -ms-flex-pack: justify;
-            justify-content: space-between;
-            text-align: center;
-        }
+		/* Header Section */
+		.header {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			border-bottom: 2px solid #dee2e6;
+			padding-bottom: 20px;
+			margin-bottom: 25px;
+		}
 
-        .invoice-w .infos .info-1 {
-            font-size: 1rem;
-            width: 100%;
-        }
+		.header .logo-container {
+			display: flex;
+			align-items: center;
+		}
 
-        .invoice-w .infos .info-1 .company-name {
-            font-size: 1.8rem;
-            font-weight: 900;
-        }
+		.header img {
+			height: 55px;
+			margin-left: 15px;
+		}
 
-        .invoice-w .infos .info-1 .company-extra {
-            /* font-size: 6rem; */
-            color: black;
-            /* margin-top: 1rem; */
-        }
+		.header h1 {
+			margin: 0;
+			font-size: 26px;
+			font-weight: 700;
+			color: #0056b3;
+		}
 
-        .text-center {
-            text-align: center !important;
-        }
+		.header .clinic-info {
+			text-align: left;
+			font-size: 13px;
+			color: #555;
+			line-height: 1.7;
+		}
 
-        .invoice-heading {
-            border-top: solid;
-            margin: 1rem 0;
-            position: relative;
-            z-index: 2;
-        }
+		.clinic-info strong {
+			font-weight: 600;
+			color: #2c3e50;
+		}
 
-        /* h3,
-		.h3,
-		.invoice-date,
-		.table.table-lightfont td,
-		.form-group,
-		.btn {
-			font-size: 1.9rem;
-			font-weight: 900;
-		} */
+		/* Patient Info & Diagnosis Section */
+		.patient-details-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 20px;
+			margin-bottom: 25px;
+			padding: 20px;
+			background-color: #f8f9fa;
+			border-radius: 8px;
+		}
 
-        .invoice-date {
-            direction: ltr;
-        }
+		.info-box {
+			font-size: 14px;
+			line-height: 2;
+		}
 
-        .text-right {
-            text-align: right !important;
-        }
+		.info-box strong {
+			color: #0056b3;
+			font-weight: 600;
+			display: inline-block;
+			margin-bottom: 5px;
+		}
 
-        .text-left {
-            text-align: left !important;
-        }
+		/* Treatment Details Section */
+		.treatment-section h2 {
+			font-size: 20px;
+			color: #0056b3;
+			border-bottom: 2px solid #dee2e6;
+			padding-bottom: 10px;
+			margin-bottom: 20px;
+		}
 
-        .invoice-body {
-            display: -webkit-box;
-            display: -ms-flexbox;
-            display: flex;
-        }
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-bottom: 25px;
+			font-size: 14px;
+		}
 
-        .invoice-table {
-            width: 100%;
-        }
+		table th, table td {
+			padding: 14px;
+			text-align: right;
+			border-bottom: 1px solid #e9ecef;
+			vertical-align: middle;
+		}
 
-        .important {
-            z-index: 2;
-        }
+		table th {
+			background-color: #f1f3f5;
+			color: #343a40;
+			font-weight: 600;
+		}
 
-        .row {
-            display: -webkit-box;
-            display: -ms-flexbox;
-            display: flex;
-            -ms-flex-wrap: wrap;
-            flex-wrap: wrap;
-            /* margin-right: -10px;
-			margin-left: -10px; */
-        }
+		table tr:last-child td { border-bottom: none; }
 
-        .col-md-12 {
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 100%;
-            flex: 0 0 100%;
-            max-width: 100%;
-        }
+		.status-badge {
+			padding: 5px 12px;
+			border-radius: 15px;
+			font-weight: 600;
+			text-align: center;
+			display: inline-block;
+			min-width: 100px;
+		}
 
-        .col-1,
-        .col-2,
-        .col-3,
-        .col-4,
-        .col-5,
-        .col-6,
-        .col-7,
-        .col-8,
-        .col-9,
-        .col-10,
-        .col-11,
-        .col-12,
-        .col,
-        .col-auto,
-        .col-sm-1,
-        .col-sm-2,
-        .col-sm-3,
-        .col-sm-4,
-        .col-sm-5,
-        .col-sm-6,
-        .col-sm-7,
-        .col-sm-8,
-        .col-sm-9,
-        .col-sm-10,
-        .col-sm-11,
-        .col-sm-12,
-        .col-sm,
-        .col-sm-auto,
-        .col-md-1,
-        .col-md-2,
-        .col-md-3,
-        .col-md-4,
-        .col-md-5,
-        .col-md-6,
-        .col-md-7,
-        .col-md-8,
-        .col-md-9,
-        .col-md-10,
-        .col-md-11,
-        .col-md-12,
-        .col-md,
-        .col-md-auto,
-        .col-lg-1,
-        .col-lg-2,
-        .col-lg-3,
-        .col-lg-4,
-        .col-lg-5,
-        .col-lg-6,
-        .col-lg-7,
-        .col-lg-8,
-        .col-lg-9,
-        .col-lg-10,
-        .col-lg-11,
-        .col-lg-12,
-        .col-lg,
-        .col-lg-auto,
-        .col-xl-1,
-        .col-xl-2,
-        .col-xl-3,
-        .col-xl-4,
-        .col-xl-5,
-        .col-xl-6,
-        .col-xl-7,
-        .col-xl-8,
-        .col-xl-9,
-        .col-xl-10,
-        .col-xl-11,
-        .col-xl-12,
-        .col-xl,
-        .col-xl-auto,
-        .col-xxl-1,
-        .col-xxl-2,
-        .col-xxl-3,
-        .col-xxl-4,
-        .col-xxl-5,
-        .col-xxl-6,
-        .col-xxl-7,
-        .col-xxl-8,
-        .col-xxl-9,
-        .col-xxl-10,
-        .col-xxl-11,
-        .col-xxl-12,
-        .col-xxl,
-        .col-xxl-auto,
-        .col-xxxl-1,
-        .col-xxxl-2,
-        .col-xxxl-3,
-        .col-xxxl-4,
-        .col-xxxl-5,
-        .col-xxxl-6,
-        .col-xxxl-7,
-        .col-xxxl-8,
-        .col-xxxl-9,
-        .col-xxxl-10,
-        .col-xxxl-11,
-        .col-xxxl-12,
-        .col-xxxl,
-        .col-xxxl-auto,
-        .col-xxxxl-1,
-        .col-xxxxl-2,
-        .col-xxxxl-3,
-        .col-xxxxl-4,
-        .col-xxxxl-5,
-        .col-xxxxl-6,
-        .col-xxxxl-7,
-        .col-xxxxl-8,
-        .col-xxxxl-9,
-        .col-xxxxl-10,
-        .col-xxxxl-11,
-        .col-xxxxl-12,
-        .col-xxxxl,
-        .col-xxxxl-auto {
-            position: relative;
-            width: 100%;
-            min-height: 1px;
-            /* padding-right: 10px;
-			padding-left: 10px; */
-        }
+		.status-completed {
+			background-color: #d4edda;
+			color: #155724;
+		}
 
-        table tr td {
-            text-align: center;
-        }
+		.status-scheduled {
+			background-color: #fff3cd;
+			color: #856404;
+		}
 
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
+		/* Notes Section */
+		.notes-section {
+			margin-top: 25px;
+			padding: 20px;
+			background-color: #f8f9fa;
+			border-radius: 8px;
+			font-size: 13px;
+			color: #555;
+			line-height: 1.8;
+		}
+		.notes-section strong {
+			color: #0056b3;
+			font-size: 14px;
+		}
 
-        td,
-        th {
-            font-weight: 900;
-            border: 2px solid black;
-            text-align: center;
-            padding: 5px;
-        }
-
-        /* .element-wrapper {
-			padding-bottom: 3rem;
-		} */
-
-        /* .element-box,
-		.invoice-w,
-		.big-error-w {
-			padding: 1.5rem 1.5rem;
-			margin-bottom: 1rem;
-		} */
-
-        h3,
-        .h3,
-        .invoice-date,
-        .table.table-lightfont td,
-        .form-group,
-        .btn {
-            font-size: 1rem;
-            font-weight: 900;
-        }
-
-        /* .border-bottom {
-			padding-bottom: 30px;
-		} */
-
-
-        tr.no-border td,
-        tr.no-border th {
-            border: none !important;
-        }
-
-        .col-md-2 {
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 16.6666666667%;
-            flex: 0 0 16.6666666667%;
-            max-width: 16.6666666667%;
-        }
-
-        .col-md-3 {
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 25%;
-            flex: 0 0 25%;
-            max-width: 25%;
-        }
-
-        .col-md-4 {
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 33.3333333333%;
-            flex: 0 0 33.3333333333%;
-            max-width: 33.3333333333%;
-        }
-
-        .col-md-8 {
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 66.6666666667%;
-            flex: 0 0 66.6666666667%;
-            max-width: 66.6666666667%;
-        }
-
-        .full-width {
-            width: 100%;
-        }
-
-        .red {
-            color: red;
-        }
-
-        p {
-            margin-top: 0;
-            margin-bottom: 1rem;
-        }
-
-        .col-md-5 {
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 41.6666666667%;
-            flex: 0 0 41.6666666667%;
-            max-width: 41.6666666667%;
-        }
-
-        .col-md-7 {
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 58.3333333333%;
-            flex: 0 0 58.3333333333%;
-            max-width: 58.3333333333%;
-        }
-
-        .col-md-6 {
-            -webkit-box-flex: 0;
-            -ms-flex: 0 0 50%;
-            flex: 0 0 50%;
-            max-width: 50%;
-        }
-
-        .element-box {
-            direction: rtl;
-            /* margin-right: 20px;
-			margin-left: 20px; */
-        }
-
-        .form-group.row.text-center {
-            border: solid 2px;
-            border-top: 0;
-        }
-
-        .price {
-            font-family: sans-serif;
-        }
-
-        tr.no-border td,
-        tr.no-border th {
-            border: none !important;
-        }
-
-        .watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.3;
-        }
-    </style>
+		/* Footer */
+		.footer {
+			text-align: center;
+			padding-top: 25px;
+			margin-top: 25px;
+			font-size: 13px;
+			color: #888;
+			border-top: 2px solid #e9ecef;
+		}
+	</style>
 </head>
-
 <body>
-    <div class="book">
-        <div class="page">
-            <div>
-                <img src="<?= $ci->dentist->assets_url() ?>assets/clinic/<?= $ci->dentist->info()['logoName'] ?>" class="watermark">
-            </div>
-            <div class="subpage">
-                <div class="invoice-w">
-                    <div class="infos">
-                        <div class="info-1">
-                            <div class="company-name">
-                                <?= $ci->dentist->info()['title'] ?>
-                            </div>
-                            <div class="company-extra text-center" style="font-size: 1rem; font-weight: 700;">
-                                <?= $ci->dentist->info()['sub_title'] ?>
-                            </div>
-                            <div class="company-extra text-center" style="font-size: 1rem; font-weight: 700;">
-                                <?= $ci->dentist->info()['print_patient_title'] ?>
-                            </div>
-                            <div class="company-extra text-center" style="font-size: 0.5rem; font-weight: 700;">
-                                (سیستم مدیریت کلینیک دندان سایبورگ تک)
-                            </div>
-                        </div>
-                    </div>
-                    <div class="invoice-heading" style="display: flex">
-                        <div class="invoice-date text-right" style="width: 50%">
-                            <bdo dir="ltr"><?= $profile['serial_id']; ?></bdo>
-                        </div>
-                        <div class="invoice-date text-left" style="width: 50%">
-                            <?= $ci->mylibrary->getCurrentShamsiDate()['date'] . ' ' . date('H:i:s') ?>
-                        </div>
-                    </div>
-                    <div class="invoice-body">
-                        <div class="invoice-table  important" style="width: 100%;">
-                            <div class="row">
-                                <div class="col-md-12" style="margin-bottom: 20px">
-                                    <div class="table-responsive" id="chart">
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
-                                                <tr class="">
-                                                    <td colspan="9" style="font-size: 0.9rem">اطلاعات شخصی</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>نام</th>
-                                                    <th>نام فامیلی</th>
-                                                    <th>سن</th>
-                                                    <th>آدرس</th>
-                                                    <th>شماره تماس</th>
-                                                    <th>شماره تماس همراه</th>
-                                                    <th>جنسیت</th>
-                                                    <th>سوابق بیماری</th>
-                                                    <th>تفصیلات</th>
-                                                </tr>
+<div class="treatment-plan-container">
+	<div class="main-content">
+		<!-- Header -->
+		<header class="header">
+			<div class="logo-container">
+				<h1>برنامه جامع درمانی</h1>
+			</div>
+			<div class="clinic-info">
+				<img src="<?= base_url() ?>application/views/prints/logo.png" alt="لوگو" />
+			</div>
+		</header>
 
-                                            </thead>
-                                            <tbody style="font-size: 0.8rem;">
+		<!-- Patient Info -->
+		<section class="patient-details-grid">
+			<div class="info-box">
+				<strong>نام مریض:</strong> <?= $ci->mylibrary->get_patient_name($profile['name'], $profile['lname'], '', $profile['gender']) ?><br>
+				<strong>سریال نمبر:</strong> <bdo dir="ltr"><?= $profile['serial_id'] ?></bdo><br>
+			</div>
+			<div class="info-box">
+				<strong>آدرس:</strong> <?= $profile['address'] ?><br>
+				<strong>تلفن تماس:</strong> <bdo dir="ltr">(+93) <?= $profile['phone1'] ?></bdo><br>
+			</div>
+			<div class="info-box">
+				<strong>تاریخ تنظیم طرح:</strong> <bdo dir="ltr"><?= $ci->mylibrary->getCurrentShamsiDate()['date'] ?></bdo>
+			</div>
+		</section>
 
+		<!-- Treatment Details Table -->
+		<section class="treatment-section">
+			<h2>جزئیات جلسات درمانی</h2>
+			<table>
+				<thead>
+				<tr>
+					<th>جلسه</th>
+					<th>شرح اقدام درمانی</th>
+					<th>دندان‌ها</th>
+					<th>وضعیت</th>
+					<th>تاریخ و ساعت نوبت</th>
+				</tr>
+				</thead>
+				<tbody>
+				<?php if (!empty($treatment_plan)): ?>
+					<?php $session_number = 1; ?>
+					<?php foreach ($treatment_plan as $session): ?>
+						<tr>
+							<td><?= $ci->mylibrary->persion_number($session_number++) ?></td>
+							<td>
+								<?= htmlspecialchars($session['aggregated_processes'] ?? '---') ?>
+							</td>
+							<td>
+								<bdo dir="ltr"><?= htmlspecialchars($session['aggregated_teeth'] ?? '---') ?></bdo>
+							</td>
+							<td>
+								<?php
+								// 'c' means completed, any other status is considered scheduled.
+								if ($session['status'] == 'c') {
+									echo '<span class="status-badge status-completed">انجام شد</span>';
+								} else {
+									echo '<span class="status-badge status-scheduled">برنامه ریزی شده</span>';
+								}
+								?>
+							</td>
+							<td>
+								<bdo dir="ltr">
+									<?= htmlspecialchars($session['date'] ?? '') ?> - <?= htmlspecialchars($session['from_time'] ?? '') ?>
+								</bdo>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				<?php else: ?>
+					<tr>
+						<td colspan="5" style="text-align: center; padding: 20px;">
+							هیچ برنامه درمانی برای این بیمار ثبت نشده است.
+						</td>
+					</tr>
+				<?php endif; ?>
+				</tbody>
+			</table>
+		</section>
 
-                                                <tr>
-                                                    <td><?= $profile['name']; ?></td>
-                                                    <td><?= $profile['lname']; ?></td>
-                                                    <td><?= $profile['age']; ?></td>
-                                                    <td><?= $profile['address'] ?></td>
-                                                    <td><?= $profile['phone1']; ?></td>
-                                                    <td><?= $profile['phone2']; ?></td>
-                                                    <td><?= $ci->mylibrary->elsewise($profile['gender'], 'm', 'مذکر', 'مونث') ?></td>
-                                                    <td><?= $profile['pains']; ?></td>
-                                                    <td><?= $profile['other_pains']; ?></td>
-                                                </tr>
+		<!-- Notes Section -->
+		<section class="notes-section">
+			<strong>توصیه‌ها و نکات مهم:</strong><br>
+			- لطفاً ۱۵ دقیقه قبل از زمان تعیین شده در کلینیک حضور داشته باشید.<br>
+			- در صورت نیاز به تغییر یا لغو نوبت، حتماً از ۴ ساعت قبل به کلینیک اطلاع دهید.<br>
+			- رعایت بهداشت دهان طبق دستورالعمل‌های ارائه شده، برای موفقیت درمان ضروری است.
+		</section>
 
-
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                </div>
-                                <div class="col-md-12" style="margin-bottom: 20px">
-                                    <div class="element-wrapper">
-                                        <div class="element-box">
-
-                                            <div class="table-responsive" id="chart">
-                                                <table class="table table-bordered table-striped">
-                                                    <thead>
-                                                        <tr class="">
-                                                            <th colspan="6" style="font-size: 0.9rem">دندان ها</th>
-                                                        </tr>
-                                                        <tr style="font-size: 0.8rem">
-                                                            <th>شماره</th>
-                                                            <th>نام دندان</th>
-                                                            <th>موقعیت دندان</th>
-                                                            <th>خدمات</th>
-                                                            <th>فیس پرداختی</th>
-                                                            <th>تفصیلات</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody style="font-size: 0.8rem;">
-                                                        <?php $i = 1;
-                                                        $fee = 0;
-                                                        foreach ($teeth as $tooth) : ?>
-                                                            <tr>
-                                                                <td><?= $i ?></td>
-                                                                <td><?= $tooth['name'] ?></td>
-                                                                <td><?= $ci->dentist->find_location($tooth['location']) ?></td>
-                                                                <td><?= $ci->services_name($tooth['services'])  ?></td>
-                                                                <td><?= $tooth['price'] ?></td>
-                                                                <td><?= $tooth['details'] ?></td>
-                                                            </tr>
-                                                        <?php $i++;
-                                                            $fee += $tooth['price'];
-                                                        endforeach; ?>
-                                                    </tbody>
-                                                    <tfoot>
-                                                        <tr class="no-border">
-
-                                                            <td style="font-size: 0.8rem"></td>
-                                                            <td style="font-size: 0.8rem"></td>
-                                                            <td style="font-size: 0.8rem"></td>
-
-                                                            <td style="font-size: 0.9rem">مجموعه فیس:</td>
-                                                            <td style="font-size: 0.9rem"><?= $fee ?></td>
-                                                            <td style="font-size: 0.8rem"></td>
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-12" style="margin-bottom: 20px">
-                                    <div class="element-wrapper">
-                                        <div class="element-box">
-
-                                            <div class="table-responsive" id="chart">
-                                                <table class="table table-bordered table-striped">
-                                                    <thead>
-                                                        <tr class="">
-                                                            <th colspan="6" style="font-size: 0.9rem">مصارف</th>
-                                                        </tr>
-                                                        <tr style="font-size: 0.8rem">
-                                                            <th>شماره</th>
-                                                            <th>لابراتوار</th>
-                                                            <th>دندان ها</th>
-                                                            <th>نوعیت دندان</th>
-                                                            <th>مقدار مصارف</th>
-                                                            <th>تفصیلات</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody style="font-size: 0.8rem;">
-                                                        <?php $j = 1;
-                                                        $expense = 0;
-                                                        foreach ($labs as $lab) : ?>
-                                                            <tr>
-                                                                <td><?= $j ?></td>
-                                                                <td><?= $lab['lab_name'] ?></td>
-                                                                <?php
-                                                                $teeths = explode(',', $lab['teeth']);
-                                                                $teethName = '';
-                                                                foreach ($teeths as $tooth) {
-                                                                    $info = $ci->tooth_by_id($tooth);
-                                                                    $teethName .= $info['name'];
-                                                                    $teethName .= ' (';
-                                                                    $teethName .= $ci->dentist->find_location($info['location']);
-                                                                    $teethName .= '),';
-                                                                }
-                                                                ?>
-                                                                <td><?= substr($teethName, 0, -1) ?></td>
-                                                                <?php
-                                                                $types = explode(',', $lab['type']);
-                                                                $typesName = '';
-                                                                foreach ($types as $type) {
-                                                                    $typesName .= $ci->lang($type);
-                                                                    $typesName .= ',';
-                                                                }
-                                                                ?>
-                                                                <td><?= substr($typesName, 0, -1) ?></td>
-                                                                <td><?= $lab['dr'] ?></td>
-                                                                <td><?= $lab['remarks'] ?></td>
-                                                            </tr>
-                                                        <?php $j++;
-                                                            $expense += $lab['dr'];
-                                                        endforeach; ?>
-                                                    </tbody>
-                                                    <tfoot>
-                                                        <tr class="no-border">
-
-                                                            <td style="font-size: 0.8rem"></td>
-                                                            <td style="font-size: 0.8rem"></td>
-                                                            <td style="font-size: 0.8rem"></td>
-
-                                                            <td style="font-size: 0.9rem">مجموعه مصارف:</td>
-                                                            <td style="font-size: 0.9rem"><?= $expense ?></td>
-                                                            <td style="font-size: 0.8rem"></td>
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="element-wrapper">
-                                        <div class="element-box">
-
-                                            <div class="table-responsive" id="chart">
-                                                <table class="table table-bordered table-striped">
-                                                    <thead>
-                                                        <tr class="">
-                                                            <th colspan="6" style="font-size: 0.9rem">حسابات مالی</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>شماره</th>
-                                                            <th>جلسات</th>
-                                                            <th>مبلغ پرداختی</th>
-                                                            <th>تاریخ پرداخت</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody style="font-size: 0.8rem;">
-                                                        <tr>
-                                                            <td>1</td>
-                                                            <td>جلسه اول</td>
-                                                            <td></td>
-                                                            <td></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>2</td>
-                                                            <td>جلسه دوم</td>
-                                                            <td></td>
-                                                            <td></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>3</td>
-                                                            <td>جلسه سوم</td>
-                                                            <td></td>
-                                                            <td></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>4</td>
-                                                            <td>جلسه چهارم</td>
-                                                            <td></td>
-                                                            <td></td>
-                                                        </tr>
-                                                    </tbody>
-                                                    <tfoot>
-                                                        <tr class="no-border">
-                                                            <td></td>
-                                                            <td></td>
-                                                            <td>مجموعه:</td>
-                                                            <td>(___________)</td>
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                window.print();
-                self.close();
-            }, 1000);
-        });
-    </script>
+		<!-- Footer -->
+		<footer class="footer">
+			از انتخاب شما سپاسگزاریم و برایتان آرزوی سلامتی داریم.
+		</footer>
+	</div>
+</div>
 </body>
-
 </html>

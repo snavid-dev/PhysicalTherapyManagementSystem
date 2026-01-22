@@ -1,4 +1,5 @@
 <?php $ci = get_instance(); ?>
+
 <script>
 	// TODO the actions for patients single page
 	function actions() {
@@ -37,7 +38,9 @@
 		}
 
 		if (actionValues == 7){
+			revertSelect2InModal();
 			$(`#multiTurnModal`).modal("toggle");
+			$("#selectaction").val("").trigger("change");
 	}
 	}
 
@@ -402,4 +405,25 @@
 	}
 
 
+</script>
+
+<script>
+	function revertSelect2InModal(modalId) {
+		if (!modalId) {
+			console.error("No modal ID was provided.");
+			return;
+		}
+		const $modal = $('#' + modalId);
+		if ($modal.length === 0) {
+			console.warn("Modal with ID '" + modalId + "' not found.");
+			return;
+		}
+		const $selects = $modal.find('select');
+		if ($.fn.select2) {
+			$selects.select2('destroy');
+			console.log('Select2 instances destroyed in modal: ' + modalId);
+		} else {
+			console.error("Select2 is not loaded.");
+		}
+	}
 </script>
