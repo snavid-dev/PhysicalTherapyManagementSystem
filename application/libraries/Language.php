@@ -351,6 +351,12 @@ class Language
 
 			// Start Turns Page
 			'insert turn' => self::lang_arr('insert turn', 'افزودن نوبت', 'وار اضافه کړئ'),
+			'insert multiple turns' => self::lang_arr('insert turn', 'افزودن نوبت', 'وار اضافه کړئ'),
+			'plan' => self::lang_arr('plan', 'پلان', 'وار اضافه کړئ'),
+			'from' => self::lang_arr('from', 'از', 'وار اضافه کړئ'),
+			'to' => self::lang_arr('to', 'به', 'وار اضافه کړئ'),
+			'add another turn' => self::lang_arr('add another turn', 'افزودن نوبت دیگر', 'وار اضافه کړئ'),
+			'save all' => self::lang_arr('save all', 'ثبت همه', 'وار اضافه کړئ'),
 			'update turn' => self::lang_arr('update turn', 'ویرایش نوبت', 'وار تازه کړئ'),
 			// TODO what is the meaning of this word (لست نوب ها)?
 			'turns list' => self::lang_arr('List of turns', 'لیست نوبت ها', 'مالي حساب'),
@@ -364,12 +370,15 @@ class Language
 			'paid amount' => self::lang_arr('paid amount', 'مقدار پرداخت شده', 'تادیه شوی مقدار'),
 			'received by' => self::lang_arr('received by', 'تسلیم شده توسط', 'تادیه شوی مقدار'),
 			'not paid' => self::lang_arr('not paid', 'پرداخت نشده', 'تادیه شوی مقدار'),
+
 			// End Turns page
 
 			// Start Payment
 			'insert payment' => self::lang_arr('add payment', 'افزودن پول پرداختی', 'تادیه اضافه کړئ'),
 			'insert payment turn error' => self::err_gen('Select Turn', 'انتخاب نوبت', '??????'),
 			'insert payment amount error' => self::err_gen('Paid amount', 'مقدار پرداختی ', 'قدار پرداختی '),
+			'no turn data submitted' => self::lang_arr('no turn data submitted', 'هیچ نوبتی ثبت نشد', 'قدار پرداختی '),
+			'patient not identified' => self::lang_arr('patient not identified', 'مریض شناخته نشد', 'قدار پرداختی '),
 			'insert payment success' => self::lang_arr('The Patient payment was successfully inserted', 'پرداخت مریض موفقانه افزوده شد', ' حساب په بریالیتوب سره اضافه شو'),
 			// End Payment
 
@@ -383,6 +392,8 @@ class Language
 			'teeth' => self::lang_arr('teeth', 'دندان ها', 'غاښونه'),
 			'turns' => self::lang_arr('turns', 'نوبت ها', '??????'),
 			'archive' => self::lang_arr('Archive', 'آرشیف', 'آرشیف'),
+			'treatment plan' => self::lang_arr('treatment plan', 'پلان درمانی', 'آرشیف'),
+			'sum of recommendation' => self::lang_arr('sum of recommendation', 'مجموعه پروسه های پیشنهادی', 'آرشیف'),
 			'experiments' => self::lang_arr('experiments', 'آزمایشات', 'آزمایشات'),
 
 			'block' => self::lang_arr('block', 'معلق کردن', 'بند کول'),
@@ -606,11 +617,15 @@ class Language
 			'insert turn doctor_id error' => self::err_gen('reference doctor', 'داکتر مربوطه', 'حواله ډاکټر'),
 			'insert turn date error' => self::err_gen('date', 'تاریخ', 'نیټه'),
 			'insert turn hour error' => self::err_gen('hour', 'ساعت', 'ساعت'),
+			'insert turn plan error' => self::err_gen('treatment plan', 'پلان درمانی', 'not set'),
 			// TODO: could not be treanslated
 			'insert turn success' => self::lang_arr('The turn was successfully added', 'نوبت موفقانه افزوده شد', '????'),
 			'turn already taken' => self::lang_arr('On the selected date and time, the relevant doctor has a patient', 'در تاریخ و ساعت انتخاب شده داکتر مربوطه مریض دارد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
 			'turn conflict' => self::lang_arr('On the selected date and time, the relevant doctor has a patient', 'در تاریخ و ساعت انتخاب شده داکتر مربوطه مریض دارد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
+			'insert turn success multiple' => self::lang_arr('insert turn success multiple', 'افزودن چندین نوبت موفقانه انجام شد', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
+			'insert turn failed multiple' => self::lang_arr('insert turn failed multiple', 'افزودن چندین نوبت موفقانه انجام نشد!', 'په ټاکل شوې نیټه او وخت کې، اړوند ډاکټر ناروغ لري'),
 			'update turn success' => self::lang_arr('The turn was successfully updated', 'نوبت موفقانه بروزرسانی شد', '????'),
+			'please insert recommended processes first or the recommended is wrong' => self::lang_arr('please insert recommended processes first or the recommended is wrong', 'اول پروسه های پیشنهادی انتخاب کنید', '????'),
 			// end turn errors
 
 			// lab errors
@@ -737,6 +752,7 @@ class Language
 			'other treatments' => self::lang_arr('other treatment', 'سایر درمان ها', '?????'),
 			'other' => self::lang_arr('other', 'متفرقه', '?????'),
 			'invalid patient' => self::lang_arr('invalid patient', 'بیمار نامعتبر است', 'Invalid patient'),
+			'duplicate process name' => self::lang_arr('duplicate process name', 'این نام قبلا ثبت شده است', 'not set'),
 			'recommended processes inserted' => self::lang_arr('recommended processes inserted', 'فرآیندهای پیشنهادی با موفقیت ثبت شدند', 'Recommended processes inserted'),
 			// other treatment end
 
@@ -942,7 +958,7 @@ class Language
 			//turns errors
 
 			//recommended process start
-			'recommended processes' => self::lang_arr('recommended processes', 'not set', 'not set'),
+			'recommended processes' => self::lang_arr('recommended processes', 'پروسه های پیشنهادی', 'not set'),
 			//recommended process end
 
 		];

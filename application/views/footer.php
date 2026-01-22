@@ -470,7 +470,7 @@
 	<?php endforeach; ?>
 <?php endif; ?>
 
-<?php if ($ci->dentist->usage_type == 'online'): ?>
+<?php if ($ci->dentist->usage_type == 'onlinee'): ?>
 
 	<?php if ($_COOKIE['language'] == 'en') : ?>
 

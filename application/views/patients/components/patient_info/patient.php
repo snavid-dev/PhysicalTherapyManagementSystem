@@ -135,6 +135,10 @@ $ci = get_instance();
 						style=" display: flex;align-items: center; width: 100%; justify-content: space-between;"><?= $ci->lang('edit') ?>
 					<i class="fa fa-edit"></i>
 				</button>
+				<button type="button" class="btn btn-warning-gradient btn-wave custom-btn" onclick="print_patient('<?= $profile['id'] ?>')"
+						style=" display: flex;align-items: center; width: 100%; justify-content: space-between; margin-top: 3%;"><?= $ci->lang('print') ?>
+					<i class="fa fa-print"></i>
+				</button>
 
 				<!-- patients edit profile modal codes goes here - start -->
 				<?php $ci->render('patients/components/patient_info/edit_patients_profile_modal.php') ?>
@@ -144,3 +148,9 @@ $ci = get_instance();
 		<?php endif; ?>
 	</div>
 </div>
+
+<script>
+	function print_patient(turnId) {
+		window.open(`<?= base_url() ?>admin/print_patient/${turnId}`, '_blank');
+	}
+</script>

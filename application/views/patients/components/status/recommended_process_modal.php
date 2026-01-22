@@ -14,6 +14,26 @@
 
 				<!-- Teeth Selection -->
 				<div class="row mb-3">
+					<div class="col-md-3">
+						<label><?= $ci->lang('doctor') ?></label>
+						<select name="doctor_id" class="form-control select2-show-search form-select"
+								data-placeholder="<?= $ci->lang('select') ?>" id="doctor_id" form="processForm">
+							<option label="<?= $ci->lang('select') ?>"></option>
+							<option value="all">
+								<?= $ci->lang("select") ?>
+							</option>
+							<?php foreach ($doctors as $doctor) : ?>
+								<option value="<?= $doctor['id'] ?>">
+									<?= $ci->mylibrary->user_name($doctor['fname'], $doctor['lname']) ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+
+					</div>
+					<div class="col-md-3">
+						<label><?= $ci->lang('name') ?></label>
+						<input type="text" class="form-control" name="name" form="processForm">
+					</div>
 					<div class="col-md-6">
 						<label><?= $ci->lang('teeth') ?></label>
 						<select class="form-control select2-show-search form-select" name="teeth[]" id="process_teeth"
@@ -39,7 +59,7 @@
 				</button>
 
 				<button class="btn btn-primary"
-						onclick="submitWithoutDatatable('processForm', '<?= base_url() ?>admin/insert_recommended_processes', 'labsTable', 'recommended_processes', list_labs)">
+						onclick="submitWithoutDatatable('processForm', '<?= base_url() ?>admin/insert_recommended_processes', 'labsTable', 'recommended_processes', list_treatment_plan)">
 					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
 				</button>
 			</div>

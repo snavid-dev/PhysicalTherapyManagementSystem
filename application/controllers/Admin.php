@@ -885,6 +885,60 @@ class Admin extends CI_Controller
 	}
 
 
+	public function delete_recommended()
+	{
+		$data = array('type' => 'form_error', 'messages' => array());
+		$this->form_validation->set_rules('record', 'record', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
+		if ($this->form_validation->run()) {
+			$recommended_id = $this->input->post('record');
+			$datas = array(
+				'services_id' => $this->input->post('record')
+			);
+
+			$endo_has_service = $this->Admin_model->get_endo_has_service($datas);
+			$restorative_has_service = $this->Admin_model->get_restorative_has_service($datas);
+
+			// print_r($restorative_has_service);
+			// exit;
+
+			if (count($endo_has_service) !== 0 || count($restorative_has_service) !== 0) {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('services delete not allowed');
+				$data['alert']['type'] = 'error';
+				print_r(json_encode($data));
+				exit();
+			}
+
+
+			$datas_for_delete = array(
+				'id' => $this->input->post('record')
+			);
+
+			if ($this->Admin_model->delete_service($datas_for_delete)) {
+				$data['type'] = 'success';
+				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['text'] = $this->lang('delete service');
+				$data['alert']['type'] = 'success';
+			} else {
+				$data['type'] = 'error';
+				$data['alert']['title'] = $this->lang('error');
+				$data['alert']['text'] = $this->lang('problem');
+				$data['alert']['type'] = 'error';
+			}
+		} else {
+			foreach ($_POST as $key => $value) {
+				if (form_error($key) !== '') {
+					$error = form_error($key);
+					$data['messages'][] = substr($error, 3, -4);
+				}
+			}
+		}
+
+		print_r(json_encode($data));
+	}
+
+
 	public function delete_service()
 	{
 		$data = array('type' => 'form_error', 'messages' => array());
@@ -945,6 +999,7 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('price', 'price', 'trim|required', array('required' => $this->lang('insert service error price')));
 
 		$names = $this->input->post('process_name');
+		$remarks = $this->input->post('remarks');
 		$percentages = $this->input->post('percentage');
 
 		$hasProcessError = false;
@@ -998,9 +1053,11 @@ class Admin extends CI_Controller
 
 				foreach ($names as $index => $name) {
 					$percentage = isset($percentages[$index]) ? $percentages[$index] : 0;
+					$remark = isset($remarks[$index]) ? $remarks[$index] : 0;
 					$process_data = array(
 						'name' => $name,
 						'percentage' => $percentage,
+						'remarks' => $remark,
 						'number' => $index + 1,
 						'services_id' => $service_id
 					);
@@ -1105,6 +1162,7 @@ class Admin extends CI_Controller
 
 		$names = $this->input->post('process_name');
 		$percentages = $this->input->post('percentage');
+		$remarks = $this->input->post('remarks');
 
 		$hasProcessError = false;
 		$totalPercentage = 0;
@@ -1163,12 +1221,14 @@ class Admin extends CI_Controller
 				// Determine which to keep, update, insert, delete
 				foreach ($submittedNames as $index => $name) {
 					$percentage = $percentages[$index];
+					$remark = $remarks[$index];
 					$number = $index + 1;
 
 					if (in_array($name, $existingNames)) {
 						// UPDATE existing process
 						$this->Admin_model->update_process_by_name_and_service($id, $name, [
 							'percentage' => $percentage,
+							'remarks' => $remark,
 							'number' => $number
 						]);
 					} else {
@@ -1176,6 +1236,7 @@ class Admin extends CI_Controller
 						$this->Admin_model->insert_process([
 							'name' => $name,
 							'percentage' => $percentage,
+							'remarks' => $remark,
 							'number' => $number,
 							'services_id' => $id
 						]);
@@ -3184,6 +3245,7 @@ class Admin extends CI_Controller
 	{
 		$this->check_permission_page('Read Patient Profile');
 		if (!is_null($id)) {
+
 			$profile = $this->Admin_model->profile_patient($id);
 
 			if (count($profile) !== 0) {
@@ -3231,6 +3293,10 @@ class Admin extends CI_Controller
 
 
 				// End List of primary information for insert teeth
+
+				// Start List of Treatment Plans
+				$data['treatment_plans'] = $this->Admin_model->get_patient_treatment_plan($id);
+				// End List of Treatment Plans
 
 
 				// Start List of primary information for files
@@ -4007,6 +4073,7 @@ class Admin extends CI_Controller
 		} else {
 			$data['labs'] = $this->Admin_model->labs_patient_id($id);
 
+			$data['treatment_plan'] = $this->Admin_model->get_treatment_plan_for_patient($id);
 
 			$data['teeth'] = $this->Admin_model->get_teeth_by_id($id);
 			$data['profile'] = $profile[0];
@@ -5597,6 +5664,8 @@ class Admin extends CI_Controller
 
 	public function insert_recommended_processes()
 	{
+		$this->form_validation->set_rules('name', 'name', 'required');
+		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'required|is_natural_no_zero');
 		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
 		if (!$this->form_validation->run()) {
 			echo json_encode([
@@ -5611,6 +5680,24 @@ class Admin extends CI_Controller
 		}
 
 		$patient_id = $this->input->post('patient_id');
+		$name = $this->input->post('name');
+		$doctor_id = $this->input->post('doctor_id');
+		$recommendations = $this->Admin_model->get_patient_treatment_plan($patient_id);
+
+		foreach ($recommendations as $recommendation) {
+			if ($recommendation['recommendation_name'] == $name) {
+				echo json_encode([
+					'type' => 'error',
+					'alert' => [
+						'title' => $this->lang('error'),
+						'text' => $this->lang('duplicate process name'),
+						'type' => 'error'
+					]
+				]);
+				return;
+			}
+		}
+
 		$tooth_ids = $this->input->post('tooth_id');
 		$processes = $this->input->post('processes');
 		$custom_processes = $this->input->post('custom_process');
@@ -5621,6 +5708,8 @@ class Admin extends CI_Controller
 			if (!empty($processes[$tooth_id])) {
 				foreach ($processes[$tooth_id] as $process_id) {
 					$this->Admin_model->insert_recommended_process([
+						'name' => $name,
+						'doctor_id' => $doctor_id,
 						'turn_id' => null,
 						'tooth_id' => $tooth_id,
 						'process_id' => $process_id, // ✅ Use actual ID
@@ -6379,6 +6468,186 @@ class Admin extends CI_Controller
 		]);
 	}
 
+	public function insert_turnsMultiple()
+	{
+		// Get the array of turns from the POST data
+		$turns = $this->input->post('turns');
+
+		// 1. Initial validation: Check if turns data is present and is an array
+		if (empty($turns) || !is_array($turns)) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('no turn data submitted'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$errors = [];
+		$successful_inserts = 0;
+		$patient_id = null;
+		$batch_slots = []; // To check for conflicts within the same submission
+
+		// Get patient_id from the first turn (it's the same for all)
+		if (isset($turns[0]['patient_id'])) {
+			$patient_id = $turns[0]['patient_id'];
+		}
+
+		if (!$patient_id) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('patient not identified'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// Pre-fetch all treatment plans for the patient once to avoid querying in a loop
+		$patient_plans = $this->Admin_model->get_patient_treatment_plan($patient_id);
+
+		// 2. Loop through each turn to validate and insert
+		foreach ($turns as $index => $turn_data) {
+			$row_num = $index + 1;
+
+			// === 2a. Manual Validation for each turn ===
+			if (empty($turn_data['date'])) {
+				$errors[] = "Row #{$row_num}: " . $this->lang('insert turn date error');
+				continue; // Skip to the next turn
+			}
+			if (empty($turn_data['doctor_id'])) {
+				$errors[] = "Row #{$row_num}: " . $this->lang('insert turn doctor_id error');
+				continue;
+			}
+			if (empty($turn_data['plan'])) {
+				$errors[] = "Row #{$row_num}: " . $this->lang('insert turn plan error');
+				continue;
+			}
+			if (empty($turn_data['from_time']) || empty($turn_data['to_time'])) {
+				$errors[] = "Row #{$row_num}: " . $this->lang('insert turn hour error');
+				continue;
+			}
+
+			// === 2b. Check if the recommended process exists for this patient ===
+			$planName = $turn_data['plan'];
+			$hasRecommended = false;
+			foreach ($patient_plans as $patient_plan) {
+				// Check for a plan that matches the name and hasn't been assigned a turn yet
+				if ($patient_plan['recommendation_name'] == $planName && is_null($patient_plan['turn_id'])) {
+					$hasRecommended = true;
+					break; // Found a matching, available plan
+				}
+			}
+
+			if ($hasRecommended !== true) {
+				$errors[] = "Row #{$row_num}: " . $this->lang('please insert recommended processes first or the recommended is wrong');
+				continue;
+			}
+
+			// === 2c. Check for time conflict (against database) ===
+			$conflict_in_db = $this->Admin_model->check_turn_conflict(
+				$turn_data['date'],
+				$turn_data['doctor_id'],
+				$turn_data['from_time'],
+				$turn_data['to_time']
+			);
+
+			if ($conflict_in_db) {
+				$errors[] = "Row #{$row_num}: " . $this->lang('turn conflict') . " with an existing appointment.";
+				continue;
+			}
+
+			// === 2d. Check for time conflict (within this batch) ===
+			$conflict_in_batch = false;
+			foreach ($batch_slots as $slot) {
+				if ($slot['date'] == $turn_data['date'] && $slot['doctor_id'] == $turn_data['doctor_id']) {
+					// Check for time overlap
+					if ($turn_data['from_time'] < $slot['to_time'] && $turn_data['to_time'] > $slot['from_time']) {
+						$conflict_in_batch = true;
+						break;
+					}
+				}
+			}
+
+			if ($conflict_in_batch) {
+				$errors[] = "Row #{$row_num}: " . $this->lang('turn conflict') . " with another turn in this submission.";
+				continue;
+			}
+
+
+			// === 2e. If all checks pass, insert the turn ===
+			$data_to_insert = [
+				'patient_id' => $patient_id,
+				'date' => $turn_data['date'],
+				'from_time' => $turn_data['from_time'],
+				'to_time' => $turn_data['to_time'],
+				'status' => 'p', // Pending
+				'doctor_id' => $turn_data['doctor_id']
+			];
+
+			$insert_result = $this->Admin_model->insert_turn_form($data_to_insert);
+
+			if (!$insert_result[0]) {
+				$errors[] = "Row #{$row_num}: A database error occurred during insertion.";
+				continue; // Skip to next turn
+			}
+
+			// === 2f. Update the recommended process with the new turn_id ===
+			$turn_id = $insert_result[1];
+			$this->Admin_model->update_recommended_by_turn_id($turn_id, $planName, $patient_id);
+
+			// Add to batch slots to check subsequent turns against it
+			$batch_slots[] = [
+				'date' => $turn_data['date'],
+				'doctor_id' => $turn_data['doctor_id'],
+				'from_time' => $turn_data['from_time'],
+				'to_time' => $turn_data['to_time']
+			];
+
+			$successful_inserts++;
+		}
+
+		// 3. Prepare the final JSON response based on the outcome
+		if ($successful_inserts > 0 && empty($errors)) {
+			// All succeeded
+			$response = [
+				'type' => 'success',
+				'alert' => [
+					'title' => $this->lang('success'),
+					'text' => $successful_inserts . ' ' . $this->lang('insert turn success multiple'),
+					'type' => 'success'
+				]
+			];
+		} elseif ($successful_inserts > 0 && !empty($errors)) {
+			// Partial success
+			$response = [
+				'type' => 'warning',
+				'alert' => [
+					'title' => $this->lang('warning'),
+					'text' => $successful_inserts . ' ' . $this->lang('insert turn success multiple') . ".<br><br><strong>Errors:</strong><br>" . implode('<br>', $errors),
+					'type' => 'warning'
+				]
+			];
+		} else {
+			// Total failure
+			$response = [
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('insert turn failed multiple') . "<br><br><strong>Errors:</strong><br>" . implode('<br>', $errors),
+					'type' => 'error'
+				]
+			];
+		}
+
+		echo json_encode($response);
+	}
+
 
 	public function insert_turn()
 	{
@@ -6394,12 +6663,16 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'trim|required', [
 			'required' => $this->lang('insert turn doctor_id error')
 		]);
+		$this->form_validation->set_rules('plan', 'plan', 'trim|required', [
+			'required' => $this->lang('insert turn plan error')
+		]);
 		$this->form_validation->set_rules('from_time', 'from_time', 'trim|required', [
 			'required' => $this->lang('insert turn hour error')
 		]);
 		$this->form_validation->set_rules('to_time', 'to_time', 'trim|required', [
 			'required' => $this->lang('insert turn hour error')
 		]);
+
 
 		if (!$this->form_validation->run()) {
 			foreach ($_POST as $key => $value) {
@@ -6413,22 +6686,25 @@ class Admin extends CI_Controller
 		}
 
 		$patient_id = $this->input->post('patient_id');
-		$tooth_ids = $this->Admin_model->get_patient_tooth_ids($patient_id);
-
+		$planName = $this->input->post('plan');
 		// === Check if any recommended processes exist for this patient (with NULL turn_id) ===
-		$has_recommended = false;
-		if (!empty($tooth_ids)) {
-			$this->db->where('turn_id IS NULL', null, false);
-			$this->db->where_in('tooth_id', $tooth_ids);
-			$has_recommended = $this->db->count_all_results('turn_tooth_recommended') > 0;
+
+		$patient_plans = $this->Admin_model->get_patient_treatment_plan($patient_id);
+
+		$hasRecommended = false;
+		foreach ($patient_plans as $patient_plan) {
+			if ($patient_plan['recommendation_name'] == $planName) {
+				$hasRecommended = true;
+			}
 		}
 
-		if (!$has_recommended) {
+
+		if ($hasRecommended !== true) {
 			echo json_encode([
 				'type' => 'error',
 				'alert' => [
 					'title' => $this->lang('error'),
-					'text' => $this->lang('please insert recommended processes first'),
+					'text' => $this->lang('please insert recommended processes first or the recommended is wrong'),
 					'type' => 'error'
 				]
 			]);
@@ -6481,11 +6757,9 @@ class Admin extends CI_Controller
 
 		$turn_id = $insert[1];
 
-		// === Assign recommended processes to this turn ===
-		$this->db->where('turn_id IS NULL', null, false);
-		$this->db->where_in('tooth_id', $tooth_ids);
-		$this->db->update('turn_tooth_recommended', ['turn_id' => $turn_id]);
+		$update_recommendeds = $this->Admin_model->update_recommended_by_turn_id($turn_id, $planName, $patient_id);
 
+		// === Assign recommended processes to this turn ===
 		$data['type'] = 'success';
 		$data['id'] = $turn_id;
 		$data['extraFunction'] = 'print';
@@ -7489,6 +7763,37 @@ class Admin extends CI_Controller
 		}
 
 		print_r(json_encode($data));
+	}
+
+
+	public function get_doctor_for_plan()
+	{
+		header('Content-Type: application/json');
+
+		$planName = $this->input->post('plan_name');
+		$patientId = $this->input->post('patient_id');
+
+		if (empty($planName) || empty($patientId)) {
+			echo json_encode(['status' => 'error', 'message' => 'Plan name or Patient ID not provided.']);
+			return;
+		}
+
+		// This now calls the new, correct model function
+		$result = $this->Admin_model->get_doctor_for_patient_plan($planName, $patientId);
+
+		if ($result && isset($result['doctor_id'])) {
+			// Your frontend expects 'status' and 'doctor_id', which we provide here.
+			// It's better practice to parse JSON on the frontend.
+			echo json_encode([
+				'status' => 'success',
+				'doctor_id' => $result['doctor_id']
+			]);
+		} else {
+			echo json_encode([
+				'status' => 'error',
+				'message' => 'Doctor not found for the selected plan and patient.'
+			]);
+		}
 	}
 
 	public function report_ajax_patients_income()

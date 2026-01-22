@@ -1,4 +1,5 @@
 <?php $ci = get_instance(); ?>
+
 <script>
 	// TODO the actions for patients single page
 	function actions() {
@@ -35,6 +36,12 @@
 			$(`#recommended_processes`).modal("toggle");
 			$("#selectaction").val("").trigger("change");
 		}
+
+		if (actionValues == 7){
+			revertSelect2InModal();
+			$(`#multiTurnModal`).modal("toggle");
+			$("#selectaction").val("").trigger("change");
+	}
 	}
 
 	// TODO: toogleView function please note that this function placed at the cdn/assets/js/teeth.js
@@ -269,6 +276,13 @@
 	}
 </script>
 
+<script>
+	function list_treatment_plan() {
+		const id = '<?= $profile['id'] ?>';
+		console.log("the patient id is:", id);
+	}
+</script>
+
 
 <script>
 	function get_teeth_process() {
@@ -279,7 +293,7 @@
 		if (!selectedTeeth || !selectedTeeth.length) return;
 
 		$.ajax({
-				url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
+			url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
 			type: 'POST',
 			data: {
 				teeth_ids: selectedTeeth,
@@ -371,7 +385,7 @@
 		$.ajax({
 			url: "<?= base_url('admin/get_patient_process_completion') ?>",
 			type: 'POST',
-			data: { patient_id },
+			data: {patient_id},
 			dataType: 'json',
 			success: function (response) {
 				if (response.type === 'success') {
@@ -391,4 +405,25 @@
 	}
 
 
+</script>
+
+<script>
+	function revertSelect2InModal(modalId) {
+		if (!modalId) {
+			console.error("No modal ID was provided.");
+			return;
+		}
+		const $modal = $('#' + modalId);
+		if ($modal.length === 0) {
+			console.warn("Modal with ID '" + modalId + "' not found.");
+			return;
+		}
+		const $selects = $modal.find('select');
+		if ($.fn.select2) {
+			$selects.select2('destroy');
+			console.log('Select2 instances destroyed in modal: ' + modalId);
+		} else {
+			console.error("Select2 is not loaded.");
+		}
+	}
 </script>
