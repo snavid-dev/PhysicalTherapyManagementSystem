@@ -205,7 +205,7 @@ class Admin_model extends CI_Model
 	public function get_balance_sheet()
 	{
 		$date = $this->mylibrary->getCurrentShamsiDate()['date'];
-		return $this->db->query("SELECT `balance_sheet`.*, users.fname AS 'firstname', users.lname AS 'lastname', customers.name, customers.fname FROM `balance_sheet` INNER JOIN `users` ON balance_sheet.users_id = users.id INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE DATE(`balance_sheet`.`shamsi`) BETWEEN DATE('" . $date . "') AND DATE('" . $date . "')  
+		return $this->db->query("SELECT `balance_sheet`.*, users.fname AS 'firstname', users.lname AS 'lastname', customers.name, customers.fname FROM `balance_sheet` INNER JOIN `users` ON balance_sheet.users_id = users.id INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE `balance_sheet`.`shamsi` BETWEEN '" . $date . "' AND '" . $date . "'  
         ORDER BY `balance_sheet`.`id` DESC")->result_array();
 	}
 
@@ -217,7 +217,7 @@ class Admin_model extends CI_Model
 	public function get_report_balance_sheet($extra = null)
 	{
 		if (is_null($extra)) {
-			$extra = "DATE(shamsi) = DATE('" . $this->mylibrary->getCurrentShamsiDate()['date'] . "')";
+			$extra = "shamsi = '" . $this->mylibrary->getCurrentShamsiDate()['date'] . "'";
 		}
 
 		return $this->db->query("SELECT `balance_sheet`.*,  CONCAT(customers.name, ' - ', customers.lname) AS 'customer_name', CONCAT(users.fname, ' - ', users.lname) AS 'user_name' FROM `balance_sheet` INNER JOIN `customers` ON balance_sheet.customers_id = customers.id INNER JOIN `users` ON `balance_sheet`.users_id = users.id WHERE " . $extra . " ORDER BY `balance_sheet`.`shamsi` ASC;")->result_array();
@@ -227,7 +227,7 @@ class Admin_model extends CI_Model
 	public function get_tooth_income($extra = null)
 	{
 		if (is_null($extra)) {
-			$extra = "DATE(tooth.create_date) = DATE('" . $this->mylibrary->getCurrentShamsiDate()['date'] . "')";
+			$extra = "tooth.create_date = '" . $this->mylibrary->getCurrentShamsiDate()['date'] . "'";
 		}
 
 		return $this->db->query("SELECT tooth.name AS 'tooth_name', tooth.location, tooth.price, tooth.create_date, patient.name, patient.lname, patient.gender FROM `tooth` INNER JOIN patient ON tooth.patient_id = patient.id WHERE " . $extra . " ORDER BY `tooth`.`create_date` ASC;")->result_array();
@@ -239,7 +239,7 @@ class Admin_model extends CI_Model
 		// Default condition for today's date if no extra condition is provided
 		if (is_null($extra)) {
 			$currentDate = $this->mylibrary->getCurrentShamsiDate()['date'];
-			$extra = "DATE(turn.date) = DATE(?)";
+			$extra = "turn.date = ?";
 			$params = [$currentDate];
 		} else {
 			$params = []; // Assume `extra` already contains conditions and doesn't need parameters
@@ -1126,7 +1126,7 @@ class Admin_model extends CI_Model
 	{
 		$ci = get_instance();
 		$date = $ci->mylibrary->getCurrentShamsiDate()['date'];
-		return $this->db->query("SELECT `balance_sheet`.*, users.fname AS 'firstname', users.lname AS 'lastname', users.role, customers.name, customers.lname, customers.type FROM `balance_sheet` INNER JOIN `users` ON balance_sheet.users_id = users.id INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE DATE(`balance_sheet`.`shamsi`) BETWEEN DATE('" . $date . "') AND DATE('" . $date . "')  
+		return $this->db->query("SELECT `balance_sheet`.*, users.fname AS 'firstname', users.lname AS 'lastname', users.role, customers.name, customers.lname, customers.type FROM `balance_sheet` INNER JOIN `users` ON balance_sheet.users_id = users.id INNER JOIN customers ON balance_sheet.customers_id = customers.id WHERE `balance_sheet`.`shamsi` BETWEEN '" . $date . "' AND '" . $date . "'  
     ORDER BY `balance_sheet`.`id` DESC")->result_array();
 	}
 
@@ -1176,9 +1176,9 @@ class Admin_model extends CI_Model
 		$today = $ci->mylibrary->getCurrentShamsiDate()['date'];
 // return $today;
 		if (is_null($date)) {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) < DATE('$today') ORDER BY `turn`.`from_time` ASC")->result_array();
+			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND turn.date < '$today' ORDER BY `turn`.`from_time` ASC")->result_array();
 		} else {
-			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND DATE(turn.date) < DATE('$today') AND turn.date = '$date' ORDER BY `turn`.`from_time` ASC")->result_array();
+			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND turn.date < '$today' AND turn.date = '$date' ORDER BY `turn`.`from_time` ASC")->result_array();
 		}
 	}
 
@@ -1195,7 +1195,7 @@ class Admin_model extends CI_Model
               INNER JOIN users ON turn.doctor_id = users.id 
               WHERE patient.status != 'b' 
               AND turn.status = 'p' 
-              AND DATE(turn.date) >= DATE('$today')";
+              AND turn.date >= '$today'";
 
 		if (!empty($date)) {
 			$query .= " AND turn.date = '$date'";
@@ -1408,7 +1408,7 @@ class Admin_model extends CI_Model
 		$this->db->select('from_time, to_time');
 		$this->db->from('turn');
 		$this->db->where('doctor_id', $doctor_id);
-		$this->db->where('DATE(date)', $date);  // Assuming the appointment date is stored in `appointment_date`
+		$this->db->where('date', $date);  // Assuming the appointment date is stored in `appointment_date`
 		$query = $this->db->get();
 		return $query->result_array();
 	}
@@ -2159,17 +2159,17 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 
 	function find_sum_price_tooth($date = null)
 	{
-		return $this->db->query("SELECT SUM(price) AS sum_price FROM `tooth` WHERE DATE(create_date) = '$date' ORDER BY `tooth`.`create_date`  DESC")->result_array();
+		return $this->db->query("SELECT SUM(price) AS sum_price FROM `tooth` WHERE create_date = '$date' ORDER BY `tooth`.`create_date`  DESC")->result_array();
 	}
 
 	function find_sum_paid_turn($date = null)
 	{
-		return $this->db->query("SELECT SUM(cr) AS 'sum_cr' FROM `turn` WHERE DATE(pay_date) = '$date'")->result_array();
+		return $this->db->query("SELECT SUM(cr) AS 'sum_cr' FROM `turn` WHERE pay_date = '$date'")->result_array();
 	}
 
 	function find_sum_dr_balance_sheet($date = null)
 	{
-		return $this->db->query("SELECT SUM(dr) AS sum_dr FROM `balance_sheet` WHERE DATE(shamsi) = '$date'")->result_array();
+		return $this->db->query("SELECT SUM(dr) AS sum_dr FROM `balance_sheet` WHERE shamsi = '$date'")->result_array();
 	}
 
 	// end home page

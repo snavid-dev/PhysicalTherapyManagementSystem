@@ -7645,7 +7645,7 @@ class Admin extends CI_Controller
 		if ($this->form_validation->run()) {
 			$extra = '';
 			if ((isset($_POST['from']) && isset($_POST['to'])) && (!empty($_POST['from']) && !empty($_POST['to']))) {
-				$extra .= "DATE(shamsi) BETWEEN DATE('" . $_POST['from'] . "') AND DATE('" . $_POST['to'] . "') ";
+				$extra .= "shamsi BETWEEN '" . $_POST['from'] . "' AND '" . $_POST['to'] . "'";
 				if (!empty($_POST['customers_id'])) {
 					$extra .= "AND customers_id = '" . $_POST['customers_id'] . "' ";
 				}
@@ -7718,7 +7718,7 @@ class Admin extends CI_Controller
 		if ($this->form_validation->run()) {
 			$extra = '';
 			if ((isset($_POST['from']) && isset($_POST['to'])) && (!empty($_POST['from']) && !empty($_POST['to']))) {
-				$extra .= "DATE(date) BETWEEN DATE('" . $_POST['from'] . "') AND DATE('" . $_POST['to'] . "') ";
+				$extra .= "date BETWEEN '" . $_POST['from'] . "' AND '" . $_POST['to'] . "' ";
 				if (!empty($_POST['patient_id'])) {
 					$extra .= "AND patient_id = '" . $_POST['patient_id'] . "' ";
 				}
@@ -7804,7 +7804,7 @@ class Admin extends CI_Controller
 		if ($this->form_validation->run()) {
 			$extra = '';
 			if ((isset($_POST['from']) && isset($_POST['to'])) && (!empty($_POST['from']) && !empty($_POST['to']))) {
-				$extra .= "DATE(tooth.create_date) BETWEEN DATE('" . $_POST['from'] . "') AND DATE('" . $_POST['to'] . "') ";
+				$extra .= "tooth.create_date BETWEEN '" . $_POST['from'] . "' AND '" . $_POST['to'] . "' ";
 				if (!empty($_POST['patient_id'])) {
 					$extra .= "AND patient_id = '" . $_POST['patient_id'] . "' ";
 				}
@@ -7865,7 +7865,7 @@ class Admin extends CI_Controller
 		if ($this->form_validation->run()) {
 			$extra = '';
 			if ((isset($_POST['from']) && isset($_POST['to'])) && (!empty($_POST['from']) && !empty($_POST['to']))) {
-				$extra .= "DATE(labs.give_date) BETWEEN DATE('" . $_POST['from'] . "') AND DATE('" . $_POST['to'] . "') ";
+				$extra .= "labs.give_date BETWEEN '" . $_POST['from'] . "' AND '" . $_POST['to'] . "' ";
 				if (!empty($_POST['patient_id'])) {
 					$extra .= "AND labs.patient_id = '" . $_POST['patient_id'] . "' ";
 				}
@@ -7975,7 +7975,7 @@ class Admin extends CI_Controller
 		if ($this->form_validation->run()) {
 			$extra = '';
 			if ((isset($_POST['from']) && isset($_POST['to'])) && (!empty($_POST['from']) && !empty($_POST['to']))) {
-				$extra .= "DATE(patient.create) BETWEEN DATE('" . $_POST['from'] . "') AND DATE('" . $_POST['to'] . "') ";
+				$extra .= "patient.create BETWEEN '" . $_POST['from'] . "' AND '" . $_POST['to'] . "' ";
 				if (!empty($_POST['patient_id'])) {
 					$extra .= "AND patient.id = '" . $_POST['patient_id'] . "' ";
 				}
