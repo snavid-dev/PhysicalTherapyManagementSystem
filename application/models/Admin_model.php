@@ -227,7 +227,7 @@ class Admin_model extends CI_Model
 	public function get_tooth_income($extra = null)
 	{
 		if (is_null($extra)) {
-			$extra = "tooth.create_date = '" . $this->mylibrary->getCurrentShamsiDate()['date'] . "'";
+			$extra = "DATE(tooth.create_date) = '" . $this->mylibrary->getCurrentShamsiDate()['date'] . "'";
 		}
 
 		return $this->db->query("SELECT tooth.name AS 'tooth_name', tooth.location, tooth.price, tooth.create_date, patient.name, patient.lname, patient.gender FROM `tooth` INNER JOIN patient ON tooth.patient_id = patient.id WHERE " . $extra . " ORDER BY `tooth`.`create_date` ASC;")->result_array();
@@ -2159,7 +2159,7 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 
 	function find_sum_price_tooth($date = null)
 	{
-		return $this->db->query("SELECT SUM(price) AS sum_price FROM `tooth` WHERE create_date = '$date' ORDER BY `tooth`.`create_date`  DESC")->result_array();
+		return $this->db->query("SELECT SUM(price) AS sum_price FROM `tooth` WHERE DATE(create_date) = '$date' ORDER BY `tooth`.`create_date`  DESC")->result_array();
 	}
 
 	function find_sum_paid_turn($date = null)

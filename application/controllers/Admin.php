@@ -7804,7 +7804,7 @@ class Admin extends CI_Controller
 		if ($this->form_validation->run()) {
 			$extra = '';
 			if ((isset($_POST['from']) && isset($_POST['to'])) && (!empty($_POST['from']) && !empty($_POST['to']))) {
-				$extra .= "tooth.create_date BETWEEN '" . $_POST['from'] . "' AND '" . $_POST['to'] . "' ";
+				$extra .= "DATE(tooth.create_date) BETWEEN '" . $_POST['from'] . "' AND '" . $_POST['to'] . "' ";
 				if (!empty($_POST['patient_id'])) {
 					$extra .= "AND patient_id = '" . $_POST['patient_id'] . "' ";
 				}
