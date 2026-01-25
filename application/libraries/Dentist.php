@@ -4,6 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class Dentist
 {
 	public $usage_type = 'online';
+
 	public function __construct()
 	{
 	}
@@ -19,7 +20,6 @@ class Dentist
 		);
 		return $currency;
 	}
-
 
 
 	public function assets_url($filepath = null)
@@ -173,6 +173,7 @@ class Dentist
 			'Metal' => ucwords($ci->language->languages('Metal')),
 			'Gold' => ucwords($ci->language->languages('Gold')),
 			'Partial Mobile' => ucwords($ci->language->languages('Partial Mobile')),
+			"Zirconium" => ucwords($ci->language->languages('Zirconium')),
 			'Full Mobile' => ucwords($ci->language->languages('Full Mobile')),
 		);
 	}
