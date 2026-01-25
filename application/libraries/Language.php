@@ -438,6 +438,8 @@ class Language
 			'Gold' => self::lang_arr('Gold', 'گلد', 'گلد'),
 			'Partial Mobile' => self::lang_arr('Partial Mobile', 'پارشیل متحرک', 'پارشیل ګرځنده'),
 			'Full Mobile' => self::lang_arr('Full Mobile', 'متحرک کامل', 'بشپړه ګرځنده'),
+			'Zirconium' => self::lang_arr('Zirconium', 'زیرکونیوم', 'زیرکونیوم'),
+
 
 			// end teeth type
 
