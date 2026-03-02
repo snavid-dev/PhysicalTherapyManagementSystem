@@ -53,7 +53,8 @@ class Admin extends CI_Controller
 	public function index()
 	{
 		$this->auth->has_permission('View Appointments');
-		$data['title'] = $this->lang('home');;
+		$data['title'] = $this->lang('home');
+		;
 		$data['page'] = "home";
 		$data['temp_patients'] = $this->Admin_model->get_temp_patients_extra();
 		$data['patients'] = $this->Admin_model->get_patients();
@@ -64,8 +65,7 @@ class Admin extends CI_Controller
 		$data['sum_expenses'] = $this->Admin_model->find_sum_dr_balance_sheet($this->mylibrary->getCurrentShamsiDate()['date'])[0]['sum_dr'];
 		$data['script'] = $this->mylibrary->generateSelect2();
 		$data['prescriptions'] = $this->Admin_model->list_prescription_samples('sample');
-		$data['medicines'] = $this->Admin_model->get_medicines();
-//		$data['script_single_patient_assets'] = ['assets/js/home.js'];
+		$data['medicines'] = $this->Admin_model->get_medicines(); //		$data['script_single_patient_assets'] = ['assets/js/home.js'];
 		$data['turns'] = $this->Admin_model->get_turns($this->mylibrary->getCurrentShamsiDate()['date']);
 		$this->load->view('header', $data);
 		$this->load->view('index', $data);
@@ -119,7 +119,7 @@ class Admin extends CI_Controller
 				'leave_start_date' => $this->input->post('leave_start_date'),
 				'leave_end_date' => $this->input->post('leave_end_date'),
 				'reason' => $this->input->post('reason'),
-				'status' => "a"  // Default to approved status for simplicity
+				'status' => "a" // Default to approved status for simplicity
 			);
 
 			// Insert the leave record into the database
@@ -141,7 +141,7 @@ class Admin extends CI_Controller
 				$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_leave');
 
 				// Collect the information for the row display, if required
-				$leaveDetails = $this->Admin_model->get_leave_details($insert[1]);  // Assuming a function to get details of the inserted leave
+				$leaveDetails = $this->Admin_model->get_leave_details($insert[1]); // Assuming a function to get details of the inserted leave
 
 				$data['tr'] = array(
 					$leaveDetails['doctor_name'],
@@ -151,14 +151,16 @@ class Admin extends CI_Controller
 					$this->mylibrary->check_status($leaveDetails['status']),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				// Failure case
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('error');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			// Collect and return form validation errors
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
@@ -184,16 +186,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_leave($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete leave');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -214,7 +219,8 @@ class Admin extends CI_Controller
 		if ($leave) {
 			$data['type'] = 'success';
 			$data['content'] = $leave;
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['text'] = $this->lang('leave_not_found');
 		}
@@ -271,13 +277,15 @@ class Admin extends CI_Controller
 					$this->mylibrary->check_status($x['status']),
 					$this->mylibrary->btn_group($btns),
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('error');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			// Handle validation errors
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
@@ -340,13 +348,16 @@ class Admin extends CI_Controller
 
 				if (file_put_contents('user_images/' . $imageName, $data)) {
 					return true;
-				} else {
+				}
+				else {
 					return false;
 				}
-			} else {
+			}
+			else {
 				return false;
 			}
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
@@ -372,7 +383,8 @@ class Admin extends CI_Controller
 			$profile_image = null;
 			if ($upload) {
 				$profile_image = $this->input->post('username') . '.png';
-			} else {
+			}
+			else {
 				$profile_image = 'default.png';
 			}
 			$datas = array(
@@ -400,7 +412,8 @@ class Admin extends CI_Controller
 				$btns = '';
 				if ($this->input->post('status') == 'P') {
 					$btns .= $this->mylibrary->generateBtnUnlock($data['id'], 'admin/change_status_user');
-				} elseif ($this->input->post('status') == 'A') {
+				}
+				elseif ($this->input->post('status') == 'A') {
 					$btns .= $this->mylibrary->generateBtnBan($data['id'], 'admin/change_status_user');
 				}
 				$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_user');
@@ -418,13 +431,15 @@ class Admin extends CI_Controller
 					$this->lang($this->mylibrary->check_user_type($datas['role'])),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -482,7 +497,8 @@ class Admin extends CI_Controller
 				$btns = '';
 				if ($this->input->post('status') == 'P') {
 					$btns .= $this->mylibrary->generateBtnUnlock($data['id'], 'admin/change_status_user');
-				} elseif ($this->input->post('status') == 'A') {
+				}
+				elseif ($this->input->post('status') == 'A') {
 					$btns .= $this->mylibrary->generateBtnBan($data['id'], 'admin/change_status_user');
 				}
 				$btns .= $this->mylibrary->generateBtnDelete($id, 'admin/delete_user');
@@ -499,13 +515,15 @@ class Admin extends CI_Controller
 					$this->lang($this->mylibrary->check_user_type($datas['role'])),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -546,13 +564,15 @@ class Admin extends CI_Controller
 					'working_end_time' => $receipt[0]['working_end_time'],
 				);
 
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -594,7 +614,8 @@ class Admin extends CI_Controller
 				$btns = '';
 				if (ucfirst($this->input->post('status')) == 'P') {
 					$btns .= $this->mylibrary->generateBtnUnlock($data['id'], 'admin/change_status_user');
-				} elseif (ucfirst($this->input->post('status')) == 'A') {
+				}
+				elseif (ucfirst($this->input->post('status')) == 'A') {
 					$btns .= $this->mylibrary->generateBtnBan($data['id'], 'admin/change_status_user');
 				}
 				$btns .= $this->mylibrary->generateBtnDelete($record, 'admin/delete_user');
@@ -610,13 +631,15 @@ class Admin extends CI_Controller
 					$this->lang($this->mylibrary->check_user_type($user['role'])),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -660,7 +683,8 @@ class Admin extends CI_Controller
 				$btns .= $this->mylibrary->generateBtnDelete($record, 'admin/delete_user', 'mr-left-0 btn-danger btn-group-right', 'trash');
 				if ($status == 'A') {
 					$btns .= $this->mylibrary->generateBtnStatus($record, 'admin/pending_user', 'mr-left-0 btn-info btn-group-left', 'clock-o');
-				} else {
+				}
+				else {
 					$btns .= $this->mylibrary->generateBtnStatus($record, 'admin/accept_user', 'mr-left-0 btn-info btn-group-left', 'check');
 				}
 				$user = $this->Admin_model->single_user($record)[0];
@@ -673,13 +697,15 @@ class Admin extends CI_Controller
 					$this->mylibrary->elsewise($user['role'], 'admin', 'مدیر', 'کاربر'),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -718,16 +744,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_user($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete user');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -757,7 +786,8 @@ class Admin extends CI_Controller
 					$data['alert']['text'] = 'your password is incorrect';
 					// $data['alert']['text'] = $this->lang('your password is incorrect');
 					$data['alert']['type'] = 'error';
-				} else {
+				}
+				else {
 					$datas = array(
 						'password' => $this->mylibrary->hash($this->input->post('newPassword')),
 					);
@@ -769,7 +799,8 @@ class Admin extends CI_Controller
 						$data['alert']['title'] = $this->lang('success');
 						$data['alert']['text'] = $this->lang('update account success');
 						$data['alert']['type'] = 'success';
-					} else {
+					}
+					else {
 						$data['type'] = 'error';
 						$data['alert']['title'] = $this->lang('error');
 						$data['alert']['text'] = $this->lang('problem');
@@ -777,7 +808,8 @@ class Admin extends CI_Controller
 					}
 				}
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -858,7 +890,8 @@ class Admin extends CI_Controller
 					$serviceText .= ',';
 				}
 			}
-		} else {
+		}
+		else {
 			return 'error';
 		}
 
@@ -872,13 +905,15 @@ class Admin extends CI_Controller
 					if (count($result) > 0) {
 						$name .= $result[0]['name'];
 						$name .= ',';
-					} else {
+					}
+					else {
 						$name .= $this->lang('error');
 						$name .= ',';
 					}
 				}
 				return substr($name, 0, -1);
-			} else {
+			}
+			else {
 				return 'error';
 			}
 		}
@@ -917,16 +952,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_service($datas_for_delete)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete service');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -970,16 +1008,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_service($datas_for_delete)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete service');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1008,7 +1049,8 @@ class Admin extends CI_Controller
 		if (empty($names) || !is_array($names) || count($names) < 1) {
 			$data['messages'][] = $this->lang('at least one process is required');
 			$hasProcessError = true;
-		} else {
+		}
+		else {
 			foreach ($names as $index => $name) {
 				$name = trim($name);
 				$percentage = isset($percentages[$index]) ? floatval($percentages[$index]) : 0;
@@ -1080,13 +1122,15 @@ class Admin extends CI_Controller
 					$datas['price'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1121,13 +1165,15 @@ class Admin extends CI_Controller
 					'price' => $service[0]['price'],
 					'processes' => $processes
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -1170,7 +1216,8 @@ class Admin extends CI_Controller
 		if (empty($names) || !is_array($names) || count($names) < 1) {
 			$data['messages'][] = $this->lang('at least one process is required');
 			$hasProcessError = true;
-		} else {
+		}
+		else {
 			foreach ($names as $index => $name) {
 				$name = trim($name);
 				$percentage = isset($percentages[$index]) ? floatval($percentages[$index]) : 0;
@@ -1231,7 +1278,8 @@ class Admin extends CI_Controller
 							'remarks' => $remark,
 							'number' => $number
 						]);
-					} else {
+					}
+					else {
 						// INSERT new process
 						$this->Admin_model->insert_process([
 							'name' => $name,
@@ -1245,8 +1293,7 @@ class Admin extends CI_Controller
 
 				// DELETE unused ones (only if not used in turns)
 				foreach ($existingProcesses as $existing) {
-					if (!in_array($existing['name'], $submittedNames)) {
-//						TODO: Check if the process is in use or not!!
+					if (!in_array($existing['name'], $submittedNames)) { //						TODO: Check if the process is in use or not!!
 //						$inUse = $this->Admin_model->is_process_used_in_turns($existing['id']);
 						$inUse = false;
 						if (!$inUse) {
@@ -1272,13 +1319,15 @@ class Admin extends CI_Controller
 					$service['price'],
 					$this->mylibrary->btn_group($btns)
 				];
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1325,13 +1374,15 @@ class Admin extends CI_Controller
 					$this->lang($datas['type']),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1365,16 +1416,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_categories($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete categories');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1406,13 +1460,15 @@ class Admin extends CI_Controller
 					'name' => $category[0]['name'],
 					'type' => $category[0]['type'],
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -1440,7 +1496,8 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_categories($datas, $id);
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('update categories success');
 				$data['alert']['type'] = 'success';
 
@@ -1458,13 +1515,15 @@ class Admin extends CI_Controller
 					$this->lang($category['type']),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1515,13 +1574,15 @@ class Admin extends CI_Controller
 					$datas['name'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1553,13 +1614,15 @@ class Admin extends CI_Controller
 					'name' => $single_info[0]['name'],
 					'categories_id' => $single_info[0]['categories_id'],
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -1591,7 +1654,8 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_basic_information_teeth($datas, $id);
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('update basic_teeth_info success');
 				$data['alert']['type'] = 'success';
 
@@ -1610,13 +1674,15 @@ class Admin extends CI_Controller
 					$single_info['name'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1654,13 +1720,15 @@ class Admin extends CI_Controller
 				$data['alert']['title'] = $this->lang('success');
 				$data['alert']['text'] = $this->lang('delete basic_teeth_info');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1717,13 +1785,15 @@ class Admin extends CI_Controller
 					'usageType' => $medicine[0]['usageType'],
 					'unit' => $medicine[0]['unit'],
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -1743,7 +1813,8 @@ class Admin extends CI_Controller
 
 		if (count($tooth) > 0) {
 			return $tooth[0];
-		} else {
+		}
+		else {
 			return 'undefined';
 		}
 	}
@@ -1795,13 +1866,15 @@ class Admin extends CI_Controller
 					$datas['times'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1861,13 +1934,15 @@ class Admin extends CI_Controller
 					$datas['times'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1905,13 +1980,15 @@ class Admin extends CI_Controller
 				$data['alert']['title'] = $this->lang('success');
 				$data['alert']['text'] = $this->lang('delete medicine');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1952,13 +2029,15 @@ class Admin extends CI_Controller
 				$data['alert']['title'] = $this->lang('success');
 				$data['alert']['text'] = $this->lang('delete diagnose');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -1996,13 +2075,15 @@ class Admin extends CI_Controller
 					$datas['name'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -2034,13 +2115,15 @@ class Admin extends CI_Controller
 					'slug' => $diagnose[0]['id'],
 					'name' => $diagnose[0]['name'],
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -2066,7 +2149,8 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_diagnose($datas, $id);
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('update service success');
 				$data['alert']['type'] = 'success';
 
@@ -2083,13 +2167,15 @@ class Admin extends CI_Controller
 					$service['name'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -2120,13 +2206,15 @@ class Admin extends CI_Controller
 			$data['type'] = 'success';
 			if (count($prescription) > 0) {
 				$data['content'] = $prescription[0];
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -2150,13 +2238,15 @@ class Admin extends CI_Controller
 			$data['type'] = 'success';
 			if (count($prescription) > 0) {
 				$data['content'] = $prescription[0];
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -2193,7 +2283,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_2', 'day_2', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_2', 'time_2', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_2', 'amount_2', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_2', 'medicine_2', 'trim');
 			$this->form_validation->set_rules('doze_2', 'doze_2', 'trim');
 			$this->form_validation->set_rules('unit_2', 'unit_2', 'trim');
@@ -2213,7 +2304,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_3', 'day_3', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_3', 'time_3', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_3', 'amount_3', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_3', 'medicine_3', 'trim');
 			$this->form_validation->set_rules('doze_3', 'doze_3', 'trim');
 			$this->form_validation->set_rules('unit_3', 'unit_3', 'trim');
@@ -2233,7 +2325,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_4', 'day_4', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_4', 'time_4', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_4', 'amount_4', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_4', 'medicine_4', 'trim');
 			$this->form_validation->set_rules('doze_4', 'doze_4', 'trim');
 			$this->form_validation->set_rules('unit_4', 'unit_4', 'trim');
@@ -2253,7 +2346,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_5', 'day_5', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_5', 'time_5', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_5', 'amount_5', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_5', 'medicine_5', 'trim');
 			$this->form_validation->set_rules('doze_5', 'doze_5', 'trim');
 			$this->form_validation->set_rules('unit_5', 'unit_5', 'trim');
@@ -2273,7 +2367,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_6', 'day_6', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_6', 'time_6', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_6', 'amount_6', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_6', 'medicine_6', 'trim');
 			$this->form_validation->set_rules('doze_6', 'doze_6', 'trim');
 			$this->form_validation->set_rules('unit_6', 'unit_6', 'trim');
@@ -2294,7 +2389,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_7', 'day_7', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_7', 'time_7', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_7', 'amount_7', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_7', 'medicine_7', 'trim');
 			$this->form_validation->set_rules('doze_7', 'doze_7', 'trim');
 			$this->form_validation->set_rules('unit_7', 'unit_7', 'trim');
@@ -2315,7 +2411,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_8', 'day_8', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_8', 'time_8', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_8', 'amount_8', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_8', 'medicine_8', 'trim');
 			$this->form_validation->set_rules('doze_8', 'doze_8', 'trim');
 			$this->form_validation->set_rules('unit_8', 'unit_8', 'trim');
@@ -2336,7 +2433,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_9', 'day_9', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_9', 'time_9', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_9', 'amount_9', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_9', 'medicine_9', 'trim');
 			$this->form_validation->set_rules('doze_9', 'doze_9', 'trim');
 			$this->form_validation->set_rules('unit_9', 'unit_9', 'trim');
@@ -2356,7 +2454,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_10', 'day_10', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_10', 'time_10', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_10', 'amount_10', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_10', 'medicine_10', 'trim');
 			$this->form_validation->set_rules('doze_10', 'doze_10', 'trim');
 			$this->form_validation->set_rules('unit_10', 'unit_10', 'trim');
@@ -2480,13 +2579,15 @@ class Admin extends CI_Controller
 					$this->session->userdata($this->mylibrary->hash_session('u_fullname')),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -2524,7 +2625,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_2', 'day_2', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_2', 'time_2', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_2', 'amount_2', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_2', 'medicine_2', 'trim');
 			$this->form_validation->set_rules('doze_2', 'doze_2', 'trim');
 			$this->form_validation->set_rules('unit_2', 'unit_2', 'trim');
@@ -2544,7 +2646,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_3', 'day_3', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_3', 'time_3', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_3', 'amount_3', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_3', 'medicine_3', 'trim');
 			$this->form_validation->set_rules('doze_3', 'doze_3', 'trim');
 			$this->form_validation->set_rules('unit_3', 'unit_3', 'trim');
@@ -2564,7 +2667,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_4', 'day_4', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_4', 'time_4', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_4', 'amount_4', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_4', 'medicine_4', 'trim');
 			$this->form_validation->set_rules('doze_4', 'doze_4', 'trim');
 			$this->form_validation->set_rules('unit_4', 'unit_4', 'trim');
@@ -2584,7 +2688,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_5', 'day_5', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_5', 'time_5', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_5', 'amount_5', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_5', 'medicine_5', 'trim');
 			$this->form_validation->set_rules('doze_5', 'doze_5', 'trim');
 			$this->form_validation->set_rules('unit_5', 'unit_5', 'trim');
@@ -2604,7 +2709,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_6', 'day_6', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_6', 'time_6', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_6', 'amount_6', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_6', 'medicine_6', 'trim');
 			$this->form_validation->set_rules('doze_6', 'doze_6', 'trim');
 			$this->form_validation->set_rules('unit_6', 'unit_6', 'trim');
@@ -2625,7 +2731,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_7', 'day_7', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_7', 'time_7', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_7', 'amount_7', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_7', 'medicine_7', 'trim');
 			$this->form_validation->set_rules('doze_7', 'doze_7', 'trim');
 			$this->form_validation->set_rules('unit_7', 'unit_7', 'trim');
@@ -2646,7 +2753,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_8', 'day_8', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_8', 'time_8', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_8', 'amount_8', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_8', 'medicine_8', 'trim');
 			$this->form_validation->set_rules('doze_8', 'doze_8', 'trim');
 			$this->form_validation->set_rules('unit_8', 'unit_8', 'trim');
@@ -2667,7 +2775,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_9', 'day_9', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_9', 'time_9', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_9', 'amount_9', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_9', 'medicine_9', 'trim');
 			$this->form_validation->set_rules('doze_9', 'doze_9', 'trim');
 			$this->form_validation->set_rules('unit_9', 'unit_9', 'trim');
@@ -2687,7 +2796,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('day_10', 'day_10', 'trim|required', array('required' => $this->lang('insert prescription day error')));
 			$this->form_validation->set_rules('time_10', 'time_10', 'trim|required', array('required' => $this->lang('insert prescription time error')));
 			$this->form_validation->set_rules('amount_10', 'amount_10', 'trim|required', array('required' => $this->lang('insert prescription amount error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('medicine_10', 'medicine_10', 'trim');
 			$this->form_validation->set_rules('doze_10', 'doze_10', 'trim');
 			$this->form_validation->set_rules('unit_10', 'unit_10', 'trim');
@@ -2810,13 +2920,15 @@ class Admin extends CI_Controller
 					$datas['name'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -2840,16 +2952,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_prescription_sample($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete service');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -2872,7 +2987,8 @@ class Admin extends CI_Controller
 		$prescription = $this->Admin_model->single_prescription_print($id);
 		if (count($prescription) !== 1) {
 			show_404();
-		} else {
+		}
+		else {
 			$data['prescription'] = $prescription[0];
 			$this->load->view("prints/prescription", $data);
 		}
@@ -2937,26 +3053,30 @@ class Admin extends CI_Controller
 							$datas['desc'],
 							$this->mylibrary->btn_group($btns)
 						);
-					} else {
+					}
+					else {
 						$data['type'] = 'error';
 						$data['alert']['title'] = $this->lang('error');
 						$data['alert']['text'] = $this->lang('problem');
 						$data['alert']['type'] = 'error';
 					}
-				} else {
+				}
+				else {
 					$upload_errors = array('error' => $this->upload->display_errors());
 					foreach ($upload_errors as $upload_error) {
 						$data['messages'][] = $upload_error;
 						$data['title'] = $this->lang('error');
 					}
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('empty file error');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -2980,16 +3100,19 @@ class Admin extends CI_Controller
 			if ($this->Admin_model->delete_file($datas)) {
 				unlink('patient_files/' . $file['filename']);
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete turn');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -3031,7 +3154,8 @@ class Admin extends CI_Controller
 			$status = $this->input->post('status');
 			if ($status != 't') {
 				$patients = $this->Admin_model->get_patients($status);
-			} else {
+			}
+			else {
 				$patients = $this->Admin_model->get_temp_patients_extra("temp_patient.status = 'a'");
 			}
 
@@ -3063,13 +3187,15 @@ class Admin extends CI_Controller
 
 					$i++;
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -3105,16 +3231,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_patient($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete patient');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -3149,16 +3278,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->update_patient($datas, $id)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('accept patient');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -3184,16 +3316,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->update_patient($datas, $id)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('block patient');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -3220,16 +3355,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->update_patient($datas, $id)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('block patient');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -3330,10 +3468,12 @@ class Admin extends CI_Controller
 				$this->load->view('header', $data);
 				$this->load->view('patients/single', $data);
 				$this->load->view('footer');
-			} else {
+			}
+			else {
 				show_404();
 			}
-		} else {
+		}
+		else {
 			show_404();
 			exit;
 		}
@@ -3414,15 +3554,18 @@ class Admin extends CI_Controller
 						foreach ($endo_basic_info as $basic_info) {
 							if ($basic_info['category_name'] == 'نوع آبجوریشن') {
 								$data['content']['endo']['typeObturation'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'نوع سیلر') {
+							}
+							else if ($basic_info['category_name'] == 'نوع سیلر') {
 								$data['content']['endo']['TypeSealer'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'نوع اریگیشن') {
+							}
+							else if ($basic_info['category_name'] == 'نوع اریگیشن') {
 								$data['content']['endo']['TypeIrrigation'] = $basic_info['basic_information_teeth_id'];
 							}
 						}
 					}
 					$data['content']['is_endo'] = 'true';
-				} else {
+				}
+				else {
 					$data['content']['is_endo'] = 'false';
 				}
 
@@ -3447,22 +3590,28 @@ class Admin extends CI_Controller
 						foreach ($restorative_basic_info as $basic_info) {
 							if ($basic_info['category_name'] == 'عمق پوسیدگی') {
 								$data['content']['restorative']['CariesDepth'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'ماده بیس یا لاینر') {
+							}
+							else if ($basic_info['category_name'] == 'ماده بیس یا لاینر') {
 								$data['content']['restorative']['Material'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'ماده ترمیم') {
+							}
+							else if ($basic_info['category_name'] == 'ماده ترمیم') {
 								$data['content']['restorative']['RestorativeMaterial'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'برند کامپوزیت') {
+							}
+							else if ($basic_info['category_name'] == 'برند کامپوزیت') {
 								$data['content']['restorative']['CompositeBrand'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'برند امالگام') {
+							}
+							else if ($basic_info['category_name'] == 'برند امالگام') {
 								$data['content']['restorative']['AmalgamBrand'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'برند باندینگ') {
+							}
+							else if ($basic_info['category_name'] == 'برند باندینگ') {
 								$data['content']['restorative']['bondingBrand'] = $basic_info['basic_information_teeth_id'];
 							}
 						}
 					}
 
 					$data['content']['is_restorative'] = 'true';
-				} else {
+				}
+				else {
 					$data['content']['is_restorative'] = 'false';
 				}
 
@@ -3493,41 +3642,54 @@ class Admin extends CI_Controller
 						foreach ($pro_basic_info as $basic_info) {
 							if ($basic_info['category_name'] == 'Type of restoration') {
 								$data['content']['prosthodontic']['type_restoration'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'Core material') {
+							}
+							else if ($basic_info['category_name'] == 'Core material') {
 								$data['content']['prosthodontic']['filling_material'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'Post') {
+							}
+							else if ($basic_info['category_name'] == 'Post') {
 								$data['content']['prosthodontic']['post'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'Prefabricated post') {
+							}
+							else if ($basic_info['category_name'] == 'Prefabricated post') {
 								$data['content']['prosthodontic']['PrefabricatedPost'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'Custom post') {
+							}
+							else if ($basic_info['category_name'] == 'Custom post') {
 								$data['content']['prosthodontic']['customPost'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'Material of crown') {
+							}
+							else if ($basic_info['category_name'] == 'Material of crown') {
 								$data['content']['prosthodontic']['crown_material'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'pontic design') {
+							}
+							else if ($basic_info['category_name'] == 'pontic design') {
 								$data['content']['prosthodontic']['pontic_design'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'Impression Technique') {
+							}
+							else if ($basic_info['category_name'] == 'Impression Technique') {
 								$data['content']['prosthodontic']['impression_technique'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'Impression materials') {
+							}
+							else if ($basic_info['category_name'] == 'Impression materials') {
 								$data['content']['prosthodontic']['impression_material'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'Cement Material') {
+							}
+							else if ($basic_info['category_name'] == 'Cement Material') {
 								$data['content']['prosthodontic']['CementMaterial'] = $basic_info['basic_information_teeth_id'];
-							} else if ($basic_info['category_name'] == 'color') {
+							}
+							else if ($basic_info['category_name'] == 'color') {
 								$data['content']['prosthodontic']['color'] = explode(',', $basic_info['basic_information_teeth_id']);
 							}
 						}
 					}
 
 					$data['content']['is_prosthodontic'] = 'true';
-				} else {
+				}
+				else {
 					$data['content']['is_prosthodontic'] = 'false';
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -3547,7 +3709,8 @@ class Admin extends CI_Controller
 
 		if (count($tooth) > 0) {
 			return $tooth[0];
-		} else {
+		}
+		else {
 			return 'undefined';
 		}
 	}
@@ -3572,13 +3735,15 @@ class Admin extends CI_Controller
 						'location' => $this->dentist->find_location($tooth['location']),
 					);
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -3615,13 +3780,15 @@ class Admin extends CI_Controller
 					'doctor_id' => $patient[0]['doctor_id'],
 					'pains_select' => explode(',', $patient[0]['pains'])
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -3665,7 +3832,8 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_patient($datas, $id);
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('update patient success');
 				$data['alert']['type'] = 'success';
 
@@ -3678,7 +3846,8 @@ class Admin extends CI_Controller
 				if ($this->auth->has_permission('View Phone Numbers')) {
 					$data['phone1'] = $patient['phone1'];
 					$data['phone2'] = $patient['phone2'];
-				} else {
+				}
+				else {
 					$data['phone1'] = null;
 					$data['phone2'] = null;
 				}
@@ -3694,13 +3863,15 @@ class Admin extends CI_Controller
 				$data['other diseases'] = $this->lang('other diseases');
 				$data['desc'] = $this->lang('desc');
 				$data['lang age'] = $this->lang('age');
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -3733,7 +3904,8 @@ class Admin extends CI_Controller
 			$serial = $number_of_month + 1;
 			if ($serial >= 10) {
 				$serial_id = $this->mylibrary->getCurrentShamsiDate()['serial'] . $serial;
-			} else {
+			}
+			else {
 				$serial_id = $this->mylibrary->getCurrentShamsiDate()['serial'] . '0' . $serial;
 			}
 
@@ -3807,13 +3979,15 @@ class Admin extends CI_Controller
 					$datas['remarks'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -3866,13 +4040,15 @@ class Admin extends CI_Controller
 				$data['alert']['title'] = $this->lang('success');
 				$data['alert']['text'] = $this->lang('insert patient success');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -3898,7 +4074,8 @@ class Admin extends CI_Controller
 				$serial = $number_of_month + 1;
 				if ($serial >= 10) {
 					$serial_id = $this->mylibrary->getCurrentShamsiDate()['serial'] . $serial;
-				} else {
+				}
+				else {
 					$serial_id = $this->mylibrary->getCurrentShamsiDate()['serial'] . '0' . $serial;
 				}
 				$datas = array(
@@ -3970,19 +4147,22 @@ class Admin extends CI_Controller
 						$datas['remarks'],
 						$this->mylibrary->btn_group($btns)
 					);
-				} else {
+				}
+				else {
 					$data['type'] = 'error';
 					$data['alert']['title'] = $this->lang('error');
 					$data['alert']['text'] = $this->lang('problem');
 					$data['alert']['type'] = 'error';
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4018,7 +4198,8 @@ class Admin extends CI_Controller
 				);
 				$i++;
 			}
-		} else {
+		}
+		else {
 			$data['content'] = array();
 		}
 
@@ -4038,16 +4219,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->update_temp_patient($datas, $id)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('archive patient');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4070,7 +4254,8 @@ class Admin extends CI_Controller
 		$profile = $this->Admin_model->profile_patient($id);
 		if (count($profile) !== 1) {
 			show_404();
-		} else {
+		}
+		else {
 			$data['labs'] = $this->Admin_model->labs_patient_id($id);
 
 			$data['treatment_plan'] = $this->Admin_model->get_treatment_plan_for_patient($id);
@@ -4091,13 +4276,15 @@ class Admin extends CI_Controller
 			if ($teeth) {
 				$data['type'] = 'success';
 				$data['content'] = $teeth;
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4119,13 +4306,15 @@ class Admin extends CI_Controller
 			if ($teeth) {
 				$data['type'] = 'success';
 				$data['content'] = $teeth;
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4188,7 +4377,8 @@ class Admin extends CI_Controller
 				$data['alert']['type'] = 'success';
 				$data['id'] = $insert[1];
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4224,7 +4414,8 @@ class Admin extends CI_Controller
 				$data['alert']['type'] = 'success';
 				$data['extraFunction'] = true;
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4269,7 +4460,8 @@ class Admin extends CI_Controller
 				$data['alert']['type'] = 'success';
 				$data['extraFunction'] = true;
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4283,8 +4475,7 @@ class Admin extends CI_Controller
 
 	public function init_lab()
 	{
-
-//		echo $this->input->post('hour');
+		//		echo $this->input->post('hour');
 //		exit();
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('insert lab customers_id error')));
@@ -4308,7 +4499,8 @@ class Admin extends CI_Controller
 				$data['id'] = $this->input->post('slug');
 				$data['extraFunction'] = true;
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4332,16 +4524,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_lab($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete lab');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4366,16 +4561,19 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_lab($datas, array('id' => $this->input->post('record')));
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('finish lab');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4401,16 +4599,19 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_lab($datas, array('id' => $this->input->post('record')));
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('finish lab');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4444,23 +4645,27 @@ class Admin extends CI_Controller
 					$data['content'] = array(
 						'datetime' => $lab[0]['receive_datetime']
 					);
-				} elseif ($type == 'install') {
+				}
+				elseif ($type == 'install') {
 					$data['content'] = array(
 						'datetime' => $lab[0]['receive_datetime']
 					);
-				} else {
+				}
+				else {
 					$data['content'] = array(
 						'datetime' => $lab[0][$type . '_try_datetime'],
 						'message' => $lab[0][$type . '_try_message'],
 					);
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -4497,13 +4702,15 @@ class Admin extends CI_Controller
 					'pay_amount' => $lab[0]['dr'],
 					'remarks' => $lab[0]['remarks'],
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -4564,13 +4771,15 @@ class Admin extends CI_Controller
 
 			if (count($labs) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -4641,7 +4850,8 @@ class Admin extends CI_Controller
 					'type' => 'error'
 				];
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert'] = [
 				'title' => $this->lang('error'),
@@ -4723,7 +4933,8 @@ class Admin extends CI_Controller
 					'text' => $this->lang('lab payment recorded'),
 					'type' => 'success'
 				];
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert'] = [
 					'title' => $this->lang('error'),
@@ -4731,7 +4942,8 @@ class Admin extends CI_Controller
 					'type' => 'error'
 				];
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4755,7 +4967,8 @@ class Admin extends CI_Controller
 		$lab = $this->Admin_model->single_lab_print($id);
 		if (count($lab) !== 1) {
 			show_404();
-		} else {
+		}
+		else {
 			$data['single'] = $lab[0];
 			$data['title'] = 'print';
 			$this->load->view("prints/lab", $data);
@@ -4829,7 +5042,8 @@ class Admin extends CI_Controller
 
 			$data['type'] = 'success';
 			$data['balance'] = $array;
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4877,16 +5091,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_account($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete account');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4940,13 +5157,15 @@ class Admin extends CI_Controller
 					$fullname,
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -4980,13 +5199,15 @@ class Admin extends CI_Controller
 					'lname' => $account[0]['lname'],
 					'type' => $account[0]['type'],
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -5016,7 +5237,8 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_account($datas, $id);
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('update account success');
 				$data['alert']['type'] = 'success';
 
@@ -5037,13 +5259,15 @@ class Admin extends CI_Controller
 					$this->mylibrary->account_name($account['fname'], $account['lastname'], $account['role']),
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -5091,7 +5315,8 @@ class Admin extends CI_Controller
 			$type = $this->input->post('type');
 			if ($type == 'cr') {
 				$datas['cr'] = $this->input->post('amount');
-			} else {
+			}
+			else {
 				$datas['dr'] = $this->input->post('amount');
 			}
 
@@ -5121,13 +5346,15 @@ class Admin extends CI_Controller
 					$x['remarks'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -5164,17 +5391,20 @@ class Admin extends CI_Controller
 				if ($receipt[0]['dr'] == 0) {
 					$data['content']['type'] = 'cr';
 					$data['content']['amount'] = $receipt[0]['cr'];
-				} else {
+				}
+				else {
 					$data['content']['type'] = 'dr';
 					$data['content']['amount'] = $receipt[0]['dr'];
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -5207,7 +5437,8 @@ class Admin extends CI_Controller
 
 				$datas['dr'] = 0;
 				$datas['cr'] = $this->input->post('amount');
-			} else {
+			}
+			else {
 				$datas['dr'] = $this->input->post('amount');
 				$datas['cr'] = 0;
 			}
@@ -5215,7 +5446,8 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_balance($datas, $id);
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('update receipt success');
 				$data['alert']['type'] = 'success';
 
@@ -5238,13 +5470,15 @@ class Admin extends CI_Controller
 					$x['remarks'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -5285,16 +5519,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_receipt($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete receipt');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -5339,7 +5576,8 @@ class Admin extends CI_Controller
 			if (!empty($teeth)) {
 				$data['type'] = 'success';
 				$data['content']['teeth'] = $teeth;
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert'] = [
 					'title' => $this->lang('error'),
@@ -5347,7 +5585,8 @@ class Admin extends CI_Controller
 					'type' => 'error'
 				];
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert'] = [
 				'title' => $this->lang('error'),
@@ -5398,7 +5637,8 @@ class Admin extends CI_Controller
 		foreach ($teeth_ids as $tooth_id) {
 			$tooth_info = $this->Admin_model->get_tooth_basic_info($tooth_id);
 
-			if (!$tooth_info) continue;
+			if (!$tooth_info)
+				continue;
 
 			$departments = ['endo', 'restorative', 'prosthodontics'];
 			$tooth_data = [
@@ -5517,7 +5757,8 @@ class Admin extends CI_Controller
 
 						if ($dp['process_id']) {
 							$done_list[] = ['label' => $label, 'process_id' => $dp['process_id'], 'type' => 'matched'];
-						} elseif ($dp['custom_label']) {
+						}
+						elseif ($dp['custom_label']) {
 							$done_list[] = ['label' => $dp['custom_label'], 'process_id' => null, 'type' => 'custom'];
 							$custom_text .= $dp['custom_label'] . ", ";
 						}
@@ -5529,12 +5770,13 @@ class Admin extends CI_Controller
 						'done' => $done_list,
 						'done_custom_text' => rtrim($custom_text, ', ')
 					];
-				} else {
+				}
+				else {
 					// If recommended processes are available, return them
 					$tooth_data['departments'][] = [
 						'name' => $dept,
 						'recommended' => $rec_list,
-						'done' => [],  // Empty done list as recommended is available
+						'done' => [], // Empty done list as recommended is available
 						'done_custom_text' => ''
 					];
 				}
@@ -5713,7 +5955,7 @@ class Admin extends CI_Controller
 						'turn_id' => null,
 						'tooth_id' => $tooth_id,
 						'process_id' => $process_id, // ✅ Use actual ID
-						'custom_label' => null,      // ✅ No label needed
+						'custom_label' => null, // ✅ No label needed
 						'remarks' => null,
 						'users_id' => $user_id,
 					]);
@@ -5748,12 +5990,158 @@ class Admin extends CI_Controller
 		]);
 	}
 
+	public function get_treatment_plan_for_edit()
+	{
+		$this->check_permission_function('Read Treatment Plan');
+
+		$id = $this->input->post('id');
+
+		$process = $this->Admin_model->get_recommended_process_by_id($id);
+		if (!$process) {
+			echo json_encode(['type' => 'error', 'alert' => ['title' => $this->lang('error'), 'text' => $this->lang('problem'), 'type' => 'error']]);
+			return;
+		}
+
+		$tooth_info = $this->db->get_where('tooth', ['id' => $process['tooth_id']])->row_array();
+		if (!$tooth_info) {
+			echo json_encode(['type' => 'error', 'alert' => ['title' => $this->lang('error'), 'text' => $this->lang('problem'), 'type' => 'error']]);
+			return;
+		}
+
+		$patient_id = $tooth_info['patient_id'];
+		$plan_name = $process['name'];
+		$doctor_id = $process['doctor_id'];
+
+		// fetch all recommended processes for this patient and plan
+		$plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $plan_name);
+
+		$teeth = [];
+		$processes = [];
+		$custom_processes = [];
+
+		foreach ($plan_details as $detail) {
+			if (!in_array($detail['tooth_id'], $teeth)) {
+				$teeth[] = $detail['tooth_id'];
+			}
+			if ($detail['process_id']) {
+				$processes[] = $detail['process_id'];
+			}
+			elseif ($detail['custom_label']) {
+				if (!isset($custom_processes[$detail['tooth_id']])) {
+					$custom_processes[$detail['tooth_id']] = [];
+				}
+				$custom_processes[$detail['tooth_id']][$detail['remarks']] = $detail['custom_label'];
+			}
+		}
+
+		echo json_encode([
+			'type' => 'success',
+			'content' => [
+				'patient_id' => $patient_id,
+				'name' => $plan_name,
+				'doctor_id' => $doctor_id,
+				'teeth' => $teeth,
+				'processes' => $processes,
+				'custom_processes' => $custom_processes,
+				'old_plan_name' => $plan_name
+			]
+		]);
+	}
+
+	public function update_recommended_process()
+	{
+		$this->check_permission_function('Update Treatment Plan');
+
+		$this->form_validation->set_rules('name', 'name', 'required');
+		$this->form_validation->set_rules('old_plan_name', 'old plan name', 'required');
+		$this->form_validation->set_rules('doctor_id', 'doctor_id', 'required|is_natural_no_zero');
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
+
+		if (!$this->form_validation->run()) {
+			echo json_encode(['type' => 'error', 'alert' => ['title' => $this->lang('error'), 'text' => $this->lang('invalid patient'), 'type' => 'error']]);
+			return;
+		}
+
+		$patient_id = $this->input->post('patient_id');
+		$name = $this->input->post('name');
+		$old_plan_name = $this->input->post('old_plan_name');
+		$doctor_id = $this->input->post('doctor_id');
+
+		// Validate unique name ONLY IF the name is actually changing
+		if ($name !== $old_plan_name) {
+			$recommendations = $this->Admin_model->get_patient_treatment_plan($patient_id);
+			foreach ($recommendations as $recommendation) {
+				if ($recommendation['recommendation_name'] == $name) {
+					echo json_encode(['type' => 'error', 'alert' => ['title' => $this->lang('error'), 'text' => $this->lang('duplicate process name'), 'type' => 'error']]);
+					return;
+				}
+			}
+		}
+
+		$tooth_ids = $this->input->post('tooth_id');
+		$processes = $this->input->post('processes');
+		$custom_processes = $this->input->post('custom_process');
+		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
+
+		// 1. Delete the old plan
+		$this->Admin_model->delete_treatment_plan_by_name($patient_id, $old_plan_name);
+
+		// 2. Re-insert the new selections
+		if (!empty($tooth_ids)) {
+			foreach ($tooth_ids as $tooth_id) {
+				// Save checked processes
+				if (!empty($processes[$tooth_id])) {
+					foreach ($processes[$tooth_id] as $process_id) {
+						$this->Admin_model->insert_recommended_process([
+							'name' => $name,
+							'doctor_id' => $doctor_id,
+							'turn_id' => null,
+							'tooth_id' => $tooth_id,
+							'process_id' => $process_id,
+							'custom_label' => null,
+							'remarks' => null,
+							'users_id' => $user_id,
+						]);
+					}
+				}
+
+				// Save "other" (custom) text areas
+				if (!empty($custom_processes[$tooth_id])) {
+					foreach ($custom_processes[$tooth_id] as $dept => $label) {
+						if (trim($label) !== '') {
+							$this->Admin_model->insert_recommended_process([
+								'name' => $name,
+								'doctor_id' => $doctor_id,
+								'turn_id' => null,
+								'tooth_id' => $tooth_id,
+								'process_id' => null,
+								'custom_label' => $label,
+								'remarks' => $dept,
+								'users_id' => $user_id,
+							]);
+						}
+					}
+				}
+			}
+		}
+
+		echo json_encode([
+			'type' => 'success',
+			'alert' => [
+				'title' => $this->lang('success'),
+				'text' => $this->lang('update treatment plan'),
+				'type' => 'success'
+			]
+		]);
+	}
+
 	public function assign_recommendations_to_turn($patient_id, $turn_id)
 	{
 		$this->load->model('Admin_model');
 
 		$teeth = $this->Admin_model->get_teeth_ids_by_patient($patient_id);
-		if (empty($teeth)) return;
+		if (empty($teeth))
+			return;
 
 		$this->db->where('turn_id', 0);
 		$this->db->where_in('tooth_id', $teeth);
@@ -5770,8 +6158,7 @@ class Admin extends CI_Controller
 			$date = $this->input->post('date');
 			$doctor = $this->input->post('doctor');
 
-
-// Pass both parameters correctly
+			// Pass both parameters correctly
 			$turns = $this->Admin_model->get_turns_page($date ?: null, $doctor ?: null);
 
 
@@ -5791,10 +6178,12 @@ class Admin extends CI_Controller
 					);
 					$i++;
 				}
-			} else {
+			}
+			else {
 				$data['content'] = array();
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -5832,11 +6221,11 @@ class Admin extends CI_Controller
 						'number' => $i,
 						'id' => $turn['id'],
 						'patient_name' => $this->mylibrary->get_patient_name(
-							$turn['name'],
-							$turn['lname'],
-							'',
-							$turn['gender']
-						),
+						$turn['name'],
+						$turn['lname'],
+						'',
+						$turn['gender']
+					),
 						'patient_id' => $turn['patient_id'],
 						'doctor_name' => $turn['doctor_name'],
 						'date' => $turn['date'],
@@ -5845,10 +6234,12 @@ class Admin extends CI_Controller
 					);
 					$i++;
 				}
-			} else {
+			}
+			else {
 				$data['content'] = array(); // No turns found
 			}
-		} else {
+		}
+		else {
 			// Validation error response
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
@@ -5858,6 +6249,68 @@ class Admin extends CI_Controller
 
 		// Output the response as JSON
 		print_r(json_encode($data));
+	}
+
+	public function delete_treatment()
+	{
+		$this->check_permission_function('Delete Treatment Plan'); // Check permission for this function
+
+		$id = $this->input->post('id'); // Get the ID from the POST request
+
+		if (!is_numeric($id) || $id <= 0) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// 1. Get the process to determine name and patient
+		$process = $this->Admin_model->get_recommended_process_by_id($id);
+		if (!$process) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'), // Or a more specific error
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		// 2. We need the patient ID (since processes can share names across patients)
+		// We can get it directly from the tooth related to this process
+		$tooth_info = $this->db->get_where('tooth', ['id' => $process['tooth_id']])->row_array();
+		if (!$tooth_info) {
+			echo json_encode([
+				'type' => 'error',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+		$patient_id = $tooth_info['patient_id'];
+		$plan_name = $process['name'];
+
+		// 3. Delete all associated processes for this plan
+		$this->Admin_model->delete_treatment_plan_by_name($patient_id, $plan_name);
+
+		echo json_encode([
+			'type' => 'success',
+			'alert' => [
+				'title' => $this->lang('success'),
+				'text' => $this->lang('delete treatment plan'),
+				'type' => 'success'
+			]
+		]);
 	}
 
 
@@ -5871,7 +6324,8 @@ class Admin extends CI_Controller
 		$x = $this->Admin_model->turns_factor($id);
 		if (count($x) !== 1) {
 			show_404();
-		} else {
+		}
+		else {
 			$check = $this->check_balance($x[0]['patient_id']);
 			$data['balance'] = $check['sum'];
 			$data['sum_cr'] = $check['sum_cr'];
@@ -5918,7 +6372,8 @@ class Admin extends CI_Controller
 				$data['alert']['text'] = $this->lang('sms sent');
 				$data['alert']['type'] = 'success';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -5940,7 +6395,8 @@ class Admin extends CI_Controller
 		$turn = $this->Admin_model->turns_factor($id);
 		if (count($turn) !== 1) {
 			show_404();
-		} else {
+		}
+		else {
 			$check = $this->check_balance($turn[0]['patient_id']);
 			$data['balance'] = $check['sum'];
 			$data['sum_cr'] = $check['sum_cr'];
@@ -5977,7 +6433,8 @@ class Admin extends CI_Controller
 						'type' => 'error'
 					]
 				];
-			} else {
+			}
+			else {
 				// Return the available slots
 				$response = [
 					'type' => 'success',
@@ -5986,7 +6443,8 @@ class Admin extends CI_Controller
 					]
 				];
 			}
-		} else {
+		}
+		else {
 			// Validation error
 			$response = [
 				'type' => 'error',
@@ -6015,13 +6473,16 @@ class Admin extends CI_Controller
 			if ($fullname != '' && $serial_id != '') {
 				$extra = "patient.serial_id = '$serial_id' AND CONCAT(patient.name, ' ', patient.lname) LIKE '%$fullname%'";
 				$patients = $this->Admin_model->get_patients_extra($extra);
-			} elseif ($serial_id != '') {
+			}
+			elseif ($serial_id != '') {
 				$extra = "patient.serial_id = '$serial_id'";
 				$patients = $this->Admin_model->get_patients_extra($extra);
-			} elseif ($fullname != '') {
+			}
+			elseif ($fullname != '') {
 				$extra = "CONCAT(patient.name, ' ', patient.lname) LIKE '%$fullname%'";
 				$patients = $this->Admin_model->get_patients_extra($extra);
-			} else {
+			}
+			else {
 				$patients = array();
 			}
 
@@ -6044,13 +6505,15 @@ class Admin extends CI_Controller
 
 			if (count($patients) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -6075,7 +6538,8 @@ class Admin extends CI_Controller
 
 			if (!empty($doctor)) {
 				$turns = $this->Admin_model->check_turns($date, $doctor);
-			} else {
+			}
+			else {
 				$turns = $this->Admin_model->check_turns($date);
 			}
 
@@ -6093,13 +6557,15 @@ class Admin extends CI_Controller
 
 			if (count($turns) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -6131,13 +6597,15 @@ class Admin extends CI_Controller
 					'from_time' => $turn[0]['from_time'],
 					'to_time' => $turn[0]['to_time'],
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -6164,11 +6632,13 @@ class Admin extends CI_Controller
 				foreach ($turns as $turn) {
 					$data['content']['turns'][] = array('date' => $turn['date'], 'id' => $turn['id'], 'hour_key' => '1', 'hour' => $turn['from_time'] . ' - ' . $turn['to_time']);
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'success';
 				$data['content']['turns'] = array();
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -6195,11 +6665,13 @@ class Admin extends CI_Controller
 				foreach ($turns as $turn) {
 					$data['content']['turns'][] = array('date' => $turn['date'], 'id' => $turn['id'], 'hour_key' => '1', 'hour' => $turn['from_time'] . ' - ' . $turn['to_time']);
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'success';
 				$data['content']['turns'] = array();
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -6211,8 +6683,7 @@ class Admin extends CI_Controller
 
 
 	public function update_turn()
-	{
-//		print_r($_POST);
+	{ //		print_r($_POST);
 //		exit();
 		$data = ['type' => 'form_error', 'messages' => []];
 
@@ -6347,7 +6818,8 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_turn($datas, $id);
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('insert payment success');
 				$data['alert']['type'] = 'success';
 
@@ -6362,7 +6834,8 @@ class Admin extends CI_Controller
 				$btns .= $this->mylibrary->generateBtnPrint('print_turn', $data['id']);
 				if ($turn['status'] == 'p') {
 					$btns .= $this->mylibrary->generateBtnStatus($data['id'], 'admin/accept_turn');
-				} else {
+				}
+				else {
 					$btns .= $this->mylibrary->generateBtnStatus($data['id'], 'admin/pending_turn', 'a');
 				}
 
@@ -6375,13 +6848,15 @@ class Admin extends CI_Controller
 					$turn['paid_user_name'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -6623,7 +7098,8 @@ class Admin extends CI_Controller
 					'type' => 'success'
 				]
 			];
-		} elseif ($successful_inserts > 0 && !empty($errors)) {
+		}
+		elseif ($successful_inserts > 0 && !empty($errors)) {
 			// Partial success
 			$response = [
 				'type' => 'warning',
@@ -6633,7 +7109,8 @@ class Admin extends CI_Controller
 					'type' => 'warning'
 				]
 			];
-		} else {
+		}
+		else {
 			// Total failure
 			$response = [
 				'type' => 'error',
@@ -6843,7 +7320,8 @@ class Admin extends CI_Controller
 					'type' => 'success'
 				]
 			]);
-		} else {
+		}
+		else {
 			echo json_encode([
 				'type' => 'error',
 				'alert' => [
@@ -6867,16 +7345,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->change_payment_status_turn('a', $datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('accept turn');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -6900,16 +7381,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->change_payment_status_turn('p', $datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('accept turn');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -6946,7 +7430,8 @@ class Admin extends CI_Controller
 		if ($is_endo) {
 			$this->form_validation->set_rules('endo_services', 'endo_services', 'trim|required', array('required' => $this->lang('insert tooth services error')));
 			$this->form_validation->set_rules('price', 'price', 'trim|required', array('required' => $this->lang('insert tooth price error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('endo_services', 'endo_services', 'trim');
 			$this->form_validation->set_rules('price', 'price', 'trim');
 		}
@@ -6978,7 +7463,8 @@ class Admin extends CI_Controller
 		if ($is_restorative) {
 			$this->form_validation->set_rules('restorative_services', 'restorative_services', 'trim|required', array('required' => $this->lang('insert tooth services error')));
 			$this->form_validation->set_rules('price_restorative', 'price_restorative', 'trim|required', array('required' => $this->lang('insert tooth price error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('restorative_services', 'restorative_services', 'trim');
 			$this->form_validation->set_rules('price_restorative', 'price_restorative', 'trim');
 		}
@@ -6996,7 +7482,8 @@ class Admin extends CI_Controller
 		if ($is_prosthodontics) {
 			$this->form_validation->set_rules('pro_services', 'pro_services', 'trim|required', array('required' => $this->lang('insert tooth services error')));
 			$this->form_validation->set_rules('price_pro', 'price_pro', 'trim|required', array('required' => $this->lang('insert tooth price error')));
-		} else {
+		}
+		else {
 			$this->form_validation->set_rules('pro_services', 'pro_services', 'trim');
 			$this->form_validation->set_rules('price_pro', 'price_pro', 'trim');
 		}
@@ -7293,13 +7780,15 @@ class Admin extends CI_Controller
 				$data['alert']['type'] = 'success';
 
 				$data['extraFunction'] = true;
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -7393,7 +7882,8 @@ class Admin extends CI_Controller
 					if (count($endos) == 1) {
 						$this->Admin_model->update_endo($tooth_id, $endo_data);
 						$endo = $endos[0];
-					} else {
+					}
+					else {
 						$endo_data['tooth_id'] = $tooth_id;
 						$this->Admin_model->insert_endo($endo_data);
 						$endo = $this->Admin_model->single_endo_by_tooth_id($tooth_id)[0];
@@ -7403,7 +7893,7 @@ class Admin extends CI_Controller
 					$endo_services = explode(',', $this->input->post('endo_services'));
 					foreach ($endo_services as $service_id) {
 						$this->Admin_model->insert_endo_has_services(array(
-							'endo_id' => $endo['id'],  // Using endo_id correctly
+							'endo_id' => $endo['id'], // Using endo_id correctly
 							'services_id' => $service_id
 						));
 					}
@@ -7433,7 +7923,8 @@ class Admin extends CI_Controller
 					if (count($restorative_check) == 1) {
 						$this->Admin_model->update_restorative($tooth_id, $restorative_data);
 						$restorative = $restorative_check[0];
-					} else {
+					}
+					else {
 						$restorative_data['tooth_id'] = $tooth_id;
 						$this->Admin_model->insert_restorative($restorative_data);
 						$restorative_check = $this->Admin_model->single_restorative_by_tooth_id($tooth_id);
@@ -7476,7 +7967,8 @@ class Admin extends CI_Controller
 					if (count($pro_check) == 1) {
 						$this->Admin_model->update_prosthodontics($tooth_id, $prosthodontics_data);
 						$pro = $pro_check[0];
-					} else {
+					}
+					else {
 						$prosthodontics_data['tooth_id'] = $tooth_id;
 						$this->Admin_model->insert_prosthodontics($prosthodontics_data);
 						$pro_check = $this->Admin_model->single_prosthodontic_by_tooth_id($tooth_id);
@@ -7522,14 +8014,16 @@ class Admin extends CI_Controller
 				$data['alert']['text'] = $this->lang('update tooth success');
 				$data['alert']['type'] = 'success';
 				$data['extraFunction'] = true;
-			} else {
+			}
+			else {
 				// Error response
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			// Validation error response
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
@@ -7554,16 +8048,19 @@ class Admin extends CI_Controller
 
 			if ($this->Admin_model->delete_tooth($datas)) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('delete tooth');
 				$data['alert']['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -7604,13 +8101,15 @@ class Admin extends CI_Controller
 
 			if (count($teeth) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -7649,7 +8148,8 @@ class Admin extends CI_Controller
 				if (!empty($_POST['customers_id'])) {
 					$extra .= "AND customers_id = '" . $_POST['customers_id'] . "' ";
 				}
-			} elseif (isset($_POST['customers_id'])) {
+			}
+			elseif (isset($_POST['customers_id'])) {
 				if (!empty($_POST['customers_id'])) {
 					$extra .= "customers_id = '" . $_POST['customers_id'] . "' ";
 				}
@@ -7664,7 +8164,8 @@ class Admin extends CI_Controller
 				foreach ($receipts as $receipt) {
 					if (is_null($receipt['cr']) || $receipt['cr'] == 0) {
 						$type = $this->lang('dr');
-					} else {
+					}
+					else {
 						$type = $this->lang('cr');
 					}
 					$datas[] = array(
@@ -7682,7 +8183,8 @@ class Admin extends CI_Controller
 					$sum_cr += $receipt['cr'];
 					$sum_dr += $receipt['dr'];
 				}
-			} else {
+			}
+			else {
 				$receipts = array();
 			}
 
@@ -7693,13 +8195,15 @@ class Admin extends CI_Controller
 			$data['content']['balance'] = $sum_cr - $sum_dr;
 			if (count($receipts) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -7722,7 +8226,8 @@ class Admin extends CI_Controller
 				if (!empty($_POST['patient_id'])) {
 					$extra .= "AND patient_id = '" . $_POST['patient_id'] . "' ";
 				}
-			} elseif (isset($_POST['patient_id'])) {
+			}
+			elseif (isset($_POST['patient_id'])) {
 				if (!empty($_POST['patient_id']) && $_POST['patient_id'] != '0') {
 					$extra .= "patient_id = '" . $_POST['patient_id'] . "' ";
 				}
@@ -7741,7 +8246,8 @@ class Admin extends CI_Controller
 					);
 					$sum_cr += $receipt['cr'];
 				}
-			} else {
+			}
+			else {
 				$receipts = array();
 			}
 
@@ -7749,13 +8255,15 @@ class Admin extends CI_Controller
 			$data['content']['sum_cr'] = $sum_cr;
 			if (count($receipts) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -7788,7 +8296,8 @@ class Admin extends CI_Controller
 				'status' => 'success',
 				'doctor_id' => $result['doctor_id']
 			]);
-		} else {
+		}
+		else {
 			echo json_encode([
 				'status' => 'error',
 				'message' => 'Doctor not found for the selected plan and patient.'
@@ -7808,7 +8317,8 @@ class Admin extends CI_Controller
 				if (!empty($_POST['patient_id'])) {
 					$extra .= "AND patient_id = '" . $_POST['patient_id'] . "' ";
 				}
-			} elseif (isset($_POST['patient_id'])) {
+			}
+			elseif (isset($_POST['patient_id'])) {
 				if (!empty($_POST['patient_id']) && $_POST['patient_id'] != '0') {
 					$extra .= "patient_id = '" . $_POST['patient_id'] . "' ";
 				}
@@ -7832,7 +8342,8 @@ class Admin extends CI_Controller
 					);
 					$sum_cr += $receipt['price'];
 				}
-			} else {
+			}
+			else {
 				$receipts = array();
 			}
 
@@ -7841,13 +8352,15 @@ class Admin extends CI_Controller
 			$data['content']['sum_cr'] = $sum_cr;
 			if (count($receipts) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -7872,14 +8385,17 @@ class Admin extends CI_Controller
 				if (!empty($_POST['lab_id'])) {
 					$extra .= "AND labs.customers_id = '" . $_POST['lab_id'] . "' ";
 				}
-			} elseif ((isset($_POST['patient_id']) && isset($_POST['lab_id'])) && (!empty($_POST['patient_id']) && !empty($_POST['lab_id'])) && ($_POST['patient_id'] != '0' && $_POST['lab_id'] != '0')) {
+			}
+			elseif ((isset($_POST['patient_id']) && isset($_POST['lab_id'])) && (!empty($_POST['patient_id']) && !empty($_POST['lab_id'])) && ($_POST['patient_id'] != '0' && $_POST['lab_id'] != '0')) {
 				$extra .= "labs.patient_id = '" . $_POST['patient_id'] . "' ";
 				$extra .= "AND labs.customers_id = '" . $_POST['lab_id'] . "' ";
-			} elseif (isset($_POST['lab_id']) && $_POST['lab_id'] != '0') {
+			}
+			elseif (isset($_POST['lab_id']) && $_POST['lab_id'] != '0') {
 				if (!empty($_POST['lab_id'])) {
 					$extra .= " labs.customers_id = '" . $_POST['lab_id'] . "' ";
 				}
-			} elseif (isset($_POST['patient_id']) && $_POST['patient_id'] != '0') {
+			}
+			elseif (isset($_POST['patient_id']) && $_POST['patient_id'] != '0') {
 				if (!empty($_POST['patient_id'])) {
 					$extra .= " labs.patient_id = '" . $_POST['patient_id'] . "' ";
 				}
@@ -7917,7 +8433,8 @@ class Admin extends CI_Controller
 					);
 					$sum_dr += $receipt['dr'];
 				}
-			} else {
+			}
+			else {
 				$receipts = array();
 			}
 
@@ -7926,13 +8443,15 @@ class Admin extends CI_Controller
 			$data['content']['sum_dr'] = $sum_dr;
 			if (count($receipts) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -7959,7 +8478,8 @@ class Admin extends CI_Controller
 
 		if (count($receipt) !== 1) {
 			show_404();
-		} else {
+		}
+		else {
 			$data['single'] = $receipt[0];
 			$data['title'] = 'print';
 			$this->load->view("prints/expense", $data);
@@ -7967,7 +8487,7 @@ class Admin extends CI_Controller
 	}
 
 	public
-	function report_ajax_psatients_balance()
+		function report_ajax_psatients_balance()
 	{
 		$this->form_validation->set_rules('from', 'from', 'trim');
 		$this->form_validation->set_rules('to', 'to', 'trim');
@@ -7982,14 +8502,17 @@ class Admin extends CI_Controller
 				if (!empty($_POST['status'])) {
 					$extra .= "AND patient.status = '" . $_POST['status'] . "' ";
 				}
-			} elseif ((isset($_POST['patient_id']) && isset($_POST['status'])) && (!empty($_POST['patient_id']) && !empty($_POST['status'])) && ($_POST['patient_id'] != '0' && $_POST['status'] != '0')) {
+			}
+			elseif ((isset($_POST['patient_id']) && isset($_POST['status'])) && (!empty($_POST['patient_id']) && !empty($_POST['status'])) && ($_POST['patient_id'] != '0' && $_POST['status'] != '0')) {
 				$extra .= "patient.id = '" . $_POST['patient_id'] . "' ";
 				$extra .= "AND patient.status = '" . $_POST['status'] . "' ";
-			} elseif (isset($_POST['status']) && $_POST['status'] != '0') {
+			}
+			elseif (isset($_POST['status']) && $_POST['status'] != '0') {
 				if (!empty($_POST['status'])) {
 					$extra .= " patient.status = '" . $_POST['status'] . "' ";
 				}
-			} elseif (isset($_POST['patient_id']) && $_POST['patient_id'] != '0') {
+			}
+			elseif (isset($_POST['patient_id']) && $_POST['patient_id'] != '0') {
 				if (!empty($_POST['patient_id'])) {
 					$extra .= " patient.id = '" . $_POST['patient_id'] . "' ";
 				}
@@ -8009,10 +8532,8 @@ class Admin extends CI_Controller
 					$cr = $check['sum_cr'];
 					$dr = $check['sum_dr'];
 
-
-//					Code for accept all patients which their balance are 0
-
-//					if ($balance == 0) {
+					//					Code for accept all patients which their balance are 0
+					//					if ($balance == 0) {
 //						$datas = array(
 //							'status' => 'a'
 //						);
@@ -8033,7 +8554,8 @@ class Admin extends CI_Controller
 					$sum_dr += $dr;
 					$sum_cr += $cr;
 				}
-			} else {
+			}
+			else {
 				$receipts = array();
 			}
 			$data['content']['receipts'] = $datas;
@@ -8042,13 +8564,15 @@ class Admin extends CI_Controller
 			$data['content']['balance'] = $sum_cr - $sum_dr;
 			if (count($receipts) >= 0) {
 				$data['type'] = 'success';
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -8060,7 +8584,7 @@ class Admin extends CI_Controller
 
 
 	public
-	function report_patients()
+		function report_patients()
 	{
 		$data['title'] = $this->lang('report patients');
 		$data['page'] = "report_patients";
@@ -8076,26 +8600,25 @@ class Admin extends CI_Controller
 	// End Reports
 
 	public
-	function _404()
+		function _404()
 	{
 		$this->load->view('errors/html/error_404');
 	}
 
 	public
-	function logout()
+		function logout()
 	{
 		session_destroy();
 		redirect(base_url());
 	}
 
 	public
-	function phoneBook()
+		function phoneBook()
 	{
 		$this->check_permission_function('Read Call Log Index');
 		$data['title'] = $this->lang('phonebook');
 		$data['page'] = "phonebook";
-		$data['receipts'] = $this->Admin_model->get_turns_phonebook();
-// 		print_r($data['receipts']);
+		$data['receipts'] = $this->Admin_model->get_turns_phonebook(); // 		print_r($data['receipts']);
 // 		exit;
 		$data['script'] = $this->mylibrary->generateSelect2();
 		$data['script_date'] = $this->mylibrary->script_datepicker();
@@ -8105,7 +8628,7 @@ class Admin extends CI_Controller
 	}
 
 	public
-	function failedCall()
+		function failedCall()
 	{
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
@@ -8119,13 +8642,15 @@ class Admin extends CI_Controller
 					'hour_phone1' => date('H:i:s'),
 					'remarks_phone1' => $this->input->post('remarks')
 				);
-			} elseif ($type == 'call2') {
+			}
+			elseif ($type == 'call2') {
 				$datas = array(
 					'date_phone2' => $this->mylibrary->getCurrentShamsiDate()['date'],
 					'hour_phone2' => date('H:i:s'),
 					'remarks_phone2' => $this->input->post('remarks')
 				);
-			} elseif ($type == 'call3') {
+			}
+			elseif ($type == 'call3') {
 				$datas = array(
 					'date_phone3' => $this->mylibrary->getCurrentShamsiDate()['date'],
 					'hour_phone3' => date('H:i:s'),
@@ -8136,7 +8661,8 @@ class Admin extends CI_Controller
 			$update = $this->Admin_model->update_turn($datas, $id);
 			if ($update) {
 				$data['type'] = 'success';
-				$data['alert']['title'] = $this->lang('success');;
+				$data['alert']['title'] = $this->lang('success');
+				;
 				$data['alert']['text'] = $this->lang('update turn success');
 				$data['alert']['type'] = 'success';
 
@@ -8155,11 +8681,13 @@ class Admin extends CI_Controller
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call1', 'btn-outline-success', false, 'eye');
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call2', 'btn-outline-secondary', false);
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call3', 'btn-outline-danger', true);
-				} elseif ($type == 'call2') {
+				}
+				elseif ($type == 'call2') {
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call1', 'btn-outline-success', false, 'eye');
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call2', 'btn-outline-secondary', false, 'eye');
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call3', 'btn-outline-danger');
-				} elseif ($type == 'call3') {
+				}
+				elseif ($type == 'call3') {
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call1', 'btn-outline-success', false, 'eye');
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call2', 'btn-outline-secondary', false, 'eye');
 					$btns .= $this->mylibrary->generateBtnCall($id, 'call3', 'btn-outline-danger', false, 'eye');
@@ -8175,13 +8703,15 @@ class Admin extends CI_Controller
 					$service['from_time'] . ' - ' . $service['to_time'],
 					$this->mylibrary->btn_group($btns)
 				);
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			foreach ($_POST as $key => $value) {
 				if (form_error($key) !== '') {
 					$error = form_error($key);
@@ -8194,7 +8724,7 @@ class Admin extends CI_Controller
 	}
 
 	public
-	function single_phonebook()
+		function single_phonebook()
 	{
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		$this->form_validation->set_rules('type', 'type', 'trim|required', array('required' => $this->lang('problem')));
@@ -8214,26 +8744,30 @@ class Admin extends CI_Controller
 						'hour' => $service[0]['hour_phone1'],
 						'remarks' => $service[0]['remarks_phone1'],
 					);
-				} elseif ($type == 'call2') {
+				}
+				elseif ($type == 'call2') {
 					$data['content'] = array(
 						'date' => $service[0]['date_phone2'],
 						'hour' => $service[0]['hour_phone2'],
 						'remarks' => $service[0]['remarks_phone2'],
 					);
-				} elseif ($type == 'call3') {
+				}
+				elseif ($type == 'call3') {
 					$data['content'] = array(
 						'date' => $service[0]['date_phone3'],
 						'hour' => $service[0]['hour_phone3'],
 						'remarks' => $service[0]['remarks_phone3'],
 					);
 				}
-			} else {
+			}
+			else {
 				$data['type'] = 'error';
 				$data['alert']['title'] = $this->lang('error');
 				$data['alert']['text'] = $this->lang('problem');
 				$data['alert']['type'] = 'error';
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -8251,7 +8785,8 @@ class Admin extends CI_Controller
 			$date = $this->input->post('date');
 			if ($date !== '') {
 				$turns = $this->Admin_model->get_turns_phonebook($date);
-			} else {
+			}
+			else {
 				$turns = $this->Admin_model->get_turns_phonebook();
 			}
 
@@ -8273,15 +8808,18 @@ class Admin extends CI_Controller
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call1', 'btn-outline-success', false);
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call2', 'btn-outline-secondary', true);
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call3', 'btn-outline-danger', true);
-					} elseif (empty($turn['date_phone2'])) {
+					}
+					elseif (empty($turn['date_phone2'])) {
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call1', 'btn-outline-success', false, 'eye');
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call2', 'btn-outline-secondary', false);
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call3', 'btn-outline-danger', true);
-					} elseif (empty($turn['date_phone3'])) {
+					}
+					elseif (empty($turn['date_phone3'])) {
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call1', 'btn-outline-success', false, 'eye');
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call2', 'btn-outline-secondary', false, 'eye');
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call3', 'btn-outline-danger', false);
-					} else {
+					}
+					else {
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call1', 'btn-outline-success', false, 'eye');
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call2', 'btn-outline-secondary', false, 'eye');
 						$btns .= $this->mylibrary->generateBtnCall($turn['id'], 'call3', 'btn-outline-danger', false, 'eye');
@@ -8298,10 +8836,12 @@ class Admin extends CI_Controller
 					);
 					$i++;
 				}
-			} else {
+			}
+			else {
 				$data['content'] = array();
 			}
-		} else {
+		}
+		else {
 			$data['type'] = 'error';
 			$data['alert']['title'] = $this->lang('error');
 			$data['alert']['text'] = $this->lang('problem');
@@ -8314,7 +8854,7 @@ class Admin extends CI_Controller
 
 	//Start Roles
 	public
-	function roles()
+		function roles()
 	{
 		$this->check_permission_page();
 		$this->load->model('Role_model');
@@ -8328,7 +8868,7 @@ class Admin extends CI_Controller
 	}
 
 	public
-	function edit_role($id = null)
+		function edit_role($id = null)
 	{
 		if (!is_null($id)) {
 			$this->load->model('Role_model');
@@ -8351,11 +8891,13 @@ class Admin extends CI_Controller
 				$this->load->view('header', $data);
 				$this->load->view('users/user_role_edit', $data);
 				$this->load->view('footer');
-			} else {
+			}
+			else {
 				show_404();
 				exit();
 			}
-		} else {
+		}
+		else {
 			show_404();
 			exit;
 		}
@@ -8364,13 +8906,12 @@ class Admin extends CI_Controller
 	//End Roles
 
 	public
-	function init()
+		function init()
 	{
 		$this->load->model('Role_model');
 		$data['title'] = $this->lang('role and permission');
 		$data['page'] = "users";
-		$data['roles'] = $this->Role_model->get_all_roles();
-//		$data['script_single_patient_assets'] = ['assets/js/users.js'];
+		$data['roles'] = $this->Role_model->get_all_roles(); //		$data['script_single_patient_assets'] = ['assets/js/users.js'];
 
 		$this->load->view('header', $data);
 		$this->load->view('test/init', $data);
@@ -8381,7 +8922,8 @@ class Admin extends CI_Controller
 	{
 		if (!is_null($data)) {
 			return $this->load->view($file_path, $data);
-		} else {
+		}
+		else {
 			return $this->load->view($file_path);
 		}
 	}
@@ -8395,7 +8937,8 @@ class Admin extends CI_Controller
 				exit();
 			}
 
-		} elseif (!$this->auth->has_permission($permission_name)) {
+		}
+		elseif (!$this->auth->has_permission($permission_name)) {
 			show_404();
 			exit();
 		}
