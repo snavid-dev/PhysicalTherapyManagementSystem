@@ -126,4 +126,25 @@ if (!function_exists('hex2bin')) {
 	 * @param string $data
 	 * @return    string
 	 */
-	function h
+	function hex2bin($data)
+	{
+		if (in_array($type = gettype($data), array('array', 'double', 'object', 'resource'), TRUE)) {
+			if ($type === 'object' && method_exists($data, '__toString')) {
+				$data = (string)$data;
+			} else {
+				trigger_error('hex2bin() expects parameter 1 to be string, ' . $type . ' given', E_USER_WARNING);
+				return NULL;
+			}
+		}
+
+		if (strlen($data) % 2 !== 0) {
+			trigger_error('Hexadecimal input string must have an even length', E_USER_WARNING);
+			return FALSE;
+		} elseif (!preg_match('/^[0-9a-f]*$/i', $data)) {
+			trigger_error('Input string must be hexadecimal string', E_USER_WARNING);
+			return FALSE;
+		}
+
+		return pack('H*', $data);
+	}
+}
