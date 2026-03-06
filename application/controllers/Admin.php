@@ -5391,6 +5391,18 @@ class Admin extends CI_Controller
 			return;
 		}
 
+		$teeth_ids = array_values(array_filter(array_unique(array_map('intval', $teeth_ids)), function ($id) {
+			return $id > 0;
+		}));
+
+		if (empty($teeth_ids)) {
+			echo json_encode([
+				'type' => 'success',
+				'content' => []
+			]);
+			return;
+		}
+
 		$results = [];
 
 		foreach ($teeth_ids as $tooth_id) {
@@ -5703,6 +5715,9 @@ class Admin extends CI_Controller
 		$processes = $this->input->post('processes');
 		$custom_processes = $this->input->post('custom_process');
 		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
+		$tooth_ids = is_array($tooth_ids) ? array_values(array_filter(array_unique(array_map('intval', $tooth_ids)), function ($id) {
+			return $id > 0;
+		})) : [];
 
 		foreach ($tooth_ids as $tooth_id) {
 			// Save checked processes
@@ -5937,6 +5952,9 @@ class Admin extends CI_Controller
 		$processes = $this->input->post('processes');
 		$custom_processes = $this->input->post('custom_process');
 		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
+		$tooth_ids = is_array($tooth_ids) ? array_values(array_filter(array_unique(array_map('intval', $tooth_ids)), function ($id) {
+			return $id > 0;
+		})) : [];
 
 		$old_plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $old_plan_name);
 
