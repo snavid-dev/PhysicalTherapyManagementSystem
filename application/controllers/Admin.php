@@ -3451,7 +3451,7 @@ class Admin extends CI_Controller
 				$data['script_date'] = $this->mylibrary->script_datepicker();
 				$data['medicines'] = $this->Admin_model->get_medicines();
 				$data['prescriptions'] = $this->Admin_model->list_prescription_patient($id);
-				$data['script_single_patient_assets'] = ['assets/js/teeth.js', 'assets/js/prescription.js'];
+				$data['script_single_patient_assets'] = ['assets/js/teeth.js', 'assets/js/prescription.js', 'assets/js/treatment_plan.js'];
 				$data['profile'] = $profile[0];
 				$data['script'] = $this->mylibrary->generateSelect2('extralargemodal');
 				// $data['script'] .= $this->mylibrary->generateSelect2('extralargemodal', 'reference_doctor');
@@ -5992,27 +5992,45 @@ class Admin extends CI_Controller
 
 	public function get_treatment_plan_for_edit()
 	{
-		$this->check_permission_function('Read Treatment Plan');
+		$this->check_permission_function('Read Patient Profile');
 
-		$id = $this->input->post('id');
+		$id = $this->input->post('record');
+		if (empty($id)) {
+			$id = $this->input->post('id');
+		}
 
-		$process = $this->Admin_model->get_recommended_process_by_id($id);
+		if (!is_numeric($id) || (int)$id <= 0) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$process = $this->Admin_model->get_recommended_process_by_id((int)$id);
 		if (!$process) {
-			echo json_encode(['type' => 'error', 'alert' => ['title' => $this->lang('error'), 'text' => $this->lang('problem'), 'type' => 'error']]);
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
 			return;
 		}
 
-		$tooth_info = $this->db->get_where('tooth', ['id' => $process['tooth_id']])->row_array();
-		if (!$tooth_info) {
-			echo json_encode(['type' => 'error', 'alert' => ['title' => $this->lang('error'), 'text' => $this->lang('problem'), 'type' => 'error']]);
-			return;
-		}
-
-		$patient_id = $tooth_info['patient_id'];
+		$patient_id = $process['patient_id'];
 		$plan_name = $process['name'];
 		$doctor_id = $process['doctor_id'];
-
-		// fetch all recommended processes for this patient and plan
 		$plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $plan_name);
 
 		$teeth = [];
@@ -6020,24 +6038,29 @@ class Admin extends CI_Controller
 		$custom_processes = [];
 
 		foreach ($plan_details as $detail) {
-			if (!in_array($detail['tooth_id'], $teeth)) {
-				$teeth[] = $detail['tooth_id'];
+			$tooth_id = (int)$detail['tooth_id'];
+			if (!in_array($tooth_id, $teeth, true)) {
+				$teeth[] = $tooth_id;
 			}
-			if ($detail['process_id']) {
-				$processes[] = $detail['process_id'];
-			}
-			elseif ($detail['custom_label']) {
-				if (!isset($custom_processes[$detail['tooth_id']])) {
-					$custom_processes[$detail['tooth_id']] = [];
+
+			if (!is_null($detail['process_id'])) {
+				if (!isset($processes[$tooth_id])) {
+					$processes[$tooth_id] = [];
 				}
-				$custom_processes[$detail['tooth_id']][$detail['remarks']] = $detail['custom_label'];
+				$processes[$tooth_id][] = (int)$detail['process_id'];
+			} elseif (!empty($detail['custom_label'])) {
+				if (!isset($custom_processes[$tooth_id])) {
+					$custom_processes[$tooth_id] = [];
+				}
+				$custom_processes[$tooth_id][$detail['remarks']] = $detail['custom_label'];
 			}
 		}
 
 		echo json_encode([
+			'status' => 'success',
 			'type' => 'success',
 			'content' => [
-				'patient_id' => $patient_id,
+				'patient_id' => (int)$patient_id,
 				'name' => $plan_name,
 				'doctor_id' => $doctor_id,
 				'teeth' => $teeth,
@@ -6058,7 +6081,16 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
 
 		if (!$this->form_validation->run()) {
-			echo json_encode(['type' => 'error', 'alert' => ['title' => $this->lang('error'), 'text' => $this->lang('invalid patient'), 'type' => 'error']]);
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('invalid patient'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid patient'),
+					'type' => 'error'
+				]
+			]);
 			return;
 		}
 
@@ -6067,12 +6099,20 @@ class Admin extends CI_Controller
 		$old_plan_name = $this->input->post('old_plan_name');
 		$doctor_id = $this->input->post('doctor_id');
 
-		// Validate unique name ONLY IF the name is actually changing
 		if ($name !== $old_plan_name) {
 			$recommendations = $this->Admin_model->get_patient_treatment_plan($patient_id);
 			foreach ($recommendations as $recommendation) {
 				if ($recommendation['recommendation_name'] == $name) {
-					echo json_encode(['type' => 'error', 'alert' => ['title' => $this->lang('error'), 'text' => $this->lang('duplicate process name'), 'type' => 'error']]);
+					echo json_encode([
+						'status' => 'error',
+						'type' => 'error',
+						'message' => $this->lang('duplicate process name'),
+						'alert' => [
+							'title' => $this->lang('error'),
+							'text' => $this->lang('duplicate process name'),
+							'type' => 'error'
+						]
+					]);
 					return;
 				}
 			}
@@ -6083,13 +6123,16 @@ class Admin extends CI_Controller
 		$custom_processes = $this->input->post('custom_process');
 		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
 
-		// 1. Delete the old plan
+		$old_plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $old_plan_name);
+
+		$this->db->trans_start();
+		if (!empty($old_plan_details)) {
+			$this->Admin_model->delete_related_done_by_plan_details($old_plan_details);
+		}
 		$this->Admin_model->delete_treatment_plan_by_name($patient_id, $old_plan_name);
 
-		// 2. Re-insert the new selections
 		if (!empty($tooth_ids)) {
 			foreach ($tooth_ids as $tooth_id) {
-				// Save checked processes
 				if (!empty($processes[$tooth_id])) {
 					foreach ($processes[$tooth_id] as $process_id) {
 						$this->Admin_model->insert_recommended_process([
@@ -6105,13 +6148,10 @@ class Admin extends CI_Controller
 					}
 				}
 
-				// Save "other" (custom) text areas
 				if (!empty($custom_processes[$tooth_id])) {
 					foreach ($custom_processes[$tooth_id] as $dept => $label) {
 						if (trim($label) !== '') {
 							$this->Admin_model->insert_recommended_process([
-								'name' => $name,
-								'doctor_id' => $doctor_id,
 								'turn_id' => null,
 								'tooth_id' => $tooth_id,
 								'process_id' => null,
@@ -6124,14 +6164,61 @@ class Admin extends CI_Controller
 				}
 			}
 		}
+		$this->db->trans_complete();
+
+		if ($this->db->trans_status() === false) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
 
 		echo json_encode([
+			'status' => 'success',
 			'type' => 'success',
+			'message' => $this->lang('update treatment plan'),
 			'alert' => [
 				'title' => $this->lang('success'),
 				'text' => $this->lang('update treatment plan'),
 				'type' => 'success'
 			]
+		]);
+	}
+
+	public function list_treatment_plan()
+	{
+		$this->check_permission_function('Read Patient Profile');
+
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('invalid patient'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid patient'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = (int)$this->input->post('patient_id');
+		$data['treatment_plans'] = $this->Admin_model->get_patient_treatment_plan($patient_id);
+		$html = $this->load->view('patients/components/main/TreatmentPlan/treatment_plan', $data, true);
+
+		echo json_encode([
+			'status' => 'success',
+			'type' => 'success',
+			'content' => $html
 		]);
 	}
 
@@ -6253,13 +6340,18 @@ class Admin extends CI_Controller
 
 	public function delete_treatment()
 	{
-		$this->check_permission_function('Delete Treatment Plan'); // Check permission for this function
+		$this->check_permission_function('Delete Treatment Plan');
 
-		$id = $this->input->post('id'); // Get the ID from the POST request
+		$id = $this->input->post('record');
+		if (empty($id)) {
+			$id = $this->input->post('id');
+		}
 
-		if (!is_numeric($id) || $id <= 0) {
+		if (!is_numeric($id) || (int)$id <= 0) {
 			echo json_encode([
+				'status' => 'error',
 				'type' => 'error',
+				'message' => $this->lang('problem'),
 				'alert' => [
 					'title' => $this->lang('error'),
 					'text' => $this->lang('problem'),
@@ -6269,26 +6361,12 @@ class Admin extends CI_Controller
 			return;
 		}
 
-		// 1. Get the process to determine name and patient
-		$process = $this->Admin_model->get_recommended_process_by_id($id);
+		$process = $this->Admin_model->get_recommended_process_by_id((int)$id);
 		if (!$process) {
 			echo json_encode([
+				'status' => 'error',
 				'type' => 'error',
-				'alert' => [
-					'title' => $this->lang('error'),
-					'text' => $this->lang('problem'), // Or a more specific error
-					'type' => 'error'
-				]
-			]);
-			return;
-		}
-
-		// 2. We need the patient ID (since processes can share names across patients)
-		// We can get it directly from the tooth related to this process
-		$tooth_info = $this->db->get_where('tooth', ['id' => $process['tooth_id']])->row_array();
-		if (!$tooth_info) {
-			echo json_encode([
-				'type' => 'error',
+				'message' => $this->lang('problem'),
 				'alert' => [
 					'title' => $this->lang('error'),
 					'text' => $this->lang('problem'),
@@ -6297,14 +6375,36 @@ class Admin extends CI_Controller
 			]);
 			return;
 		}
-		$patient_id = $tooth_info['patient_id'];
-		$plan_name = $process['name'];
 
-		// 3. Delete all associated processes for this plan
+		$patient_id = $process['patient_id'];
+		$plan_name = $process['name'];
+		$plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $plan_name);
+
+		$this->db->trans_start();
+		if (!empty($plan_details)) {
+			$this->Admin_model->delete_related_done_by_plan_details($plan_details);
+		}
 		$this->Admin_model->delete_treatment_plan_by_name($patient_id, $plan_name);
+		$this->db->trans_complete();
+
+		if ($this->db->trans_status() === false) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
 
 		echo json_encode([
+			'status' => 'success',
 			'type' => 'success',
+			'message' => $this->lang('delete treatment plan'),
 			'alert' => [
 				'title' => $this->lang('success'),
 				'text' => $this->lang('delete treatment plan'),

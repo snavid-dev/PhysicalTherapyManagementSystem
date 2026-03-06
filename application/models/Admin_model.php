@@ -781,27 +781,21 @@ class Admin_model extends CI_Model
 
 	public function get_patient_treatment_plan($patient_id)
 	{
-		return $this->db->query("
-			SELECT 
-				tr.id,
-				tr.turn_id,
-				p.id AS patient_id,
-				p.name AS patient_name,
-				COALESCE(NULLIF(tr.name, ''), 'No Name') AS recommendation_name,  -- Replace empty or NULL with 'No Name'
-				COUNT(*) AS total_recommendations
-			FROM 
-				`turn_tooth_recommended` tr
-			JOIN 
-				`tooth` t ON tr.tooth_id = t.id
-			JOIN 
-				`patient` p ON t.patient_id = p.id
-			WHERE
-				p.id = '$patient_id'
-			GROUP BY 
-				p.id, recommendation_name
-			ORDER BY 
-				p.id, recommendation_name;
-		")->result_array();
+		$this->db->select(" 
+			MIN(tr.id) AS id,
+			MIN(tr.turn_id) AS turn_id,
+			p.id AS patient_id,
+			p.name AS patient_name,
+			COALESCE(NULLIF(tr.name, ''), 'No Name') AS recommendation_name,
+			COUNT(*) AS total_recommendations
+		", false);
+		$this->db->from('turn_tooth_recommended tr');
+		$this->db->join('tooth t', 'tr.tooth_id = t.id', 'inner');
+		$this->db->join('patient p', 't.patient_id = p.id', 'inner');
+		$this->db->where('p.id', $patient_id);
+		$this->db->group_by("p.id, COALESCE(NULLIF(tr.name, ''), 'No Name')", false);
+		$this->db->order_by('recommendation_name', 'ASC');
+		return $this->db->get()->result_array();
 	}
 
 	public function get_doctor_for_patient_plan($planName, $patientId)
@@ -862,30 +856,74 @@ class Admin_model extends CI_Model
 
 	public function get_recommended_process_by_id($id)
 	{
-		return $this->db->get_where('turn_tooth_recommended', ['id' => $id])->row_array();
+		$this->db->select('tr.*, t.patient_id');
+		$this->db->from('turn_tooth_recommended tr');
+		$this->db->join('tooth t', 't.id = tr.tooth_id', 'inner');
+		$this->db->where('tr.id', $id);
+		return $this->db->get()->row_array();
 	}
 
 	public function delete_treatment_plan_by_name($patient_id, $name)
 	{
-		$this->db->where('patient_id', $patient_id);
-		$subquery = $this->db->get_compiled_select('tooth');
+		$plan_details = $this->get_plan_details_by_name($patient_id, $name);
+		if (empty($plan_details)) {
+			return 0;
+		}
 
-		// Since CI3 delete with join is tricky, we use a custom query
-		$sql = "DELETE ttr FROM turn_tooth_recommended ttr 
-                JOIN tooth t ON ttr.tooth_id = t.id 
-                WHERE t.patient_id = ? AND ttr.name = ?";
-		return $this->db->query($sql, [$patient_id, $name]);
+		$ids = array_column($plan_details, 'id');
+		$this->db->where_in('id', $ids);
+		$this->db->delete('turn_tooth_recommended');
+		return $this->db->affected_rows();
 	}
 
 	public function get_plan_details_by_name($patient_id, $name)
 	{
-		$sql = "SELECT ttr.*, t.location, t.name as tooth_name 
-                FROM turn_tooth_recommended ttr 
-                JOIN tooth t ON ttr.tooth_id = t.id 
-                WHERE t.patient_id = ? AND ttr.name = ?";
-		return $this->db->query($sql, [$patient_id, $name])->result_array();
+		$this->db->select('ttr.*, t.location, t.name as tooth_name, t.patient_id');
+		$this->db->from('turn_tooth_recommended ttr');
+		$this->db->join('tooth t', 't.id = ttr.tooth_id', 'inner');
+		$this->db->where('t.patient_id', $patient_id);
+
+		if ($name === null || $name === '') {
+			$this->db->group_start();
+			$this->db->where('ttr.name IS NULL', null, false);
+			$this->db->or_where('ttr.name', '');
+			$this->db->group_end();
+		} else {
+			$this->db->where('ttr.name', $name);
+		}
+
+		return $this->db->get()->result_array();
 	}
 
+	public function delete_related_done_by_plan_details($plan_details)
+	{
+		$deleted = 0;
+		if (empty($plan_details)) {
+			return $deleted;
+		}
+
+		foreach ($plan_details as $detail) {
+			if (empty($detail['turn_id'])) {
+				continue;
+			}
+
+			$this->db->where('turn_id', $detail['turn_id']);
+			$this->db->where('tooth_id', $detail['tooth_id']);
+
+			if (!is_null($detail['process_id'])) {
+				$this->db->where('process_id', $detail['process_id']);
+			} else {
+				$this->db->where('process_id IS NULL', null, false);
+				$this->db->where('custom_label', $detail['custom_label']);
+				$this->db->where('remarks', $detail['remarks']);
+			}
+
+			$this->db->delete('turn_tooth_done');
+			$deleted += $this->db->affected_rows();
+		}
+
+		return $deleted;
+	}
 
 	public function get_lab_by_id($lab_id)
 	{
