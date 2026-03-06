@@ -30,13 +30,16 @@
 			$("#selectaction").val("").trigger("change");
 		}
 		if (actionValues == 6) {
-			$('#patient_id').val(<?= $profile['id'] ?>); // Dynamically set patient ID
+			if (typeof prepare_treatment_plan_insert === "function") {
+				prepare_treatment_plan_insert();
+			} else {
+				$('#patient_id').val(<?= $profile['id'] ?>);
+				list_teeth_recommended();
+			}
 
-			list_teeth_recommended();
 			$(`#recommended_processes`).modal("toggle");
 			$("#selectaction").val("").trigger("change");
 		}
-
 		if (actionValues == 7){
 			revertSelect2InModal();
 			$(`#multiTurnModal`).modal("toggle");

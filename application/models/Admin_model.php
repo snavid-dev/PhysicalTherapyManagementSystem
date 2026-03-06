@@ -75,7 +75,7 @@ class Admin_model extends CI_Model
 
 		if ($query->num_rows() > 0) {
 			$leave = $query->row_array();
-			$doctor = $this->get_doctor_by_id($leave['doctor_id']);  // Assuming a function to fetch doctor's name
+			$doctor = $this->get_doctor_by_id($leave['doctor_id']); // Assuming a function to fetch doctor's name
 			$leave['doctor_name'] = $doctor['fname'] . ' ' . $doctor['lname'];
 			return $leave;
 		}
@@ -85,13 +85,13 @@ class Admin_model extends CI_Model
 	public function get_doctor_by_id($doctor_id)
 	{
 		// Select relevant doctor details from the 'users' table (or the table where doctor data is stored)
-		$this->db->select('id, fname, lname');  // Adjust fields as needed
-		$this->db->from('users');  // Assuming 'users' table stores doctor info
+		$this->db->select('id, fname, lname'); // Adjust fields as needed
+		$this->db->from('users'); // Assuming 'users' table stores doctor info
 		$this->db->where('id', $doctor_id);
 		$query = $this->db->get();
 
 		if ($query->num_rows() > 0) {
-			return $query->row_array();  // Return doctor details as an associative array
+			return $query->row_array(); // Return doctor details as an associative array
 		}
 
 		// Return false if doctor is not found
@@ -104,8 +104,8 @@ class Admin_model extends CI_Model
 		$this->db->select('doctor_leave.id, doctor_leave.leave_start_date, doctor_leave.leave_end_date, doctor_leave.reason, doctor_leave.status, doctor_leave.doctor_id, users.fname AS doctor_fname, users.lname AS doctor_lname');
 
 		// Join the 'users' table (doctor details) on 'doctor_id'
-		$this->db->from('doctor_leave');  // Assuming 'doctor_leave' stores leave data
-		$this->db->join('users', 'doctor_leave.doctor_id = users.id', 'left');  // Join doctors from 'users' table
+		$this->db->from('doctor_leave'); // Assuming 'doctor_leave' stores leave data
+		$this->db->join('users', 'doctor_leave.doctor_id = users.id', 'left'); // Join doctors from 'users' table
 
 		// Order by the leave start date in descending order
 		$this->db->order_by('doctor_leave.leave_start_date DESC');
@@ -115,7 +115,7 @@ class Admin_model extends CI_Model
 
 		// Check if the query returns any results
 		if ($query->num_rows() > 0) {
-			return $query->result_array();  // Return leave requests as an array of associative arrays
+			return $query->result_array(); // Return leave requests as an array of associative arrays
 		}
 
 		// If no leave requests found, return false
@@ -241,7 +241,8 @@ class Admin_model extends CI_Model
 			$currentDate = $this->mylibrary->getCurrentShamsiDate()['date'];
 			$extra = "turn.date = ?";
 			$params = [$currentDate];
-		} else {
+		}
+		else {
 			$params = []; // Assume `extra` already contains conditions and doesn't need parameters
 		}
 
@@ -398,7 +399,8 @@ class Admin_model extends CI_Model
 	{
 		if (is_null($department)) {
 			return $this->db->get('services')->result_array();
-		} else {
+		}
+		else {
 			return $this->db->get_where('services', array('department' => $department))->result_array();
 		}
 	}
@@ -444,7 +446,7 @@ class Admin_model extends CI_Model
 	public function create_endo_record($endo_data)
 	{
 		$this->db->insert('endo', $endo_data);
-		return $this->db->insert_id();  // Get the last inserted ID (the new `endo_id`)
+		return $this->db->insert_id(); // Get the last inserted ID (the new `endo_id`)
 	}
 
 
@@ -662,7 +664,8 @@ class Admin_model extends CI_Model
 		if (!empty($filters['payment_filter']) && $filters['payment_filter'] !== '0') {
 			if ($filters['payment_filter'] == 'paid') {
 				$this->db->where("labs.status", 'm');
-			} elseif ($filters['payment_filter'] == 'unpaid') {
+			}
+			elseif ($filters['payment_filter'] == 'unpaid') {
 				$this->db->where("labs.status !=", 'm');
 			}
 		}
@@ -708,7 +711,8 @@ class Admin_model extends CI_Model
 			'prosthodontics' => ['table' => 'prosthodontics', 'junction' => 'prosthodontics_has_services']
 		];
 
-		if (!isset($map[$department])) return [];
+		if (!isset($map[$department]))
+			return [];
 
 		$dept_table = $map[$department]['table'];
 		$junction_table = $map[$department]['junction'];
@@ -719,7 +723,8 @@ class Admin_model extends CI_Model
 		$this->db->where('tooth_id', $tooth_id);
 		$dept_record = $this->db->get()->row_array();
 
-		if (!$dept_record) return [];
+		if (!$dept_record)
+			return [];
 
 		$dept_id = $dept_record['id'];
 
@@ -776,32 +781,25 @@ class Admin_model extends CI_Model
 
 	public function get_patient_treatment_plan($patient_id)
 	{
-		return $this->db->query("
-			SELECT 
-				tr.id,
-				tr.turn_id,
-				p.id AS patient_id,
-				p.name AS patient_name,
-				COALESCE(NULLIF(tr.name, ''), 'No Name') AS recommendation_name,  -- Replace empty or NULL with 'No Name'
-				COUNT(*) AS total_recommendations
-			FROM 
-				`turn_tooth_recommended` tr
-			JOIN 
-				`tooth` t ON tr.tooth_id = t.id
-			JOIN 
-				`patient` p ON t.patient_id = p.id
-			WHERE
-				p.id = '$patient_id'
-			GROUP BY 
-				p.id, recommendation_name
-			ORDER BY 
-				p.id, recommendation_name;
-		")->result_array();
+		$this->db->select(" 
+			MIN(tr.id) AS id,
+			MIN(tr.turn_id) AS turn_id,
+			p.id AS patient_id,
+			p.name AS patient_name,
+			COALESCE(NULLIF(tr.name, ''), 'No Name') AS recommendation_name,
+			COUNT(*) AS total_recommendations
+		", false);
+		$this->db->from('turn_tooth_recommended tr');
+		$this->db->join('tooth t', 'tr.tooth_id = t.id', 'inner');
+		$this->db->join('patient p', 't.patient_id = p.id', 'inner');
+		$this->db->where('p.id', $patient_id);
+		$this->db->group_by("p.id, COALESCE(NULLIF(tr.name, ''), 'No Name')", false);
+		$this->db->order_by('recommendation_name', 'ASC');
+		return $this->db->get()->result_array();
 	}
 
 	public function get_doctor_for_patient_plan($planName, $patientId)
 	{
-		// This query assumes 'turn_tooth_recommended' table has a 'doctor_id' column.
 		$this->db->select('tr.doctor_id');
 		$this->db->from('turn_tooth_recommended tr');
 
@@ -816,13 +814,15 @@ class Admin_model extends CI_Model
 
 		// Specify the exact recommendation name
 		$this->db->where('tr.name', $planName);
+		$this->db->where('tr.doctor_id IS NOT NULL', null, false);
+		$this->db->where('tr.doctor_id >', 0);
+		$this->db->order_by('tr.id', 'DESC');
 
-		// We only need one result, as the doctor should be the same for all teeth in that plan
 		$this->db->limit(1);
 
 		$query = $this->db->get();
 
-		return $query->row_array(); // Returns ['doctor_id' => '...'] or null
+		return $query->row_array();
 	}
 
 
@@ -855,6 +855,76 @@ class Admin_model extends CI_Model
 
 	}
 
+	public function get_recommended_process_by_id($id)
+	{
+		$this->db->select('tr.*, t.patient_id');
+		$this->db->from('turn_tooth_recommended tr');
+		$this->db->join('tooth t', 't.id = tr.tooth_id', 'inner');
+		$this->db->where('tr.id', $id);
+		return $this->db->get()->row_array();
+	}
+
+	public function delete_treatment_plan_by_name($patient_id, $name)
+	{
+		$plan_details = $this->get_plan_details_by_name($patient_id, $name);
+		if (empty($plan_details)) {
+			return 0;
+		}
+
+		$ids = array_column($plan_details, 'id');
+		$this->db->where_in('id', $ids);
+		$this->db->delete('turn_tooth_recommended');
+		return $this->db->affected_rows();
+	}
+
+	public function get_plan_details_by_name($patient_id, $name)
+	{
+		$this->db->select('ttr.*, t.location, t.name as tooth_name, t.patient_id');
+		$this->db->from('turn_tooth_recommended ttr');
+		$this->db->join('tooth t', 't.id = ttr.tooth_id', 'inner');
+		$this->db->where('t.patient_id', $patient_id);
+
+		if ($name === null || $name === '') {
+			$this->db->group_start();
+			$this->db->where('ttr.name IS NULL', null, false);
+			$this->db->or_where('ttr.name', '');
+			$this->db->group_end();
+		} else {
+			$this->db->where('ttr.name', $name);
+		}
+
+		return $this->db->get()->result_array();
+	}
+
+	public function delete_related_done_by_plan_details($plan_details)
+	{
+		$deleted = 0;
+		if (empty($plan_details)) {
+			return $deleted;
+		}
+
+		foreach ($plan_details as $detail) {
+			if (empty($detail['turn_id'])) {
+				continue;
+			}
+
+			$this->db->where('turn_id', $detail['turn_id']);
+			$this->db->where('tooth_id', $detail['tooth_id']);
+
+			if (!is_null($detail['process_id'])) {
+				$this->db->where('process_id', $detail['process_id']);
+			} else {
+				$this->db->where('process_id IS NULL', null, false);
+				$this->db->where('custom_label', $detail['custom_label']);
+				$this->db->where('remarks', $detail['remarks']);
+			}
+
+			$this->db->delete('turn_tooth_done');
+			$deleted += $this->db->affected_rows();
+		}
+
+		return $deleted;
+	}
 
 	public function get_lab_by_id($lab_id)
 	{
@@ -980,7 +1050,8 @@ class Admin_model extends CI_Model
 					'process_id' => $row['process_id'],
 					'label' => $row['custom_label'] ?? $row['process_name']
 				];
-			} elseif ($row['custom_label']) {
+			}
+			elseif ($row['custom_label']) {
 				$grouped[$tid]['departments'][$department]['custom'] = $row['custom_label'];
 			}
 		}
@@ -1021,7 +1092,8 @@ class Admin_model extends CI_Model
 	public function calculate_patient_process_completion($patient_id)
 	{
 		$teeth = $this->db->get_where('tooth', ['patient_id' => $patient_id])->result_array();
-		if (empty($teeth)) return 0;
+		if (empty($teeth))
+			return 0;
 
 		$tooth_ids = array_column($teeth, 'id');
 		$total_percentage = 0;
@@ -1044,7 +1116,8 @@ class Admin_model extends CI_Model
 				->result_array();
 
 			$dept_ids = array_column($dept_ids, 'id');
-			if (empty($dept_ids)) continue;
+			if (empty($dept_ids))
+				continue;
 
 			// Step 2: Get all processes for the department services
 			$processes = $this->db
@@ -1062,7 +1135,8 @@ class Admin_model extends CI_Model
 		}
 
 
-		if ($total_percentage === 0) return 0;
+		if ($total_percentage === 0)
+			return 0;
 
 		// Step 3: Get completed process percentages
 		$done = $this->db
@@ -1173,11 +1247,11 @@ class Admin_model extends CI_Model
 	public function get_turns_phonebook($date = null)
 	{
 		$ci = get_instance();
-		$today = $ci->mylibrary->getCurrentShamsiDate()['date'];
-// return $today;
+		$today = $ci->mylibrary->getCurrentShamsiDate()['date'];		// return $today;
 		if (is_null($date)) {
 			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND turn.date < '$today' ORDER BY `turn`.`from_time` ASC")->result_array();
-		} else {
+		}
+		else {
 			return $this->db->query("SELECT turn.*, patient.name, patient.lname, patient.serial_id, patient.gender, CONCAT(users.fname, ' - ', users.lname) AS 'doctor_name' FROM `turn` INNER JOIN patient ON turn.patient_id = patient.id INNER JOIN users ON turn.doctor_id = users.id WHERE patient.status != 'b' AND turn.status = 'p' AND turn.date < '$today' AND turn.date = '$date' ORDER BY `turn`.`from_time` ASC")->result_array();
 		}
 	}
@@ -1351,7 +1425,7 @@ class Admin_model extends CI_Model
 		// Add time range condition if both from_time and to_time are provided
 		if (!is_null($from_time) && !is_null($to_time)) {
 			$sql .= " AND (turn.from_time < ? AND turn.to_time > ?)";
-			$params[] = $to_time;  // Overlapping check
+			$params[] = $to_time; // Overlapping check
 			$params[] = $from_time; // Overlapping check
 		}
 
@@ -1408,7 +1482,7 @@ class Admin_model extends CI_Model
 		$this->db->select('from_time, to_time');
 		$this->db->from('turn');
 		$this->db->where('doctor_id', $doctor_id);
-		$this->db->where('date', $date);  // Assuming the appointment date is stored in `appointment_date`
+		$this->db->where('date', $date); // Assuming the appointment date is stored in `appointment_date`
 		$query = $this->db->get();
 		return $query->result_array();
 	}
@@ -1419,7 +1493,7 @@ class Admin_model extends CI_Model
 		// Fetch working hours for the doctor
 		$working_hours = $this->get_doctor_working_hours($doctor_id);
 		if (empty($working_hours)) {
-			return [];  // No working hours found for doctor
+			return []; // No working hours found for doctor
 		}
 
 		// Convert working start and end times to timestamps
@@ -1455,7 +1529,7 @@ class Admin_model extends CI_Model
 
 		// Generate available time slots
 		$available_slots = [];
-		$last_end_time = $working_start_time;  // Start at the working start time
+		$last_end_time = $working_start_time; // Start at the working start time
 
 		foreach ($booked_ranges as $slot) {
 			// If there's a gap before the booked slot, we add it to the available slots
@@ -1548,7 +1622,8 @@ LEFT JOIN  users AS paid_user ON turn.paid_user_id = paid_user.id  WHERE turn.id
 
 		if (count($result) !== 0) {
 			return $result[0]['serial_id'];
-		} else {
+		}
+		else {
 			return $date . '0';
 		}
 	}
@@ -1689,8 +1764,7 @@ ORDER BY
 
 		return true;
 	}
-
-// **Delete Old Prosthodontic Basic Info**
+	// **Delete Old Prosthodontic Basic Info**
 	public function delete_prosthodontics_basic_info($tooth_id)
 	{
 		// Get the prosthodontics_id based on tooth_id
@@ -1704,8 +1778,7 @@ ORDER BY
 
 		return true;
 	}
-
-// **Delete Old Endo Services**
+	// **Delete Old Endo Services**
 	public function delete_endo_services($tooth_id)
 	{
 		// Get the endo_id based on tooth_id
@@ -1719,8 +1792,7 @@ ORDER BY
 
 		return true;
 	}
-
-// **Delete Old Restorative Services**
+	// **Delete Old Restorative Services**
 	public function delete_restorative_services($tooth_id)
 	{
 		// Get the restorative_id based on tooth_id
@@ -1734,8 +1806,7 @@ ORDER BY
 
 		return true;
 	}
-
-// **Delete Old Prosthodontic Services**
+	// **Delete Old Prosthodontic Services**
 	public function delete_prosthodontics_services($tooth_id)
 	{
 		// Get the prosthodontics_id based on tooth_id
@@ -1749,8 +1820,7 @@ ORDER BY
 
 		return true;
 	}
-
-// **Delete Old Endo Basic Info**
+	// **Delete Old Endo Basic Info**
 	public function delete_endo_basic_info($tooth_id)
 	{
 		// Get the endo_id based on tooth_id
@@ -1764,8 +1834,7 @@ ORDER BY
 
 		return true;
 	}
-
-// Helper methods to get the related ids based on tooth_id
+	// Helper methods to get the related ids based on tooth_id
 	private function get_endo_id_by_tooth($tooth_id)
 	{
 		// Fetch the related endo_id based on the tooth_id
@@ -2043,7 +2112,8 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 	{
 		if ($type == 'diagnose') {
 			return $this->db->get_where('tooth_has_diagnose', array('diagnose_id' => $id))->result_array();
-		} else {
+		}
+		else {
 			return $this->db->get_where('tooth_has_diagnose', array('tooth_id' => $id))->result_array();
 		}
 	}
@@ -2172,5 +2242,5 @@ LEFT JOIN users AS paid_user ON turn.paid_user_id = paid_user.id WHERE turn.pati
 		return $this->db->query("SELECT SUM(dr) AS sum_dr FROM `balance_sheet` WHERE shamsi = '$date'")->result_array();
 	}
 
-	// end home page
+// end home page
 }

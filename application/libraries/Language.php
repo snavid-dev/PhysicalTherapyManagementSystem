@@ -61,7 +61,8 @@ class Language
 			if (is_null($lan)) {
 				$lan = $_COOKIE['language'];
 			}
-		} else {
+		}
+		else {
 			$lan = 'fa';
 		}
 		$lang = [
@@ -393,6 +394,11 @@ class Language
 			'turns' => self::lang_arr('turns', 'نوبت ها', '??????'),
 			'archive' => self::lang_arr('Archive', 'آرشیف', 'آرشیف'),
 			'treatment plan' => self::lang_arr('treatment plan', 'پلان درمانی', 'آرشیف'),
+			'Treatment Plan Management' => self::lang_arr('Treatment Plan Management', 'مدیریت پلان درمانی', 'د درملنې د پلان مدیریت'),
+			'Create Treatment Plan' => self::lang_arr('Create Treatment Plan', 'ایجاد پلان درمانی', 'د درملنې پلان جوړول'),
+			'Read Treatment Plan' => self::lang_arr('Read Treatment Plan', 'مشاهده پلان درمانی', 'د درملنې پلان کتل'),
+			'Update Treatment Plan' => self::lang_arr('Update Treatment Plan', 'بروزرسانی پلان درمانی', 'د درملنې پلان تازه کول'),
+			'Delete Treatment Plan' => self::lang_arr('Delete Treatment Plan', 'حذف پلان درمانی', 'د درملنې پلان ړنګول'),
 			'sum of recommendation' => self::lang_arr('sum of recommendation', 'مجموعه پروسه های پیشنهادی', 'آرشیف'),
 			'experiments' => self::lang_arr('experiments', 'آزمایشات', 'آزمایشات'),
 
@@ -647,6 +653,12 @@ class Language
 
 			//end lab errors
 
+			// Treatment Plan
+			'delete treatment plan' => self::lang_arr('Treatment plan deleted successfully', 'پلان درمانی موفقانه حذف شد', 'د درملنې پلان په بریالیتوب سره حذف شو'),
+			'update treatment plan' => self::lang_arr('Treatment plan updated successfully', 'پلان درمانی موفقانه بروزرسانی شد', 'د درملنې پلان په بریالیتوب سره تازه شو'),
+			'edit treatment plan' => self::lang_arr('Edit Treatment Plan', 'ویرایش پلان درمانی', 'د درملنې پلان سمول'),
+			// End Treatment Plan
+
 			// receipt errors
 			'insert receipt customers_id error' => self::err_gen('name', 'نام', 'نوم'),
 			'insert receipt type error' => self::err_gen('type', 'نوعیت', 'ډول'),
@@ -801,9 +813,9 @@ class Language
 			'insert turn done invalid process' => self::lang_arr('insert turn done invalid process', 'پروسه نامعتبر است', 'پروسه ناسم ده'),
 			'turn processes saved' => self::lang_arr('turn processes saved', 'پروسه‌های نوبت ذخیره شدند', 'د نوبت پروسې ثبت شوې'),
 			'please insert recommended processes first' => self::lang_arr('please insert recommended processes first', 'لطفاً ابتدا پروسه‌های پیشنهادی را وارد کنید', 'لطفاً ابتدا فرآیندهای پیشنهادی را وارد نمایید'),
-			'cannot delete turn with done processes' => self::lang_arr('cannot delete turn with done processes','نمی‌توان نوبتی را که دارای درمان انجام‌شده است حذف کرد', 'نوبت دارای پروسه‌های انجام شده را نمی‌توان حذف کرد'),
-			'view treatment' => self::lang_arr('view treatment','مشاهده درمان', 'not set'),
-			'treatment status' => self::lang_arr('treatment status','وضعیت درمان', 'not set'),
+			'cannot delete turn with done processes' => self::lang_arr('cannot delete turn with done processes', 'نمی‌توان نوبتی را که دارای درمان انجام‌شده است حذف کرد', 'نوبت دارای پروسه‌های انجام شده را نمی‌توان حذف کرد'),
+			'view treatment' => self::lang_arr('view treatment', 'مشاهده درمان', 'not set'),
+			'treatment status' => self::lang_arr('treatment status', 'وضعیت درمان', 'not set'),
 
 			//End Turns Done Process
 

@@ -66,4 +66,33 @@ class Permission_model extends CI_Model
 		return array_values($permissions);
 	}
 
+	public function ensure_treatment_plan_permissions()
+	{
+		$category_name = 'Treatment Plan Management';
+		$permission_names = [
+			'Create Treatment Plan',
+			'Read Treatment Plan',
+			'Update Treatment Plan',
+			'Delete Treatment Plan'
+		];
+
+		$category = $this->db->get_where('permission_categories', ['category_name' => $category_name])->row();
+		if ($category) {
+			$category_id = (int)$category->id;
+		} else {
+			$this->db->insert('permission_categories', ['category_name' => $category_name]);
+			$category_id = (int)$this->db->insert_id();
+		}
+
+		foreach ($permission_names as $permission_name) {
+			$permission_exists = $this->db->get_where('permissions', ['permission_name' => $permission_name])->row();
+			if (!$permission_exists) {
+				$this->db->insert('permissions', [
+					'permission_name' => $permission_name,
+					'category_id' => $category_id
+				]);
+			}
+		}
+	}
+
 }

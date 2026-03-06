@@ -21,8 +21,13 @@ $ci = get_instance();
 				<td><?= $treatment_plan['total_recommendations'] ?></td>
 				<td>
 					<div class="g-2">
-						<a href="javascript:delete_via_alert('<?= $treatment_plan['id'] ?>', '<?= base_url('admin/delete_treatment') ?>', 'TreatmentPlanTable')"
-						   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"><span
+						<a href="javascript:edit_treatment_plan('<?= $treatment_plan['id'] ?>')"
+						   class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"
+						   data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('edit') ?>"><span
+								class="fa fa-edit fs-14"></span></a>
+						<a href="javascript:delete_via_alert('<?= $treatment_plan['id'] ?>', '<?= base_url('admin/delete_treatment') ?>', 'TreatmentPlanTable', list_treatment_plan)"
+						   class="btn btn-icon btn-outline-danger rounded-pill btn-wave waves-effect waves-light"
+						   data-bs-toggle="tooltip" data-bs-original-title="<?= $ci->lang('delete') ?>"><span
 								class="fa-solid fa-trash-can fs-14"></span></a>
 					</div>
 				</td>

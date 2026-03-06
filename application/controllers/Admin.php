@@ -64,8 +64,7 @@ class Admin extends CI_Controller
 		$data['sum_expenses'] = $this->Admin_model->find_sum_dr_balance_sheet($this->mylibrary->getCurrentShamsiDate()['date'])[0]['sum_dr'];
 		$data['script'] = $this->mylibrary->generateSelect2();
 		$data['prescriptions'] = $this->Admin_model->list_prescription_samples('sample');
-		$data['medicines'] = $this->Admin_model->get_medicines();
-//		$data['script_single_patient_assets'] = ['assets/js/home.js'];
+		$data['medicines'] = $this->Admin_model->get_medicines(); //		$data['script_single_patient_assets'] = ['assets/js/home.js'];
 		$data['turns'] = $this->Admin_model->get_turns($this->mylibrary->getCurrentShamsiDate()['date']);
 		$this->load->view('header', $data);
 		$this->load->view('index', $data);
@@ -119,7 +118,7 @@ class Admin extends CI_Controller
 				'leave_start_date' => $this->input->post('leave_start_date'),
 				'leave_end_date' => $this->input->post('leave_end_date'),
 				'reason' => $this->input->post('reason'),
-				'status' => "a"  // Default to approved status for simplicity
+				'status' => "a" // Default to approved status for simplicity
 			);
 
 			// Insert the leave record into the database
@@ -141,7 +140,7 @@ class Admin extends CI_Controller
 				$btns .= $this->mylibrary->generateBtnDelete($insert[1], 'admin/delete_leave');
 
 				// Collect the information for the row display, if required
-				$leaveDetails = $this->Admin_model->get_leave_details($insert[1]);  // Assuming a function to get details of the inserted leave
+				$leaveDetails = $this->Admin_model->get_leave_details($insert[1]); // Assuming a function to get details of the inserted leave
 
 				$data['tr'] = array(
 					$leaveDetails['doctor_name'],
@@ -299,6 +298,7 @@ class Admin extends CI_Controller
 
 
 		$this->load->model('Permission_model');
+		$this->Permission_model->ensure_treatment_plan_permissions();
 
 		$data['permissions'] = $this->Permission_model->get_permissions_with_categories();
 
@@ -1245,8 +1245,7 @@ class Admin extends CI_Controller
 
 				// DELETE unused ones (only if not used in turns)
 				foreach ($existingProcesses as $existing) {
-					if (!in_array($existing['name'], $submittedNames)) {
-//						TODO: Check if the process is in use or not!!
+					if (!in_array($existing['name'], $submittedNames)) { //						TODO: Check if the process is in use or not!!
 //						$inUse = $this->Admin_model->is_process_used_in_turns($existing['id']);
 						$inUse = false;
 						if (!$inUse) {
@@ -3313,7 +3312,7 @@ class Admin extends CI_Controller
 				$data['script_date'] = $this->mylibrary->script_datepicker();
 				$data['medicines'] = $this->Admin_model->get_medicines();
 				$data['prescriptions'] = $this->Admin_model->list_prescription_patient($id);
-				$data['script_single_patient_assets'] = ['assets/js/teeth.js', 'assets/js/prescription.js'];
+				$data['script_single_patient_assets'] = ['assets/js/teeth.js', 'assets/js/prescription.js', 'assets/js/treatment_plan.js'];
 				$data['profile'] = $profile[0];
 				$data['script'] = $this->mylibrary->generateSelect2('extralargemodal');
 				// $data['script'] .= $this->mylibrary->generateSelect2('extralargemodal', 'reference_doctor');
@@ -4283,8 +4282,7 @@ class Admin extends CI_Controller
 
 	public function init_lab()
 	{
-
-//		echo $this->input->post('hour');
+		//		echo $this->input->post('hour');
 //		exit();
 		$data = array('type' => 'form_error', 'messages' => array());
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required', array('required' => $this->lang('insert lab customers_id error')));
@@ -5398,7 +5396,8 @@ class Admin extends CI_Controller
 		foreach ($teeth_ids as $tooth_id) {
 			$tooth_info = $this->Admin_model->get_tooth_basic_info($tooth_id);
 
-			if (!$tooth_info) continue;
+			if (!$tooth_info)
+				continue;
 
 			$departments = ['endo', 'restorative', 'prosthodontics'];
 			$tooth_data = [
@@ -5534,7 +5533,7 @@ class Admin extends CI_Controller
 					$tooth_data['departments'][] = [
 						'name' => $dept,
 						'recommended' => $rec_list,
-						'done' => [],  // Empty done list as recommended is available
+						'done' => [], // Empty done list as recommended is available
 						'done_custom_text' => ''
 					];
 				}
@@ -5552,6 +5551,8 @@ class Admin extends CI_Controller
 
 	public function get_patient_process_completion()
 	{
+		echo $_POST['patient_id'];
+		exit;
 		$this->form_validation->set_rules('patient_id', 'Patient ID', 'trim|required|is_natural_no_zero');
 
 		if (!$this->form_validation->run()) {
@@ -5713,7 +5714,7 @@ class Admin extends CI_Controller
 						'turn_id' => null,
 						'tooth_id' => $tooth_id,
 						'process_id' => $process_id, // ✅ Use actual ID
-						'custom_label' => null,      // ✅ No label needed
+						'custom_label' => null, // ✅ No label needed
 						'remarks' => null,
 						'users_id' => $user_id,
 					]);
@@ -5726,6 +5727,8 @@ class Admin extends CI_Controller
 				foreach ($custom_processes[$tooth_id] as $dept => $label) {
 					if (trim($label) !== '') {
 						$this->Admin_model->insert_recommended_process([
+							'name' => $name,
+							'doctor_id' => $doctor_id,
 							'turn_id' => null,
 							'tooth_id' => $tooth_id,
 							'process_id' => null,
@@ -5748,12 +5751,301 @@ class Admin extends CI_Controller
 		]);
 	}
 
+	public function get_treatment_plan_for_edit()
+	{
+		$this->check_permission_function('Read Patient Profile');
+
+		$id = $this->input->post('record');
+		if (empty($id)) {
+			$id = $this->input->post('id');
+		}
+
+		if (!is_numeric($id) || (int)$id <= 0) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$process = $this->Admin_model->get_recommended_process_by_id((int)$id);
+		if (!$process) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = $process['patient_id'];
+		$plan_name = $process['name'];
+		$doctor_id = (!empty($process['doctor_id']) && (int)$process['doctor_id'] > 0) ? (int)$process['doctor_id'] : 0;
+		$plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $plan_name);
+
+		$teeth = [];
+		$processes = [];
+		$custom_processes = [];
+
+		foreach ($plan_details as $detail) {
+			$tooth_id = (int)$detail['tooth_id'];
+			if (!in_array($tooth_id, $teeth, true)) {
+				$teeth[] = $tooth_id;
+			}
+
+			if (!is_null($detail['process_id'])) {
+				if (!isset($processes[$tooth_id])) {
+					$processes[$tooth_id] = [];
+				}
+				$processes[$tooth_id][] = (int)$detail['process_id'];
+			} elseif (!empty($detail['custom_label'])) {
+				if (!isset($custom_processes[$tooth_id])) {
+					$custom_processes[$tooth_id] = [];
+				}
+				$custom_processes[$tooth_id][$detail['remarks']] = $detail['custom_label'];
+			}
+		}
+
+		if ($doctor_id <= 0) {
+			foreach ($plan_details as $detail) {
+				if (!empty($detail['doctor_id']) && (int)$detail['doctor_id'] > 0) {
+					$doctor_id = (int)$detail['doctor_id'];
+					break;
+				}
+			}
+		}
+
+		if ($doctor_id <= 0) {
+			$doctor = $this->Admin_model->get_doctor_for_patient_plan($plan_name, $patient_id);
+			if (!empty($doctor['doctor_id']) && (int)$doctor['doctor_id'] > 0) {
+				$doctor_id = (int)$doctor['doctor_id'];
+			}
+		}
+
+		echo json_encode([
+			'status' => 'success',
+			'type' => 'success',
+			'content' => [
+				'patient_id' => (int)$patient_id,
+				'name' => $plan_name,
+				'doctor_id' => $doctor_id,
+				'teeth' => $teeth,
+				'processes' => $processes,
+				'custom_processes' => $custom_processes,
+				'old_plan_name' => $plan_name
+			]
+		]);
+	}
+
+	public function update_recommended_process()
+	{
+		$this->check_permission_function('Update Treatment Plan');
+
+		$this->form_validation->set_rules('name', 'name', 'required');
+		$this->form_validation->set_rules('old_plan_name', 'old plan name', 'required');
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
+
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('invalid patient'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid patient'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = (int)$this->input->post('patient_id');
+		$name = $this->input->post('name');
+		$old_plan_name = $this->input->post('old_plan_name');
+		$doctor_id_input = trim((string)$this->input->post('doctor_id'));
+		$doctor_id = (ctype_digit($doctor_id_input) && (int)$doctor_id_input > 0) ? (int)$doctor_id_input : 0;
+
+		if ($doctor_id <= 0) {
+			$treatment_id = (int)$this->input->post('treatment_id');
+			if ($treatment_id > 0) {
+				$selected_treatment = $this->Admin_model->get_recommended_process_by_id($treatment_id);
+				if (!empty($selected_treatment['doctor_id']) && (int)$selected_treatment['doctor_id'] > 0) {
+					$doctor_id = (int)$selected_treatment['doctor_id'];
+				}
+			}
+		}
+
+		if ($doctor_id <= 0) {
+			$doctor = $this->Admin_model->get_doctor_for_patient_plan($old_plan_name, $patient_id);
+			if (!empty($doctor['doctor_id']) && (int)$doctor['doctor_id'] > 0) {
+				$doctor_id = (int)$doctor['doctor_id'];
+			}
+		}
+
+		if ($doctor_id <= 0) {
+			$patient = $this->Admin_model->get_patient_by_id($patient_id);
+			if (!empty($patient['doctor_id']) && (int)$patient['doctor_id'] > 0) {
+				$doctor_id = (int)$patient['doctor_id'];
+			}
+		}
+
+		if ($doctor_id <= 0) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('insert patient doctor_id error'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('insert patient doctor_id error'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		if ($name !== $old_plan_name) {
+			$recommendations = $this->Admin_model->get_patient_treatment_plan($patient_id);
+			foreach ($recommendations as $recommendation) {
+				if ($recommendation['recommendation_name'] == $name) {
+					echo json_encode([
+						'status' => 'error',
+						'type' => 'error',
+						'message' => $this->lang('duplicate process name'),
+						'alert' => [
+							'title' => $this->lang('error'),
+							'text' => $this->lang('duplicate process name'),
+							'type' => 'error'
+						]
+					]);
+					return;
+				}
+			}
+		}
+
+		$tooth_ids = $this->input->post('tooth_id');
+		$processes = $this->input->post('processes');
+		$custom_processes = $this->input->post('custom_process');
+		$user_id = $this->session->userdata($this->mylibrary->hash_session('u_id'));
+
+		$old_plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $old_plan_name);
+
+		$this->db->trans_start();
+		if (!empty($old_plan_details)) {
+			$this->Admin_model->delete_related_done_by_plan_details($old_plan_details);
+		}
+		$this->Admin_model->delete_treatment_plan_by_name($patient_id, $old_plan_name);
+
+		if (!empty($tooth_ids)) {
+			foreach ($tooth_ids as $tooth_id) {
+				if (!empty($processes[$tooth_id])) {
+					foreach ($processes[$tooth_id] as $process_id) {
+						$this->Admin_model->insert_recommended_process([
+							'name' => $name,
+							'doctor_id' => $doctor_id,
+							'turn_id' => null,
+							'tooth_id' => $tooth_id,
+							'process_id' => $process_id,
+							'custom_label' => null,
+							'remarks' => null,
+							'users_id' => $user_id,
+						]);
+					}
+				}
+
+				if (!empty($custom_processes[$tooth_id])) {
+					foreach ($custom_processes[$tooth_id] as $dept => $label) {
+						if (trim($label) !== '') {
+							$this->Admin_model->insert_recommended_process([
+								'name' => $name,
+								'doctor_id' => $doctor_id,
+								'turn_id' => null,
+								'tooth_id' => $tooth_id,
+								'process_id' => null,
+								'custom_label' => $label,
+								'remarks' => $dept,
+								'users_id' => $user_id,
+							]);
+						}
+					}
+				}
+			}
+		}
+		$this->db->trans_complete();
+
+		if ($this->db->trans_status() === false) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		echo json_encode([
+			'status' => 'success',
+			'type' => 'success',
+			'message' => $this->lang('update treatment plan'),
+			'alert' => [
+				'title' => $this->lang('success'),
+				'text' => $this->lang('update treatment plan'),
+				'type' => 'success'
+			]
+		]);
+	}
+
+	public function list_treatment_plan()
+	{
+		$this->check_permission_function('Read Patient Profile');
+
+		$this->form_validation->set_rules('patient_id', 'Patient ID', 'required|is_natural_no_zero');
+		if (!$this->form_validation->run()) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('invalid patient'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('invalid patient'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = (int)$this->input->post('patient_id');
+		$data['treatment_plans'] = $this->Admin_model->get_patient_treatment_plan($patient_id);
+		$html = $this->load->view('patients/components/main/TreatmentPlan/treatment_plan', $data, true);
+
+		echo json_encode([
+			'status' => 'success',
+			'type' => 'success',
+			'content' => $html
+		]);
+	}
+
 	public function assign_recommendations_to_turn($patient_id, $turn_id)
 	{
 		$this->load->model('Admin_model');
 
 		$teeth = $this->Admin_model->get_teeth_ids_by_patient($patient_id);
-		if (empty($teeth)) return;
+		if (empty($teeth))
+			return;
 
 		$this->db->where('turn_id', 0);
 		$this->db->where_in('tooth_id', $teeth);
@@ -5770,8 +6062,7 @@ class Admin extends CI_Controller
 			$date = $this->input->post('date');
 			$doctor = $this->input->post('doctor');
 
-
-// Pass both parameters correctly
+			// Pass both parameters correctly
 			$turns = $this->Admin_model->get_turns_page($date ?: null, $doctor ?: null);
 
 
@@ -5858,6 +6149,81 @@ class Admin extends CI_Controller
 
 		// Output the response as JSON
 		print_r(json_encode($data));
+	}
+
+	public function delete_treatment()
+	{
+		$this->check_permission_function('Delete Treatment Plan');
+
+		$id = $this->input->post('record');
+		if (empty($id)) {
+			$id = $this->input->post('id');
+		}
+
+		if (!is_numeric($id) || (int)$id <= 0) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$process = $this->Admin_model->get_recommended_process_by_id((int)$id);
+		if (!$process) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		$patient_id = $process['patient_id'];
+		$plan_name = $process['name'];
+		$plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $plan_name);
+
+		$this->db->trans_start();
+		if (!empty($plan_details)) {
+			$this->Admin_model->delete_related_done_by_plan_details($plan_details);
+		}
+		$this->Admin_model->delete_treatment_plan_by_name($patient_id, $plan_name);
+		$this->db->trans_complete();
+
+		if ($this->db->trans_status() === false) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => $this->lang('problem'),
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => $this->lang('problem'),
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
+		echo json_encode([
+			'status' => 'success',
+			'type' => 'success',
+			'message' => $this->lang('delete treatment plan'),
+			'alert' => [
+				'title' => $this->lang('success'),
+				'text' => $this->lang('delete treatment plan'),
+				'type' => 'success'
+			]
+		]);
 	}
 
 
@@ -6211,8 +6577,7 @@ class Admin extends CI_Controller
 
 
 	public function update_turn()
-	{
-//		print_r($_POST);
+	{ //		print_r($_POST);
 //		exit();
 		$data = ['type' => 'form_error', 'messages' => []];
 
@@ -7403,7 +7768,7 @@ class Admin extends CI_Controller
 					$endo_services = explode(',', $this->input->post('endo_services'));
 					foreach ($endo_services as $service_id) {
 						$this->Admin_model->insert_endo_has_services(array(
-							'endo_id' => $endo['id'],  // Using endo_id correctly
+							'endo_id' => $endo['id'], // Using endo_id correctly
 							'services_id' => $service_id
 						));
 					}
@@ -8009,10 +8374,8 @@ class Admin extends CI_Controller
 					$cr = $check['sum_cr'];
 					$dr = $check['sum_dr'];
 
-
-//					Code for accept all patients which their balance are 0
-
-//					if ($balance == 0) {
+					//					Code for accept all patients which their balance are 0
+					//					if ($balance == 0) {
 //						$datas = array(
 //							'status' => 'a'
 //						);
@@ -8094,8 +8457,7 @@ class Admin extends CI_Controller
 		$this->check_permission_function('Read Call Log Index');
 		$data['title'] = $this->lang('phonebook');
 		$data['page'] = "phonebook";
-		$data['receipts'] = $this->Admin_model->get_turns_phonebook();
-// 		print_r($data['receipts']);
+		$data['receipts'] = $this->Admin_model->get_turns_phonebook(); // 		print_r($data['receipts']);
 // 		exit;
 		$data['script'] = $this->mylibrary->generateSelect2();
 		$data['script_date'] = $this->mylibrary->script_datepicker();
@@ -8339,6 +8701,7 @@ class Admin extends CI_Controller
 
 			if (count($role) !== 0) {
 				$this->load->model('Permission_model');
+				$this->Permission_model->ensure_treatment_plan_permissions();
 
 				$data['title'] = $role[0]->role_name;
 				$data['page'] = "single_role";
@@ -8369,8 +8732,7 @@ class Admin extends CI_Controller
 		$this->load->model('Role_model');
 		$data['title'] = $this->lang('role and permission');
 		$data['page'] = "users";
-		$data['roles'] = $this->Role_model->get_all_roles();
-//		$data['script_single_patient_assets'] = ['assets/js/users.js'];
+		$data['roles'] = $this->Role_model->get_all_roles(); //		$data['script_single_patient_assets'] = ['assets/js/users.js'];
 
 		$this->load->view('header', $data);
 		$this->load->view('test/init', $data);
