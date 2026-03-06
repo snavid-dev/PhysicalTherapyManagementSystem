@@ -394,6 +394,11 @@ class Language
 			'turns' => self::lang_arr('turns', 'نوبت ها', '??????'),
 			'archive' => self::lang_arr('Archive', 'آرشیف', 'آرشیف'),
 			'treatment plan' => self::lang_arr('treatment plan', 'پلان درمانی', 'آرشیف'),
+			'Treatment Plan Management' => self::lang_arr('Treatment Plan Management', 'مدیریت پلان درمانی', 'د درملنې د پلان مدیریت'),
+			'Create Treatment Plan' => self::lang_arr('Create Treatment Plan', 'ایجاد پلان درمانی', 'د درملنې پلان جوړول'),
+			'Read Treatment Plan' => self::lang_arr('Read Treatment Plan', 'مشاهده پلان درمانی', 'د درملنې پلان کتل'),
+			'Update Treatment Plan' => self::lang_arr('Update Treatment Plan', 'بروزرسانی پلان درمانی', 'د درملنې پلان تازه کول'),
+			'Delete Treatment Plan' => self::lang_arr('Delete Treatment Plan', 'حذف پلان درمانی', 'د درملنې پلان ړنګول'),
 			'sum of recommendation' => self::lang_arr('sum of recommendation', 'مجموعه پروسه های پیشنهادی', 'آرشیف'),
 			'experiments' => self::lang_arr('experiments', 'آزمایشات', 'آزمایشات'),
 
