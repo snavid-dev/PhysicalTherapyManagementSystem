@@ -208,7 +208,7 @@ $ci = get_instance();
 								<div class="modal-image-area">
 									<h2 class="modal-Title"></h2>
 									<img src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/up/PNG/8upup.png"
-										 class="modalimg" id="modalImage2">
+										 class="modalimg" id="modalImage_update_resto">
 									<div>
 										<label class="form-label">
 											<?= $ci->lang('pay amount') ?>

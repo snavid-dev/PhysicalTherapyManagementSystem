@@ -105,7 +105,7 @@ $ci = get_instance();
 									<label class="form-label">
 										<?= $ci->lang('canal length') ?>
 									</label>
-									<input type="number" name="r_width1" class="form-control"
+									<input type="number" name="r_width1" id="c_length1_update" class="form-control"
 										   placeholder="<?= $ci->lang('canal length') ?>">
 								</div>
 							</div>
@@ -145,7 +145,7 @@ $ci = get_instance();
 									</label>
 
 
-									<input type="number" name="r_width2" class="form-control"
+									<input type="number" name="r_width2" id="c_length2_update" class="form-control"
 										   placeholder="<?= $ci->lang('canal length') ?>">
 
 								</div>
@@ -184,7 +184,7 @@ $ci = get_instance();
 									</label>
 
 
-									<input type="number" name="r_width3" class="form-control"
+									<input type="number" name="r_width3" id="c_length3_update" class="form-control"
 										   placeholder="<?= $ci->lang('canal length') ?>">
 
 								</div>
@@ -225,7 +225,7 @@ $ci = get_instance();
 									</label>
 
 
-									<input type="number" name="r_width4" class="form-control"
+									<input type="number" name="r_width4" id="c_length4_update" class="form-control"
 										   placeholder="<?= $ci->lang('canal length') ?>">
 
 								</div>
@@ -266,7 +266,7 @@ $ci = get_instance();
 									</label>
 
 
-									<input type="number" name="r_width5" class="form-control"
+									<input type="number" name="r_width5" id="c_length5_update" class="form-control"
 										   placeholder="<?= $ci->lang('canal length') ?>">
 
 								</div>
@@ -289,7 +289,7 @@ $ci = get_instance();
 								<!--												ask this-->
 								<select name="typeObturation"
 										class="form-control select2-show-search form-select"
-										id="instypeObturation"
+										id="instypeObturation_update"
 										data-placeholder="<?= $ci->lang('type of obturation') ?>">
 									<option label="<?= $ci->lang('select') ?>"></option>
 									<?php foreach ($typeOfAbturationList as $typeOfAbturation) : ?>
@@ -346,7 +346,6 @@ $ci = get_instance();
 								<label class="form-label">
 									<?= $ci->lang('treatment') ?> <span class="text-red">*</span>
 								</label>
-								<input type="hidden" name="diagnose" id="diagnose_adultOld_update">
 								<select class="form-control select2-show-search form-select"
 										id="services_endo_update"
 										onchange="service_price('#services_endo_update', '#services_input_update', '#price_tooth_endo_update', insert_endo_price_update)"
@@ -381,7 +380,7 @@ $ci = get_instance();
 								<label class="form-label">
 									<?= $ci->lang('description') ?>
 								</label>
-								<textarea class="form-control" name="details"
+								<textarea class="form-control" id="details_update" name="details"
 										  placeholder="<?= $ci->lang('description') ?>"></textarea>
 							</div>
 						</div>
@@ -396,7 +395,7 @@ $ci = get_instance();
 
 					<h2 class="modal-Title"></h2>
 					<img src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/up/PNG/1upup.png"
-						 class="modalimg" id="modalImage">
+						 class="modalimg" id="modalImage_update_endo">
 					<div>
 						<label class="form-label">
 							<?= $ci->lang('pay amount') ?>

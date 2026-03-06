@@ -145,7 +145,7 @@ $ci = get_instance();
 							}
 
 							if (result.content.update_access) {
-								update_button = `<a href="javascript:updateTeeth('${tooth['id']}')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa-regular fa-pen-to-square fs-14"></span></a>`;
+								update_button = `<a href="javascript:updateTeeth('${tooth['id']}', '<?= $profile['id'] ?>')" class="btn btn-icon btn-outline-secondary rounded-pill btn-wave waves-effect waves-light"><span class="fa-regular fa-pen-to-square fs-14"></span></a>`;
 							}
 							tableTemplate +=
 								`

@@ -11,12 +11,13 @@ $ci = get_instance();
 			success: function (response) {
 				let result = JSON.parse(response);
 				let contents = result.content;
-				console.log(contents);
 
-				if (typeof contents.name === 'string' && !isNaN(contents.name)) {
+				if (contents && typeof contents.name !== "undefined") {
 					clearFields(); // Clears all fields before setting new data
 
-					$('#patient_id_update').val(patient_id);
+					if (typeof patient_id !== "undefined") {
+						$('#patient_id_update').val(patient_id);
+					}
 					$('#tooth_id_update').val(id);
 
 					updateInputFields(contents);
@@ -39,26 +40,30 @@ $ci = get_instance();
 		$("#teethmodal_update input, #teethmodal_update select:not([multiple]), #teethmodal_update textarea")
 			.val("")
 			.trigger('change');
+		$("#teethmodal_update select[multiple]").val([]).trigger('change');
 	}
 
 	// ✅ Updates Basic Input Fields
 	function updateInputFields(contents) {
 		updateFields({
 			"#selectName_update": contents.name,
-			"#locationSelector_update": contents.location
+			"#locationSelector_update": contents.location,
+			"#adulth_teeth_location_update": contents.imgAddress,
+			"#adulth_teeth_location": contents.imgAddress
 		});
 	}
 
 	// ✅ Fixes Diagnose Multi-Select Issue (Clears before updating)
 	function updateDiagnoseSelect(diagnoseList) {
 		let selectElement = $("#select_diagnose_update");
+		const normalizedDiagnoseList = Array.isArray(diagnoseList) ? diagnoseList.map(String) : [];
 
 		// Clear previous selections
 		selectElement.val([]).trigger("change");
 
 		// Select only existing <option> elements and mark them as selected
 		selectElement.find("option").each(function () {
-			this.selected = diagnoseList.includes(this.value);
+			this.selected = normalizedDiagnoseList.includes(String(this.value));
 		});
 
 		// Trigger change event after setting selections
@@ -69,7 +74,7 @@ $ci = get_instance();
 	// ✅ Updates Images
 	function updateImages(imgAddress) {
 		const imgUrl = `https://canin-cdn.cyborgtech.co/assets/images/tooth${imgAddress}`;
-		$('#modalImage2_update_restro, #modalImage_update').attr('src', imgUrl);
+		$('#modalImage_update_endo, #modalImage_update_resto, #modalImage_update_pro').attr('src', imgUrl);
 	}
 
 	// ✅ Handles Endodontic Updates
@@ -132,6 +137,7 @@ $ci = get_instance();
 		if (prosthodontic.color.length > 0) {
 
 			updateMultiSelect("pro_color_update", prosthodontic.color);
+			multiple_value('#pro_color_update', '#pro_colors_update');
 		}
 
 
@@ -190,19 +196,10 @@ $ci = get_instance();
 
 	// ✅ Generic Multi-Select Updater with Disabled `onchange` While Setting Values
 	function updateMultiSelect(selectId, items) {
-		let selectElement = $("#" + $.escapeSelector(selectId)); // Fix selector issue
+		let selectElement = $("#" + $.escapeSelector(selectId));
 		if (!selectElement.length) return;
-
-		selectElement.off("change").val([]).trigger("change"); // Temporarily disable onchange
-
-		let optionsHTML = selectElement.html();
-		items.forEach(item => {
-			optionsHTML = optionsHTML.replace(`<option value="${item}">`, `<option value="${item}" selected>`);
-		});
-
-		selectElement.html(optionsHTML).trigger("change").on("change", function () {
-			// Re-enable onchange event after setting values
-		});
+		const normalizedItems = Array.isArray(items) ? items.map(String) : [];
+		selectElement.val(normalizedItems).trigger("change");
 	}
 
 	// Function to calculate the sum of prosthodontic price and all other prices

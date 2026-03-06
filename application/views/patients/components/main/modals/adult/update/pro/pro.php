@@ -113,8 +113,7 @@ $ci = get_instance();
 									</div>
 								</div>
 								<!-- metal screw post -->
-								<div class="col-sm-12 col-md-6 nonDisplay abutment" id="metal_screw_post_div_update"
-									 style="border: 3px solid yellow">
+								<div class="col-sm-12 col-md-6 nonDisplay abutment" id="metal_screw_post_div_update">
 									<div class="form-group">
 
 										<label class="form-label">
@@ -160,7 +159,7 @@ $ci = get_instance();
 										</label>
 										<!-- this is an important select tag remember it -->
 										<select id="pro_color_update" name="pro_color"
-												onchange="multiple_value('#pro_color', '#pro_colors')"
+												onchange="multiple_value('#pro_color_update', '#pro_colors_update')"
 												class="form-control select2-show-search form-select"
 												data-placeholder="<?= $ci->lang('select') ?>"
 												multiple>
@@ -319,7 +318,7 @@ $ci = get_instance();
 				<div class="modal-image-area">
 					<h2 class="modal-Title"></h2>
 					<img src="<?= $ci->dentist->assets_url() ?>assets/images/tooth/v2/up/PNG/8upup.png"
-						 class="modalimg" id="modalImage2">
+						 class="modalimg" id="modalImage_update_pro">
 					<div>
 						<label class="form-label">
 							<?= $ci->lang('pay amount') ?>
