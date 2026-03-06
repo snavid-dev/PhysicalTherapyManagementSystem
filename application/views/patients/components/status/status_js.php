@@ -289,6 +289,56 @@
 
 <script>
 	let treatmentProcessRequestCounter = 0;
+	let isNormalizingToothBlocks = false;
+
+	function normalizeTreatmentPlanToothBlocks() {
+		if (isNormalizingToothBlocks) return;
+		const container = document.getElementById('teeth_processes_container');
+		if (!container) return;
+
+		isNormalizingToothBlocks = true;
+		try {
+			const blocks = Array.from(container.querySelectorAll(':scope > .row.nthHrLine'));
+			const seen = new Map();
+
+			blocks.forEach(block => {
+				const toothInput = block.querySelector('input[name="tooth_id[]"]');
+				if (!toothInput) return;
+				const toothId = String(toothInput.value || '').trim();
+				if (!toothId) return;
+
+				if (!seen.has(toothId)) {
+					seen.set(toothId, block);
+					return;
+				}
+
+				const keepBlock = seen.get(toothId);
+				const removeBlock = block;
+
+				// Merge checked checkboxes from duplicate block into the kept block.
+				const checkedInDuplicate = Array.from(removeBlock.querySelectorAll('input[type="checkbox"]:checked'));
+				checkedInDuplicate.forEach(cb => {
+					const selector = `input[type="checkbox"][name="${cb.name}"][value="${cb.value}"]`;
+					const inKeep = keepBlock.querySelector(selector);
+					if (inKeep) inKeep.checked = true;
+				});
+
+				// Merge textarea values from duplicate block if keep block has empty value.
+				const duplicateTextareas = Array.from(removeBlock.querySelectorAll('textarea[name^="custom_process["]'));
+				duplicateTextareas.forEach(dupTa => {
+					const selector = `textarea[name="${dupTa.name}"]`;
+					const keepTa = keepBlock.querySelector(selector);
+					const keepVal = keepTa ? (keepTa.value || '').trim() : '';
+					const dupVal = (dupTa.value || '').trim();
+					if (keepTa && !keepVal && dupVal) keepTa.value = dupVal;
+				});
+
+				removeBlock.remove();
+			});
+		} finally {
+			isNormalizingToothBlocks = false;
+		}
+	}
 
 	function get_teeth_process() {
 		const selectedTeethRaw = $('#process_teeth').val() || [];
@@ -386,6 +436,7 @@
 				});
 
 				container.html(renderedBlocks.join(''));
+				normalizeTreatmentPlanToothBlocks();
 			},
 			error: function (xhr, status, error) {
 				if (requestId !== treatmentProcessRequestCounter) return;
@@ -394,6 +445,28 @@
 			}
 		});
 	}
+
+	// Force "Other" checkbox behavior to be scoped to its own target only.
+	window.otherProcess = function (checkbox) {
+		const targetId = checkbox.getAttribute("data-target");
+		if (!targetId) return;
+		const textareaWrapper = document.getElementById(targetId);
+		if (textareaWrapper) {
+			textareaWrapper.style.display = checkbox.checked ? "block" : "none";
+		}
+	};
+
+	// If another script appends duplicate tooth blocks asynchronously, clean them up.
+	(function initTreatmentPlanObserver() {
+		const container = document.getElementById('teeth_processes_container');
+		if (!container || container.dataset.tpObserverInit === '1') return;
+		container.dataset.tpObserverInit = '1';
+
+		const observer = new MutationObserver(() => {
+			normalizeTreatmentPlanToothBlocks();
+		});
+		observer.observe(container, {childList: true});
+	})();
 
 	function update_process_completion() {
 		let patient_id = '<?= $profile['id'] ?>';
