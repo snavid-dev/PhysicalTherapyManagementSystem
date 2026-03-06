@@ -800,7 +800,6 @@ class Admin_model extends CI_Model
 
 	public function get_doctor_for_patient_plan($planName, $patientId)
 	{
-		// This query assumes 'turn_tooth_recommended' table has a 'doctor_id' column.
 		$this->db->select('tr.doctor_id');
 		$this->db->from('turn_tooth_recommended tr');
 
@@ -815,13 +814,15 @@ class Admin_model extends CI_Model
 
 		// Specify the exact recommendation name
 		$this->db->where('tr.name', $planName);
+		$this->db->where('tr.doctor_id IS NOT NULL', null, false);
+		$this->db->where('tr.doctor_id >', 0);
+		$this->db->order_by('tr.id', 'DESC');
 
-		// We only need one result, as the doctor should be the same for all teeth in that plan
 		$this->db->limit(1);
 
 		$query = $this->db->get();
 
-		return $query->row_array(); // Returns ['doctor_id' => '...'] or null
+		return $query->row_array();
 	}
 
 
