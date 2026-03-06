@@ -3353,6 +3353,7 @@ class Admin extends CI_Controller
 
 	public function single_tooth()
 	{
+		$this->check_permission_function('Update Teeth');
 		$this->form_validation->set_rules('slug', 'slug', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		if ($this->form_validation->run()) {
 			$data = array();
@@ -3386,7 +3387,7 @@ class Admin extends CI_Controller
 
 				$endo = $this->Admin_model->single_endo_by_tooth_id($record);
 				if (count($endo) != 0) {
-					$endo_services = explode(',', $endo[0]['services']);
+					$endo_services = array_values(array_filter(explode(',', $endo[0]['services']), 'strlen'));
 
 					$data['content']['endo'] = array(
 						'r_name1' => $endo[0]['r_name1'],
@@ -3427,7 +3428,7 @@ class Admin extends CI_Controller
 
 				$restorative = $this->Admin_model->single_restorative_by_tooth_id($record);
 				if (count($restorative) != 0) {
-					$restorative_services = explode(',', $restorative[0]['services']);
+					$restorative_services = array_values(array_filter(explode(',', $restorative[0]['services']), 'strlen'));
 
 					$data['content']['restorative'] = array(
 						'price' => $restorative[0]['price'],
@@ -3468,7 +3469,7 @@ class Admin extends CI_Controller
 
 				$pro = $this->Admin_model->single_prosthodontic_by_tooth_id($record);
 				if (count($pro) != 0) {
-					$pro_services = explode(',', $pro[0]['services']);
+					$pro_services = array_values(array_filter(explode(',', $pro[0]['services']), 'strlen'));
 
 					$data['content']['prosthodontic'] = array(
 						'price' => $pro[0]['price'],
@@ -3480,7 +3481,7 @@ class Admin extends CI_Controller
 						'PrefabricatedPost' => '',
 						'customPost' => '',
 						'crown_material' => '',
-						'color' => '',
+						'color' => array(),
 						'pontic_design' => '',
 						'impression_technique' => '',
 						'impression_material' => '',
@@ -3511,7 +3512,8 @@ class Admin extends CI_Controller
 							} else if ($basic_info['category_name'] == 'Cement Material') {
 								$data['content']['prosthodontic']['CementMaterial'] = $basic_info['basic_information_teeth_id'];
 							} else if ($basic_info['category_name'] == 'color') {
-								$data['content']['prosthodontic']['color'] = explode(',', $basic_info['basic_information_teeth_id']);
+								$color_values = array_values(array_filter(explode(',', (string)$basic_info['basic_information_teeth_id']), 'strlen'));
+								$data['content']['prosthodontic']['color'] = array_values(array_unique(array_merge($data['content']['prosthodontic']['color'], $color_values)));
 							}
 						}
 					}
@@ -7403,7 +7405,7 @@ class Admin extends CI_Controller
 		if ($this->form_validation->run()) {
 
 
-			$diagnoses = explode(',', $this->input->post('diagnose'));
+			$diagnoses = array_values(array_filter(explode(',', $this->input->post('diagnose')), 'strlen'));
 
 			$main_data = array(
 				'name' => $this->input->post('name'),
@@ -7697,12 +7699,14 @@ class Admin extends CI_Controller
 	public function update_tooth()
 	{
 		$this->check_permission_function('Update Teeth');
+		$data = array('type' => 'form_error', 'messages' => array());
 		// Determine which sections are active based on checkboxes
 		$is_endo = isset($_POST['checkbox2']);
 		$is_restorative = isset($_POST['checkbox1']);
 		$is_prosthodontics = isset($_POST['checkbox3']);
 
 		// Validation rules
+		$this->form_validation->set_rules('tooth_id', 'tooth_id', 'trim|required|is_natural_no_zero', array('required' => $this->lang('problem'), 'is_natural_no_zero' => $this->lang('problem')));
 		$this->form_validation->set_rules('diagnose', 'diagnose', 'trim|required', array('required' => $this->lang('insert tooth diagnose error')));
 		$this->form_validation->set_rules('name', 'name', 'trim|required', array('required' => $this->lang('insert tooth name error')));
 		$this->form_validation->set_rules('location', 'location', 'trim|required', array('required' => $this->lang('insert tooth location error')));
@@ -7749,6 +7753,17 @@ class Admin extends CI_Controller
 				$this->Admin_model->delete_restorative_services($tooth_id);
 				$this->Admin_model->delete_prosthodontics_services($tooth_id);
 
+				// Mirror insert behavior: if a department is disabled on update, remove its records.
+				if (!$is_endo) {
+					$this->Admin_model->delete_endo_by_tooth($tooth_id);
+				}
+				if (!$is_restorative) {
+					$this->Admin_model->delete_restorative_by_tooth($tooth_id);
+				}
+				if (!$is_prosthodontics) {
+					$this->Admin_model->delete_prosthodontics_by_tooth($tooth_id);
+				}
+
 				// Handle Endodontic Data
 				if ($is_endo) {
 					$endo_data = array(
@@ -7773,18 +7788,21 @@ class Admin extends CI_Controller
 					$endos = $this->Admin_model->single_endo_by_tooth_id($tooth_id);
 
 
-					if (count($endos) == 1) {
+					if (count($endos) > 0) {
 						$this->Admin_model->update_endo($tooth_id, $endo_data);
 						$endo = $endos[0];
 					} else {
 						$endo_data['tooth_id'] = $tooth_id;
-						$this->Admin_model->insert_endo($endo_data);
-						$endo = $this->Admin_model->single_endo_by_tooth_id($tooth_id)[0];
+						$insert_endo = $this->Admin_model->insert_endo($endo_data);
+						$endo = ['id' => $insert_endo[1]];
 					}
 
 					// Insert Endo Services (use endo_id instead of tooth_id)
 					$endo_services = explode(',', $this->input->post('endo_services'));
 					foreach ($endo_services as $service_id) {
+						if ($service_id === '') {
+							continue;
+						}
 						$this->Admin_model->insert_endo_has_services(array(
 							'endo_id' => $endo['id'], // Using endo_id correctly
 							'services_id' => $service_id
@@ -7813,20 +7831,22 @@ class Admin extends CI_Controller
 
 					$restorative_check = $this->Admin_model->single_restorative_by_tooth_id($tooth_id);
 
-					if (count($restorative_check) == 1) {
+					if (count($restorative_check) > 0) {
 						$this->Admin_model->update_restorative($tooth_id, $restorative_data);
 						$restorative = $restorative_check[0];
 					} else {
 						$restorative_data['tooth_id'] = $tooth_id;
-						$this->Admin_model->insert_restorative($restorative_data);
-						$restorative_check = $this->Admin_model->single_restorative_by_tooth_id($tooth_id);
-						$restorative = $restorative_check[0];
+						$insert_restorative = $this->Admin_model->insert_restorative($restorative_data);
+						$restorative = ['id' => $insert_restorative[1]];
 					}
 
 
 					// Insert Restorative Services
 					$restorative_services = explode(',', $this->input->post('restorative_services'));
 					foreach ($restorative_services as $restorative_service) {
+						if ($restorative_service === '') {
+							continue;
+						}
 
 						$this->Admin_model->insert_restorative_has_services(array(
 							'restorative_id' => $restorative['id'],
@@ -7856,20 +7876,22 @@ class Admin extends CI_Controller
 
 					$pro_check = $this->Admin_model->single_prosthodontic_by_tooth_id($tooth_id);
 
-					if (count($pro_check) == 1) {
+					if (count($pro_check) > 0) {
 						$this->Admin_model->update_prosthodontics($tooth_id, $prosthodontics_data);
 						$pro = $pro_check[0];
 					} else {
 						$prosthodontics_data['tooth_id'] = $tooth_id;
-						$this->Admin_model->insert_prosthodontics($prosthodontics_data);
-						$pro_check = $this->Admin_model->single_prosthodontic_by_tooth_id($tooth_id);
-						$pro = $pro_check[0];
+						$insert_pro = $this->Admin_model->insert_prosthodontics($prosthodontics_data);
+						$pro = ['id' => $insert_pro[1]];
 					}
 
 
 					// Insert Prosthodontic Services
 					$pro_services = explode(',', $this->input->post('pro_services'));
 					foreach ($pro_services as $pro_service) {
+						if ($pro_service === '') {
+							continue;
+						}
 						$this->Admin_model->insert_prosthodontics_has_services(array(
 							'prosthodontics_id' => $pro['id'],
 							'services_id' => $pro_service
@@ -7882,6 +7904,19 @@ class Admin extends CI_Controller
 							$this->Admin_model->insert_prosthodontics_basic_info(array(
 								'prosthodontics_id' => $pro['id'],
 								'basic_information_teeth_id' => $this->input->post($key)
+							));
+						}
+					}
+
+					if ($this->input->post('color') !== '') {
+						$colors = explode(',', $this->input->post('color'));
+						foreach ($colors as $color) {
+							if ($color === '') {
+								continue;
+							}
+							$this->Admin_model->insert_prosthodontics_basic_info(array(
+								'prosthodontics_id' => $pro['id'],
+								'basic_information_teeth_id' => $color
 							));
 						}
 					}

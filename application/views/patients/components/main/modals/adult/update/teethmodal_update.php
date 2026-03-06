@@ -112,7 +112,7 @@ $ci = get_instance();
 				</button>
 				<!--fix at the end-->
 				<button class="btn btn-primary"
-						onclick="submitWithoutDatatableMulti(['updateTooth','total_price_form', 'updatePro', 'updateFixing', 'demo_form_update', 'checkboxes_update'], '<?= base_url() ?>admin/update_tooth', '','teethmodal_update', list_teeth)">
+						onclick="submitWithoutDatatableMulti(['updateTooth', 'updatePro', 'updateFixing', 'demo_form_update', 'checkboxes_update'], '<?= base_url() ?>admin/update_tooth', '','teethmodal_update', list_teeth)">
 					<?= $ci->lang('save') ?> <i class="fa fa-plus"></i>
 				</button>
 
