@@ -288,13 +288,17 @@
 
 
 <script>
+	let treatmentProcessRequestCounter = 0;
+
 	function get_teeth_process() {
-		const selectedTeeth = $('#process_teeth').val();
+		const selectedTeethRaw = $('#process_teeth').val() || [];
+		const selectedTeeth = Array.from(new Set(selectedTeethRaw.map(String)));
 		const container = $('#teeth_processes_container');
 		container.empty();
 
 		if (!selectedTeeth || !selectedTeeth.length) return;
 
+		const requestId = ++treatmentProcessRequestCounter;
 		$.ajax({
 			url: "<?= base_url('admin/get_tooth_processes_by_teeth') ?>",
 			type: 'POST',
@@ -304,13 +308,18 @@
 			},
 			dataType: 'json',
 			success: function (res) {
+				if (requestId !== treatmentProcessRequestCounter) return;
 				if (res.type !== 'success' || !Array.isArray(res.content)) return;
 				if (res.content.length === 0) return;
 
+				const renderedToothIds = new Set();
+				const renderedBlocks = [];
 				res.content.forEach((tooth, toothIndex) => {
 					if (!Array.isArray(tooth.departments)) return;
 
-					const toothId = tooth.tooth_id;
+					const toothId = String(tooth.tooth_id);
+					if (renderedToothIds.has(toothId)) return;
+					renderedToothIds.add(toothId);
 					const toothName = tooth.tooth_name;
 					const recommended = tooth.recommended || {};
 					const done = tooth.done || []; // array of process_ids (numbers or strings)
@@ -360,10 +369,10 @@
 						html += `
 					<div class="col-12 col-md-12 mt-2">
 						<label class="cl-checkbox">
-							<input type="checkbox" data-target="${otherId}" onclick="otherProcess(this)" ${otherVisible ? 'checked' : ''}>
+							<input type="checkbox" ${otherVisible ? 'checked' : ''} onchange="const wrap=this.closest('.mt-2').querySelector('.other-process-wrap'); if(wrap){wrap.style.display=this.checked?'block':'none';}">
 							<span><?= $ci->lang('other') ?></span>
 						</label>
-						<div class="mt-2" id="${otherId}" style="display: ${otherVisible ? 'block' : 'none'}">
+						<div class="mt-2 other-process-wrap" id="${otherId}" style="display: ${otherVisible ? 'block' : 'none'}">
 							<label><?= $ci->lang('other process') ?></label>
 							<textarea class="form-control" name="custom_process[${toothId}][${dept.department}]">${otherText}</textarea>
 						</div>
@@ -373,10 +382,13 @@
 					});
 
 					html += '</div></div></div>'; // end tooth block
-					container.append(html);
+					renderedBlocks.push(html);
 				});
+
+				container.html(renderedBlocks.join(''));
 			},
 			error: function (xhr, status, error) {
+				if (requestId !== treatmentProcessRequestCounter) return;
 				console.error("AJAX error:", error);
 				container.empty();
 			}

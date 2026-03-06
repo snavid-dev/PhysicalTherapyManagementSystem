@@ -958,12 +958,15 @@ class Admin_model extends CI_Model
 	}
 
 
-	public function get_unassigned_recommended_processes($patient_id)
+	public function get_unassigned_recommended_processes($patient_id, $tooth_id = null)
 	{
 		$this->db->select('turn_tooth_recommended.tooth_id, turn_tooth_recommended.process_id, turn_tooth_recommended.custom_label, turn_tooth_recommended.remarks');
 		$this->db->from('turn_tooth_recommended');
 		$this->db->join('tooth', 'tooth.id = turn_tooth_recommended.tooth_id', 'inner');
 		$this->db->where('tooth.patient_id', $patient_id);
+		if (!is_null($tooth_id)) {
+			$this->db->where('turn_tooth_recommended.tooth_id', $tooth_id);
+		}
 		$this->db->where('turn_tooth_recommended.turn_id IS NULL', null, false);
 		$query = $this->db->get();
 
@@ -993,6 +996,10 @@ class Admin_model extends CI_Model
 					'process_id' => $pid,
 				];
 			}
+		}
+
+		if (!is_null($tooth_id)) {
+			return isset($grouped[$tooth_id]) ? $grouped[$tooth_id] : [];
 		}
 
 		return $grouped;
