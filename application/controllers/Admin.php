@@ -307,6 +307,7 @@ class Admin extends CI_Controller
 
 
 		$this->load->model('Permission_model');
+		$this->Permission_model->ensure_treatment_plan_permissions();
 
 		$data['permissions'] = $this->Permission_model->get_permissions_with_categories();
 
@@ -8979,6 +8980,7 @@ class Admin extends CI_Controller
 
 			if (count($role) !== 0) {
 				$this->load->model('Permission_model');
+				$this->Permission_model->ensure_treatment_plan_permissions();
 
 				$data['title'] = $role[0]->role_name;
 				$data['page'] = "single_role";

@@ -538,7 +538,11 @@ VALUES (1, 'Create Patient', 1, '2024-11-17 11:18:16'),
 	   (70, 'Create Lab Entry', 8, '2024-11-17 11:18:16'),
 	   (71, 'Read Lab Entry', 8, '2024-11-17 11:18:16'),
 	   (72, 'Update Lab Entry', 8, '2024-11-17 11:18:16'),
-	   (73, 'Delete Lab Entry', 8, '2024-11-17 11:18:16');
+	   (73, 'Delete Lab Entry', 8, '2024-11-17 11:18:16'),
+	   (74, 'Create Treatment Plan', 9, '2024-11-17 11:18:16'),
+	   (75, 'Read Treatment Plan', 9, '2024-11-17 11:18:16'),
+	   (76, 'Update Treatment Plan', 9, '2024-11-17 11:18:16'),
+	   (77, 'Delete Treatment Plan', 9, '2024-11-17 11:18:16');
 
 -- --------------------------------------------------------
 
@@ -565,7 +569,8 @@ VALUES (1, 'Patient Management', '2024-11-17 11:15:13'),
 	   (5, 'Communication Management', '2024-11-17 11:15:13'),
 	   (6, 'Service Management', '2024-11-17 11:15:13'),
 	   (7, 'User Management', '2024-11-17 11:15:13'),
-	   (8, 'Patient Profile Details', '2024-11-17 11:15:13');
+	   (8, 'Patient Profile Details', '2024-11-17 11:15:13'),
+	   (9, 'Treatment Plan Management', '2024-11-17 11:15:13');
 
 -- --------------------------------------------------------
 
