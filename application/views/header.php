@@ -143,6 +143,18 @@ $ci = get_instance();
 						<span id="timer" style="margin-left: 3px; font-size: large; margin-right: 3px;"> </span>
 					</div>
 
+					<?php if ($ci->auth->has_permission('Read Patient Profile')): ?>
+						<div class="ms-3 d-none d-lg-flex align-items-center">
+							<button type="button"
+									class="btn btn-danger-gradient btn-wave d-flex align-items-center gap-2"
+									data-bs-toggle="modal"
+									data-bs-target="#searchModal">
+								<i class="fa fa-search"></i>
+								<span><?= $ci->lang('search') ?></span>
+							</button>
+						</div>
+					<?php endif; ?>
+
 					<!-- LOGO -->
 					<div class="d-flex order-lg-2 ms-auto header-right-icons">
 						<!-- SEARCH -->
@@ -156,10 +168,12 @@ $ci = get_instance();
 							<div class="collapse navbar-collapse" id="navbarSupportedContent-4">
 								<div class="d-flex order-lg-2">
 									<div class="dropdown d-lg-none d-flex">
-										<a href="javascript:void(0)" class="nav-link icon" data-bs-toggle="dropdown">
+										<a href="javascript:void(0)"
+										   class="nav-link icon"
+										   <?= $ci->auth->has_permission('Read Patient Profile') ? 'data-bs-toggle="modal" data-bs-target="#searchModal"' : 'data-bs-toggle="dropdown"' ?>>
 											<i class="fa fa-search"></i>
 										</a>
-										<div class="dropdown-menu header-search dropdown-menu-start">
+										<div class="dropdown-menu header-search dropdown-menu-start<?= $ci->auth->has_permission('Read Patient Profile') ? ' d-none' : '' ?>">
 											<div class="input-group w-100 p-2">
 												<input type="text" class="form-control" placeholder="Search....">
 												<div class="input-group-text btn btn-primary">

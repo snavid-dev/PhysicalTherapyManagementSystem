@@ -124,6 +124,55 @@
 
 <!-- Change Password Modal -->
 
+<?php if ($ci->auth->has_permission('Read Patient Profile')): ?>
+	<div class="modal fade effect-scale hide" id="searchModal" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<div>
+						<h5 class="modal-title mb-1"><?= $ci->lang('search') ?></h5>
+						<p class="text-muted mb-0"><?= $ci->lang('fullname') ?> / <?= $ci->lang('serial id') ?></p>
+					</div>
+					<button class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">Ã—</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="row g-3 align-items-end">
+						<div class="col-sm-12 col-md-2">
+							<label class="form-label"><?= $ci->lang('scan') ?></label>
+							<button class="btn btn-primary w-100" type="button" id="global_patient_scan_btn">
+								<i class="fa fa-qrcode"></i>
+							</button>
+						</div>
+						<div class="col-sm-12 col-md-4">
+							<label class="form-label"><?= $ci->lang('serial id') ?></label>
+							<input type="text" class="form-control" id="global_patient_serial_id" autocomplete="off">
+						</div>
+						<div class="col-sm-12 col-md-6">
+							<label class="form-label"><?= $ci->lang('fullname') ?></label>
+							<input type="text" class="form-control" id="global_patient_fullname" autocomplete="off">
+						</div>
+					</div>
+
+					<div id="global_patient_reader" class="mt-3" style="display:none;"></div>
+
+					<div class="row mt-4">
+						<div class="col-md-12">
+							<div class="table-responsive" id="global_patient_results"></div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" data-bs-dismiss="modal">
+						<?= $ci->lang('cancel') ?> <i class="fa fa-close"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+<?php endif; ?>
+
 <!-- FOOTER -->
 <footer class="footer">
 	<div class="container">
@@ -145,6 +194,176 @@
 
 <!-- JQUERY JS -->
 <script src="<?= $ci->dentist->assets_url() ?>assets/js/jquery.min.js"></script>
+
+<?php if ($ci->auth->has_permission('Read Patient Profile')): ?>
+	<script>
+		let globalPatientScanner = null;
+		let globalPatientSearchRequest = null;
+
+		function renderGlobalPatientResults(patients) {
+			const container = document.getElementById('global_patient_results');
+			if (!container) return;
+
+			if (!Array.isArray(patients) || patients.length === 0) {
+				container.innerHTML = '';
+				return;
+			}
+
+			let rows = '';
+			patients.forEach((item) => {
+				const nameCell = item.profile_access
+					? `<a href="<?= base_url('admin/single_patient/') ?>${item.id}" target="_blank">${item.fullname}</a>`
+					: item.fullname;
+
+				rows += `
+					<tr>
+						<td dir="ltr" style="text-align:right;">${item.serial_id}</td>
+						<td>${nameCell}</td>
+						<td>${item.phone1}</td>
+						<td>${item.pains}</td>
+						<td>${item.doctor_name}</td>
+					</tr>
+				`;
+			});
+
+			container.innerHTML = `
+				<table class="table text-nowrap table-striped align-middle">
+					<thead>
+						<tr>
+							<th scope="col"><?= $ci->lang('serial id') ?></th>
+							<th scope="col"><?= $ci->lang('fullname') ?></th>
+							<th scope="col"><?= $ci->lang('phone1') ?></th>
+							<th scope="col"><?= $ci->lang('medical history') ?></th>
+							<th scope="col"><?= $ci->lang('reference doctor') ?></th>
+						</tr>
+					</thead>
+					<tbody>${rows}</tbody>
+				</table>
+			`;
+		}
+
+		function list_global_patients() {
+			const serialInput = document.getElementById('global_patient_serial_id');
+			const fullnameInput = document.getElementById('global_patient_fullname');
+			if (!serialInput || !fullnameInput) return;
+
+			const serial = serialInput.value.trim();
+			const fullname = fullnameInput.value.trim();
+
+			if (globalPatientSearchRequest) {
+				globalPatientSearchRequest.abort();
+				globalPatientSearchRequest = null;
+			}
+
+			if (!serial && !fullname) {
+				renderGlobalPatientResults([]);
+				return;
+			}
+
+			globalPatientSearchRequest = $.ajax({
+				url: "<?= base_url('admin/list_patients') ?>",
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					serial_id: serial,
+					fullname: fullname
+				},
+				success: function (result) {
+					if (result.type === 'success') {
+						renderGlobalPatientResults(result.content.patients || []);
+						return;
+					}
+
+					if (result.alert) {
+						$.growl.error1({
+							title: result.alert.title,
+							message: result.alert.text
+						});
+					}
+				},
+				error: function (xhr, status) {
+					if (status === 'abort') return;
+					renderGlobalPatientResults([]);
+				},
+				complete: function () {
+					globalPatientSearchRequest = null;
+				}
+			});
+		}
+
+		function stopGlobalPatientScanner() {
+			const reader = document.getElementById('global_patient_reader');
+			if (reader) {
+				reader.style.display = 'none';
+				reader.innerHTML = '';
+			}
+
+			if (!globalPatientScanner) return Promise.resolve();
+
+			const scanner = globalPatientScanner;
+			globalPatientScanner = null;
+
+			return scanner.stop()
+				.then(() => scanner.clear())
+				.catch(() => scanner.clear())
+				.catch(() => {});
+		}
+
+		function startGlobalPatientScanner() {
+			const reader = document.getElementById('global_patient_reader');
+			const serialInput = document.getElementById('global_patient_serial_id');
+			if (!reader || !serialInput || typeof Html5Qrcode === 'undefined') return;
+
+			stopGlobalPatientScanner().finally(() => {
+				reader.style.display = 'block';
+				globalPatientScanner = new Html5Qrcode('global_patient_reader');
+				globalPatientScanner.start(
+					{ facingMode: 'environment' },
+					{ fps: 10, qrbox: { width: 240, height: 240 } },
+					(decodedText) => {
+						serialInput.value = decodedText;
+						list_global_patients();
+						stopGlobalPatientScanner();
+					}
+				).catch(() => {
+					reader.style.display = 'none';
+				});
+			});
+		}
+
+		function resetGlobalPatientSearchModal() {
+			const serialInput = document.getElementById('global_patient_serial_id');
+			const fullnameInput = document.getElementById('global_patient_fullname');
+			if (serialInput) serialInput.value = '';
+			if (fullnameInput) fullnameInput.value = '';
+			renderGlobalPatientResults([]);
+			stopGlobalPatientScanner();
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+			const serialInput = document.getElementById('global_patient_serial_id');
+			const fullnameInput = document.getElementById('global_patient_fullname');
+			const scanBtn = document.getElementById('global_patient_scan_btn');
+			const searchModal = document.getElementById('searchModal');
+
+			if (serialInput) {
+				serialInput.addEventListener('input', list_global_patients);
+			}
+
+			if (fullnameInput) {
+				fullnameInput.addEventListener('input', list_global_patients);
+			}
+
+			if (scanBtn) {
+				scanBtn.addEventListener('click', startGlobalPatientScanner);
+			}
+
+			if (searchModal) {
+				searchModal.addEventListener('hidden.bs.modal', resetGlobalPatientSearchModal);
+			}
+		});
+	</script>
+<?php endif; ?>
 
 <!--fix header-->
 <!--TODO: fix header js-->
