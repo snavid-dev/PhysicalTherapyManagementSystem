@@ -5790,8 +5790,21 @@ class Admin extends CI_Controller
 		}
 
 		$patient_id = $process['patient_id'];
-		$plan_name = $process['name'];
+		$plan_name = trim((string)$process['name']);
 		$doctor_id = (!empty($process['doctor_id']) && (int)$process['doctor_id'] > 0) ? (int)$process['doctor_id'] : 0;
+		if ($this->Admin_model->has_linked_turn_for_plan($patient_id, $plan_name)) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => 'This treatment plan is linked to a turn and cannot be updated.',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => 'This treatment plan is linked to a turn and cannot be updated.',
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
 		$plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $plan_name);
 
 		$teeth = [];
@@ -5871,8 +5884,8 @@ class Admin extends CI_Controller
 		}
 
 		$patient_id = (int)$this->input->post('patient_id');
-		$name = $this->input->post('name');
-		$old_plan_name = $this->input->post('old_plan_name');
+		$name = trim((string)$this->input->post('name'));
+		$old_plan_name = trim((string)$this->input->post('old_plan_name'));
 		$doctor_id_input = trim((string)$this->input->post('doctor_id'));
 		$doctor_id = (ctype_digit($doctor_id_input) && (int)$doctor_id_input > 0) ? (int)$doctor_id_input : 0;
 
@@ -5940,6 +5953,20 @@ class Admin extends CI_Controller
 		$tooth_ids = is_array($tooth_ids) ? array_values(array_filter(array_unique(array_map('intval', $tooth_ids)), function ($id) {
 			return $id > 0;
 		})) : [];
+
+		if ($this->Admin_model->has_linked_turn_for_plan($patient_id, $old_plan_name)) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => 'This treatment plan is linked to a turn and cannot be updated.',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => 'This treatment plan is linked to a turn and cannot be updated.',
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
 
 		$old_plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $old_plan_name);
 
@@ -6193,7 +6220,21 @@ class Admin extends CI_Controller
 		}
 
 		$patient_id = $process['patient_id'];
-		$plan_name = $process['name'];
+		$plan_name = trim((string)$process['name']);
+		if ($this->Admin_model->has_linked_turn_for_plan($patient_id, $plan_name)) {
+			echo json_encode([
+				'status' => 'error',
+				'type' => 'error',
+				'message' => 'This treatment plan is linked to a turn and cannot be deleted.',
+				'alert' => [
+					'title' => $this->lang('error'),
+					'text' => 'This treatment plan is linked to a turn and cannot be deleted.',
+					'type' => 'error'
+				]
+			]);
+			return;
+		}
+
 		$plan_details = $this->Admin_model->get_plan_details_by_name($patient_id, $plan_name);
 
 		$this->db->trans_start();

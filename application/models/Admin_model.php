@@ -783,23 +783,35 @@ class Admin_model extends CI_Model
 	{
 		$this->db->select(" 
 			MIN(tr.id) AS id,
-			MIN(tr.turn_id) AS turn_id,
+			MIN(CASE WHEN tr.turn_id IS NOT NULL AND tr.turn_id > 0 THEN tr.turn_id ELSE NULL END) AS turn_id,
+			MAX(CASE WHEN tr.turn_id IS NOT NULL AND tr.turn_id > 0 THEN 1 ELSE 0 END) AS has_linked_turn,
 			p.id AS patient_id,
 			p.name AS patient_name,
-			COALESCE(NULLIF(tr.name, ''), 'No Name') AS recommendation_name,
+			CASE
+				WHEN TRIM(COALESCE(tr.name, '')) = '' THEN 'No Name'
+				ELSE TRIM(tr.name)
+			END AS recommendation_name,
 			COUNT(*) AS total_recommendations
 		", false);
 		$this->db->from('turn_tooth_recommended tr');
 		$this->db->join('tooth t', 'tr.tooth_id = t.id', 'inner');
 		$this->db->join('patient p', 't.patient_id = p.id', 'inner');
 		$this->db->where('p.id', $patient_id);
-		$this->db->group_by("p.id, COALESCE(NULLIF(tr.name, ''), 'No Name')", false);
+		$this->db->group_by("
+			p.id,
+			CASE
+				WHEN TRIM(COALESCE(tr.name, '')) = '' THEN 'No Name'
+				ELSE TRIM(tr.name)
+			END
+		", false);
 		$this->db->order_by('recommendation_name', 'ASC');
 		return $this->db->get()->result_array();
 	}
 
 	public function get_doctor_for_patient_plan($planName, $patientId)
 	{
+		$planName = trim((string)$planName);
+
 		$this->db->select('tr.doctor_id');
 		$this->db->from('turn_tooth_recommended tr');
 
@@ -813,7 +825,7 @@ class Admin_model extends CI_Model
 		$this->db->where('p.id', $patientId);
 
 		// Specify the exact recommendation name
-		$this->db->where('tr.name', $planName);
+		$this->db->where("TRIM(COALESCE(tr.name, '')) =", $planName);
 		$this->db->where('tr.doctor_id IS NOT NULL', null, false);
 		$this->db->where('tr.doctor_id >', 0);
 		$this->db->order_by('tr.id', 'DESC');
@@ -884,16 +896,24 @@ class Admin_model extends CI_Model
 		$this->db->join('tooth t', 't.id = ttr.tooth_id', 'inner');
 		$this->db->where('t.patient_id', $patient_id);
 
-		if ($name === null || $name === '') {
-			$this->db->group_start();
-			$this->db->where('ttr.name IS NULL', null, false);
-			$this->db->or_where('ttr.name', '');
-			$this->db->group_end();
-		} else {
-			$this->db->where('ttr.name', $name);
-		}
+		$normalized_name = trim((string)$name);
+		$this->db->where("TRIM(COALESCE(ttr.name, '')) =", $normalized_name);
 
 		return $this->db->get()->result_array();
+	}
+
+	public function has_linked_turn_for_plan($patient_id, $name)
+	{
+		$normalized_name = trim((string)$name);
+
+		$this->db->from('turn_tooth_recommended ttr');
+		$this->db->join('tooth t', 't.id = ttr.tooth_id', 'inner');
+		$this->db->where('t.patient_id', $patient_id);
+		$this->db->where("TRIM(COALESCE(ttr.name, '')) =", $normalized_name);
+		$this->db->where('ttr.turn_id IS NOT NULL', null, false);
+		$this->db->where('ttr.turn_id >', 0);
+
+		return $this->db->count_all_results() > 0;
 	}
 
 	public function delete_related_done_by_plan_details($plan_details)
@@ -949,12 +969,17 @@ class Admin_model extends CI_Model
 
 	public function update_recommended_by_turn_id($turn_id, $name, $patient_id)
 	{
+		$turn_id = (int)$turn_id;
+		$patient_id = (int)$patient_id;
+		$name = trim((string)$name);
+		$escaped_name = $this->db->escape($name);
+
 		return $this->db->query("UPDATE turn_tooth_recommended ttr
 									JOIN tooth t ON ttr.tooth_id = t.id
 									JOIN patient p ON t.patient_id = p.id
-									SET ttr.turn_id = '$turn_id'
-									WHERE p.id = '$patient_id'   -- your patient_id
-									AND ttr.name = '$name'");
+									SET ttr.turn_id = {$turn_id}
+									WHERE p.id = {$patient_id}
+									AND TRIM(COALESCE(ttr.name, '')) = {$escaped_name}");
 	}
 
 
