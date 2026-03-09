@@ -5459,101 +5459,84 @@ class Admin extends CI_Controller
 
 		$turn_id = $this->input->post('turn_id');
 
-		// Get teeth related to this turn (whether recommended or done processes)
-		$this->db->select('ttr.tooth_id, t.name, t.location');
-		$this->db->from('turn_tooth_recommended ttr');
-		$this->db->join('tooth t', 't.id = ttr.tooth_id');
-		$this->db->where('ttr.turn_id', $turn_id);
-		$this->db->group_by('ttr.tooth_id');
-		$teeth = $this->db->get()->result_array();
+		$teeth = $this->db->query("
+			SELECT DISTINCT t.id AS tooth_id, t.name, t.location
+			FROM tooth t
+			INNER JOIN (
+				SELECT tooth_id FROM turn_tooth_recommended WHERE turn_id = ?
+				UNION
+				SELECT tooth_id FROM turn_tooth_done WHERE turn_id = ?
+			) tx ON tx.tooth_id = t.id
+			ORDER BY t.location ASC, t.name ASC
+		", [$turn_id, $turn_id])->result_array();
 
 		$result = [];
 
-		// Check if no recommended processes were found, in that case fetch done processes directly
-		if (empty($teeth)) {
-			// No recommended processes found, so we'll get the done processes directly for all teeth
-			$this->db->select('t.id as tooth_id, t.name, t.location');
-			$this->db->from('tooth t');
-			$this->db->join('turn_tooth_done ttd', 'ttd.tooth_id = t.id');
-			$this->db->where('ttd.turn_id', $turn_id);
-			$this->db->group_by('t.id');
-			$teeth = $this->db->get()->result_array();
-		}
-
-		// Loop through each tooth and handle the departments, recommended and done processes
 		foreach ($teeth as $tooth) {
-			$tooth_id = $tooth['tooth_id'];
-			$tooth_data = [
-				'tooth_id' => $tooth_id,
-				'tooth_name' => $tooth['location'] . ' ' . $tooth['name'],
-				'departments' => []
-			];
+			$tooth_id = (int)$tooth['tooth_id'];
+			$dept_map = [];
 
-			$departments = ['endo', 'restorative', 'prosthodontics'];
+			$recommended_rows = $this->db->query("
+				SELECT r.process_id, r.custom_label, r.remarks, s.department, p.name AS process_name
+				FROM turn_tooth_recommended r
+				LEFT JOIN processes p ON p.id = r.process_id
+				LEFT JOIN services s ON s.id = p.services_id
+				WHERE r.turn_id = ? AND r.tooth_id = ?
+			", [$turn_id, $tooth_id])->result_array();
 
-			foreach ($departments as $dept) {
-				// Check if there are recommended processes for this department
-				$this->db->select('ttr.process_id, ttr.custom_label, p.name as process_name');
-				$this->db->from('turn_tooth_recommended ttr');
-				$this->db->join('processes p', 'p.id = ttr.process_id', 'left');
-				$this->db->where('ttr.turn_id', $turn_id);
-				$this->db->where('ttr.tooth_id', $tooth_id);
-				$this->db->where('ttr.remarks', $dept);
-				$recommended = $this->db->get()->result_array();
-
-				$rec_list = [];
-				foreach ($recommended as $rec) {
-					$rec_list[] = [
-						'label' => $rec['custom_label'] ?? $rec['process_name'],
-						'process_id' => $rec['process_id']
-					];
+			foreach ($recommended_rows as $row) {
+				$dept = !empty($row['remarks']) ? $row['remarks'] : (!empty($row['department']) ? $row['department'] : 'unknown');
+				if (!isset($dept_map[$dept])) {
+					$dept_map[$dept] = ['name' => $dept, 'recommended' => [], 'done' => [], 'done_custom_text' => ''];
 				}
 
-				// If no recommended processes, we fall back to done processes
-				if (empty($rec_list)) {
-					// Get done processes for the department
-					$this->db->select('process_id, custom_label, remarks');
-					$this->db->from('turn_tooth_done');
-					$this->db->where('turn_id', $turn_id);
-					$this->db->where('tooth_id', $tooth_id);
-					$this->db->where('remarks', $dept);
-					$done = $this->db->get()->result_array();
-
-					$done_list = [];
-					$custom_text = '';
-
-					foreach ($done as $dp) {
-						$label = $dp['custom_label'] ?? '';
-						if ($dp['process_id']) {
-							$label = $this->Admin_model->get_process_name($dp['process_id']);
-						}
-
-						if ($dp['process_id']) {
-							$done_list[] = ['label' => $label, 'process_id' => $dp['process_id'], 'type' => 'matched'];
-						} elseif ($dp['custom_label']) {
-							$done_list[] = ['label' => $dp['custom_label'], 'process_id' => null, 'type' => 'custom'];
-							$custom_text .= $dp['custom_label'] . ", ";
-						}
-					}
-
-					$tooth_data['departments'][] = [
-						'name' => $dept,
-						'recommended' => $rec_list,
-						'done' => $done_list,
-						'done_custom_text' => rtrim($custom_text, ', ')
-					];
-				} else {
-					// If recommended processes are available, return them
-					$tooth_data['departments'][] = [
-						'name' => $dept,
-						'recommended' => $rec_list,
-						'done' => [], // Empty done list as recommended is available
-						'done_custom_text' => ''
+				$label = !empty($row['custom_label']) ? $row['custom_label'] : $row['process_name'];
+				if (!empty($label)) {
+					$dept_map[$dept]['recommended'][] = [
+						'label' => $label,
+						'process_id' => $row['process_id']
 					];
 				}
 			}
 
-			$result[] = $tooth_data;
+			$done_rows = $this->db->query("
+				SELECT d.process_id, d.custom_label, d.remarks, s.department, p.name AS process_name
+				FROM turn_tooth_done d
+				LEFT JOIN processes p ON p.id = d.process_id
+				LEFT JOIN services s ON s.id = p.services_id
+				WHERE d.turn_id = ? AND d.tooth_id = ?
+			", [$turn_id, $tooth_id])->result_array();
+
+			foreach ($done_rows as $row) {
+				$dept = !empty($row['remarks']) ? $row['remarks'] : (!empty($row['department']) ? $row['department'] : 'unknown');
+				if (!isset($dept_map[$dept])) {
+					$dept_map[$dept] = ['name' => $dept, 'recommended' => [], 'done' => [], 'done_custom_text' => ''];
+				}
+
+				$label = !empty($row['custom_label']) ? $row['custom_label'] : $row['process_name'];
+				if (!empty($label)) {
+					$dept_map[$dept]['done'][] = [
+						'label' => $label,
+						'process_id' => $row['process_id'],
+						'type' => !empty($row['process_id']) ? 'matched' : 'custom'
+					];
+				}
+
+				if (empty($row['process_id']) && !empty($row['custom_label'])) {
+					$dept_map[$dept]['done_custom_text'] = trim($dept_map[$dept]['done_custom_text'] . ', ' . $row['custom_label'], ', ');
+				}
+			}
+
+			$departments = [];
+			foreach ($dept_map as $dept_info) {
+				$departments[] = $dept_info;
+			}
+
+			$result[] = [
+				'tooth_id' => $tooth_id,
+				'tooth_name' => $tooth['location'] . ' ' . $tooth['name'],
+				'departments' => $departments
+			];
 		}
 
 		echo json_encode([

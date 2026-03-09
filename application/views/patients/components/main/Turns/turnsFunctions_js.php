@@ -310,37 +310,122 @@
 						const recommended = Array.isArray(dept.recommended) ? dept.recommended : [];
 						const done = Array.isArray(dept.done) ? dept.done : [];
 						const doneCustomText = dept.done_custom_text || '';
+						if (recommended.length === 0 && done.length === 0 && !doneCustomText.trim()) {
+							return;
+						}
 
-						html += `<h5 class="text-primary">${deptName}</h5><div class="row">`;
+						const normalize = (txt) => (txt || '').toString().trim().toLowerCase();
+						const doneSet = new Set(done.map(proc => normalize(proc.label)));
+						const checklistMap = new Map();
 
-						// Merge all recommended + done (if done not in recommended)
-						const combined = [...recommended];
-
-						done.forEach(doneProc => {
-							if (!recommended.some(r => r.label === doneProc.label)) {
-								combined.push({label: doneProc.label, type: doneProc.type || 'custom'});
+						recommended.forEach(proc => {
+							const label = (proc.label || '').toString().trim();
+							const key = normalize(label);
+							if (!label || !key) return;
+							if (!checklistMap.has(key)) {
+								checklistMap.set(key, {
+									label,
+									checked: doneSet.has(key),
+									fromSuggested: true
+								});
 							}
 						});
 
-						// Render checkboxes
-						combined.forEach(proc => {
-							const isDone = done.some(d => d.label === proc.label);
-							html += `
-						<div class="col-sm-12 col-md-3 customMargin_processCheckbox">
-							<label class="cl-checkbox">
-								<input type="checkbox" ${isDone ? 'checked' : ''} disabled>
-								<span>${proc.label}</span>
-							</label>
-						</div>`;
+						// Items completed but not in suggestions are still shown as checked.
+						done.forEach(proc => {
+							const label = (proc.label || '').toString().trim();
+							const key = normalize(label);
+							if (!label || !key) return;
+							if (!checklistMap.has(key)) {
+								checklistMap.set(key, {
+									label,
+									checked: true,
+									fromSuggested: false
+								});
+							} else {
+								checklistMap.get(key).checked = true;
+							}
 						});
 
-						// Show custom text if exists
-						if (doneCustomText.trim()) {
+						const suggestedOther = recommended
+							.filter(proc => !proc.process_id)
+							.map(proc => (proc.label || '').toString().trim())
+							.filter(Boolean);
+						const doneOtherFromList = done
+							.filter(proc => !proc.process_id || proc.type === 'custom')
+							.map(proc => (proc.label || '').toString().trim())
+							.filter(Boolean);
+						const doneOtherFromText = doneCustomText
+							.split(',')
+							.map(txt => txt.trim())
+							.filter(Boolean);
+						const doneOther = Array.from(new Set([...doneOtherFromList, ...doneOtherFromText]));
+						const doneOtherSet = new Set(doneOther.map(normalize));
+						const otherMap = new Map();
+
+						suggestedOther.forEach(label => {
+							const key = normalize(label);
+							if (!key || otherMap.has(key)) return;
+							otherMap.set(key, {
+								label,
+								checked: doneOtherSet.has(key),
+								fromSuggested: true
+							});
+						});
+
+						doneOther.forEach(label => {
+							const key = normalize(label);
+							if (!key) return;
+							if (!otherMap.has(key)) {
+								otherMap.set(key, {
+									label,
+									checked: true,
+									fromSuggested: false
+								});
+							} else {
+								otherMap.get(key).checked = true;
+							}
+						});
+
+						html += `<h5 class="text-primary">${deptName}</h5><div class="row">`;
+
+						if (checklistMap.size === 0) {
+							html += `<div class="col-12 text-muted mb-2">-</div>`;
+						} else {
+							Array.from(checklistMap.values()).forEach(item => {
+								html += `
+									<div class="col-sm-12 col-md-6 col-lg-4 customMargin_processCheckbox mb-2">
+										<label class="cl-checkbox d-flex align-items-center gap-2">
+											<input type="checkbox" ${item.checked ? 'checked' : ''} disabled>
+											<span>${item.label}</span>
+											${item.fromSuggested ? '' : '<small class="text-success">(<?= $ci->lang('done') ?>)</small>'}
+										</label>
+									</div>`;
+							});
+						}
+
+						if (otherMap.size > 0) {
 							html += `
-						<div class="col-12 mt-2">
-							<label><strong><?= $ci->lang('other process') ?>:</strong></label>
-							<p class="form-control-plaintext">${doneCustomText}</p>
-						</div>`;
+								<div class="col-12 mt-3">
+									<div class="p-3 border rounded-2 bg-light">
+										<div class="fw-semibold mb-2"><?= $ci->lang('other') ?> (متفرقه)</div>
+										<div class="row">`;
+
+							Array.from(otherMap.values()).forEach(item => {
+								html += `
+									<div class="col-sm-12 col-md-6 col-lg-4 customMargin_processCheckbox mb-2">
+										<label class="cl-checkbox d-flex align-items-center gap-2">
+											<input type="checkbox" ${item.checked ? 'checked' : ''} disabled>
+											<span>${item.label}</span>
+											${item.fromSuggested ? '' : '<small class="text-success">(<?= $ci->lang('done') ?>)</small>'}
+										</label>
+									</div>`;
+							});
+
+							html += `
+										</div>
+									</div>
+								</div>`;
 						}
 
 						html += '</div>'; // close department
