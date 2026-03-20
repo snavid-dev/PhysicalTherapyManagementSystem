@@ -38,12 +38,8 @@
 							<div class="border rounded p-3 h-100">
 								<div class="small text-muted mb-1"><?= t('section') ?></div>
 								<div class="fw-semibold">
-									<?php if ($staff['section'] === 'male') : ?>
-										<?= t('male_section') ?>
-									<?php elseif ($staff['section'] === 'female') : ?>
-										<?= t('female_section') ?>
-									<?php elseif ($staff['section'] === 'both') : ?>
-										<?= t('both_sections') ?>
+									<?php if (!empty($staff['sections'])) : ?>
+										<?= html_escape(implode(', ', array_map(function ($section) { return t($section['name']); }, $staff['sections']))) ?>
 									<?php else : ?>
 										<?= t('section_na') ?>
 									<?php endif; ?>

@@ -59,3 +59,12 @@ if (!function_exists('format_number')) {
 		));
 	}
 }
+
+if (!function_exists('format_amount')) {
+	function format_amount($number)
+	{
+		$number = (float) $number;
+		$decimals = ((int) $number == $number) ? 0 : 2;
+		return format_number($number, $decimals);
+	}
+}

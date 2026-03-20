@@ -7,6 +7,7 @@ class Staff extends Authenticated_Controller
 	{
 		parent::__construct();
 		$this->load->model('Staff_model');
+		$this->load->model('Section_model');
 		$this->load->model('User_model');
 	}
 
@@ -73,6 +74,17 @@ class Staff extends Authenticated_Controller
 
 		$this->Staff_model->set_inactive($id);
 		$this->session->set_flashdata('success', t('Staff deactivated successfully.'));
+		redirect('staff');
+	}
+
+	public function activate($id)
+	{
+		$this->require_permission('manage_staff');
+		$staff = $this->Staff_model->get_by_id($id);
+		show_404_if_empty($staff);
+
+		$this->Staff_model->set_active($id);
+		$this->session->set_flashdata('success', t('Staff activated successfully.'));
 		redirect('staff');
 	}
 
@@ -151,6 +163,8 @@ class Staff extends Authenticated_Controller
 			'staff' => $staff,
 			'action' => $action,
 			'staff_types' => $this->Staff_model->get_staff_types(),
+			'sections' => $this->Section_model->get_all(),
+			'selected_section_ids' => $staff ? $this->Staff_model->get_section_ids($staff['id']) : array(),
 			'users' => $this->User_model->all(),
 		));
 	}
@@ -161,7 +175,7 @@ class Staff extends Authenticated_Controller
 		$this->form_validation->set_rules('last_name', 'Last name', 'required|trim');
 		$this->form_validation->set_rules('gender', 'Gender', 'required|in_list[male,female]');
 		$this->form_validation->set_rules('staff_type_id', 'Staff type', 'required|integer|callback__valid_staff_type');
-		$this->form_validation->set_rules('section', 'Section', 'callback__valid_section');
+		$this->form_validation->set_rules('section_ids[]', 'Section', 'callback__valid_section_ids');
 		$this->form_validation->set_rules('monthly_leave_quota', 'Monthly leave quota', 'required|integer|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('salary', 'Salary', 'required|numeric|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[active,inactive]');
@@ -178,9 +192,10 @@ class Staff extends Authenticated_Controller
 		return FALSE;
 	}
 
-	public function _valid_section($value)
+	public function _valid_section_ids()
 	{
 		$staff_type = $this->find_staff_type($this->input->post('staff_type_id'));
+		$section_ids = $this->input->post('section_ids');
 
 		if (!$staff_type) {
 			return TRUE;
@@ -190,12 +205,19 @@ class Staff extends Authenticated_Controller
 			return TRUE;
 		}
 
-		if (in_array($value, array('male', 'female', 'both'), TRUE)) {
-			return TRUE;
+		if (empty($section_ids) || !is_array($section_ids)) {
+			$this->form_validation->set_message('_valid_section_ids', t('Section is required for the selected staff type.'));
+			return FALSE;
 		}
 
-		$this->form_validation->set_message('_valid_section', t('Section is required for the selected staff type.'));
-		return FALSE;
+		foreach ($section_ids as $section_id) {
+			if (!$this->Section_model->get_by_id((int) $section_id)) {
+				$this->form_validation->set_message('_valid_section_ids', t('Section is required for the selected staff type.'));
+				return FALSE;
+			}
+		}
+
+		return TRUE;
 	}
 
 	public function _valid_user_id($value)
@@ -224,7 +246,7 @@ class Staff extends Authenticated_Controller
 			'first_name' => $this->input->post('first_name', TRUE),
 			'last_name' => $this->input->post('last_name', TRUE),
 			'gender' => $this->input->post('gender', TRUE),
-			'section' => $requires_section ? $this->input->post('section', TRUE) : 'na',
+			'section_ids' => $requires_section ? array_map('intval', (array) $this->input->post('section_ids')) : array(),
 			'monthly_leave_quota' => (int) $this->input->post('monthly_leave_quota'),
 			'salary' => round((float) $this->input->post('salary'), 2),
 			'salary_type' => 'fixed',

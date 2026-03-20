@@ -4,7 +4,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `doctor_leaves`;
 DROP TABLE IF EXISTS `payments`;
 DROP TABLE IF EXISTS `turns`;
+DROP TABLE IF EXISTS `staff_sections`;
 DROP TABLE IF EXISTS `staff`;
+DROP TABLE IF EXISTS `sections`;
 DROP TABLE IF EXISTS `staff_types`;
 DROP TABLE IF EXISTS `patients`;
 DROP TABLE IF EXISTS `role_permissions`;
@@ -61,6 +63,15 @@ CREATE TABLE `staff_types` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `sections` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`name` varchar(100) NOT NULL,
+	`default_fee` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `staff` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`user_id` int unsigned DEFAULT NULL,
@@ -68,7 +79,7 @@ CREATE TABLE `staff` (
 	`first_name` varchar(100) NOT NULL,
 	`last_name` varchar(100) NOT NULL,
 	`gender` enum('male','female') NOT NULL,
-	`section` enum('male','female','both','na') NOT NULL DEFAULT 'na',
+	`section_id` int unsigned DEFAULT NULL,
 	`monthly_leave_quota` tinyint unsigned NOT NULL DEFAULT 4,
 	`salary` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`salary_type` enum('fixed','hourly') NOT NULL DEFAULT 'fixed',
@@ -78,8 +89,18 @@ CREATE TABLE `staff` (
 	PRIMARY KEY (`id`),
 	KEY `staff_user_id_index` (`user_id`),
 	KEY `staff_staff_type_id_index` (`staff_type_id`),
+	KEY `staff_section_id_index` (`section_id`),
 	CONSTRAINT `staff_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-	CONSTRAINT `staff_staff_type_fk` FOREIGN KEY (`staff_type_id`) REFERENCES `staff_types` (`id`)
+	CONSTRAINT `staff_staff_type_fk` FOREIGN KEY (`staff_type_id`) REFERENCES `staff_types` (`id`),
+	CONSTRAINT `staff_section_fk` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `staff_sections` (
+	`staff_id` int unsigned NOT NULL,
+	`section_id` int unsigned NOT NULL,
+	PRIMARY KEY (`staff_id`, `section_id`),
+	CONSTRAINT `staff_sections_staff_fk` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `staff_sections_section_fk` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `patients` (
@@ -156,10 +177,11 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(5, 'manage_payments', 'payments'),
 	(6, 'view_reports', 'reports'),
 	(7, 'manage_leaves', 'leaves'),
-	(8, 'manage_staff', 'staff');
+	(8, 'manage_staff', 'staff'),
+	(9, 'manage_sections', 'sections');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8),
+	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9),
 	(2, 1), (2, 4), (2, 6), (2, 7),
 	(3, 1), (3, 4), (3, 5), (3, 6);
 
@@ -171,6 +193,11 @@ INSERT INTO `staff_types` (`name`) VALUES
 	('Intern'),
 	('Helper'),
 	('Marketer');
+
+INSERT INTO `sections` (`name`, `default_fee`) VALUES
+	('Male Section', 0.00),
+	('Female Section', 0.00),
+	('Both Sections', 0.00);
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `email`, `phone`, `password`, `role_id`, `is_active`) VALUES
 	(1, 'System', 'Admin', 'admin', 'admin@clinic.local', '0000000000', '$2y$10$reKyugm60bDFU1/CoGnX..qeEJlYRQyI3e.Cp4LpdaHpVk84GupFS', 1, 1),

@@ -43,14 +43,15 @@
 				</div>
 				<div class="col-md-4" id="sectionField">
 					<label class="form-label"><?= t('section') ?></label>
-					<?php $selected_section = set_value('section', $staff['section'] ?? 'na'); ?>
-					<select name="section" id="sectionSelect" class="form-select">
-						<option value="na" <?= $selected_section === 'na' ? 'selected' : '' ?>><?= t('section_na') ?></option>
-						<option value="male" <?= $selected_section === 'male' ? 'selected' : '' ?>><?= t('male_section') ?></option>
-						<option value="female" <?= $selected_section === 'female' ? 'selected' : '' ?>><?= t('female_section') ?></option>
-						<option value="both" <?= $selected_section === 'both' ? 'selected' : '' ?>><?= t('both_sections') ?></option>
+					<?php $selected_sections = set_value('section_ids[]', $selected_section_ids ?? array()); ?>
+					<select name="section_ids[]" id="sectionSelect" class="form-select" multiple size="5">
+						<?php foreach ($sections as $section) : ?>
+							<option value="<?= $section['id'] ?>" <?= in_array((string) $section['id'], array_map('strval', (array) $selected_sections), TRUE) ? 'selected' : '' ?>>
+								<?= html_escape(t($section['name'])) ?> (<?= format_amount($section['default_fee']) ?>)
+							</option>
+						<?php endforeach; ?>
 					</select>
-					<small class="text-danger"><?= form_error('section') ?></small>
+					<small class="text-danger"><?= form_error('section_ids[]') ?></small>
 				</div>
 				<div class="col-md-4">
 					<label class="form-label"><?= t('monthly_leave_quota') ?></label>
@@ -110,7 +111,9 @@
 		sectionField.classList.toggle('d-none', !shouldShow);
 
 		if (!shouldShow) {
-			sectionSelect.value = 'na';
+			Array.from(sectionSelect.options).forEach(function (option) {
+				option.selected = false;
+			});
 		}
 	}
 
