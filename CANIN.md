@@ -15,6 +15,7 @@ The current live direction is no longer dental treatment planning, teeth charts,
 
 - patient management
 - patient profile
+- section or department management
 - staff management and salary profiles
 - users and login access
 - roles and permissions
@@ -52,6 +53,7 @@ The current refactor focuses on:
 - smaller modules
 - clearer routes
 - simpler CRUD flows
+- dynamic section setup instead of hardcoded staff sections
 - role-based access
 - responsive UI
 - bilingual support for Persian and English
@@ -103,6 +105,7 @@ If you are editing this project in a future chat, assume this:
 - `application/controllers/Preferences.php`
 - `application/controllers/Dashboard.php`
 - `application/controllers/Patients.php`
+- `application/controllers/Sections.php`
 - `application/controllers/Staff.php`
 - `application/controllers/Users.php`
 - `application/controllers/Roles.php`
@@ -116,6 +119,7 @@ If you are editing this project in a future chat, assume this:
 - `application/models/Login_model.php`
 - `application/models/Dashboard_model.php`
 - `application/models/Patient_model.php`
+- `application/models/Section_model.php`
 - `application/models/Staff_model.php`
 - `application/models/User_model.php`
 - `application/models/Role_model.php`
@@ -129,6 +133,7 @@ If you are editing this project in a future chat, assume this:
 - `application/views/login.php`
 - `application/views/dashboard/`
 - `application/views/patients/`
+- `application/views/sections/`
 - `application/views/staff/`
 - `application/views/users/`
 - `application/views/roles/`
@@ -191,6 +196,7 @@ These are the main active routes:
 - `/logout`
 - `/dashboard`
 - `/patients`
+- `/sections`
 - `/staff`
 - `/users`
 - `/roles`
@@ -275,9 +281,18 @@ This is the practical dependency map of the active system.
 
 - `Staff` depends on `Staff_model`
 - `Staff` depends on `User_model`
+- `Staff` depends on `Section_model`
 - salary profile depends on `doctor_leaves`
 - salary profile depends on `turns`
 - salary profile depends on `users`
+- staff section assignment depends on `sections`
+- staff multi-section assignment depends on `staff_sections`
+
+### Sections dependencies
+
+- `Sections` depends on `Section_model`
+- `Sections` affects Staff section assignment
+- future turn pricing can depend on `sections.default_fee`
 
 ### Preferences dependencies
 
@@ -319,9 +334,18 @@ This section maps each active module to the main tables it reads or writes.
 
 - writes: `staff`
 - reads: `staff_types`
+- reads: `sections`
+- writes: `staff_sections`
 - reads: `doctor_leaves`
 - reads: `turns`
 - reads: `users`
+
+### Sections
+
+- writes: `sections`
+- reads: `staff`
+- reads: `staff_types`
+- reads: `staff_sections`
 
 ### Roles
 
@@ -388,6 +412,7 @@ Important rules:
 ### Current permission keys
 
 - `manage_patients`
+- `manage_sections`
 - `manage_staff`
 - `manage_users`
 - `manage_roles`
@@ -1012,12 +1037,13 @@ Pass these steps:
 
 ### Purpose
 
-This module manages clinic staff records, linked login accounts, and on-demand monthly salary calculations.
+This module manages clinic staff records, linked login accounts, multi-section assignment, and on-demand salary calculations for a selected date range.
 
 ### Main files
 
 - `application/controllers/Staff.php`
 - `application/models/Staff_model.php`
+- `application/models/Section_model.php`
 - `application/views/staff/index.php`
 - `application/views/staff/form.php`
 - `application/views/staff/profile.php`
@@ -1030,22 +1056,25 @@ This module manages clinic staff records, linked login accounts, and on-demand m
 
 ### What it currently does
 
-- lists staff with type, section, and status
+- lists staff with type, assigned sections, and status
 - creates staff records with optional linked user accounts
+- auto-creates an inactive linked user when no existing user is selected
 - edits staff records
 - deactivates staff records without hard deletion
+- re-activates inactive staff records
 - shows a staff profile page
+- assigns one or more sections to staff members who require sections
 - counts completed turns from the previous calendar month when a linked user exists
-- calculates this month’s salary impact from approved leave days on demand
+- calculates salary impact from approved leave days on demand for a chosen date range
 
 ### If you want to change this module
 
 Pass these steps:
 
-1. Decide whether the change affects CRUD fields, salary logic, or both.
+1. Decide whether the change affects CRUD fields, section assignment, salary logic, or linked-user behavior.
 2. Update validation in `Staff.php`.
 3. Update `staff_payload()` if stored fields change.
-4. Update `Staff_model.php` if joins or salary-related queries change.
+4. Update `Staff_model.php` if joins, section syncing, or salary-related queries change.
 5. Update the correct views:
    - `index.php`
    - `form.php`
@@ -1061,20 +1090,87 @@ Pass these steps:
 - add extra non-auth profile fields
 - adjust salary profile presentation
 - add richer staff profile metrics
+- adjust section assignment rules by staff type
 
 ### Common risky changes
 
 - changing the join path between staff and users
+- changing how `staff_sections` syncs with `staff.section_id`
 - changing how leave days are counted from `doctor_leaves`
 - changing turn linkage without checking the salary profile queries
 
 ### AI prompt example for this module
 
-> Read `CANIN.md` first. Work only on the Staff module. Inspect `application/controllers/Staff.php`, `application/models/Staff_model.php`, and the views under `application/views/staff/`. Preserve the `manage_staff` permission gate, keep `doctor_leaves` read-only, and keep the salary profile calculation aligned with the live schema.
+> Read `CANIN.md` first. Work only on the Staff module. Inspect `application/controllers/Staff.php`, `application/models/Staff_model.php`, `application/models/Section_model.php`, and the views under `application/views/staff/`. Preserve the `manage_staff` permission gate, keep `doctor_leaves` read-only, preserve multi-section staff assignment through `staff_sections`, and keep the salary profile calculation aligned with the live schema.
 
 ---
 
-## 21. Module: Preferences
+## 21. Module: Sections
+
+### Purpose
+
+This module manages clinic sections or departments and stores each section's default fee for future turn pricing.
+
+### Main files
+
+- `application/controllers/Sections.php`
+- `application/models/Section_model.php`
+- `application/views/sections/index.php`
+- `application/views/sections/form.php`
+- `application/views/sections/show.php`
+- `application/views/layout/header.php`
+- `application/models/Role_model.php`
+- `database/physical_therapy_clinic.sql`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+
+### What it currently does
+
+- lists all sections with default fee
+- creates sections
+- edits sections
+- deletes sections
+- shows a section detail page with section summary
+- shows a simple staff distribution chart by staff type for that section
+- shows the staff members assigned to that section
+- provides dynamic section records for the Staff module
+
+### If you want to change this module
+
+Pass these steps:
+
+1. Decide whether the change affects section data only or also staff assignment rules.
+2. Update validation in `Sections.php`.
+3. Update `Section_model.php` if delete behavior, chart queries, or section reads change.
+4. Update the correct views:
+   - `index.php`
+   - `form.php`
+   - `show.php`
+5. Update both language files for any new labels or messages.
+6. If schema changes, update `database/physical_therapy_clinic.sql`.
+7. Verify the permission gate, navigation visibility, CRUD flow, and section chart page.
+8. Verify mobile layout and RTL rendering.
+9. If default fee should affect appointment pricing, also update the Turns module deliberately.
+
+### Common safe changes
+
+- add more section metadata
+- change section list presentation
+- improve the chart UI
+
+### Common risky changes
+
+- deleting sections without checking staff reassignment impact
+- changing default fee behavior without updating turns
+- breaking `staff_sections` synchronization with Staff
+
+### AI prompt example for this module
+
+> Read `CANIN.md` first. Work only on the Sections module. Inspect `application/controllers/Sections.php`, `application/models/Section_model.php`, and the views under `application/views/sections/`. Preserve the `manage_sections` permission gate, keep section records dynamic, keep `staff_sections` compatible with Staff, and do not silently couple fee changes into Turns unless the task explicitly requires it.
+
+---
+
+## 22. Module: Preferences
 
 ### Purpose
 
@@ -1122,7 +1218,7 @@ Pass these steps:
 
 ---
 
-## 22. Database Story
+## 23. Database Story
 
 The active simplified schema reference is:
 
@@ -1133,8 +1229,10 @@ This file defines the simplified physical therapy structure for:
 - roles
 - permissions
 - users
+- sections
 - staff types
 - staff
+- staff sections
 - patients
 - turns
 - payments
@@ -1149,7 +1247,7 @@ If the database needs to evolve, update that file and then reflect the change in
 
 ---
 
-## 23. Legacy Code Policy
+## 24. Legacy Code Policy
 
 This repository still contains old dental-era code.
 
@@ -1218,7 +1316,7 @@ Pass these checks:
 
 ---
 
-## 24. Global Change Process For Any Module
+## 25. Global Change Process For Any Module
 
 If you want to change any module, use this exact sequence:
 
@@ -1239,13 +1337,14 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 25. Module-Specific Change Matrix
+## 26. Module-Specific Change Matrix
 
 | Module | Start Here | Then Check | Then Update |
 |---|---|---|---|
 | Login | `Login.php` | `Login_model.php`, `Auth.php` | `login.php`, language files |
 | Dashboard | `Dashboard.php` | `Dashboard_model.php` | `dashboard/index.php`, language files |
 | Patients | `Patients.php` | `Patient_model.php` | `patients/index.php`, `patients/form.php`, `patients/show.php` |
+| Sections | `Sections.php` | `Section_model.php`, `Staff_model.php` | `sections/index.php`, `sections/form.php`, `sections/show.php`, language files |
 | Staff | `Staff.php` | `Staff_model.php`, `User_model.php` | `staff/index.php`, `staff/form.php`, `staff/profile.php`, language files |
 | Users | `Users.php` | `User_model.php`, `Role_model.php` | `users/index.php`, `users/form.php` |
 | Roles | `Roles.php` | `Role_model.php`, `Auth.php` | `roles/index.php`, `roles/form.php`, `header.php` |
@@ -1257,7 +1356,7 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 26. Exact File Paths By Module
+## 27. Exact File Paths By Module
 
 This section is intentionally repetitive. It is here so future chats can jump directly into the correct files without re-discovering the structure.
 
@@ -1290,10 +1389,25 @@ This section is intentionally repetitive. It is here so future chats can jump di
 - `application/language/farsi/app_lang.php`
 - `database/physical_therapy_clinic.sql`
 
+### Sections exact paths
+
+- `application/controllers/Sections.php`
+- `application/models/Section_model.php`
+- `application/models/Staff_model.php`
+- `application/views/sections/index.php`
+- `application/views/sections/form.php`
+- `application/views/sections/show.php`
+- `application/views/layout/header.php`
+- `application/models/Role_model.php`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+- `database/physical_therapy_clinic.sql`
+
 ### Staff exact paths
 
 - `application/controllers/Staff.php`
 - `application/models/Staff_model.php`
+- `application/models/Section_model.php`
 - `application/models/User_model.php`
 - `application/views/staff/index.php`
 - `application/views/staff/form.php`
@@ -1385,13 +1499,13 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 ---
 
-## 27. AI Prompt Library
+## 28. AI Prompt Library
 
 These prompts are designed to be pasted into future chats.
 
 ### Full-project prompt
 
-> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
+> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, sections, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
 
 ### Login prompt
 
@@ -1405,9 +1519,13 @@ These prompts are designed to be pasted into future chats.
 
 > Read `CANIN.md` first. Update only the Patients module. Start with `application/controllers/Patients.php`, `application/models/Patient_model.php`, and the views under `application/views/patients/`. Preserve patient CRUD, patient profile history, and bilingual responsive UI.
 
+### Sections prompt
+
+> Read `CANIN.md` first. Update only the Sections module. Start with `application/controllers/Sections.php`, `application/models/Section_model.php`, and the views under `application/views/sections/`. Preserve `manage_sections`, keep sections dynamic, keep `staff_sections` compatible with Staff, and only connect default fees into Turns when the task explicitly asks for it.
+
 ### Staff prompt
 
-> Read `CANIN.md` first. Update only the Staff module. Start with `application/controllers/Staff.php`, `application/models/Staff_model.php`, and the views under `application/views/staff/`. Preserve `manage_staff`, keep the salary profile aligned with `doctor_leaves` and `turns`, and keep the whole flow bilingual and responsive.
+> Read `CANIN.md` first. Update only the Staff module. Start with `application/controllers/Staff.php`, `application/models/Staff_model.php`, `application/models/Section_model.php`, and the views under `application/views/staff/`. Preserve `manage_staff`, keep multi-section staff assignment aligned with `staff_sections`, keep the salary profile aligned with `doctor_leaves` and `turns`, and keep the whole flow bilingual and responsive.
 
 ### Users prompt
 
@@ -1439,7 +1557,7 @@ These prompts are designed to be pasted into future chats.
 
 ---
 
-## 28. Language And Content Rules
+## 29. Language And Content Rules
 
 When adding UI text:
 
@@ -1451,7 +1569,7 @@ Do not leave new visible UI strings untranslated if the rest of the module is lo
 
 ---
 
-## 29. Responsive Rules
+## 30. Responsive Rules
 
 Every module change must be checked for:
 
@@ -1469,7 +1587,7 @@ If a module needs special responsive styling, prefer adding small, focused addit
 
 ---
 
-## 30. Validation Checklist Before Finishing Any Change
+## 31. Validation Checklist Before Finishing Any Change
 
 Before saying a task is complete, verify:
 
@@ -1484,15 +1602,15 @@ Before saying a task is complete, verify:
 
 ---
 
-## 31. Best Prompt To Reuse In Other Chats
+## 32. Best Prompt To Reuse In Other Chats
 
 If you want to continue this project in another chat, you can paste something like this:
 
-> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
+> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, sections, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
 
 ---
 
-## 32. Final Rule
+## 33. Final Rule
 
 When in doubt:
 

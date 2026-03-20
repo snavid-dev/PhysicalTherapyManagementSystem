@@ -27,12 +27,8 @@
 						<td><?= html_escape(t($staff['staff_type_name'])) ?></td>
 						<td><?= $staff['gender'] === 'male' ? t('Male') : t('Female') ?></td>
 						<td>
-							<?php if ($staff['section'] === 'male') : ?>
-								<?= t('male_section') ?>
-							<?php elseif ($staff['section'] === 'female') : ?>
-								<?= t('female_section') ?>
-							<?php elseif ($staff['section'] === 'both') : ?>
-								<?= t('both_sections') ?>
+							<?php if (!empty($staff['sections'])) : ?>
+								<?= html_escape(implode(', ', array_map(function ($section) { return t($section['name']); }, $staff['sections']))) ?>
 							<?php else : ?>
 								<?= t('section_na') ?>
 							<?php endif; ?>
@@ -42,7 +38,11 @@
 							<div class="d-flex gap-2 justify-content-end">
 								<a href="<?= base_url('staff/edit/' . $staff['id']) ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
 								<a href="<?= base_url('staff/profile/' . $staff['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
-								<a href="<?= base_url('staff/delete/' . $staff['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Deactivate this staff member?') ?>')"><?= t('Deactivate') ?></a>
+								<?php if ($staff['status'] === 'active') : ?>
+									<a href="<?= base_url('staff/delete/' . $staff['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Deactivate this staff member?') ?>')"><?= t('Deactivate') ?></a>
+								<?php else : ?>
+									<a href="<?= base_url('staff/activate/' . $staff['id']) ?>" class="btn btn-sm btn-outline-success"><?= t('Activate') ?></a>
+								<?php endif; ?>
 							</div>
 						</td>
 					</tr>

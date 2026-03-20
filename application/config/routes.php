@@ -65,5 +65,14 @@ $route['staff/store'] = 'staff/store';
 $route['staff/edit/(:num)'] = 'staff/edit/$1';
 $route['staff/update/(:num)'] = 'staff/update/$1';
 $route['staff/delete/(:num)'] = 'staff/delete/$1';
+$route['staff/activate/(:num)'] = 'staff/activate/$1';
 $route['staff/profile/(:num)'] = 'staff/profile/$1';
 $route['staff/calculate_salary/(:num)'] = 'staff/calculate_salary/$1';
+
+$route['sections'] = 'sections/index';
+$route['sections/create'] = 'sections/create';
+$route['sections/store'] = 'sections/store';
+$route['sections/(:num)'] = 'sections/show/$1';
+$route['sections/(:num)/edit'] = 'sections/edit/$1';
+$route['sections/(:num)/update'] = 'sections/update/$1';
+$route['sections/(:num)/delete'] = 'sections/delete/$1';
