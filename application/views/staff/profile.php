@@ -33,22 +33,24 @@
 							<div class="fw-semibold"><?= $staff['gender'] === 'male' ? t('Male') : t('Female') ?></div>
 						</div>
 					</div>
-					<div class="col-md-6">
-						<div class="border rounded p-3 h-100">
-							<div class="small text-muted mb-1"><?= t('section') ?></div>
-							<div class="fw-semibold">
-								<?php if ($staff['section'] === 'male') : ?>
-									<?= t('male_section') ?>
-								<?php elseif ($staff['section'] === 'female') : ?>
-									<?= t('female_section') ?>
-								<?php elseif ($staff['section'] === 'both') : ?>
-									<?= t('both_sections') ?>
-								<?php else : ?>
-									<?= t('section_na') ?>
-								<?php endif; ?>
+					<?php if ($show_section) : ?>
+						<div class="col-md-6">
+							<div class="border rounded p-3 h-100">
+								<div class="small text-muted mb-1"><?= t('section') ?></div>
+								<div class="fw-semibold">
+									<?php if ($staff['section'] === 'male') : ?>
+										<?= t('male_section') ?>
+									<?php elseif ($staff['section'] === 'female') : ?>
+										<?= t('female_section') ?>
+									<?php elseif ($staff['section'] === 'both') : ?>
+										<?= t('both_sections') ?>
+									<?php else : ?>
+										<?= t('section_na') ?>
+									<?php endif; ?>
+								</div>
 							</div>
 						</div>
-					</div>
+					<?php endif; ?>
 					<div class="col-md-4">
 						<div class="border rounded p-3 h-100">
 							<div class="small text-muted mb-1"><?= t('Status') ?></div>
@@ -102,10 +104,10 @@
 	</div>
 
 	<div class="col-12 col-lg-7">
-		<div class="card h-100">
-			<div class="card-body">
-				<h2 class="h5 mb-3"><?= t('calculate_salary') ?></h2>
-				<button type="button" class="btn btn-dark" id="calculateSalaryButton"><?= t('calculate_salary') ?></button>
+			<div class="card h-100">
+				<div class="card-body">
+					<h2 class="h5 mb-3"><?= t('calculate_salary') ?></h2>
+				<button type="button" class="btn btn-dark" id="openSalaryModalButton"><?= t('calculate_salary') ?></button>
 				<div id="salaryCalculationError" class="alert alert-danger mt-3 d-none"></div>
 				<div id="salaryCalculationResult" class="mt-3 d-none"></div>
 			</div>
@@ -113,16 +115,49 @@
 	</div>
 </div>
 
+<div class="modal fade" id="salaryRangeModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2 class="modal-title fs-5"><?= t('Select Salary Date Range') ?></h2>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label class="form-label" for="salaryFromDate"><?= t('From') ?></label>
+						<input type="date" id="salaryFromDate" class="form-control" value="<?= html_escape(date('Y-m-01')) ?>">
+					</div>
+					<div class="col-md-6">
+						<label class="form-label" for="salaryToDate"><?= t('To') ?></label>
+						<input type="date" id="salaryToDate" class="form-control" value="<?= html_escape(date('Y-m-t')) ?>">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
+				<button type="button" class="btn btn-dark" id="calculateSalaryButton"><?= t('calculate_salary') ?></button>
+			</div>
+		</div>
+	</div>
+</div>
+
 <script>
 (function () {
+	const openModalButton = document.getElementById('openSalaryModalButton');
 	const button = document.getElementById('calculateSalaryButton');
+	const modalElement = document.getElementById('salaryRangeModal');
+	const fromDateInput = document.getElementById('salaryFromDate');
+	const toDateInput = document.getElementById('salaryToDate');
 	const result = document.getElementById('salaryCalculationResult');
 	const errorBox = document.getElementById('salaryCalculationError');
 	const locale = <?= json_encode($current_locale === 'farsi' ? 'fa-IR' : 'en-US') ?>;
 	const labels = {
+		from_date: <?= json_encode(t('From')) ?>,
+		to_date: <?= json_encode(t('To')) ?>,
 		base_salary: <?= json_encode(t('base_salary')) ?>,
 		monthly_leave_quota: <?= json_encode(t('monthly_leave_quota')) ?>,
-		approved_leaves: <?= json_encode(t('approved_leaves')) ?>,
+		approved_leaves: <?= json_encode(t('approved_leaves_in_range')) ?>,
 		paid_leaves: <?= json_encode(t('paid_leaves')) ?>,
 		excess_leaves: <?= json_encode(t('excess_leaves')) ?>,
 		deduction: <?= json_encode(t('deduction')) ?>,
@@ -142,6 +177,8 @@
 
 	function renderRows(data) {
 		const rows = [
+			[labels.from_date, data.from_date],
+			[labels.to_date, data.to_date],
 			[labels.base_salary, formatNumber(data.base_salary, 2)],
 			[labels.monthly_leave_quota, formatNumber(data.monthly_leave_quota, 0)],
 			[labels.approved_leaves, formatNumber(data.approved_leaves, 0)],
@@ -159,30 +196,60 @@
 		}).join('');
 	}
 
+	function getSalaryModal() {
+		if (!modalElement || !window.bootstrap || !window.bootstrap.Modal) {
+			return null;
+		}
+
+		return window.bootstrap.Modal.getOrCreateInstance(modalElement);
+	}
+
+	if (openModalButton) {
+		openModalButton.addEventListener('click', function () {
+			errorBox.classList.add('d-none');
+
+			const salaryModal = getSalaryModal();
+			if (salaryModal) {
+				salaryModal.show();
+			}
+		});
+	}
+
 	button.addEventListener('click', function () {
 		button.disabled = true;
 		errorBox.classList.add('d-none');
 		result.classList.add('d-none');
 
+		const payload = new URLSearchParams();
+		payload.set('from_date', fromDateInput.value);
+		payload.set('to_date', toDateInput.value);
+
 		fetch(<?= json_encode(base_url('staff/calculate_salary/' . $staff['id'])) ?>, {
 			method: 'POST',
 			headers: {
-				'X-Requested-With': 'XMLHttpRequest'
-			}
+				'X-Requested-With': 'XMLHttpRequest',
+				'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+			},
+			body: payload.toString()
 		})
 			.then(function (response) {
-				if (!response.ok) {
-					throw new Error('Request failed');
-				}
-
 				return response.json();
 			})
 			.then(function (data) {
+				if (data.error) {
+					throw new Error(data.error);
+				}
+
+				const salaryModal = getSalaryModal();
+				if (salaryModal) {
+					salaryModal.hide();
+				}
+
 				result.innerHTML = renderRows(data);
 				result.classList.remove('d-none');
 			})
-			.catch(function () {
-				errorBox.textContent = <?= json_encode(t('Unable to calculate salary right now.')) ?>;
+			.catch(function (error) {
+				errorBox.textContent = error && error.message ? error.message : <?= json_encode(t('Unable to calculate salary right now.')) ?>;
 				errorBox.classList.remove('d-none');
 			})
 			.finally(function () {

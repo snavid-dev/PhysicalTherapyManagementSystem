@@ -105,7 +105,7 @@
 		const typeName = selectedOption && selectedOption.dataset.typeName
 			? selectedOption.dataset.typeName.toLowerCase()
 			: '';
-		const shouldShow = typeName === 'doctor' || typeName === 'physiotherapist';
+		const shouldShow = ['doctor', 'physiotherapist', 'cleaner', 'intern', 'helper'].includes(typeName);
 
 		sectionField.classList.toggle('d-none', !shouldShow);
 

@@ -83,7 +83,7 @@ class Staff_model extends CI_Model
 			->count_all_results();
 	}
 
-	public function get_approved_leaves_this_month($staff_id)
+	public function get_approved_leaves_in_range($staff_id, $from_date, $to_date)
 	{
 		$staff = $this->get_by_id($staff_id);
 
@@ -91,23 +91,21 @@ class Staff_model extends CI_Model
 			return 0;
 		}
 
-		$month_start = date('Y-m-01');
-		$month_end = date('Y-m-t');
 		$rows = $this->db
 			->select('start_date, end_date')
 			->from('doctor_leaves')
 			->where('doctor_id', (int) $staff['user_id'])
 			->where('status', 'approved')
-			->where('start_date <=', $month_end)
-			->where('end_date >=', $month_start)
+			->where('start_date <=', $to_date)
+			->where('end_date >=', $from_date)
 			->get()
 			->result_array();
 
 		$total_days = 0;
 
 		foreach ($rows as $row) {
-			$effective_start = max($row['start_date'], $month_start);
-			$effective_end = min($row['end_date'], $month_end);
+			$effective_start = max($row['start_date'], $from_date);
+			$effective_end = min($row['end_date'], $to_date);
 
 			if ($effective_start > $effective_end) {
 				continue;

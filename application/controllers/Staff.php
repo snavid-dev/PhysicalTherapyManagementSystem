@@ -87,6 +87,7 @@ class Staff extends Authenticated_Controller
 			'current_section' => 'staff',
 			'staff' => $staff,
 			'patients_last_month' => $this->Staff_model->count_patients_last_month($id),
+			'show_section' => $this->requires_section($staff['staff_type_name']),
 		));
 	}
 
@@ -101,12 +102,26 @@ class Staff extends Authenticated_Controller
 		$staff = $this->Staff_model->get_by_id($id);
 		show_404_if_empty($staff);
 
-		$approved_leaves = $this->Staff_model->get_approved_leaves_this_month($id);
+		$from_date = $this->input->post('from_date', TRUE) ?: date('Y-m-01');
+		$to_date = $this->input->post('to_date', TRUE) ?: date('Y-m-t');
+
+		if (!$this->is_valid_date($from_date) || !$this->is_valid_date($to_date) || $from_date > $to_date) {
+			return $this->output
+				->set_status_header(422)
+				->set_content_type('application/json')
+				->set_output(json_encode(array(
+					'error' => t('Please choose a valid date range.'),
+				)));
+		}
+
+		$approved_leaves = $this->Staff_model->get_approved_leaves_in_range($id, $from_date, $to_date);
 		$monthly_leave_quota = (int) $staff['monthly_leave_quota'];
 		$paid_leaves = min($approved_leaves, $monthly_leave_quota);
 		$excess_leaves = max(0, $approved_leaves - $monthly_leave_quota);
 
 		$response = array(
+			'from_date' => $from_date,
+			'to_date' => $to_date,
 			'base_salary' => (float) $staff['salary'],
 			'monthly_leave_quota' => $monthly_leave_quota,
 			'approved_leaves' => $approved_leaves,
@@ -231,7 +246,13 @@ class Staff extends Authenticated_Controller
 	protected function requires_section($staff_type_name)
 	{
 		$staff_type_name = strtolower(trim((string) $staff_type_name));
-		return in_array($staff_type_name, array('doctor', 'physiotherapist'), TRUE);
+		return in_array($staff_type_name, array('doctor', 'physiotherapist', 'helper', 'intern', 'cleaner'), TRUE);
+	}
+
+	protected function is_valid_date($value)
+	{
+		$date = DateTime::createFromFormat('Y-m-d', (string) $value);
+		return $date && $date->format('Y-m-d') === $value;
 	}
 
 	protected function resolve_linked_user_id($existing_staff = NULL)
