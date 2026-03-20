@@ -1,50 +1,71 @@
 <?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Role_model extends CI_Model
 {
-
-	public function create_role($role_name)
+	public function all()
 	{
-		$data = ['role_name' => $role_name];
-		return $this->db->insert('roles', $data);
+		return $this->db
+			->select('roles.*, COUNT(users.id) AS user_count')
+			->from('roles')
+			->join('users', 'users.role_id = roles.id', 'left')
+			->group_by('roles.id')
+			->order_by('roles.name', 'asc')
+			->get()
+			->result_array();
 	}
 
-	public function get_all_roles()
+	public function find($id)
 	{
-		return $this->db->query("SELECT r.*, COUNT(u.id) AS user_count FROM roles r LEFT JOIN users u ON r.id = u.role_id GROUP BY r.id, r.role_name ORDER BY user_count DESC")->result();
+		return $this->db->get_where('roles', array('id' => (int) $id))->row_array();
 	}
 
-	public function get_role($id)
+	public function permissions()
 	{
-		return $this->db->get_where('roles', array('id' => $id))->result();
+		return $this->db->order_by('module_key', 'asc')->order_by('name', 'asc')->get('permissions')->result_array();
 	}
 
-	public function assign_permission($role_id, $permission_id)
+	public function role_permission_ids($role_id)
 	{
-		return $this->db->insert('role_permissions', [
-			'role_id' => $role_id,
-			'permission_id' => $permission_id
-		]);
+		$rows = $this->db->select('permission_id')->get_where('role_permissions', array('role_id' => (int) $role_id))->result_array();
+		return array_map('intval', array_column($rows, 'permission_id'));
 	}
 
-	public function get_permissions_for_role($role_id)
+	public function create($data, $permission_ids)
 	{
-		$this->db->select('permissions.*, permission_categories.category_name'); // Include category name
-		$this->db->from('permissions');
-		$this->db->join('role_permissions', 'permissions.id = role_permissions.permission_id');
-		$this->db->join('permission_categories', 'permissions.category_id = permission_categories.id'); // Join with categories
-		$this->db->where('role_permissions.role_id', $role_id);
-		return $this->db->get()->result();
+		$this->db->insert('roles', $data);
+		$role_id = $this->db->insert_id();
+		$this->sync_permissions($role_id, $permission_ids);
+		return $role_id;
 	}
-		public function get_assigned_permissions($role_id)
-	{
-		// Select permissions and category name
-		$this->db->select('permissions.*');
-		$this->db->from('permissions');
-		$this->db->join('role_permissions', 'permissions.id = role_permissions.permission_id');
-		$this->db->where('role_permissions.role_id', $role_id);
 
-		// Execute and return the result
-		return $this->db->get()->result();
+	public function update($id, $data, $permission_ids)
+	{
+		$this->db->where('id', (int) $id)->update('roles', $data);
+		$this->sync_permissions($id, $permission_ids);
+		return TRUE;
+	}
+
+	public function delete($id)
+	{
+		$assigned_users = (int) $this->db->where('role_id', (int) $id)->count_all_results('users');
+		if ($assigned_users > 0) {
+			return FALSE;
+		}
+
+		$this->db->where('role_id', (int) $id)->delete('role_permissions');
+		return $this->db->where('id', (int) $id)->delete('roles');
+	}
+
+	protected function sync_permissions($role_id, $permission_ids)
+	{
+		$this->db->where('role_id', (int) $role_id)->delete('role_permissions');
+
+		foreach ((array) $permission_ids as $permission_id) {
+			$this->db->insert('role_permissions', array(
+				'role_id' => (int) $role_id,
+				'permission_id' => (int) $permission_id,
+			));
+		}
 	}
 }

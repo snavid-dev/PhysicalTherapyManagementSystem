@@ -1,29 +1,17 @@
 <?php
-
+defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Login_model extends CI_Model
 {
-	public function __construct()
+	public function find_by_username($username)
 	{
-		parent::__construct();
-	}
-
-	public function select_user($id)
-	{
-		return $this->db->get_where('users', array('id' => $id))->result();
-	}
-
-	public function auth($email, $password)
-	{
-		$this->db->select("*");
-		$this->db->from("users");
-		$this->db->where("username", $email);
-		$this->db->where("password", $password);
-		$query = $this->db->get();
-		if ($query->num_rows() > 0) {
-			return $query->row_array();
-		} else {
-			return FALSE;
-		}
+		return $this->db
+			->select('users.*, roles.name AS role_name')
+			->from('users')
+			->join('roles', 'roles.id = users.role_id', 'left')
+			->where('users.username', $username)
+			->where('users.is_active', 1)
+			->get()
+			->row_array();
 	}
 }

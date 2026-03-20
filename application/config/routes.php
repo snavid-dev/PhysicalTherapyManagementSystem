@@ -1,62 +1,60 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-/*
-| -------------------------------------------------------------------------
-| URI ROUTING
-| -------------------------------------------------------------------------
-| This file lets you re-map URI requests to specific controller functions.
-|
-| Typically there is a one-to-one relationship between a URL string
-| and its corresponding controller class/method. The segments in a
-| URL normally follow this pattern:
-|
-|	example.com/class/method/id/
-|
-| In some instances, however, you may want to remap this relationship
-| so that a different class/function is called than the one
-| corresponding to the URL.
-|
-| Please see the user guide for complete details:
-|
-|	https://codeigniter.com/user_guide/general/routing.html
-|
-| -------------------------------------------------------------------------
-| RESERVED ROUTES
-| -------------------------------------------------------------------------
-|
-| There are three reserved routes:
-|
-|	$route['default_controller'] = 'welcome';
-|
-| This route indicates which controller class should be loaded if the
-| URI contains no data. In the above example, the "welcome" class
-| would be loaded.
-|
-|	$route['404_override'] = 'errors/page_missing';
-|
-| This route will tell the Router which controller/method to use if those
-| provided in the URL cannot be matched to a valid route.
-|
-|	$route['translate_uri_dashes'] = FALSE;
-|
-| This is not exactly a route, but allows you to automatically route
-| controller and method names that contain dashes. '-' isn't a valid
-| class or method name character, so it requires translation.
-| When you set this option to TRUE, it will replace ALL dashes in the
-| controller and method URI segments.
-|
-| Examples:	my-controller/index	-> my_controller/index
-|		my-controller/my-method	-> my_controller/my_method
-*/
 $route['default_controller'] = 'Login';
-$route['404_override'] = 'Admin/_404';
-$route['tasks'] = 'home/tasks';
-$route['jobs'] = 'home/jobs';
-$route['companies'] = 'home/companies';
-$route['freelancers'] = 'home/freelancers';
-$route['rfp'] = 'home/rfp';
-$route['rfq'] = 'home/rfq';
-//$route['home/provinces'] = 'home/_404';
-$route['categories'] = 'home/categories';
+$route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+$route['dashboard'] = 'Dashboard/index';
+
+$route['login'] = 'Login/index';
+$route['logout'] = 'Login/logout';
+$route['preferences/language/(:any)'] = 'Preferences/language/$1';
+$route['preferences/theme/(:any)'] = 'Preferences/theme/$1';
+
+$route['patients'] = 'Patients/index';
+$route['patients/create'] = 'Patients/create';
+$route['patients/store'] = 'Patients/store';
+$route['patients/(:num)'] = 'Patients/show/$1';
+$route['patients/(:num)/edit'] = 'Patients/edit/$1';
+$route['patients/(:num)/update'] = 'Patients/update/$1';
+$route['patients/(:num)/delete'] = 'Patients/delete/$1';
+
+$route['users'] = 'Users/index';
+$route['users/create'] = 'Users/create';
+$route['users/store'] = 'Users/store';
+$route['users/(:num)/edit'] = 'Users/edit/$1';
+$route['users/(:num)/update'] = 'Users/update/$1';
+$route['users/(:num)/delete'] = 'Users/delete/$1';
+
+$route['roles'] = 'Roles/index';
+$route['roles/create'] = 'Roles/create';
+$route['roles/store'] = 'Roles/store';
+$route['roles/(:num)/edit'] = 'Roles/edit/$1';
+$route['roles/(:num)/update'] = 'Roles/update/$1';
+$route['roles/(:num)/delete'] = 'Roles/delete/$1';
+
+$route['turns'] = 'Turns/index';
+$route['turns/create'] = 'Turns/create';
+$route['turns/bulk-create'] = 'Turns/bulk_create';
+$route['turns/store'] = 'Turns/store';
+$route['turns/bulk-store'] = 'Turns/bulk_store';
+$route['turns/(:num)/edit'] = 'Turns/edit/$1';
+$route['turns/(:num)/update'] = 'Turns/update/$1';
+$route['turns/(:num)/delete'] = 'Turns/delete/$1';
+
+$route['payments'] = 'Payments/index';
+$route['payments/create'] = 'Payments/create';
+$route['payments/store'] = 'Payments/store';
+$route['payments/(:num)/edit'] = 'Payments/edit/$1';
+$route['payments/(:num)/update'] = 'Payments/update/$1';
+$route['payments/(:num)/delete'] = 'Payments/delete/$1';
+
+$route['reports'] = 'Reports/index';
+
+$route['leaves'] = 'Leaves/index';
+$route['leaves/create'] = 'Leaves/create';
+$route['leaves/store'] = 'Leaves/store';
+$route['leaves/(:num)/edit'] = 'Leaves/edit/$1';
+$route['leaves/(:num)/update'] = 'Leaves/update/$1';
+$route['leaves/(:num)/delete'] = 'Leaves/delete/$1';
