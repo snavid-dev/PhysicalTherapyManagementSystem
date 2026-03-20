@@ -33,3 +33,29 @@ if (!function_exists('t')) {
 		return $line ? $line : $key;
 	}
 }
+
+if (!function_exists('format_number')) {
+	function format_number($number, $decimals = 0)
+	{
+		$formatted = number_format((float) $number, (int) $decimals);
+
+		if (!is_rtl_locale()) {
+			return $formatted;
+		}
+
+		return strtr($formatted, array(
+			'0' => '۰',
+			'1' => '۱',
+			'2' => '۲',
+			'3' => '۳',
+			'4' => '۴',
+			'5' => '۵',
+			'6' => '۶',
+			'7' => '۷',
+			'8' => '۸',
+			'9' => '۹',
+			',' => '٬',
+			'.' => '٫',
+		));
+	}
+}

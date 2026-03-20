@@ -76,4 +76,29 @@ class User_model extends CI_Model
 			->get()
 			->num_rows() > 0;
 	}
+
+	public function default_staff_role_id()
+	{
+		$role = $this->db
+			->select('id')
+			->from('roles')
+			->where('slug', 'receptionist')
+			->limit(1)
+			->get()
+			->row_array();
+
+		if ($role) {
+			return (int) $role['id'];
+		}
+
+		$role = $this->db
+			->select('id')
+			->from('roles')
+			->order_by('id', 'asc')
+			->limit(1)
+			->get()
+			->row_array();
+
+		return $role ? (int) $role['id'] : 1;
+	}
 }

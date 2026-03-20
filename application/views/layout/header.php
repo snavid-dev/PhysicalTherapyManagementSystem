@@ -38,6 +38,9 @@
 				<?php if ($this->auth->has_permission('manage_leaves')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'leaves' ? 'active' : '' ?>" href="<?= base_url('leaves') ?>"><?= t('Doctor Leaves') ?></a></li>
 				<?php endif; ?>
+				<?php if ($this->auth->has_permission('manage_staff')) : ?>
+					<li class="nav-item"><a class="nav-link <?= $current_section === 'staff' ? 'active' : '' ?>" href="<?= base_url('staff') ?>"><?= t('Staff') ?></a></li>
+				<?php endif; ?>
 				<?php if ($this->auth->has_permission('manage_users')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'users' ? 'active' : '' ?>" href="<?= base_url('users') ?>"><?= t('Users') ?></a></li>
 				<?php endif; ?>

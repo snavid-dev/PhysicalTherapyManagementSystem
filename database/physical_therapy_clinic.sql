@@ -4,6 +4,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `doctor_leaves`;
 DROP TABLE IF EXISTS `payments`;
 DROP TABLE IF EXISTS `turns`;
+DROP TABLE IF EXISTS `staff`;
+DROP TABLE IF EXISTS `staff_types`;
 DROP TABLE IF EXISTS `patients`;
 DROP TABLE IF EXISTS `role_permissions`;
 DROP TABLE IF EXISTS `permissions`;
@@ -50,6 +52,34 @@ CREATE TABLE `users` (
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `users_username_unique` (`username`),
 	CONSTRAINT `users_role_fk` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `staff_types` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`name` varchar(100) NOT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `staff` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`user_id` int unsigned DEFAULT NULL,
+	`staff_type_id` int unsigned NOT NULL,
+	`first_name` varchar(100) NOT NULL,
+	`last_name` varchar(100) NOT NULL,
+	`gender` enum('male','female') NOT NULL,
+	`section` enum('male','female','both','na') NOT NULL DEFAULT 'na',
+	`monthly_leave_quota` tinyint unsigned NOT NULL DEFAULT 4,
+	`salary` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`salary_type` enum('fixed','hourly') NOT NULL DEFAULT 'fixed',
+	`status` enum('active','inactive') NOT NULL DEFAULT 'active',
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `staff_user_id_index` (`user_id`),
+	KEY `staff_staff_type_id_index` (`staff_type_id`),
+	CONSTRAINT `staff_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+	CONSTRAINT `staff_staff_type_fk` FOREIGN KEY (`staff_type_id`) REFERENCES `staff_types` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `patients` (
@@ -125,12 +155,22 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(4, 'manage_turns', 'turns'),
 	(5, 'manage_payments', 'payments'),
 	(6, 'view_reports', 'reports'),
-	(7, 'manage_leaves', 'leaves');
+	(7, 'manage_leaves', 'leaves'),
+	(8, 'manage_staff', 'staff');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7),
+	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8),
 	(2, 1), (2, 4), (2, 6), (2, 7),
 	(3, 1), (3, 4), (3, 5), (3, 6);
+
+INSERT INTO `staff_types` (`name`) VALUES
+	('Doctor'),
+	('Physiotherapist'),
+	('Cleaner'),
+	('Manager'),
+	('Intern'),
+	('Helper'),
+	('Marketer');
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `email`, `phone`, `password`, `role_id`, `is_active`) VALUES
 	(1, 'System', 'Admin', 'admin', 'admin@clinic.local', '0000000000', '$2y$10$reKyugm60bDFU1/CoGnX..qeEJlYRQyI3e.Cp4LpdaHpVk84GupFS', 1, 1),

@@ -3,6 +3,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Role_model extends CI_Model
 {
+	protected $system_permissions = array(
+		array('name' => 'manage_patients', 'module_key' => 'patients'),
+		array('name' => 'manage_users', 'module_key' => 'users'),
+		array('name' => 'manage_roles', 'module_key' => 'roles'),
+		array('name' => 'manage_turns', 'module_key' => 'turns'),
+		array('name' => 'manage_payments', 'module_key' => 'payments'),
+		array('name' => 'view_reports', 'module_key' => 'reports'),
+		array('name' => 'manage_leaves', 'module_key' => 'leaves'),
+		array('name' => 'manage_staff', 'module_key' => 'staff'),
+	);
+
 	public function all()
 	{
 		return $this->db
@@ -22,6 +33,8 @@ class Role_model extends CI_Model
 
 	public function permissions()
 	{
+		$this->ensure_system_permissions();
+
 		return $this->db->order_by('module_key', 'asc')->order_by('name', 'asc')->get('permissions')->result_array();
 	}
 
@@ -66,6 +79,25 @@ class Role_model extends CI_Model
 				'role_id' => (int) $role_id,
 				'permission_id' => (int) $permission_id,
 			));
+		}
+	}
+
+	protected function ensure_system_permissions()
+	{
+		$existing = $this->db
+			->select('name')
+			->get('permissions')
+			->result_array();
+
+		$existing_names = array_column($existing, 'name');
+
+		foreach ($this->system_permissions as $permission) {
+			if (in_array($permission['name'], $existing_names, TRUE)) {
+				continue;
+			}
+
+			$this->db->insert('permissions', $permission);
+			$existing_names[] = $permission['name'];
 		}
 	}
 }
