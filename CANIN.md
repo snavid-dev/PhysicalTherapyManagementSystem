@@ -15,6 +15,7 @@ The current live direction is no longer dental treatment planning, teeth charts,
 
 - patient management
 - patient profile
+- staff management and salary profiles
 - users and login access
 - roles and permissions
 - turns or appointments
@@ -102,6 +103,7 @@ If you are editing this project in a future chat, assume this:
 - `application/controllers/Preferences.php`
 - `application/controllers/Dashboard.php`
 - `application/controllers/Patients.php`
+- `application/controllers/Staff.php`
 - `application/controllers/Users.php`
 - `application/controllers/Roles.php`
 - `application/controllers/Turns.php`
@@ -114,6 +116,7 @@ If you are editing this project in a future chat, assume this:
 - `application/models/Login_model.php`
 - `application/models/Dashboard_model.php`
 - `application/models/Patient_model.php`
+- `application/models/Staff_model.php`
 - `application/models/User_model.php`
 - `application/models/Role_model.php`
 - `application/models/Turn_model.php`
@@ -126,6 +129,7 @@ If you are editing this project in a future chat, assume this:
 - `application/views/login.php`
 - `application/views/dashboard/`
 - `application/views/patients/`
+- `application/views/staff/`
 - `application/views/users/`
 - `application/views/roles/`
 - `application/views/turns/`
@@ -187,6 +191,7 @@ These are the main active routes:
 - `/logout`
 - `/dashboard`
 - `/patients`
+- `/staff`
 - `/users`
 - `/roles`
 - `/turns`
@@ -266,6 +271,14 @@ This is the practical dependency map of the active system.
 - reports depend on leave records
 - future scheduling rules may depend on leaves if turn blocking is introduced
 
+### Staff dependencies
+
+- `Staff` depends on `Staff_model`
+- `Staff` depends on `User_model`
+- salary profile depends on `doctor_leaves`
+- salary profile depends on `turns`
+- salary profile depends on `users`
+
 ### Preferences dependencies
 
 - `Preferences` depends on session state
@@ -301,6 +314,14 @@ This section maps each active module to the main tables it reads or writes.
 
 - writes: `users`
 - reads: `roles`
+
+### Staff
+
+- writes: `staff`
+- reads: `staff_types`
+- reads: `doctor_leaves`
+- reads: `turns`
+- reads: `users`
 
 ### Roles
 
@@ -367,6 +388,7 @@ Important rules:
 ### Current permission keys
 
 - `manage_patients`
+- `manage_staff`
 - `manage_users`
 - `manage_roles`
 - `manage_turns`
@@ -986,7 +1008,73 @@ Pass these steps:
 
 ---
 
-## 20. Module: Preferences
+## 20. Module: Staff
+
+### Purpose
+
+This module manages clinic staff records, linked login accounts, and on-demand monthly salary calculations.
+
+### Main files
+
+- `application/controllers/Staff.php`
+- `application/models/Staff_model.php`
+- `application/views/staff/index.php`
+- `application/views/staff/form.php`
+- `application/views/staff/profile.php`
+- `application/models/User_model.php`
+- `application/models/Leave_model.php`
+- `application/models/Turn_model.php`
+- `database/physical_therapy_clinic.sql`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+
+### What it currently does
+
+- lists staff with type, section, and status
+- creates staff records with optional linked user accounts
+- edits staff records
+- deactivates staff records without hard deletion
+- shows a staff profile page
+- counts completed turns from the previous calendar month when a linked user exists
+- calculates this month’s salary impact from approved leave days on demand
+
+### If you want to change this module
+
+Pass these steps:
+
+1. Decide whether the change affects CRUD fields, salary logic, or both.
+2. Update validation in `Staff.php`.
+3. Update `staff_payload()` if stored fields change.
+4. Update `Staff_model.php` if joins or salary-related queries change.
+5. Update the correct views:
+   - `index.php`
+   - `form.php`
+   - `profile.php`
+6. Update both language files for any new labels or messages.
+7. If schema changes, update `database/physical_therapy_clinic.sql`.
+8. Verify the permission gate, navigation visibility, CRUD flow, and salary calculator.
+9. Verify the form and profile remain usable on mobile and in RTL.
+
+### Common safe changes
+
+- add more staff types
+- add extra non-auth profile fields
+- adjust salary profile presentation
+- add richer staff profile metrics
+
+### Common risky changes
+
+- changing the join path between staff and users
+- changing how leave days are counted from `doctor_leaves`
+- changing turn linkage without checking the salary profile queries
+
+### AI prompt example for this module
+
+> Read `CANIN.md` first. Work only on the Staff module. Inspect `application/controllers/Staff.php`, `application/models/Staff_model.php`, and the views under `application/views/staff/`. Preserve the `manage_staff` permission gate, keep `doctor_leaves` read-only, and keep the salary profile calculation aligned with the live schema.
+
+---
+
+## 21. Module: Preferences
 
 ### Purpose
 
@@ -1034,7 +1122,7 @@ Pass these steps:
 
 ---
 
-## 21. Database Story
+## 22. Database Story
 
 The active simplified schema reference is:
 
@@ -1045,6 +1133,8 @@ This file defines the simplified physical therapy structure for:
 - roles
 - permissions
 - users
+- staff types
+- staff
 - patients
 - turns
 - payments
@@ -1059,7 +1149,7 @@ If the database needs to evolve, update that file and then reflect the change in
 
 ---
 
-## 22. Legacy Code Policy
+## 23. Legacy Code Policy
 
 This repository still contains old dental-era code.
 
@@ -1128,7 +1218,7 @@ Pass these checks:
 
 ---
 
-## 23. Global Change Process For Any Module
+## 24. Global Change Process For Any Module
 
 If you want to change any module, use this exact sequence:
 
@@ -1149,13 +1239,14 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 24. Module-Specific Change Matrix
+## 25. Module-Specific Change Matrix
 
 | Module | Start Here | Then Check | Then Update |
 |---|---|---|---|
 | Login | `Login.php` | `Login_model.php`, `Auth.php` | `login.php`, language files |
 | Dashboard | `Dashboard.php` | `Dashboard_model.php` | `dashboard/index.php`, language files |
 | Patients | `Patients.php` | `Patient_model.php` | `patients/index.php`, `patients/form.php`, `patients/show.php` |
+| Staff | `Staff.php` | `Staff_model.php`, `User_model.php` | `staff/index.php`, `staff/form.php`, `staff/profile.php`, language files |
 | Users | `Users.php` | `User_model.php`, `Role_model.php` | `users/index.php`, `users/form.php` |
 | Roles | `Roles.php` | `Role_model.php`, `Auth.php` | `roles/index.php`, `roles/form.php`, `header.php` |
 | Turns | `Turns.php` | `Turn_model.php`, `Patient_model.php`, `User_model.php` | `turns/index.php`, `turns/form.php`, `turns/bulk_form.php` |
@@ -1166,7 +1257,7 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 25. Exact File Paths By Module
+## 26. Exact File Paths By Module
 
 This section is intentionally repetitive. It is here so future chats can jump directly into the correct files without re-discovering the structure.
 
@@ -1195,6 +1286,19 @@ This section is intentionally repetitive. It is here so future chats can jump di
 - `application/views/patients/index.php`
 - `application/views/patients/form.php`
 - `application/views/patients/show.php`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+- `database/physical_therapy_clinic.sql`
+
+### Staff exact paths
+
+- `application/controllers/Staff.php`
+- `application/models/Staff_model.php`
+- `application/models/User_model.php`
+- `application/views/staff/index.php`
+- `application/views/staff/form.php`
+- `application/views/staff/profile.php`
+- `application/views/layout/header.php`
 - `application/language/english/app_lang.php`
 - `application/language/farsi/app_lang.php`
 - `database/physical_therapy_clinic.sql`
@@ -1281,13 +1385,13 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 ---
 
-## 26. AI Prompt Library
+## 27. AI Prompt Library
 
 These prompts are designed to be pasted into future chats.
 
 ### Full-project prompt
 
-> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
+> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
 
 ### Login prompt
 
@@ -1300,6 +1404,10 @@ These prompts are designed to be pasted into future chats.
 ### Patients prompt
 
 > Read `CANIN.md` first. Update only the Patients module. Start with `application/controllers/Patients.php`, `application/models/Patient_model.php`, and the views under `application/views/patients/`. Preserve patient CRUD, patient profile history, and bilingual responsive UI.
+
+### Staff prompt
+
+> Read `CANIN.md` first. Update only the Staff module. Start with `application/controllers/Staff.php`, `application/models/Staff_model.php`, and the views under `application/views/staff/`. Preserve `manage_staff`, keep the salary profile aligned with `doctor_leaves` and `turns`, and keep the whole flow bilingual and responsive.
 
 ### Users prompt
 
@@ -1331,7 +1439,7 @@ These prompts are designed to be pasted into future chats.
 
 ---
 
-## 27. Language And Content Rules
+## 28. Language And Content Rules
 
 When adding UI text:
 
@@ -1343,7 +1451,7 @@ Do not leave new visible UI strings untranslated if the rest of the module is lo
 
 ---
 
-## 28. Responsive Rules
+## 29. Responsive Rules
 
 Every module change must be checked for:
 
@@ -1361,7 +1469,7 @@ If a module needs special responsive styling, prefer adding small, focused addit
 
 ---
 
-## 29. Validation Checklist Before Finishing Any Change
+## 30. Validation Checklist Before Finishing Any Change
 
 Before saying a task is complete, verify:
 
@@ -1376,15 +1484,15 @@ Before saying a task is complete, verify:
 
 ---
 
-## 30. Best Prompt To Reuse In Other Chats
+## 31. Best Prompt To Reuse In Other Chats
 
 If you want to continue this project in another chat, you can paste something like this:
 
-> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
+> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
 
 ---
 
-## 31. Final Rule
+## 32. Final Rule
 
 When in doubt:
 

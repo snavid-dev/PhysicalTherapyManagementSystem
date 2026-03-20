@@ -58,3 +58,12 @@ $route['leaves/store'] = 'Leaves/store';
 $route['leaves/(:num)/edit'] = 'Leaves/edit/$1';
 $route['leaves/(:num)/update'] = 'Leaves/update/$1';
 $route['leaves/(:num)/delete'] = 'Leaves/delete/$1';
+
+$route['staff'] = 'staff/index';
+$route['staff/create'] = 'staff/create';
+$route['staff/store'] = 'staff/store';
+$route['staff/edit/(:num)'] = 'staff/edit/$1';
+$route['staff/update/(:num)'] = 'staff/update/$1';
+$route['staff/delete/(:num)'] = 'staff/delete/$1';
+$route['staff/profile/(:num)'] = 'staff/profile/$1';
+$route['staff/calculate_salary/(:num)'] = 'staff/calculate_salary/$1';

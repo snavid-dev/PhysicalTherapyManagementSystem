@@ -28,8 +28,8 @@
 						<div class="form-check border rounded p-3 h-100">
 							<input class="form-check-input" type="checkbox" name="permissions[]" value="<?= $permission['id'] ?>" id="permission<?= $permission['id'] ?>" <?= in_array((int) $permission['id'], $selected_permissions, TRUE) ? 'checked' : '' ?>>
 							<label class="form-check-label" for="permission<?= $permission['id'] ?>">
-								<strong><?= html_escape(ucwords(str_replace('_', ' ', $permission['module_key']))) ?></strong><br>
-								<span class="text-muted"><?= html_escape($permission['name']) ?></span>
+								<strong><?= html_escape(t(ucwords(str_replace('_', ' ', $permission['module_key'])))) ?></strong><br>
+								<span class="text-muted"><?= html_escape(t($permission['name'])) ?></span>
 							</label>
 						</div>
 					</div>
