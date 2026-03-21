@@ -11,6 +11,10 @@ $route['login'] = 'Login/index';
 $route['logout'] = 'Login/logout';
 $route['preferences/language/(:any)'] = 'Preferences/language/$1';
 $route['preferences/theme/(:any)'] = 'Preferences/theme/$1';
+$route['preferences/diagnoses'] = 'Preferences/diagnoses';
+$route['preferences/diagnoses/store'] = 'Preferences/diagnoses_store';
+$route['preferences/diagnoses/update/(:num)'] = 'Preferences/diagnoses_update/$1';
+$route['preferences/diagnoses/delete/(:num)'] = 'Preferences/diagnoses_delete/$1';
 
 $route['patients'] = 'Patients/index';
 $route['patients/create'] = 'Patients/create';

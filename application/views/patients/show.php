@@ -9,22 +9,45 @@
 	</div>
 </div>
 
+<?php $father_name = $patient['father_name'] ?? NULL; ?>
+<?php $age = $patient['age'] ?? NULL; ?>
+<?php $phone = $patient['phone'] ?? NULL; ?>
+<?php $phone2 = $patient['phone2'] ?? NULL; ?>
+<?php $address = $patient['address'] ?? NULL; ?>
+<?php $medical_notes = $patient['medical_notes'] ?? NULL; ?>
+<?php $referred_by = $patient['referred_by'] ?? NULL; ?>
+<?php $referred_by_name = $patient['referred_by_name'] ?? NULL; ?>
+
 <div class="row g-4">
 	<div class="col-lg-4">
 		<div class="card">
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Profile Details') ?></h2>
 				<dl class="row mb-0">
-					<dt class="col-5"><?= t('Phone') ?></dt><dd class="col-7"><?= html_escape($patient['phone']) ?></dd>
-					<dt class="col-5"><?= t('Email') ?></dt><dd class="col-7"><?= html_escape($patient['email']) ?></dd>
-					<dt class="col-5"><?= t('Gender') ?></dt><dd class="col-7"><?= html_escape($patient['gender']) ?></dd>
-					<dt class="col-5"><?= t('Birth Date') ?></dt><dd class="col-7"><?= html_escape($patient['date_of_birth']) ?></dd>
-					<dt class="col-5"><?= t('Address') ?></dt><dd class="col-7"><?= html_escape($patient['address']) ?></dd>
-					<dt class="col-5"><?= t('Referred By') ?></dt><dd class="col-7"><?= $patient['referred_by'] ? html_escape($patient['referred_by_name']) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('First Name') ?></dt><dd class="col-7"><?= html_escape($patient['first_name']) ?></dd>
+					<dt class="col-5"><?= t('Last Name') ?></dt><dd class="col-7"><?= html_escape($patient['last_name']) ?></dd>
+					<dt class="col-5"><?= t('father_name') ?></dt><dd class="col-7"><?= $father_name ? html_escape($father_name) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('Gender') ?></dt><dd class="col-7"><?= !empty($patient['gender']) ? html_escape($patient['gender']) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('age') ?></dt><dd class="col-7"><?= $age !== NULL ? format_number($age) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('Phone 1') ?></dt><dd class="col-7"><?= $phone ? html_escape($phone) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('phone2') ?></dt><dd class="col-7"><?= $phone2 ? html_escape($phone2) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('Address') ?></dt><dd class="col-7"><?= $address ? nl2br(html_escape($address)) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('Medical Notes') ?></dt><dd class="col-7"><?= $medical_notes ? nl2br(html_escape($medical_notes)) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('Referred By') ?></dt><dd class="col-7"><?= $referred_by ? html_escape($referred_by_name) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('diagnoses') ?></dt>
+					<dd class="col-7">
+						<?php if (!empty($patient_diagnoses)) : ?>
+							<?php
+							$diagnosis_names = array_map(static function ($diagnosis) use ($is_rtl) {
+								return $is_rtl && !empty($diagnosis['name_fa']) ? $diagnosis['name_fa'] : $diagnosis['name'];
+							}, $patient_diagnoses);
+							?>
+							<?= html_escape(implode(', ', $diagnosis_names)) ?>
+						<?php else : ?>
+							&mdash;
+						<?php endif; ?>
+					</dd>
 				</dl>
-				<hr>
-				<h3 class="h6"><?= t('Medical Notes') ?></h3>
-				<p class="mb-0 text-muted"><?= nl2br(html_escape($patient['medical_notes'])) ?></p>
 			</div>
 		</div>
 	</div>

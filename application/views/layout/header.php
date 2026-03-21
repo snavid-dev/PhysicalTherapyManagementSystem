@@ -55,6 +55,14 @@
 				<?php endif; ?>
 			</ul>
 			<div class="d-flex align-items-center gap-3 header-tools">
+				<?php if ($this->auth->has_permission('manage_patients')) : ?>
+					<div class="dropdown">
+						<button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button"><?= t('Preferences') ?></button>
+						<ul class="dropdown-menu dropdown-menu-end">
+							<li><a class="dropdown-item" href="<?= base_url('preferences/diagnoses') ?>"><?= t('manage_diagnoses') ?></a></li>
+						</ul>
+					</div>
+				<?php endif; ?>
 				<div class="dropdown">
 					<button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button"><?= t('Language') ?></button>
 					<ul class="dropdown-menu dropdown-menu-end">
