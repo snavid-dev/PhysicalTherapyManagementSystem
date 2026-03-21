@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS `staff`;
 DROP TABLE IF EXISTS `sections`;
 DROP TABLE IF EXISTS `staff_types`;
 DROP TABLE IF EXISTS `patients`;
+DROP TABLE IF EXISTS `reference_doctors`;
 DROP TABLE IF EXISTS `role_permissions`;
 DROP TABLE IF EXISTS `permissions`;
 DROP TABLE IF EXISTS `users`;
@@ -103,6 +104,21 @@ CREATE TABLE `staff_sections` (
 	CONSTRAINT `staff_sections_section_fk` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `reference_doctors` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`first_name` varchar(100) NOT NULL,
+	`last_name` varchar(100) NOT NULL,
+	`specialty` varchar(150) DEFAULT NULL,
+	`phone` varchar(30) DEFAULT NULL,
+	`clinic_name` varchar(200) DEFAULT NULL,
+	`address` text DEFAULT NULL,
+	`notes` text DEFAULT NULL,
+	`status` enum('active','inactive') NOT NULL DEFAULT 'active',
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `patients` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`first_name` varchar(100) NOT NULL,
@@ -113,9 +129,12 @@ CREATE TABLE `patients` (
 	`email` varchar(150) DEFAULT NULL,
 	`address` varchar(255) DEFAULT NULL,
 	`medical_notes` text,
+	`referred_by` int unsigned DEFAULT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`id`)
+	PRIMARY KEY (`id`),
+	KEY `patients_referred_by_index` (`referred_by`),
+	CONSTRAINT `fk_patients_referred_by` FOREIGN KEY (`referred_by`) REFERENCES `reference_doctors` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `turns` (
@@ -178,10 +197,11 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(6, 'view_reports', 'reports'),
 	(7, 'manage_leaves', 'leaves'),
 	(8, 'manage_staff', 'staff'),
-	(9, 'manage_sections', 'sections');
+	(9, 'manage_sections', 'sections'),
+	(10, 'manage_reference_doctors', 'reference_doctors');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9),
+	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10),
 	(2, 1), (2, 4), (2, 6), (2, 7),
 	(3, 1), (3, 4), (3, 5), (3, 6);
 

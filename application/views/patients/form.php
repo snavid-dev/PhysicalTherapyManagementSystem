@@ -48,6 +48,18 @@
 					<input type="text" name="address" class="form-control" value="<?= set_value('address', $patient['address'] ?? '') ?>">
 				</div>
 				<div class="col-12">
+					<label class="form-label"><?= t('Referred By') ?></label>
+					<?php $selected_reference_doctor = set_value('referred_by', $patient['referred_by'] ?? ''); ?>
+					<select name="referred_by" class="form-select">
+						<option value=""><?= t('-- None --') ?></option>
+						<?php foreach ($reference_doctors as $reference_doctor) : ?>
+							<option value="<?= $reference_doctor['id'] ?>" <?= (string) $selected_reference_doctor === (string) $reference_doctor['id'] ? 'selected' : '' ?>>
+								<?= html_escape($reference_doctor['full_name']) ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+				<div class="col-12">
 					<label class="form-label"><?= t('Medical Notes') ?></label>
 					<textarea name="medical_notes" class="form-control" rows="5"><?= set_value('medical_notes', $patient['medical_notes'] ?? '') ?></textarea>
 				</div>

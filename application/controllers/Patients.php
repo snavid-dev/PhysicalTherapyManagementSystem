@@ -97,6 +97,7 @@ class Patients extends Authenticated_Controller
 			'current_section' => 'patients',
 			'patient' => $patient,
 			'action' => $action,
+			'reference_doctors' => $this->Patient_model->get_active_reference_doctors(),
 		));
 	}
 
@@ -110,6 +111,8 @@ class Patients extends Authenticated_Controller
 
 	protected function patient_payload()
 	{
+		$referred_by = $this->input->post('referred_by', TRUE);
+
 		return array(
 			'first_name' => $this->input->post('first_name', TRUE),
 			'last_name' => $this->input->post('last_name', TRUE),
@@ -119,6 +122,7 @@ class Patients extends Authenticated_Controller
 			'email' => $this->input->post('email', TRUE),
 			'address' => $this->input->post('address', TRUE),
 			'medical_notes' => $this->input->post('medical_notes', TRUE),
+			'referred_by' => $referred_by === '' || $referred_by === NULL ? NULL : (int) $referred_by,
 		);
 	}
 }

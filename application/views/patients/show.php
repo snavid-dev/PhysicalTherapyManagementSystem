@@ -20,6 +20,7 @@
 					<dt class="col-5"><?= t('Gender') ?></dt><dd class="col-7"><?= html_escape($patient['gender']) ?></dd>
 					<dt class="col-5"><?= t('Birth Date') ?></dt><dd class="col-7"><?= html_escape($patient['date_of_birth']) ?></dd>
 					<dt class="col-5"><?= t('Address') ?></dt><dd class="col-7"><?= html_escape($patient['address']) ?></dd>
+					<dt class="col-5"><?= t('Referred By') ?></dt><dd class="col-7"><?= $patient['referred_by'] ? html_escape($patient['referred_by_name']) : '&mdash;' ?></dd>
 				</dl>
 				<hr>
 				<h3 class="h6"><?= t('Medical Notes') ?></h3>

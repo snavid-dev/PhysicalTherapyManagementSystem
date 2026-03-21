@@ -19,6 +19,7 @@ The current live direction is no longer dental treatment planning, teeth charts,
 - staff management and salary profiles
 - users and login access
 - roles and permissions
+- reference doctors
 - turns or appointments
 - payments
 - reports
@@ -105,6 +106,7 @@ If you are editing this project in a future chat, assume this:
 - `application/controllers/Preferences.php`
 - `application/controllers/Dashboard.php`
 - `application/controllers/Patients.php`
+- `application/controllers/Reference_doctors.php`
 - `application/controllers/Sections.php`
 - `application/controllers/Staff.php`
 - `application/controllers/Users.php`
@@ -119,6 +121,7 @@ If you are editing this project in a future chat, assume this:
 - `application/models/Login_model.php`
 - `application/models/Dashboard_model.php`
 - `application/models/Patient_model.php`
+- `application/models/Reference_doctor_model.php`
 - `application/models/Section_model.php`
 - `application/models/Staff_model.php`
 - `application/models/User_model.php`
@@ -133,6 +136,7 @@ If you are editing this project in a future chat, assume this:
 - `application/views/login.php`
 - `application/views/dashboard/`
 - `application/views/patients/`
+- `application/views/reference_doctors/`
 - `application/views/sections/`
 - `application/views/staff/`
 - `application/views/users/`
@@ -196,6 +200,7 @@ These are the main active routes:
 - `/logout`
 - `/dashboard`
 - `/patients`
+- `/reference_doctors`
 - `/sections`
 - `/staff`
 - `/users`
@@ -231,9 +236,16 @@ This is the practical dependency map of the active system.
 ### Patients dependencies
 
 - `Patients` depends on `Patient_model`
+- `Patients` depends on `reference_doctors` for optional referral linkage
 - patient profile depends on turns from `Patient_model::turn_history()`
 - patient profile depends on payments from `Patient_model::payment_history()`
 - patient UI depends on `patients/index.php`, `patients/form.php`, `patients/show.php`
+
+### Reference Doctors dependencies
+
+- `Reference_doctors` depends on `Reference_doctor_model`
+- `Reference_doctors` depends on `Patient_model` data through `patients.referred_by`
+- reference doctor UI depends on `reference_doctors/index.php`, `reference_doctors/form.php`, `reference_doctors/profile.php`
 
 ### Users dependencies
 
@@ -322,8 +334,14 @@ This section maps each active module to the main tables it reads or writes.
 ### Patients
 
 - writes: `patients`
+- reads: `reference_doctors`
 - reads: `turns`
 - reads: `payments`
+
+### Reference Doctors
+
+- writes: `reference_doctors`
+- reads: `patients` via `referred_by`
 
 ### Users
 
@@ -412,6 +430,7 @@ Important rules:
 ### Current permission keys
 
 - `manage_patients`
+- `manage_reference_doctors`
 - `manage_sections`
 - `manage_staff`
 - `manage_users`
@@ -1033,7 +1052,86 @@ Pass these steps:
 
 ---
 
-## 20. Module: Staff
+## 20. Module: Reference Doctors
+
+### Purpose
+
+This module manages referral-source doctors and tracks the patients each doctor has referred into the clinic.
+
+### Main files
+
+- `application/controllers/Reference_doctors.php`
+- `application/models/Reference_doctor_model.php`
+- `application/views/reference_doctors/index.php`
+- `application/views/reference_doctors/form.php`
+- `application/views/reference_doctors/profile.php`
+- `application/views/layout/header.php`
+- `application/views/roles/form.php`
+- `application/models/Patient_model.php`
+- `application/controllers/Patients.php`
+- `database/physical_therapy_clinic.sql`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+
+### What it currently does
+
+- lists reference doctors
+- creates reference doctor records
+- edits reference doctor records
+- soft-deactivates reference doctor records
+- shows a profile page with doctor details and referral totals
+- counts referred patients within a selected date range through AJAX
+- shows all referred patients on the profile page
+- supplies active doctors to the patient create and edit form
+
+### Current data fields
+
+- first name
+- last name
+- specialty
+- phone
+- clinic name
+- address
+- notes
+- status
+
+### If you want to change this module
+
+Pass these steps:
+
+1. Decide whether the change affects CRUD data, patient linkage, profile reporting, or all three.
+2. Update validation in `Reference_doctors.php`.
+3. Update `doctor_payload()` if stored fields change.
+4. Update `Reference_doctor_model.php` if totals, joins, or date-range queries change.
+5. Update the correct views:
+   - `index.php`
+   - `form.php`
+   - `profile.php`
+6. Update `Patients.php` and `Patient_model.php` if the patient referral contract changes.
+7. Update both language files for new labels or messages.
+8. If schema changes, update `database/physical_therapy_clinic.sql`.
+9. Verify the permission gate, navigation visibility, patient form dropdown, and AJAX date-range count modal.
+
+### Common safe changes
+
+- add extra contact fields
+- improve doctor profile presentation
+- add more referral analytics
+- add search or filters to the list
+
+### Common risky changes
+
+- changing the `patients.referred_by` relationship
+- filtering patient referral counts by the wrong date field
+- exposing inactive doctors in the patient form dropdown
+
+### AI prompt example for this module
+
+> Read `CANIN.md` first. Work only on the Reference Doctors module. Inspect `application/controllers/Reference_doctors.php`, `application/models/Reference_doctor_model.php`, `application/controllers/Patients.php`, `application/models/Patient_model.php`, and the views under `application/views/reference_doctors/`. Preserve `manage_reference_doctors`, keep patient referral optional, and keep the profile page bilingual and responsive.
+
+---
+
+## 21. Module: Staff
 
 ### Purpose
 
@@ -1105,7 +1203,7 @@ Pass these steps:
 
 ---
 
-## 21. Module: Sections
+## 22. Module: Sections
 
 ### Purpose
 
@@ -1170,7 +1268,7 @@ Pass these steps:
 
 ---
 
-## 22. Module: Preferences
+## 23. Module: Preferences
 
 ### Purpose
 
@@ -1218,7 +1316,7 @@ Pass these steps:
 
 ---
 
-## 23. Database Story
+## 24. Database Story
 
 The active simplified schema reference is:
 
@@ -1234,6 +1332,7 @@ This file defines the simplified physical therapy structure for:
 - staff
 - staff sections
 - patients
+- reference doctors
 - turns
 - payments
 - doctor leaves
@@ -1247,7 +1346,7 @@ If the database needs to evolve, update that file and then reflect the change in
 
 ---
 
-## 24. Legacy Code Policy
+## 25. Legacy Code Policy
 
 This repository still contains old dental-era code.
 
@@ -1316,7 +1415,7 @@ Pass these checks:
 
 ---
 
-## 25. Global Change Process For Any Module
+## 26. Global Change Process For Any Module
 
 If you want to change any module, use this exact sequence:
 
@@ -1337,13 +1436,14 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 26. Module-Specific Change Matrix
+## 27. Module-Specific Change Matrix
 
 | Module | Start Here | Then Check | Then Update |
 |---|---|---|---|
 | Login | `Login.php` | `Login_model.php`, `Auth.php` | `login.php`, language files |
 | Dashboard | `Dashboard.php` | `Dashboard_model.php` | `dashboard/index.php`, language files |
 | Patients | `Patients.php` | `Patient_model.php` | `patients/index.php`, `patients/form.php`, `patients/show.php` |
+| Reference Doctors | `Reference_doctors.php` | `Reference_doctor_model.php`, `Patient_model.php` | `reference_doctors/index.php`, `reference_doctors/form.php`, `reference_doctors/profile.php`, `patients/form.php`, `patients/show.php`, language files |
 | Sections | `Sections.php` | `Section_model.php`, `Staff_model.php` | `sections/index.php`, `sections/form.php`, `sections/show.php`, language files |
 | Staff | `Staff.php` | `Staff_model.php`, `User_model.php` | `staff/index.php`, `staff/form.php`, `staff/profile.php`, language files |
 | Users | `Users.php` | `User_model.php`, `Role_model.php` | `users/index.php`, `users/form.php` |
@@ -1356,7 +1456,7 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 27. Exact File Paths By Module
+## 28. Exact File Paths By Module
 
 This section is intentionally repetitive. It is here so future chats can jump directly into the correct files without re-discovering the structure.
 
@@ -1385,6 +1485,23 @@ This section is intentionally repetitive. It is here so future chats can jump di
 - `application/views/patients/index.php`
 - `application/views/patients/form.php`
 - `application/views/patients/show.php`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+- `database/physical_therapy_clinic.sql`
+
+### Reference Doctors exact paths
+
+- `application/controllers/Reference_doctors.php`
+- `application/models/Reference_doctor_model.php`
+- `application/views/reference_doctors/index.php`
+- `application/views/reference_doctors/form.php`
+- `application/views/reference_doctors/profile.php`
+- `application/controllers/Patients.php`
+- `application/models/Patient_model.php`
+- `application/views/patients/form.php`
+- `application/views/patients/show.php`
+- `application/views/layout/header.php`
+- `application/views/roles/form.php`
 - `application/language/english/app_lang.php`
 - `application/language/farsi/app_lang.php`
 - `database/physical_therapy_clinic.sql`
@@ -1499,13 +1616,13 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 ---
 
-## 28. AI Prompt Library
+## 29. AI Prompt Library
 
 These prompts are designed to be pasted into future chats.
 
 ### Full-project prompt
 
-> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, sections, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
+> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
 
 ### Login prompt
 
@@ -1518,6 +1635,10 @@ These prompts are designed to be pasted into future chats.
 ### Patients prompt
 
 > Read `CANIN.md` first. Update only the Patients module. Start with `application/controllers/Patients.php`, `application/models/Patient_model.php`, and the views under `application/views/patients/`. Preserve patient CRUD, patient profile history, and bilingual responsive UI.
+
+### Reference Doctors prompt
+
+> Read `CANIN.md` first. Update only the Reference Doctors module. Start with `application/controllers/Reference_doctors.php`, `application/models/Reference_doctor_model.php`, `application/controllers/Patients.php`, `application/models/Patient_model.php`, and the views under `application/views/reference_doctors/`. Preserve `manage_reference_doctors`, keep `patients.referred_by` optional, and keep the date-range modal and patient profile integration responsive and bilingual.
 
 ### Sections prompt
 
@@ -1557,7 +1678,7 @@ These prompts are designed to be pasted into future chats.
 
 ---
 
-## 29. Language And Content Rules
+## 30. Language And Content Rules
 
 When adding UI text:
 
@@ -1569,7 +1690,7 @@ Do not leave new visible UI strings untranslated if the rest of the module is lo
 
 ---
 
-## 30. Responsive Rules
+## 31. Responsive Rules
 
 Every module change must be checked for:
 
@@ -1587,7 +1708,7 @@ If a module needs special responsive styling, prefer adding small, focused addit
 
 ---
 
-## 31. Validation Checklist Before Finishing Any Change
+## 32. Validation Checklist Before Finishing Any Change
 
 Before saying a task is complete, verify:
 
@@ -1602,15 +1723,15 @@ Before saying a task is complete, verify:
 
 ---
 
-## 32. Best Prompt To Reuse In Other Chats
+## 33. Best Prompt To Reuse In Other Chats
 
 If you want to continue this project in another chat, you can paste something like this:
 
-> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, sections, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
+> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
 
 ---
 
-## 33. Final Rule
+## 34. Final Rule
 
 When in doubt:
 

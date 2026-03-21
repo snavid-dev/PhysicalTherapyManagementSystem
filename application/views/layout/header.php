@@ -26,6 +26,9 @@
 				<?php if ($this->auth->has_permission('manage_patients')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'patients' ? 'active' : '' ?>" href="<?= base_url('patients') ?>"><?= t('Patients') ?></a></li>
 				<?php endif; ?>
+				<?php if ($this->auth->has_permission('manage_reference_doctors')) : ?>
+					<li class="nav-item"><a class="nav-link <?= $current_section === 'reference_doctors' ? 'active' : '' ?>" href="<?= base_url('reference_doctors') ?>"><?= t('Reference Doctors') ?></a></li>
+				<?php endif; ?>
 				<?php if ($this->auth->has_permission('manage_turns')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'turns' ? 'active' : '' ?>" href="<?= base_url('turns') ?>"><?= t('Turns') ?></a></li>
 				<?php endif; ?>
