@@ -20,6 +20,16 @@ $route['patients/(:num)/edit'] = 'Patients/edit/$1';
 $route['patients/(:num)/update'] = 'Patients/update/$1';
 $route['patients/(:num)/delete'] = 'Patients/delete/$1';
 
+$route['reference_doctors'] = 'reference_doctors/index';
+$route['reference_doctors/create'] = 'reference_doctors/create';
+$route['reference_doctors/store'] = 'reference_doctors/store';
+$route['reference_doctors/edit/(:num)'] = 'reference_doctors/edit/$1';
+$route['reference_doctors/update/(:num)'] = 'reference_doctors/update/$1';
+$route['reference_doctors/delete/(:num)'] = 'reference_doctors/delete/$1';
+$route['reference_doctors/activate/(:num)'] = 'reference_doctors/activate/$1';
+$route['reference_doctors/profile/(:num)'] = 'reference_doctors/profile/$1';
+$route['reference_doctors/patient_count/(:num)'] = 'reference_doctors/patient_count/$1';
+
 $route['users'] = 'Users/index';
 $route['users/create'] = 'Users/create';
 $route['users/store'] = 'Users/store';
