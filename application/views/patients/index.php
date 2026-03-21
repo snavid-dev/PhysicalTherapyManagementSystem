@@ -10,22 +10,40 @@
 	<div class="card-body">
 		<div class="table-responsive">
 			<table class="table align-middle">
-				<thead><tr><th><?= t('Patient') ?></th><th><?= t('Phone') ?></th><th><?= t('Email') ?></th><th><?= t('Gender') ?></th><th></th></tr></thead>
+				<thead>
+					<tr>
+						<th><?= t('Full Name') ?></th>
+						<th><?= t('father_name') ?></th>
+						<th><?= t('Gender') ?></th>
+						<th><?= t('age') ?></th>
+						<th><?= t('Phone 1') ?></th>
+						<th><?= t('Status') ?></th>
+						<th class="text-end"><?= t('Actions') ?></th>
+					</tr>
+				</thead>
 				<tbody>
 				<?php if ($patients) : foreach ($patients as $patient) : ?>
+					<?php $father_name = $patient['father_name'] ?? NULL; ?>
+					<?php $age = $patient['age'] ?? NULL; ?>
+					<?php $phone = $patient['phone'] ?? NULL; ?>
+					<?php $gender = $patient['gender'] ?? NULL; ?>
 					<tr>
 						<td><?= html_escape($patient['first_name'] . ' ' . $patient['last_name']) ?></td>
-						<td><?= html_escape($patient['phone']) ?></td>
-						<td><?= html_escape($patient['email']) ?></td>
-						<td><?= html_escape($patient['gender']) ?></td>
+						<td><?= $father_name ? html_escape($father_name) : '&mdash;' ?></td>
+						<td><?= $gender ? html_escape($gender) : '&mdash;' ?></td>
+						<td><?= $age !== NULL ? format_number($age) : '&mdash;' ?></td>
+						<td><?= $phone ? html_escape($phone) : '&mdash;' ?></td>
+						<td><span class="badge text-bg-success"><?= t('Active') ?></span></td>
 						<td class="text-end">
-							<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
-							<a href="<?= base_url('patients/' . $patient['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
-							<a href="<?= base_url('patients/' . $patient['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this patient?') ?>')"><?= t('Delete') ?></a>
+							<div class="d-flex gap-2 justify-content-end flex-wrap">
+								<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
+								<a href="<?= base_url('patients/' . $patient['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
+								<a href="<?= base_url('patients/' . $patient['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this patient?') ?>')"><?= t('Delete') ?></a>
+							</div>
 						</td>
 					</tr>
 				<?php endforeach; else : ?>
-					<tr><td colspan="5" class="text-muted"><?= t('No patients found.') ?></td></tr>
+					<tr><td colspan="7" class="text-muted"><?= t('No patients found.') ?></td></tr>
 				<?php endif; ?>
 				</tbody>
 			</table>

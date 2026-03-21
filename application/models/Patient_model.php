@@ -3,7 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Patient_model extends CI_Model
 {
-	public function all()
+	protected function diagnoses_tables_ready()
+	{
+		return $this->db->table_exists('diagnoses') && $this->db->table_exists('patient_diagnoses');
+	}
+
+	public function get_all()
 	{
 		return $this->db
 			->select("patients.*, CONCAT(reference_doctors.first_name, ' ', reference_doctors.last_name) AS referred_by_name", FALSE)
@@ -15,7 +20,7 @@ class Patient_model extends CI_Model
 			->result_array();
 	}
 
-	public function find($id)
+	public function get_by_id($id)
 	{
 		return $this->db
 			->select("patients.*, CONCAT(reference_doctors.first_name, ' ', reference_doctors.last_name) AS referred_by_name", FALSE)
@@ -24,6 +29,16 @@ class Patient_model extends CI_Model
 			->where('patients.id', (int) $id)
 			->get()
 			->row_array();
+	}
+
+	public function all()
+	{
+		return $this->get_all();
+	}
+
+	public function find($id)
+	{
+		return $this->get_by_id($id);
 	}
 
 	public function create($data)
@@ -40,6 +55,57 @@ class Patient_model extends CI_Model
 	public function delete($id)
 	{
 		return $this->db->where('id', (int) $id)->delete('patients');
+	}
+
+	public function get_diagnoses_for_patient($patient_id)
+	{
+		if (!$this->diagnoses_tables_ready()) {
+			return array();
+		}
+
+		return $this->db
+			->select('diagnoses.id, diagnoses.name, diagnoses.name_fa')
+			->from('patient_diagnoses')
+			->join('diagnoses', 'diagnoses.id = patient_diagnoses.diagnosis_id')
+			->where('patient_diagnoses.patient_id', (int) $patient_id)
+			->order_by('diagnoses.name', 'asc')
+			->get()
+			->result_array();
+	}
+
+	public function save_diagnoses($patient_id, $diagnosis_ids)
+	{
+		if (!$this->diagnoses_tables_ready()) {
+			return TRUE;
+		}
+
+		$patient_id = (int) $patient_id;
+		$diagnosis_ids = is_array($diagnosis_ids) ? $diagnosis_ids : array();
+
+		$this->db->where('patient_id', $patient_id)->delete('patient_diagnoses');
+
+		if (empty($diagnosis_ids)) {
+			return TRUE;
+		}
+
+		$rows = array();
+
+		foreach (array_unique(array_map('intval', $diagnosis_ids)) as $diagnosis_id) {
+			if ($diagnosis_id <= 0) {
+				continue;
+			}
+
+			$rows[] = array(
+				'patient_id' => $patient_id,
+				'diagnosis_id' => $diagnosis_id,
+			);
+		}
+
+		if (empty($rows)) {
+			return TRUE;
+		}
+
+		return $this->db->insert_batch('patient_diagnoses', $rows);
 	}
 
 	public function turn_history($patient_id)
@@ -74,6 +140,19 @@ class Patient_model extends CI_Model
 			->where('status', 'active')
 			->order_by('first_name', 'asc')
 			->order_by('last_name', 'asc')
+			->get()
+			->result_array();
+	}
+
+	public function get_all_diagnoses()
+	{
+		if (!$this->db->table_exists('diagnoses')) {
+			return array();
+		}
+
+		return $this->db
+			->from('diagnoses')
+			->order_by('name', 'asc')
 			->get()
 			->result_array();
 	}

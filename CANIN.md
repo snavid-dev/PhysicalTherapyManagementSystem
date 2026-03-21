@@ -334,7 +334,9 @@ This section maps each active module to the main tables it reads or writes.
 ### Patients
 
 - writes: `patients`
+- writes: `patient_diagnoses`
 - reads: `reference_doctors`
+- reads: `diagnoses`
 - reads: `turns`
 - reads: `payments`
 
@@ -398,8 +400,8 @@ This section maps each active module to the main tables it reads or writes.
 
 ### Preferences
 
-- no dedicated DB table currently
-- session-driven only
+- writes: `diagnoses`
+- session-driven for theme and language
 
 ---
 
@@ -627,12 +629,15 @@ Core patient fields currently include:
 
 - first name
 - last name
+- father name
 - gender
-- date of birth
 - phone
-- email
+- phone2
+- age
 - address
 - medical notes
+- referred_by
+- diagnoses
 
 ### If you want to change this module
 
@@ -1332,6 +1337,8 @@ This file defines the simplified physical therapy structure for:
 - staff
 - staff sections
 - patients
+- diagnoses
+- patient_diagnoses
 - reference doctors
 - turns
 - payments
@@ -1482,9 +1489,11 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 - `application/controllers/Patients.php`
 - `application/models/Patient_model.php`
+- `application/models/Diagnosis_model.php`
 - `application/views/patients/index.php`
 - `application/views/patients/form.php`
 - `application/views/patients/show.php`
+- `application/views/preferences/diagnoses.php`
 - `application/language/english/app_lang.php`
 - `application/language/farsi/app_lang.php`
 - `database/physical_therapy_clinic.sql`

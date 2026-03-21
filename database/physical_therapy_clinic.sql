@@ -4,6 +4,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `doctor_leaves`;
 DROP TABLE IF EXISTS `payments`;
 DROP TABLE IF EXISTS `turns`;
+DROP TABLE IF EXISTS `patient_diagnoses`;
+DROP TABLE IF EXISTS `diagnoses`;
 DROP TABLE IF EXISTS `staff_sections`;
 DROP TABLE IF EXISTS `staff`;
 DROP TABLE IF EXISTS `sections`;
@@ -123,10 +125,11 @@ CREATE TABLE `patients` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`first_name` varchar(100) NOT NULL,
 	`last_name` varchar(100) NOT NULL,
+	`father_name` varchar(100) DEFAULT NULL,
 	`gender` varchar(20) DEFAULT NULL,
-	`date_of_birth` date DEFAULT NULL,
-	`phone` varchar(50) DEFAULT NULL,
-	`email` varchar(150) DEFAULT NULL,
+	`phone` varchar(30) DEFAULT NULL,
+	`phone2` varchar(30) DEFAULT NULL,
+	`age` tinyint unsigned DEFAULT NULL,
 	`address` varchar(255) DEFAULT NULL,
 	`medical_notes` text,
 	`referred_by` int unsigned DEFAULT NULL,
@@ -135,6 +138,25 @@ CREATE TABLE `patients` (
 	PRIMARY KEY (`id`),
 	KEY `patients_referred_by_index` (`referred_by`),
 	CONSTRAINT `fk_patients_referred_by` FOREIGN KEY (`referred_by`) REFERENCES `reference_doctors` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `diagnoses` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`name` varchar(200) NOT NULL,
+	`name_fa` varchar(200) DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `patient_diagnoses` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`patient_id` int unsigned NOT NULL,
+	`diagnosis_id` int unsigned NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY `uq_patient_diagnosis` (`patient_id`, `diagnosis_id`),
+	KEY `patient_diagnoses_diagnosis_id_index` (`diagnosis_id`),
+	CONSTRAINT `patient_diagnoses_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `patient_diagnoses_diagnosis_fk` FOREIGN KEY (`diagnosis_id`) REFERENCES `diagnoses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `turns` (
@@ -224,9 +246,19 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `email`, `phon
 	(2, 'Default', 'Therapist', 'therapist', 'therapist@clinic.local', '0000000001', '$2y$10$reKyugm60bDFU1/CoGnX..qeEJlYRQyI3e.Cp4LpdaHpVk84GupFS', 2, 1),
 	(3, 'Front', 'Desk', 'reception', 'reception@clinic.local', '0000000002', '$2y$10$reKyugm60bDFU1/CoGnX..qeEJlYRQyI3e.Cp4LpdaHpVk84GupFS', 3, 1);
 
-INSERT INTO `patients` (`id`, `first_name`, `last_name`, `gender`, `date_of_birth`, `phone`, `email`, `address`, `medical_notes`) VALUES
-	(1, 'Ahmad', 'Rahimi', 'Male', '1990-05-10', '0700000001', 'ahmad@example.com', 'Kabul', 'Post-surgery mobility follow-up.'),
-	(2, 'Sara', 'Azizi', 'Female', '1995-08-22', '0700000002', 'sara@example.com', 'Kabul', 'Lower back pain treatment plan.');
+INSERT INTO `patients` (`id`, `first_name`, `last_name`, `father_name`, `gender`, `phone`, `phone2`, `age`, `address`, `medical_notes`) VALUES
+	(1, 'Ahmad', 'Rahimi', 'Karim', 'Male', '0700000001', '0700000101', 36, 'Kabul', 'Post-surgery mobility follow-up.'),
+	(2, 'Sara', 'Azizi', 'Jalil', 'Female', '0700000002', NULL, 31, 'Kabul', 'Lower back pain treatment plan.');
+
+INSERT INTO `diagnoses` (`id`, `name`, `name_fa`) VALUES
+	(1, 'Low Back Pain', 'کمردرد'),
+	(2, 'Post-Surgical Rehabilitation', 'توانبخشی پس از جراحی'),
+	(3, 'Knee Osteoarthritis', 'آرتروز زانو');
+
+INSERT INTO `patient_diagnoses` (`patient_id`, `diagnosis_id`) VALUES
+	(1, 2),
+	(2, 1),
+	(2, 3);
 
 INSERT INTO `turns` (`patient_id`, `doctor_id`, `turn_date`, `turn_time`, `status`, `notes`) VALUES
 	(1, 2, CURDATE(), '09:00:00', 'scheduled', 'Initial evaluation session.'),
