@@ -2,6 +2,9 @@ USE `sql_test_navid_c`;
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `doctor_leaves`;
+DROP TABLE IF EXISTS `patient_debts`;
+DROP TABLE IF EXISTS `patient_wallet_transactions`;
+DROP TABLE IF EXISTS `patient_wallet`;
 DROP TABLE IF EXISTS `payments`;
 DROP TABLE IF EXISTS `turns`;
 DROP TABLE IF EXISTS `patient_diagnoses`;
@@ -163,6 +166,14 @@ CREATE TABLE `turns` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`patient_id` int unsigned NOT NULL,
 	`doctor_id` int unsigned NOT NULL,
+	`section_id` int unsigned DEFAULT NULL,
+	`staff_id` int unsigned DEFAULT NULL,
+	`turn_number` tinyint unsigned DEFAULT NULL,
+	`fee` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`payment_type` enum('prepaid','cash','deferred','free') NOT NULL DEFAULT 'cash',
+	`wallet_deducted` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`cash_collected` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`topup_amount` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`turn_date` date NOT NULL,
 	`turn_time` time NOT NULL,
 	`status` varchar(30) NOT NULL DEFAULT 'scheduled',
@@ -172,8 +183,56 @@ CREATE TABLE `turns` (
 	PRIMARY KEY (`id`),
 	KEY `turns_patient_id_index` (`patient_id`),
 	KEY `turns_doctor_id_index` (`doctor_id`),
+	KEY `turns_section_id_index` (`section_id`),
+	KEY `turns_staff_id_index` (`staff_id`),
 	CONSTRAINT `turns_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
-	CONSTRAINT `turns_doctor_fk` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT
+	CONSTRAINT `turns_doctor_fk` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
+	CONSTRAINT `turns_section_fk` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL,
+	CONSTRAINT `turns_staff_fk` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `patient_wallet` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`patient_id` int unsigned NOT NULL,
+	`balance` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY `patient_wallet_patient_id_unique` (`patient_id`),
+	CONSTRAINT `patient_wallet_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `patient_wallet_transactions` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`patient_id` int unsigned NOT NULL,
+	`turn_id` int unsigned DEFAULT NULL,
+	`type` enum('topup','deduction') NOT NULL,
+	`amount` decimal(12,2) NOT NULL,
+	`note` varchar(255) DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `patient_wallet_transactions_patient_id_index` (`patient_id`),
+	KEY `patient_wallet_transactions_turn_id_index` (`turn_id`),
+	CONSTRAINT `patient_wallet_transactions_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `patient_wallet_transactions_turn_fk` FOREIGN KEY (`turn_id`) REFERENCES `turns` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `patient_debts` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`patient_id` int unsigned NOT NULL,
+	`turn_id` int unsigned NOT NULL,
+	`amount` decimal(12,2) NOT NULL,
+	`status` enum('open','cleared') NOT NULL DEFAULT 'open',
+	`cleared_at` timestamp NULL DEFAULT NULL,
+	`cleared_by_turn_id` int unsigned DEFAULT NULL,
+	`note` varchar(255) DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `patient_debts_patient_id_index` (`patient_id`),
+	KEY `patient_debts_turn_id_index` (`turn_id`),
+	KEY `patient_debts_cleared_by_turn_id_index` (`cleared_by_turn_id`),
+	CONSTRAINT `patient_debts_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `patient_debts_turn_fk` FOREIGN KEY (`turn_id`) REFERENCES `turns` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `patient_debts_cleared_turn_fk` FOREIGN KEY (`cleared_by_turn_id`) REFERENCES `turns` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `payments` (
@@ -263,6 +322,16 @@ INSERT INTO `patient_diagnoses` (`patient_id`, `diagnosis_id`) VALUES
 INSERT INTO `turns` (`patient_id`, `doctor_id`, `turn_date`, `turn_time`, `status`, `notes`) VALUES
 	(1, 2, CURDATE(), '09:00:00', 'scheduled', 'Initial evaluation session.'),
 	(2, 2, CURDATE(), '11:00:00', 'completed', 'Range-of-motion follow-up.');
+
+INSERT INTO `patient_wallet` (`patient_id`, `balance`) VALUES
+	(1, 100.00),
+	(2, 0.00);
+
+INSERT INTO `patient_wallet_transactions` (`patient_id`, `turn_id`, `type`, `amount`, `note`) VALUES
+	(1, NULL, 'topup', 100.00, 'Initial wallet top up');
+
+INSERT INTO `patient_debts` (`patient_id`, `turn_id`, `amount`, `status`, `note`) VALUES
+	(2, 2, 25.00, 'open', 'Outstanding follow-up fee');
 
 INSERT INTO `payments` (`patient_id`, `payment_date`, `amount`, `payment_method`, `reference_number`, `notes`) VALUES
 	(1, CURDATE(), 50.00, 'cash', 'PT-1001', 'Evaluation payment'),
