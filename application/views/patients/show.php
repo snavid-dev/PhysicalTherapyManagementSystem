@@ -17,6 +17,12 @@
 <?php $medical_notes = $patient['medical_notes'] ?? NULL; ?>
 <?php $referred_by = $patient['referred_by'] ?? NULL; ?>
 <?php $referred_by_name = $patient['referred_by_name'] ?? NULL; ?>
+<?php
+$display_time = static function ($time_value) {
+	$time_value = (string) $time_value;
+	return ($time_value === '' || $time_value === '00:00:00') ? '&mdash;' : html_escape(substr($time_value, 0, 5));
+};
+?>
 
 <div class="row g-4">
 	<div class="col-lg-4">
@@ -52,22 +58,207 @@
 		</div>
 	</div>
 	<div class="col-lg-8">
+		<div class="row g-4 mb-4">
+			<div class="col-md-6">
+				<div class="card h-100">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+							<h2 class="h5 mb-0"><?= t('wallet_balance') ?></h2>
+							<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#walletTransactionsCollapse" aria-expanded="false" aria-controls="walletTransactionsCollapse">
+								<?= t('view_transactions') ?>
+							</button>
+						</div>
+						<span id="walletBalanceProfileBadge" class="badge rounded-pill <?= $wallet_balance > 0 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?> mb-3">
+							<?= format_amount($wallet_balance) ?>
+						</span>
+						<div class="wallet-profile-stack">
+							<form id="walletTopupForm" class="wallet-profile-form" action="<?= base_url('patients/' . $patient['id'] . '/wallet-topup') ?>" method="post">
+								<div class="wallet-profile-form__head">
+									<h3 class="h6 mb-0"><?= t('top_up_wallet') ?></h3>
+									<span class="text-muted small"><?= t('wallet_action_hint') ?></span>
+								</div>
+								<div class="row g-2">
+									<div class="col-sm-5">
+										<label class="form-label mb-1"><?= t('top_up_amount') ?></label>
+										<input type="number" name="amount" id="walletTopupAmount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+									</div>
+									<div class="col-sm-7">
+										<label class="form-label mb-1"><?= t('wallet_note') ?></label>
+										<input type="text" name="note" id="walletTopupNote" class="form-control" placeholder="<?= t('wallet_note_placeholder') ?>">
+									</div>
+								</div>
+								<div class="wallet-quick-actions mt-2">
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletTopupAmount" data-amount="100">+<?= format_amount(100) ?></button>
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletTopupAmount" data-amount="250">+<?= format_amount(250) ?></button>
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletTopupAmount" data-amount="500">+<?= format_amount(500) ?></button>
+								</div>
+								<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+									<button type="submit" class="btn btn-dark btn-sm"><?= t('top_up_wallet') ?></button>
+								</div>
+								<div id="walletTopupFeedback" class="alert d-none mt-3 mb-0"></div>
+							</form>
+							<form id="walletDeductForm" class="wallet-profile-form" action="<?= base_url('patients/' . $patient['id'] . '/wallet-deduct') ?>" method="post">
+								<div class="wallet-profile-form__head">
+									<h3 class="h6 mb-0"><?= t('deduct_from_wallet') ?></h3>
+									<span class="text-muted small"><?= t('wallet_deduction_hint') ?></span>
+								</div>
+								<div class="row g-2">
+									<div class="col-sm-5">
+										<label class="form-label mb-1"><?= t('Amount') ?></label>
+										<input type="number" name="amount" id="walletDeductAmount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+									</div>
+									<div class="col-sm-7">
+										<label class="form-label mb-1"><?= t('wallet_note') ?></label>
+										<input type="text" name="note" id="walletDeductNote" class="form-control" placeholder="<?= t('wallet_note_placeholder') ?>">
+									</div>
+								</div>
+								<div class="wallet-quick-actions mt-2">
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletDeductAmount" data-amount="100">-<?= format_amount(100) ?></button>
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletDeductAmount" data-amount="250">-<?= format_amount(250) ?></button>
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletDeductAmount" data-amount="500">-<?= format_amount(500) ?></button>
+								</div>
+								<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+									<button type="submit" class="btn btn-outline-dark btn-sm"><?= t('deduct_from_wallet') ?></button>
+								</div>
+								<div id="walletDeductFeedback" class="alert d-none mt-3 mb-0"></div>
+							</form>
+						</div>
+						<div class="collapse" id="walletTransactionsCollapse">
+							<div class="table-responsive">
+								<table class="table table-sm align-middle mb-0">
+									<thead>
+										<tr>
+											<th><?= t('date_time') ?></th>
+											<th><?= t('wallet_action') ?></th>
+											<th><?= t('Amount') ?></th>
+											<th><?= t('wallet_note') ?></th>
+										</tr>
+									</thead>
+									<tbody id="walletTransactionsBody">
+									<?php if ($wallet_transactions) : foreach ($wallet_transactions as $transaction) : ?>
+										<?php $amount_prefix = $transaction['type'] === 'topup' ? '+' : '-'; ?>
+										<tr>
+											<td><?= html_escape(substr((string) $transaction['created_at'], 0, 16)) ?></td>
+											<td><span class="badge rounded-pill <?= $transaction['type'] === 'topup' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' ?>"><?= html_escape(t($transaction['type'])) ?></span></td>
+											<td><?= html_escape($amount_prefix) . format_amount($transaction['amount']) ?></td>
+											<td><?= !empty($transaction['note']) ? html_escape($transaction['note']) : (!empty($transaction['turn_id']) ? '#' . (int) $transaction['turn_id'] : '&mdash;') ?></td>
+										</tr>
+									<?php endforeach; else : ?>
+										<tr><td colspan="4" class="text-muted"><?= t('no_transactions') ?></td></tr>
+									<?php endif; ?>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card h-100">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+							<h2 class="h5 mb-0"><?= t('open_debts') ?></h2>
+							<?php if ($open_debts) : ?>
+								<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#openDebtsCollapse" aria-expanded="false" aria-controls="openDebtsCollapse">
+									<?= t('open_debts') ?>
+								</button>
+							<?php endif; ?>
+						</div>
+						<?php if ($total_open_debt > 0) : ?>
+							<span id="openDebtProfileBadge" class="badge rounded-pill bg-danger-subtle text-danger mb-3"><?= format_amount($total_open_debt) ?></span>
+						<?php else : ?>
+							<span id="openDebtProfileBadge" class="badge rounded-pill bg-success-subtle text-success mb-3"><?= t('no_open_debt') ?></span>
+						<?php endif; ?>
+						<form id="debtPaymentForm" class="wallet-profile-form mb-3" action="<?= base_url('patients/' . $patient['id'] . '/debt-payment') ?>" method="post">
+							<div class="wallet-profile-form__head">
+								<h3 class="h6 mb-0"><?= t('pay_debt') ?></h3>
+								<span class="text-muted small"><?= t('debt_payment_hint') ?></span>
+							</div>
+							<div class="row g-2">
+								<div class="col-sm-4">
+									<label class="form-label mb-1"><?= t('debt_payment_amount') ?></label>
+									<input type="number" name="amount" id="debtPaymentAmount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+								</div>
+								<div class="col-sm-4">
+									<label class="form-label mb-1"><?= t('Payment Method') ?></label>
+									<select name="payment_method" class="form-select">
+										<option value="cash"><?= t('Cash') ?></option>
+										<option value="card"><?= t('Card') ?></option>
+										<option value="transfer"><?= t('Transfer') ?></option>
+									</select>
+								</div>
+								<div class="col-sm-4">
+									<label class="form-label mb-1"><?= t('wallet_note') ?></label>
+									<input type="text" name="note" id="debtPaymentNote" class="form-control" placeholder="<?= t('debt_note_placeholder') ?>">
+								</div>
+							</div>
+							<div class="wallet-quick-actions mt-2">
+								<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="debtPaymentAmount" data-amount="100"><?= format_amount(100) ?></button>
+								<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="debtPaymentAmount" data-amount="250"><?= format_amount(250) ?></button>
+								<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="debtPaymentAmount" data-amount="500"><?= format_amount(500) ?></button>
+								<button type="button" class="btn btn-sm btn-outline-danger wallet-quick-fill-debt" data-amount="<?= html_escape(number_format((float) $total_open_debt, 2, '.', '')) ?>"><?= t('pay_full_debt') ?></button>
+							</div>
+							<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+								<button type="submit" class="btn btn-danger btn-sm"><?= t('pay_debt') ?></button>
+							</div>
+							<div id="debtPaymentFeedback" class="alert d-none mt-3 mb-0"></div>
+						</form>
+						<div class="collapse<?= $open_debts ? '' : ' show' ?>" id="openDebtsCollapse">
+							<div class="table-responsive">
+								<table class="table table-sm align-middle mb-0">
+									<thead>
+										<tr>
+											<th><?= t('Date') ?></th>
+											<th><?= t('Turns') ?></th>
+											<th><?= t('Amount') ?></th>
+											<th><?= t('Status') ?></th>
+										</tr>
+									</thead>
+									<tbody id="openDebtTableBody">
+									<?php if ($open_debts) : foreach ($open_debts as $debt) : ?>
+										<?php
+										$turn_label_parts = array('#' . (int) $debt['turn_id']);
+										if (!empty($debt['section_name'])) {
+											$turn_label_parts[] = t($debt['section_name']);
+										}
+										?>
+										<tr>
+											<td><?= html_escape($debt['debt_date']) ?></td>
+											<td><?= html_escape(implode(' - ', $turn_label_parts)) ?></td>
+											<td><?= format_amount($debt['amount']) ?></td>
+											<td><?= t('open_status') ?></td>
+										</tr>
+									<?php endforeach; else : ?>
+										<tr><td colspan="4" class="text-muted"><?= t('no_open_debt') ?></td></tr>
+									<?php endif; ?>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="card mb-4">
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Turn History') ?></h2>
 				<div class="table-responsive">
 					<table class="table">
-						<thead><tr><th><?= t('Date') ?></th><th><?= t('Time') ?></th><th><?= t('Therapist') ?></th><th><?= t('Status') ?></th></tr></thead>
+						<thead><tr><th><?= t('Date') ?></th><th><?= t('Time') ?></th><th><?= t('section') ?></th><th><?= t('staff_member') ?></th><th><?= t('payment_type') ?></th><th><?= t('fee') ?></th><th><?= t('Status') ?></th></tr></thead>
 						<tbody>
 						<?php if ($turns) : foreach ($turns as $turn) : ?>
+							<?php $staff_name = !empty($turn['staff_full_name']) ? $turn['staff_full_name'] : ($turn['doctor_full_name'] ?? ''); ?>
 							<tr>
 								<td><?= html_escape($turn['turn_date']) ?></td>
-								<td><?= html_escape($turn['turn_time']) ?></td>
-								<td><?= html_escape($turn['first_name'] . ' ' . $turn['last_name']) ?></td>
+								<td><?= $display_time($turn['turn_time']) ?></td>
+								<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>
+								<td><?= $staff_name !== '' ? html_escape($staff_name) : '&mdash;' ?></td>
+								<td><?= html_escape(t($turn['payment_type'] ?? 'cash')) ?></td>
+								<td><?= format_amount($turn['fee'] ?? 0) ?></td>
 								<td><?= t(ucfirst($turn['status'])) ?></td>
 							</tr>
 						<?php endforeach; else : ?>
-							<tr><td colspan="4" class="text-muted"><?= t('No turns found.') ?></td></tr>
+							<tr><td colspan="7" class="text-muted"><?= t('No turns found.') ?></td></tr>
 						<?php endif; ?>
 						</tbody>
 					</table>
@@ -98,3 +289,236 @@
 		</div>
 	</div>
 </div>
+
+<script>
+(function () {
+	const walletTopupForm = document.getElementById('walletTopupForm');
+	if (!walletTopupForm) {
+		return;
+	}
+
+	const balanceBadge = document.getElementById('walletBalanceProfileBadge');
+	const openDebtBadge = document.getElementById('openDebtProfileBadge');
+	const transactionsBody = document.getElementById('walletTransactionsBody');
+	const openDebtTableBody = document.getElementById('openDebtTableBody');
+	const walletCollapseElement = document.getElementById('walletTransactionsCollapse');
+	const debtCollapseElement = document.getElementById('openDebtsCollapse');
+	const quickButtons = document.querySelectorAll('.wallet-quick-amount');
+	const fullDebtButton = document.querySelector('.wallet-quick-fill-debt');
+	const labels = {
+		noTransactions: <?= json_encode(t('no_transactions')) ?>,
+		noOpenDebt: <?= json_encode(t('no_open_debt')) ?>,
+		topup: <?= json_encode(t('topup')) ?>,
+		deduction: <?= json_encode(t('deduction')) ?>,
+		openStatus: <?= json_encode(t('open_status')) ?>,
+	};
+
+	function formatAmount(value) {
+		return new Intl.NumberFormat(<?= json_encode($is_rtl ? 'fa-AF' : 'en-US') ?>, {
+			minimumFractionDigits: value % 1 === 0 ? 0 : 2,
+			maximumFractionDigits: 2
+		}).format(value);
+	}
+
+	function escapeHtml(value) {
+		return String(value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
+
+	function updateBalanceBadge(balance) {
+		balanceBadge.textContent = formatAmount(balance);
+		balanceBadge.className = balance > 0
+			? 'badge rounded-pill bg-success-subtle text-success mb-3'
+			: 'badge rounded-pill bg-secondary-subtle text-secondary mb-3';
+	}
+
+	function updateDebtBadge(totalDebt) {
+		if (totalDebt > 0) {
+			openDebtBadge.textContent = formatAmount(totalDebt);
+			openDebtBadge.className = 'badge rounded-pill bg-danger-subtle text-danger mb-3';
+			return;
+		}
+
+		openDebtBadge.textContent = labels.noOpenDebt;
+		openDebtBadge.className = 'badge rounded-pill bg-success-subtle text-success mb-3';
+	}
+
+	function renderTransactions(transactions) {
+		if (!transactionsBody) {
+			return;
+		}
+
+		if (!transactions.length) {
+			transactionsBody.innerHTML = '<tr><td colspan="4" class="text-muted">' + labels.noTransactions + '</td></tr>';
+			return;
+		}
+
+		transactionsBody.innerHTML = transactions.map(function (transaction) {
+			const isTopup = transaction.type === 'topup';
+			const note = transaction.note ? escapeHtml(transaction.note) : (transaction.turn_id ? ('#' + transaction.turn_id) : '&mdash;');
+			return '<tr>'
+				+ '<td>' + escapeHtml(String(transaction.created_at).slice(0, 16)) + '</td>'
+				+ '<td><span class="badge rounded-pill ' + (isTopup ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning') + '">' + escapeHtml(isTopup ? labels.topup : labels.deduction) + '</span></td>'
+				+ '<td>' + (isTopup ? '+' : '-') + formatAmount(parseFloat(transaction.amount || 0)) + '</td>'
+				+ '<td>' + note + '</td>'
+				+ '</tr>';
+		}).join('');
+	}
+
+	function renderOpenDebts(debts) {
+		if (!openDebtTableBody) {
+			return;
+		}
+
+		if (!debts.length) {
+			openDebtTableBody.innerHTML = '<tr><td colspan="4" class="text-muted">' + labels.noOpenDebt + '</td></tr>';
+			return;
+		}
+
+		openDebtTableBody.innerHTML = debts.map(function (debt) {
+			const parts = ['#' + debt.turn_id];
+			if (debt.section_name) {
+				parts.push(debt.section_name);
+			}
+			return '<tr>'
+				+ '<td>' + escapeHtml(debt.debt_date || String(debt.created_at || '').slice(0, 10)) + '</td>'
+				+ '<td>' + escapeHtml(parts.join(' - ')) + '</td>'
+				+ '<td>' + formatAmount(parseFloat(debt.amount || 0)) + '</td>'
+				+ '<td>' + escapeHtml(labels.openStatus) + '</td>'
+				+ '</tr>';
+		}).join('');
+	}
+
+	function showFeedback(element, message, isError) {
+		if (!element) {
+			return;
+		}
+
+		element.className = 'alert mt-3 mb-0 ' + (isError ? 'alert-danger' : 'alert-success');
+		element.classList.remove('d-none');
+		element.textContent = message;
+	}
+
+	function handleJsonResponse(response, fallbackMessage) {
+		return response.text().then(function (text) {
+			let data = {};
+			try {
+				data = JSON.parse(text);
+			} catch (error) {
+				data = { success: false, message: text || fallbackMessage };
+			}
+			return { ok: response.ok, data: data };
+		});
+	}
+
+	function submitProfileForm(form, feedbackElement, onSuccess, fallbackMessage) {
+		if (!form) {
+			return;
+		}
+
+		form.addEventListener('submit', function (event) {
+			event.preventDefault();
+
+			const formData = new URLSearchParams(new FormData(form));
+
+			fetch(form.action, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+					'Accept': 'application/json'
+				},
+				body: formData
+			})
+			.then(function (response) {
+				return handleJsonResponse(response, fallbackMessage);
+			})
+			.then(function (result) {
+				showFeedback(feedbackElement, result.data.message || '', !result.ok || result.data.success === false);
+
+				if (!result.ok || result.data.success === false) {
+					return;
+				}
+
+				onSuccess(result.data);
+			})
+			.catch(function () {
+				showFeedback(feedbackElement, fallbackMessage, true);
+			});
+		});
+	}
+
+	quickButtons.forEach(function (button) {
+		button.addEventListener('click', function () {
+			const target = document.getElementById(this.dataset.target);
+			if (!target) {
+				return;
+			}
+			target.value = this.dataset.amount;
+			target.focus();
+		});
+	});
+
+	if (fullDebtButton) {
+		fullDebtButton.addEventListener('click', function () {
+			const target = document.getElementById('debtPaymentAmount');
+			if (!target) {
+				return;
+			}
+			target.value = this.dataset.amount;
+			target.focus();
+		});
+	}
+
+	submitProfileForm(
+		document.getElementById('walletTopupForm'),
+		document.getElementById('walletTopupFeedback'),
+		function (data) {
+			updateBalanceBadge(parseFloat(data.wallet_balance || 0));
+			renderTransactions(Array.isArray(data.wallet_transactions) ? data.wallet_transactions : []);
+			document.getElementById('walletTopupAmount').value = '';
+			document.getElementById('walletTopupNote').value = '';
+
+			if (walletCollapseElement && window.bootstrap && window.bootstrap.Collapse) {
+				window.bootstrap.Collapse.getOrCreateInstance(walletCollapseElement).show();
+			}
+		},
+		<?= json_encode(t('Unable to update wallet right now.')) ?>
+	);
+
+	submitProfileForm(
+		document.getElementById('walletDeductForm'),
+		document.getElementById('walletDeductFeedback'),
+		function (data) {
+			updateBalanceBadge(parseFloat(data.wallet_balance || 0));
+			renderTransactions(Array.isArray(data.wallet_transactions) ? data.wallet_transactions : []);
+			document.getElementById('walletDeductAmount').value = '';
+			document.getElementById('walletDeductNote').value = '';
+
+			if (walletCollapseElement && window.bootstrap && window.bootstrap.Collapse) {
+				window.bootstrap.Collapse.getOrCreateInstance(walletCollapseElement).show();
+			}
+		},
+		<?= json_encode(t('Unable to update wallet right now.')) ?>
+	);
+
+	submitProfileForm(
+		document.getElementById('debtPaymentForm'),
+		document.getElementById('debtPaymentFeedback'),
+		function (data) {
+			updateDebtBadge(parseFloat(data.total_open_debt || 0));
+			renderOpenDebts(Array.isArray(data.open_debts) ? data.open_debts : []);
+			document.getElementById('debtPaymentAmount').value = '';
+			document.getElementById('debtPaymentNote').value = '';
+
+			if (debtCollapseElement && window.bootstrap && window.bootstrap.Collapse) {
+				window.bootstrap.Collapse.getOrCreateInstance(debtCollapseElement).show();
+			}
+		},
+		<?= json_encode(t('Unable to record debt payment right now.')) ?>
+	);
+})();
+</script>

@@ -127,6 +127,8 @@ If you are editing this project in a future chat, assume this:
 - `application/models/User_model.php`
 - `application/models/Role_model.php`
 - `application/models/Turn_model.php`
+- `application/models/Wallet_model.php`
+- `application/models/Debt_model.php`
 - `application/models/Payment_model.php`
 - `application/models/Report_model.php`
 - `application/models/Leave_model.php`
@@ -377,8 +379,12 @@ This section maps each active module to the main tables it reads or writes.
 ### Turns
 
 - writes: `turns`
+- writes: `patient_wallet`
+- writes: `patient_wallet_transactions`
+- writes: `patient_debts`
 - reads: `patients`
-- reads: `users`
+- reads: `staff`
+- reads: `sections`
 
 ### Payments
 
@@ -826,8 +832,11 @@ This module manages clinic appointments or turns.
 - edits one turn
 - deletes one turn
 - supports bulk turn creation
-- links turns to patient and therapist
-- stores turn date, time, status, and notes
+- links turns to patient, section, and staff member
+- stores session number, fee, payment type, wallet usage, cash collected, and top-up amount
+- applies wallet top-ups and deductions during turn creation
+- creates and clears patient debts as part of turn payment processing
+- keeps edit mode read-only for already-processed payment fields
 
 ### Current turn statuses
 
@@ -1341,6 +1350,9 @@ This file defines the simplified physical therapy structure for:
 - patient_diagnoses
 - reference doctors
 - turns
+- patient_wallet
+- patient_wallet_transactions
+- patient_debts
 - payments
 - doctor leaves
 
@@ -1569,6 +1581,8 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 - `application/controllers/Turns.php`
 - `application/models/Turn_model.php`
+- `application/models/Wallet_model.php`
+- `application/models/Debt_model.php`
 - `application/models/Patient_model.php`
 - `application/models/User_model.php`
 - `application/views/turns/index.php`
