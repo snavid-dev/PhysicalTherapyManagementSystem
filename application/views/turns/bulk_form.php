@@ -27,6 +27,7 @@
 			<div class="col-md-2">
 				<label class="form-label"><?= t('Default Status') ?></label>
 				<select name="default_status" id="bulkDefaultStatus" class="form-select">
+					<option value="accepted"><?= t('Accepted') ?></option>
 					<option value="scheduled"><?= t('Scheduled') ?></option>
 					<option value="completed"><?= t('Completed') ?></option>
 					<option value="cancelled"><?= t('Cancelled') ?></option>
@@ -77,6 +78,7 @@
 		<div class="col-lg-2">
 			<label class="form-label"><?= t('Status') ?></label>
 			<select name="status[]" class="form-select row-status">
+				<option value="accepted"><?= t('Accepted') ?></option>
 				<option value="scheduled"><?= t('Scheduled') ?></option>
 				<option value="completed"><?= t('Completed') ?></option>
 				<option value="cancelled"><?= t('Cancelled') ?></option>

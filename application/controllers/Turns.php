@@ -87,6 +87,28 @@ class Turns extends Authenticated_Controller
 			)));
 	}
 
+	public function get_session_number()
+	{
+		$this->require_permission('manage_turns');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient_id = (int) $this->input->post('patient_id');
+		$patient = $this->Patient_model->get_by_id($patient_id);
+
+		if (!$patient) {
+			return $this->json_error(t('Invalid patient selected.'));
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'session_number' => $this->Turn_model->count_turns_for_patient($patient_id) + 1,
+			)));
+	}
+
 	public function bulk_create()
 	{
 		$this->require_permission('manage_turns');
@@ -187,7 +209,7 @@ class Turns extends Authenticated_Controller
 
 		$turn_date = $this->input->post('turn_date', TRUE);
 		$doctor_id = (int) $this->input->post('doctor_id');
-		$default_status = $this->input->post('default_status', TRUE) ?: 'scheduled';
+		$default_status = $this->input->post('default_status', TRUE) ?: 'accepted';
 		$patient_ids = (array) $this->input->post('patient_id');
 		$turn_times = (array) $this->input->post('turn_time');
 		$statuses = (array) $this->input->post('status');
@@ -351,7 +373,7 @@ class Turns extends Authenticated_Controller
 		$this->form_validation->set_rules('topup_amount', 'Top up amount', 'trim|numeric|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('turn_date', 'Date', 'required');
 		$this->form_validation->set_rules('turn_time', 'Time', 'trim');
-		$this->form_validation->set_rules('status', 'Status', 'required|in_list[scheduled,completed,cancelled]');
+		$this->form_validation->set_rules('status', 'Status', 'required|in_list[accepted,scheduled,completed,cancelled]');
 	}
 
 	protected function validate_update_form()
@@ -361,7 +383,7 @@ class Turns extends Authenticated_Controller
 		$this->form_validation->set_rules('turn_number', 'Turn number', 'trim|callback__valid_turn_number');
 		$this->form_validation->set_rules('turn_date', 'Date', 'required');
 		$this->form_validation->set_rules('turn_time', 'Time', 'trim');
-		$this->form_validation->set_rules('status', 'Status', 'required|in_list[scheduled,completed,cancelled]');
+		$this->form_validation->set_rules('status', 'Status', 'required|in_list[accepted,scheduled,completed,cancelled]');
 	}
 
 	protected function turn_payload($overrides = array())
@@ -379,7 +401,7 @@ class Turns extends Authenticated_Controller
 			'topup_amount' => isset($overrides['topup_amount']) ? round((float) $overrides['topup_amount'], 2) : 0.00,
 			'turn_date' => $this->input->post('turn_date', TRUE),
 			'turn_time' => $this->normalize_time($this->input->post('turn_time', TRUE)),
-			'status' => $this->input->post('status', TRUE),
+			'status' => $this->input->post('status', TRUE) ?: 'accepted',
 			'notes' => $this->null_if_empty($this->input->post('notes', TRUE)),
 		);
 	}
@@ -393,7 +415,7 @@ class Turns extends Authenticated_Controller
 			'turn_number' => $this->nullable_int($this->input->post('turn_number', TRUE)),
 			'turn_date' => $this->input->post('turn_date', TRUE),
 			'turn_time' => $this->normalize_time($this->input->post('turn_time', TRUE)),
-			'status' => $this->input->post('status', TRUE),
+			'status' => $this->input->post('status', TRUE) ?: 'accepted',
 			'notes' => $this->null_if_empty($this->input->post('notes', TRUE)),
 		);
 	}
@@ -412,7 +434,7 @@ class Turns extends Authenticated_Controller
 	protected function normalize_time($value)
 	{
 		$value = trim((string) $value);
-		return $value === '' ? '00:00:00' : $value;
+		return $value === '' ? NULL : $value;
 	}
 
 	protected function null_if_empty($value)

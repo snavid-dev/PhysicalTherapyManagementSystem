@@ -58,6 +58,7 @@ $route['turns/store'] = 'Turns/store';
 $route['turns/bulk-store'] = 'Turns/bulk_store';
 $route['turns/get_section_data'] = 'turns/get_section_data';
 $route['turns/get_patient_financial'] = 'turns/get_patient_financial';
+$route['turns/get_session_number'] = 'turns/get_session_number';
 $route['turns/edit/(:num)'] = 'Turns/edit/$1';
 $route['turns/update/(:num)'] = 'Turns/update/$1';
 $route['turns/delete/(:num)'] = 'Turns/delete/$1';
