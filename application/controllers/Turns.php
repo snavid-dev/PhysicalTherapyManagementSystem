@@ -112,12 +112,7 @@ class Turns extends Authenticated_Controller
 	public function bulk_create()
 	{
 		$this->require_permission('manage_turns');
-		$this->render('turns/bulk_form', array(
-			'title' => t('Bulk Turn Entry'),
-			'current_section' => 'turns',
-			'patients' => $this->Patient_model->all(),
-			'therapists' => $this->User_model->therapists(),
-		));
+		$this->render_bulk_form();
 	}
 
 	public function store()
@@ -207,42 +202,150 @@ class Turns extends Authenticated_Controller
 	{
 		$this->require_permission('manage_turns');
 
-		$turn_date = $this->input->post('turn_date', TRUE);
-		$doctor_id = (int) $this->input->post('doctor_id');
-		$default_status = $this->input->post('default_status', TRUE) ?: 'accepted';
-		$patient_ids = (array) $this->input->post('patient_id');
-		$turn_times = (array) $this->input->post('turn_time');
-		$statuses = (array) $this->input->post('status');
-		$notes = (array) $this->input->post('notes');
-		$rows = array();
-
-		foreach ($patient_ids as $index => $patient_id) {
-			$patient_id = (int) $patient_id;
-			$time = isset($turn_times[$index]) ? trim($turn_times[$index]) : '';
-			if (!$patient_id && !$time) {
-				continue;
-			}
-			if (!$patient_id || !$time) {
-				continue;
-			}
-
-			$rows[] = array(
-				'patient_id' => $patient_id,
-				'doctor_id' => $doctor_id,
-				'turn_date' => $turn_date,
-				'turn_time' => $time,
-				'status' => !empty($statuses[$index]) ? $statuses[$index] : $default_status,
-				'notes' => isset($notes[$index]) ? $notes[$index] : '',
-			);
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
 		}
 
-		if (!$turn_date || !$doctor_id || empty($rows)) {
-			$this->session->set_flashdata('error', t('Please add at least one turn row.'));
-			redirect('turns/bulk-create');
+		$shared_input = $this->bulk_shared_input();
+		$submitted_turns = $this->bulk_posted_turns();
+		$validation = $this->validate_bulk_submission($shared_input, $submitted_turns);
+
+		if (!empty($validation['shared_errors']) || !empty($validation['row_errors'])) {
+			return $this->render_bulk_form($shared_input, $submitted_turns, $validation['shared_errors'], $validation['row_errors']);
 		}
 
-		$this->Turn_model->create_many($rows);
-		$this->session->set_flashdata('success', t('Turns created successfully.'));
+		$validated_rows = $validation['rows'];
+		$this->db->trans_begin();
+
+		foreach ($validated_rows as $index => $row) {
+			$staff = $this->Staff_model->get_by_id($row['staff_id']);
+
+			if (!$staff || empty($staff['user_id'])) {
+				$this->db->trans_rollback();
+				return $this->render_bulk_form(
+					$shared_input,
+					$submitted_turns,
+					array($this->bulk_row_error_message($index, t('Invalid staff member selected.'))),
+					array($index => array(t('Invalid staff member selected.')))
+				);
+			}
+
+			$wallet_deducted = 0.00;
+			$cash_collected = 0.00;
+			$remaining_fee = 0.00;
+
+			if ($row['topup_amount'] > 0) {
+				$new_balance = $this->Wallet_model->top_up($row['patient_id'], $row['topup_amount']);
+
+				if ($new_balance === FALSE) {
+					$this->db->trans_rollback();
+					return $this->render_bulk_form(
+						$shared_input,
+						$submitted_turns,
+						array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
+						array($index => array(t('Unable to save turn right now.')))
+					);
+				}
+			}
+
+			switch ($row['payment_type']) {
+				case 'free':
+					break;
+
+				case 'cash':
+					$cash_collected = $row['fee'];
+					break;
+
+				case 'deferred':
+					break;
+
+				case 'prepaid':
+					$wallet_deducted = $this->Wallet_model->deduct($row['patient_id'], $row['fee']);
+
+					if ($wallet_deducted === FALSE) {
+						$this->db->trans_rollback();
+						return $this->render_bulk_form(
+							$shared_input,
+							$submitted_turns,
+							array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
+							array($index => array(t('Unable to save turn right now.')))
+						);
+					}
+
+					$remaining_fee = round($row['fee'] - $wallet_deducted, 2);
+					break;
+
+				default:
+					$this->db->trans_rollback();
+					return $this->render_bulk_form(
+						$shared_input,
+						$submitted_turns,
+						array($this->bulk_row_error_message($index, t('Invalid payment type selected.'))),
+						array($index => array(t('Invalid payment type selected.')))
+					);
+			}
+
+			$turn_id = $this->Turn_model->create($this->bulk_turn_payload($shared_input, $row, array(
+				'doctor_id' => (int) $staff['user_id'],
+				'wallet_deducted' => $wallet_deducted,
+				'cash_collected' => $cash_collected,
+			)));
+
+			if (!$turn_id) {
+				$this->db->trans_rollback();
+				return $this->render_bulk_form(
+					$shared_input,
+					$submitted_turns,
+					array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
+					array($index => array(t('Unable to save turn right now.')))
+				);
+			}
+
+			if ($row['payment_type'] === 'cash') {
+				$this->Debt_model->clear_debts($row['patient_id'], $cash_collected, $turn_id);
+			}
+
+			if ($row['payment_type'] === 'deferred') {
+				$debt_id = $this->Debt_model->create($row['patient_id'], $turn_id, $row['fee']);
+
+				if (!$debt_id) {
+					$this->db->trans_rollback();
+					return $this->render_bulk_form(
+						$shared_input,
+						$submitted_turns,
+						array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
+						array($index => array(t('Unable to save turn right now.')))
+					);
+				}
+			}
+
+			if ($row['payment_type'] === 'prepaid' && $remaining_fee > 0) {
+				$debt_id = $this->Debt_model->create($row['patient_id'], $turn_id, $remaining_fee, 'Partial wallet - remaining after deduction');
+
+				if (!$debt_id) {
+					$this->db->trans_rollback();
+					return $this->render_bulk_form(
+						$shared_input,
+						$submitted_turns,
+						array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
+						array($index => array(t('Unable to save turn right now.')))
+					);
+				}
+			}
+
+			if ($this->db->trans_status() === FALSE) {
+				$this->db->trans_rollback();
+				return $this->render_bulk_form(
+					$shared_input,
+					$submitted_turns,
+					array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
+					array($index => array(t('Unable to save turn right now.')))
+				);
+			}
+		}
+
+		$this->db->trans_commit();
+		$this->session->set_flashdata('success', count($validated_rows) . ' ' . t('bulk_success'));
 		redirect('turns');
 	}
 
@@ -362,6 +465,26 @@ class Turns extends Authenticated_Controller
 		));
 	}
 
+	protected function render_bulk_form($shared_input = array(), $submitted_turns = array(), $shared_errors = array(), $row_errors = array())
+	{
+		$shared_input = array_merge(array(
+			'section_id' => 0,
+			'date' => date('Y-m-d'),
+			'status' => 'accepted',
+		), $shared_input);
+
+		$this->render('turns/bulk_form', array(
+			'title' => t('bulk_turns'),
+			'current_section' => 'turns',
+			'patients' => $this->Patient_model->all(),
+			'sections' => $this->Section_model->get_all(),
+			'shared_input' => $shared_input,
+			'submitted_turns' => array_values($submitted_turns),
+			'shared_errors' => array_values($shared_errors),
+			'row_errors' => $row_errors,
+		));
+	}
+
 	protected function validate_store_form()
 	{
 		$this->form_validation->set_rules('patient_id', 'Patient', 'required|integer|callback__valid_patient_id');
@@ -423,6 +546,192 @@ class Turns extends Authenticated_Controller
 	protected function decimal_value($value)
 	{
 		return round((float) $value, 2);
+	}
+
+	protected function bulk_shared_input()
+	{
+		return array(
+			'section_id' => (int) $this->input->post('section_id'),
+			'date' => trim((string) $this->input->post('date', TRUE)),
+			'status' => 'accepted',
+		);
+	}
+
+	protected function bulk_posted_turns()
+	{
+		$turns = $this->input->post('turns');
+
+		if (!is_array($turns)) {
+			return array();
+		}
+
+		$normalized = array();
+
+		foreach ($turns as $turn) {
+			if (!is_array($turn)) {
+				continue;
+			}
+
+			$normalized[] = array(
+				'patient_id' => trim((string) ($turn['patient_id'] ?? '')),
+				'staff_id' => trim((string) ($turn['staff_id'] ?? '')),
+				'turn_number' => trim((string) ($turn['turn_number'] ?? '')),
+				'fee' => trim((string) ($turn['fee'] ?? '')),
+				'payment_type' => trim((string) ($turn['payment_type'] ?? '')),
+				'topup_amount' => trim((string) ($turn['topup_amount'] ?? '0')),
+				'notes' => trim((string) ($turn['notes'] ?? '')),
+			);
+		}
+
+		return $normalized;
+	}
+
+	protected function validate_bulk_submission($shared_input, $submitted_turns)
+	{
+		$shared_errors = array();
+		$row_errors = array();
+		$validated_rows = array();
+		$allowed_payment_types = array('prepaid', 'cash', 'deferred', 'free');
+		$patient_occurrences = array();
+		$section_id = (int) $shared_input['section_id'];
+
+		if ($section_id <= 0) {
+			$shared_errors[] = t('Invalid section selected.');
+		} elseif (!$this->Section_model->get_by_id($section_id)) {
+			$shared_errors[] = t('Invalid section selected.');
+		}
+
+		if ($shared_input['date'] === '') {
+			$shared_errors[] = t('Date') . ' ' . t('is required.');
+		}
+
+		if (empty($submitted_turns)) {
+			$shared_errors[] = t('no_rows');
+		}
+
+		$valid_staff_ids = array();
+
+		if ($section_id > 0 && empty($shared_errors)) {
+			$valid_staff_ids = array_map('intval', array_column($this->Turn_model->get_staff_by_section($section_id), 'id'));
+		}
+
+		foreach ($submitted_turns as $index => $row) {
+			$errors = array();
+			$patient_id = (int) $row['patient_id'];
+			$staff_id = (int) $row['staff_id'];
+			$payment_type = $row['payment_type'];
+			$fee_raw = $row['fee'];
+			$topup_raw = $row['topup_amount'];
+
+			if ($patient_id <= 0) {
+				$errors[] = t('Patient') . ' ' . t('is required.');
+			} elseif (!$this->Patient_model->get_by_id($patient_id)) {
+				$errors[] = t('Invalid patient selected.');
+			} else {
+				$patient_occurrences[$patient_id][] = $index;
+			}
+
+			if ($staff_id <= 0) {
+				$errors[] = t('staff_member') . ' ' . t('is required.');
+			} elseif ($section_id > 0 && !in_array($staff_id, $valid_staff_ids, TRUE)) {
+				$errors[] = t('Invalid staff member selected.');
+			}
+
+			if ($fee_raw === '') {
+				$errors[] = t('fee') . ' ' . t('is required.');
+			} elseif (!is_numeric($fee_raw) || (float) $fee_raw < 0) {
+				$errors[] = t('fee') . ' ' . t('must be a valid number.');
+			}
+
+			if ($payment_type === '') {
+				$errors[] = t('payment_type') . ' ' . t('is required.');
+			} elseif (!in_array($payment_type, $allowed_payment_types, TRUE)) {
+				$errors[] = t('Invalid payment type selected.');
+			}
+
+			if ($topup_raw !== '' && (!is_numeric($topup_raw) || (float) $topup_raw < 0)) {
+				$errors[] = t('top_up_amount') . ' ' . t('must be a valid number.');
+			}
+
+			if ($row['turn_number'] !== '' && (!ctype_digit($row['turn_number']) || (int) $row['turn_number'] <= 0)) {
+				$errors[] = t('Invalid session number.');
+			}
+
+			if ($errors) {
+				$row_errors[$index] = $errors;
+				continue;
+			}
+
+			$validated_rows[$index] = array(
+				'patient_id' => $patient_id,
+				'staff_id' => $staff_id,
+				'turn_number' => $this->nullable_int($row['turn_number']),
+				'fee' => round((float) $fee_raw, 2),
+				'payment_type' => $payment_type,
+				'topup_amount' => $topup_raw === '' ? 0.00 : round((float) $topup_raw, 2),
+				'notes' => $this->null_if_empty($row['notes']),
+			);
+		}
+
+		foreach ($patient_occurrences as $indexes) {
+			if (count($indexes) < 2) {
+				continue;
+			}
+
+			foreach ($indexes as $index) {
+				$row_errors[$index][] = t('duplicate_patient');
+			}
+		}
+
+		if (!empty($row_errors)) {
+			$shared_errors = array_merge($shared_errors, $this->flatten_bulk_row_errors($row_errors));
+		}
+
+		ksort($validated_rows);
+
+		return array(
+			'shared_errors' => array_values(array_unique($shared_errors)),
+			'row_errors' => $row_errors,
+			'rows' => array_values($validated_rows),
+		);
+	}
+
+	protected function flatten_bulk_row_errors($row_errors)
+	{
+		$messages = array();
+
+		foreach ($row_errors as $index => $errors) {
+			foreach (array_unique($errors) as $error) {
+				$messages[] = $this->bulk_row_error_message($index, $error);
+			}
+		}
+
+		return $messages;
+	}
+
+	protected function bulk_row_error_message($index, $message)
+	{
+		return t('bulk_row_error') . ' ' . ($index + 1) . ': ' . $message;
+	}
+
+	protected function bulk_turn_payload($shared_input, $row, $overrides = array())
+	{
+		return array(
+			'patient_id' => (int) $row['patient_id'],
+			'doctor_id' => isset($overrides['doctor_id']) ? (int) $overrides['doctor_id'] : 0,
+			'section_id' => (int) $shared_input['section_id'],
+			'staff_id' => (int) $row['staff_id'],
+			'turn_number' => $row['turn_number'],
+			'fee' => round((float) $row['fee'], 2),
+			'payment_type' => $row['payment_type'],
+			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
+			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
+			'topup_amount' => round((float) $row['topup_amount'], 2),
+			'turn_date' => $shared_input['date'],
+			'turn_time' => NULL,
+			'status' => 'accepted',
+			'notes' => $row['notes'],
+		);
 	}
 
 	protected function nullable_int($value)

@@ -168,6 +168,45 @@ dd,
 	padding-bottom: 0;
 }
 
+.bulk-turn-counter {
+	display: flex;
+	align-items: baseline;
+	gap: 0.4rem;
+	font-size: 0.95rem;
+}
+
+.bulk-turn-row {
+	border: 1px solid var(--border);
+	border-radius: 1rem;
+	overflow: hidden;
+}
+
+.bulk-turn-row .card-header {
+	background: linear-gradient(180deg, rgba(15, 23, 42, 0.03), var(--surface));
+	border-bottom: 1px solid var(--border);
+}
+
+.bulk-turn-row--collapsed .card-header {
+	border-bottom: 0;
+}
+
+.bulk-turn-row .card-body {
+	background: linear-gradient(180deg, var(--surface), var(--surface-2));
+}
+
+.bulk-toggle-row {
+	min-width: 6.5rem;
+}
+
+.bulk-row-summary-title {
+	max-width: 28rem;
+	word-break: break-word;
+}
+
+.bulk-row-errors ul {
+	margin-bottom: 0;
+}
+
 .turn-form-block,
 .turn-summary-block {
 	padding: 1.1rem;
@@ -457,6 +496,14 @@ body.rtl .navbar-nav {
 
 	.row-item .btn {
 		width: 100%;
+	}
+
+	.bulk-turn-counter {
+		justify-content: flex-start;
+	}
+
+	.bulk-turn-row .card-header {
+		align-items: flex-start !important;
 	}
 
 	.preferences-diagnosis-actions .btn {
