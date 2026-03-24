@@ -11,7 +11,7 @@ $display_time = static function ($time_value) {
 		<p class="text-muted mb-0"><?= t('Appointments for physical therapy sessions.') ?></p>
 	</div>
 	<div class="d-flex gap-2">
-		<a href="<?= base_url('turns/bulk-create') ?>" class="btn btn-outline-dark"><?= t('Bulk Entry') ?></a>
+		<a href="<?= base_url('turns/bulk') ?>" class="btn btn-outline-dark"><?= t('Bulk Entry') ?></a>
 		<a href="<?= base_url('turns/create') ?>" class="btn btn-dark"><?= t('Add Turn') ?></a>
 	</div>
 </div>
