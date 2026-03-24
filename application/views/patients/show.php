@@ -22,6 +22,27 @@ $display_time = static function ($time_value) {
 	$time_value = (string) $time_value;
 	return ($time_value === '' || $time_value === '00:00:00') ? '&mdash;' : html_escape(substr($time_value, 0, 5));
 };
+$financial_summary = is_array($financial_summary ?? NULL) ? $financial_summary : array();
+$financial_timeline = is_array($financial_timeline ?? NULL) ? $financial_timeline : array();
+$timeline_source_labels = array(
+	'wallet' => t('wallet_source'),
+	'turn' => t('turn_source'),
+	'payment' => t('payment_source'),
+);
+$timeline_amount_prefix = static function ($entry) {
+	$source = (string) ($entry['source'] ?? '');
+	$badge = (string) ($entry['badge'] ?? '');
+
+	if ($source === 'wallet') {
+		return $badge === 'warning' ? '-' : '+';
+	}
+
+	if ($source === 'payment') {
+		return '+';
+	}
+
+	return '';
+};
 ?>
 
 <div class="row g-4">
@@ -58,6 +79,103 @@ $display_time = static function ($time_value) {
 		</div>
 	</div>
 	<div class="col-lg-8">
+		<div class="card financial-report-card mb-4">
+			<div class="card-body">
+				<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+					<div>
+						<h2 class="h5 mb-1"><?= t('financial_report') ?></h2>
+						<p class="text-muted mb-0"><?= t('financial_report_hint') ?></p>
+					</div>
+					<span class="badge rounded-pill bg-dark-subtle text-dark"><?= t('payment_summary') ?></span>
+				</div>
+				<ul class="nav nav-pills financial-report-tabs mb-4" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" id="financial-overview-tab" data-bs-toggle="pill" data-bs-target="#financial-overview-pane" type="button" role="tab" aria-controls="financial-overview-pane" aria-selected="true">
+							<?= t('financial_overview') ?>
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="financial-activity-tab" data-bs-toggle="pill" data-bs-target="#financial-activity-pane" type="button" role="tab" aria-controls="financial-activity-pane" aria-selected="false">
+							<?= t('financial_activity') ?>
+						</button>
+					</li>
+				</ul>
+				<div class="tab-content">
+					<div class="tab-pane fade show active" id="financial-overview-pane" role="tabpanel" aria-labelledby="financial-overview-tab" tabindex="0">
+						<div class="financial-summary-grid">
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('wallet_balance') ?></span>
+								<strong id="financialWalletBalanceValue" class="financial-summary-card__value"><?= format_amount($financial_summary['wallet_balance'] ?? 0) ?></strong>
+							</div>
+							<div class="financial-summary-card financial-summary-card--danger">
+								<span class="financial-summary-card__label"><?= t('total_open_debt') ?></span>
+								<strong id="financialOpenDebtValue" class="financial-summary-card__value"><?= format_amount($financial_summary['total_open_debt'] ?? 0) ?></strong>
+							</div>
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('wallet_topups') ?></span>
+								<strong id="financialWalletTopupsValue" class="financial-summary-card__value"><?= format_amount($financial_summary['wallet_topups'] ?? 0) ?></strong>
+							</div>
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('wallet_deductions') ?></span>
+								<strong id="financialWalletDeductionsValue" class="financial-summary-card__value"><?= format_amount($financial_summary['wallet_deductions'] ?? 0) ?></strong>
+							</div>
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('direct_payments') ?></span>
+								<strong id="financialDirectPaymentsValue" class="financial-summary-card__value"><?= format_amount($financial_summary['direct_payments'] ?? 0) ?></strong>
+							</div>
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('turn_cash_total') ?></span>
+								<strong id="financialTurnCashTotalValue" class="financial-summary-card__value"><?= format_amount($financial_summary['turn_cash_total'] ?? 0) ?></strong>
+							</div>
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('turn_debt_total') ?></span>
+								<strong id="financialTurnDebtTotalValue" class="financial-summary-card__value"><?= format_amount($financial_summary['turn_debt_total'] ?? 0) ?></strong>
+							</div>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="financial-activity-pane" role="tabpanel" aria-labelledby="financial-activity-tab" tabindex="0">
+						<div class="table-responsive">
+							<table class="table table-sm align-middle mb-0">
+								<thead>
+									<tr>
+										<th><?= t('date_time') ?></th>
+										<th><?= t('financial_source') ?></th>
+										<th><?= t('financial_entry') ?></th>
+										<th><?= t('Amount') ?></th>
+										<th><?= t('financial_details') ?></th>
+									</tr>
+								</thead>
+								<tbody id="financialTimelineBody">
+								<?php if ($financial_timeline) : foreach ($financial_timeline as $entry) : ?>
+									<?php
+									$source = $entry['source'] ?? '';
+									$badge = $entry['badge'] ?? 'secondary';
+									$amount_prefix = $timeline_amount_prefix($entry);
+									$detail = trim((string) ($entry['detail'] ?? ''));
+									?>
+									<tr>
+										<td><?= html_escape(substr((string) ($entry['occurred_at'] ?? ''), 0, 16)) ?></td>
+										<td><span class="badge rounded-pill bg-<?= html_escape($badge) ?>-subtle text-<?= html_escape($badge) ?>"><?= html_escape($timeline_source_labels[$source] ?? ucfirst($source)) ?></span></td>
+										<td><?= html_escape($entry['label'] ?? '') ?></td>
+										<td><?= html_escape($amount_prefix) . format_amount($entry['amount'] ?? 0) ?></td>
+										<td class="financial-timeline-detail"><?= $detail !== '' ? html_escape($detail) : '&mdash;' ?></td>
+									</tr>
+								<?php endforeach; else : ?>
+									<tr><td colspan="5" class="text-muted"><?= t('no_financial_entries') ?></td></tr>
+								<?php endif; ?>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3 financial-tools-head">
+			<div>
+				<h2 class="h5 mb-1"><?= t('financial_actions') ?></h2>
+				<p class="text-muted mb-0"><?= t('financial_actions_hint') ?></p>
+			</div>
+		</div>
 		<div class="row g-4 mb-4">
 			<div class="col-md-6">
 				<div class="card h-100">
@@ -265,25 +383,35 @@ $display_time = static function ($time_value) {
 				</div>
 			</div>
 		</div>
-		<div class="card">
+		<div class="card secondary-log-card">
 			<div class="card-body">
-				<h2 class="h5 mb-3"><?= t('Payment History') ?></h2>
-				<div class="table-responsive">
-					<table class="table">
-						<thead><tr><th><?= t('Date') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th><?= t('Reference Number') ?></th></tr></thead>
-						<tbody>
-						<?php if ($payments) : foreach ($payments as $payment) : ?>
-							<tr>
-								<td><?= html_escape($payment['payment_date']) ?></td>
-								<td><?= html_escape($payment['payment_method']) ?></td>
-								<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
-								<td><?= html_escape($payment['reference_number']) ?></td>
-							</tr>
-						<?php endforeach; else : ?>
-							<tr><td colspan="4" class="text-muted"><?= t('No payments found.') ?></td></tr>
-						<?php endif; ?>
-						</tbody>
-					</table>
+				<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+					<div>
+						<h2 class="h5 mb-1"><?= t('Payment History') ?></h2>
+						<p class="text-muted mb-0"><?= t('payment_history_raw_hint') ?></p>
+					</div>
+					<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#paymentHistoryCollapse" aria-expanded="false" aria-controls="paymentHistoryCollapse">
+						<?= t('view_raw_log') ?>
+					</button>
+				</div>
+				<div class="collapse<?= empty($payments) ? ' show' : '' ?>" id="paymentHistoryCollapse">
+					<div class="table-responsive">
+						<table class="table">
+							<thead><tr><th><?= t('Date') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th><?= t('Reference Number') ?></th></tr></thead>
+							<tbody id="paymentHistoryBody">
+							<?php if ($payments) : foreach ($payments as $payment) : ?>
+								<tr>
+									<td><?= html_escape($payment['payment_date']) ?></td>
+									<td><?= html_escape(t(ucfirst((string) $payment['payment_method']))) ?></td>
+									<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
+									<td><?= html_escape($payment['reference_number']) ?></td>
+								</tr>
+							<?php endforeach; else : ?>
+								<tr><td colspan="4" class="text-muted"><?= t('No payments found.') ?></td></tr>
+							<?php endif; ?>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -301,16 +429,32 @@ $display_time = static function ($time_value) {
 	const openDebtBadge = document.getElementById('openDebtProfileBadge');
 	const transactionsBody = document.getElementById('walletTransactionsBody');
 	const openDebtTableBody = document.getElementById('openDebtTableBody');
+	const financialTimelineBody = document.getElementById('financialTimelineBody');
+	const paymentHistoryBody = document.getElementById('paymentHistoryBody');
 	const walletCollapseElement = document.getElementById('walletTransactionsCollapse');
 	const debtCollapseElement = document.getElementById('openDebtsCollapse');
 	const quickButtons = document.querySelectorAll('.wallet-quick-amount');
 	const fullDebtButton = document.querySelector('.wallet-quick-fill-debt');
+	const financialSummaryFields = {
+		wallet_balance: document.getElementById('financialWalletBalanceValue'),
+		total_open_debt: document.getElementById('financialOpenDebtValue'),
+		wallet_topups: document.getElementById('financialWalletTopupsValue'),
+		wallet_deductions: document.getElementById('financialWalletDeductionsValue'),
+		direct_payments: document.getElementById('financialDirectPaymentsValue'),
+		turn_cash_total: document.getElementById('financialTurnCashTotalValue'),
+		turn_debt_total: document.getElementById('financialTurnDebtTotalValue')
+	};
 	const labels = {
 		noTransactions: <?= json_encode(t('no_transactions')) ?>,
 		noOpenDebt: <?= json_encode(t('no_open_debt')) ?>,
+		noFinancialEntries: <?= json_encode(t('no_financial_entries')) ?>,
+		noPayments: <?= json_encode(t('No payments found.')) ?>,
 		topup: <?= json_encode(t('topup')) ?>,
 		deduction: <?= json_encode(t('deduction')) ?>,
 		openStatus: <?= json_encode(t('open_status')) ?>,
+		walletSource: <?= json_encode(t('wallet_source')) ?>,
+		turnSource: <?= json_encode(t('turn_source')) ?>,
+		paymentSource: <?= json_encode(t('payment_source')) ?>,
 	};
 
 	function formatAmount(value) {
@@ -337,6 +481,10 @@ $display_time = static function ($time_value) {
 	}
 
 	function updateDebtBadge(totalDebt) {
+		if (fullDebtButton) {
+			fullDebtButton.dataset.amount = Number(totalDebt || 0).toFixed(2);
+		}
+
 		if (totalDebt > 0) {
 			openDebtBadge.textContent = formatAmount(totalDebt);
 			openDebtBadge.className = 'badge rounded-pill bg-danger-subtle text-danger mb-3';
@@ -345,6 +493,20 @@ $display_time = static function ($time_value) {
 
 		openDebtBadge.textContent = labels.noOpenDebt;
 		openDebtBadge.className = 'badge rounded-pill bg-success-subtle text-success mb-3';
+	}
+
+	function updateFinancialSummary(summary) {
+		if (!summary || typeof summary !== 'object') {
+			return;
+		}
+
+		Object.keys(financialSummaryFields).forEach(function (key) {
+			const field = financialSummaryFields[key];
+			if (!field) {
+				return;
+			}
+			field.textContent = formatAmount(parseFloat(summary[key] || 0));
+		});
 	}
 
 	function renderTransactions(transactions) {
@@ -369,6 +531,26 @@ $display_time = static function ($time_value) {
 		}).join('');
 	}
 
+	function renderPayments(payments) {
+		if (!paymentHistoryBody) {
+			return;
+		}
+
+		if (!payments.length) {
+			paymentHistoryBody.innerHTML = '<tr><td colspan="4" class="text-muted">' + labels.noPayments + '</td></tr>';
+			return;
+		}
+
+		paymentHistoryBody.innerHTML = payments.map(function (payment) {
+			return '<tr>'
+				+ '<td>' + escapeHtml(payment.payment_date || '') + '</td>'
+				+ '<td>' + escapeHtml(payment.payment_method || '') + '</td>'
+				+ '<td>$' + Number(payment.amount || 0).toFixed(2) + '</td>'
+				+ '<td>' + escapeHtml(payment.reference_number || '') + '</td>'
+				+ '</tr>';
+		}).join('');
+	}
+
 	function renderOpenDebts(debts) {
 		if (!openDebtTableBody) {
 			return;
@@ -389,6 +571,40 @@ $display_time = static function ($time_value) {
 				+ '<td>' + escapeHtml(parts.join(' - ')) + '</td>'
 				+ '<td>' + formatAmount(parseFloat(debt.amount || 0)) + '</td>'
 				+ '<td>' + escapeHtml(labels.openStatus) + '</td>'
+				+ '</tr>';
+		}).join('');
+	}
+
+	function renderFinancialTimeline(entries) {
+		if (!financialTimelineBody) {
+			return;
+		}
+
+		if (!entries.length) {
+			financialTimelineBody.innerHTML = '<tr><td colspan="5" class="text-muted">' + labels.noFinancialEntries + '</td></tr>';
+			return;
+		}
+
+		financialTimelineBody.innerHTML = entries.map(function (entry) {
+			const source = entry.source || '';
+			const badge = entry.badge || 'secondary';
+			const sourceLabel = source === 'wallet'
+				? labels.walletSource
+				: (source === 'payment' ? labels.paymentSource : labels.turnSource);
+			let amountPrefix = '';
+
+			if (source === 'wallet') {
+				amountPrefix = badge === 'warning' ? '-' : '+';
+			} else if (source === 'payment') {
+				amountPrefix = '+';
+			}
+
+			return '<tr>'
+				+ '<td>' + escapeHtml(String(entry.occurred_at || '').slice(0, 16)) + '</td>'
+				+ '<td><span class="badge rounded-pill bg-' + escapeHtml(badge) + '-subtle text-' + escapeHtml(badge) + '">' + escapeHtml(sourceLabel) + '</span></td>'
+				+ '<td>' + escapeHtml(entry.label || '') + '</td>'
+				+ '<td>' + amountPrefix + formatAmount(parseFloat(entry.amount || 0)) + '</td>'
+				+ '<td class="financial-timeline-detail">' + (entry.detail ? escapeHtml(entry.detail) : '&mdash;') + '</td>'
 				+ '</tr>';
 		}).join('');
 	}
@@ -479,6 +695,8 @@ $display_time = static function ($time_value) {
 		function (data) {
 			updateBalanceBadge(parseFloat(data.wallet_balance || 0));
 			renderTransactions(Array.isArray(data.wallet_transactions) ? data.wallet_transactions : []);
+			updateFinancialSummary(data.financial_summary);
+			renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);
 			document.getElementById('walletTopupAmount').value = '';
 			document.getElementById('walletTopupNote').value = '';
 
@@ -495,6 +713,8 @@ $display_time = static function ($time_value) {
 		function (data) {
 			updateBalanceBadge(parseFloat(data.wallet_balance || 0));
 			renderTransactions(Array.isArray(data.wallet_transactions) ? data.wallet_transactions : []);
+			updateFinancialSummary(data.financial_summary);
+			renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);
 			document.getElementById('walletDeductAmount').value = '';
 			document.getElementById('walletDeductNote').value = '';
 
@@ -511,6 +731,9 @@ $display_time = static function ($time_value) {
 		function (data) {
 			updateDebtBadge(parseFloat(data.total_open_debt || 0));
 			renderOpenDebts(Array.isArray(data.open_debts) ? data.open_debts : []);
+			renderPayments(Array.isArray(data.payments) ? data.payments : []);
+			updateFinancialSummary(data.financial_summary);
+			renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);
 			document.getElementById('debtPaymentAmount').value = '';
 			document.getElementById('debtPaymentNote').value = '';
 
