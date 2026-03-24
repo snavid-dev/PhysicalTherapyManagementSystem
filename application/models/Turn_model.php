@@ -140,6 +140,16 @@ class Turn_model extends CI_Model
 			->result_array();
 	}
 
+	public function count_turns_for_patient($patient_id)
+	{
+		$this->ensure_schema();
+
+		return (int) $this->db
+			->from('turns')
+			->where('patient_id', (int) $patient_id)
+			->count_all_results();
+	}
+
 	protected function related_section_ids($section_name, $section_id)
 	{
 		$section_ids = array((int) $section_id);
@@ -175,6 +185,8 @@ class Turn_model extends CI_Model
 		}
 
 		$this->ensure_turn_columns();
+		$this->ensure_turn_time_nullable();
+		$this->ensure_turn_status_values();
 		$this->schema_ready = TRUE;
 	}
 
@@ -192,6 +204,43 @@ class Turn_model extends CI_Model
 		$this->add_column_if_missing('turns', 'wallet_deducted', "ALTER TABLE `turns` ADD COLUMN `wallet_deducted` decimal(12,2) NOT NULL DEFAULT 0.00 AFTER `payment_type`");
 		$this->add_column_if_missing('turns', 'cash_collected', "ALTER TABLE `turns` ADD COLUMN `cash_collected` decimal(12,2) NOT NULL DEFAULT 0.00 AFTER `wallet_deducted`");
 		$this->add_column_if_missing('turns', 'topup_amount', "ALTER TABLE `turns` ADD COLUMN `topup_amount` decimal(12,2) NOT NULL DEFAULT 0.00 AFTER `cash_collected`");
+	}
+
+	protected function ensure_turn_time_nullable()
+	{
+		$column = $this->column_definition('turns', 'turn_time');
+
+		if (!$column) {
+			return;
+		}
+
+		if (stripos((string) $column['Type'], 'time') === 0 && strtoupper((string) $column['Null']) === 'YES' && $column['Default'] === NULL) {
+			return;
+		}
+
+		$this->db->query("ALTER TABLE `turns` MODIFY COLUMN `turn_time` TIME DEFAULT NULL");
+	}
+
+	protected function ensure_turn_status_values()
+	{
+		$column = $this->column_definition('turns', 'status');
+
+		if (!$column) {
+			return;
+		}
+
+		$expected_type = "enum('accepted','scheduled','completed','cancelled')";
+		if (strtolower((string) $column['Type']) === $expected_type && (string) $column['Default'] === 'accepted') {
+			return;
+		}
+
+		$this->db->query("ALTER TABLE `turns` MODIFY COLUMN `status` ENUM('accepted','scheduled','completed','cancelled') NOT NULL DEFAULT 'accepted'");
+	}
+
+	protected function column_definition($table, $column)
+	{
+		$query = $this->db->query("SHOW COLUMNS FROM `{$table}` LIKE " . $this->db->escape($column));
+		return $query ? $query->row_array() : NULL;
 	}
 
 	protected function add_column_if_missing($table, $column, $sql)
