@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS `patient_debts`;
 DROP TABLE IF EXISTS `patient_wallet_transactions`;
 DROP TABLE IF EXISTS `patient_wallet`;
 DROP TABLE IF EXISTS `payments`;
+DROP TABLE IF EXISTS `patient_discounts`;
 DROP TABLE IF EXISTS `turns`;
 DROP TABLE IF EXISTS `patient_diagnoses`;
 DROP TABLE IF EXISTS `diagnoses`;
@@ -169,6 +170,25 @@ CREATE TABLE `patient_diagnoses` (
 	CONSTRAINT `patient_diagnoses_diagnosis_fk` FOREIGN KEY (`diagnosis_id`) REFERENCES `diagnoses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `patient_discounts` (
+	`id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	`patient_id` INT UNSIGNED NOT NULL,
+	`section_id` INT UNSIGNED NOT NULL,
+	`discount_percent` DECIMAL(5,2) NOT NULL,
+	`note` VARCHAR(255) DEFAULT NULL,
+	`created_by` INT UNSIGNED DEFAULT NULL,
+	`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	KEY `patient_discounts_patient_id_index` (`patient_id`),
+	KEY `patient_discounts_section_id_index` (`section_id`),
+	KEY `patient_discounts_created_by_index` (`created_by`),
+	FOREIGN KEY (`patient_id`)
+		REFERENCES `patients`(`id`) ON DELETE CASCADE,
+	FOREIGN KEY (`section_id`)
+		REFERENCES `sections`(`id`) ON DELETE CASCADE,
+	FOREIGN KEY (`created_by`)
+		REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `turns` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`patient_id` int unsigned NOT NULL,
@@ -197,6 +217,10 @@ CREATE TABLE `turns` (
 	CONSTRAINT `turns_section_fk` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL,
 	CONSTRAINT `turns_staff_fk` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `turns`
+	ADD COLUMN `discount_percent` DECIMAL(5,2) NOT NULL DEFAULT 0.00 AFTER `fee`,
+	ADD COLUMN `discount_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00 AFTER `discount_percent`;
 
 CREATE TABLE `patient_wallet` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,

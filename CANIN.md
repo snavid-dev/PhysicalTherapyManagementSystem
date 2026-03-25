@@ -125,6 +125,7 @@ If you are editing this project in a future chat, assume this:
 - `application/models/Login_model.php`
 - `application/models/Dashboard_model.php`
 - `application/models/Patient_model.php`
+- `application/models/Discount_model.php`
 - `application/models/Reference_doctor_model.php`
 - `application/models/Section_model.php`
 - `application/models/Staff_model.php`
@@ -364,10 +365,12 @@ This section maps each active module to the main tables it reads or writes.
 
 - writes: `patients`
 - writes: `patient_diagnoses`
+- writes: `patient_discounts`
 - reads: `reference_doctors`
 - reads: `diagnoses`
 - reads: `turns`
 - reads: `payments`
+- reads: `sections`
 
 ### Reference Doctors
 
@@ -412,6 +415,7 @@ This section maps each active module to the main tables it reads or writes.
 - reads: `patients`
 - reads: `staff`
 - reads: `sections`
+- reads: `patient_discounts`
 
 ### Payments
 
@@ -671,6 +675,7 @@ This module manages patient records and patient profiles.
 - shows patient profile
 - shows patient turn history
 - shows patient payment history
+- manages patient section-based discount history from the profile page
 
 ### Current data fields
 
@@ -687,6 +692,7 @@ Core patient fields currently include:
 - medical notes
 - referred_by
 - diagnoses
+- profile-based discount records by section
 
 ### If you want to change this module
 
@@ -1479,6 +1485,7 @@ This file defines the simplified physical therapy structure for:
 - patients
 - diagnoses
 - patient_diagnoses
+- patient_discounts
 - reference doctors
 - turns
 - patient_wallet
@@ -1490,6 +1497,11 @@ This file defines the simplified physical therapy structure for:
 - expenses
 - staff_salary_records
 - staff_salary_payments
+
+The `turns` table also stores discount snapshots in:
+
+- `discount_percent`
+- `discount_amount`
 
 If the database needs to evolve, update that file and then reflect the change in the related:
 
@@ -1638,6 +1650,7 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 - `application/controllers/Patients.php`
 - `application/models/Patient_model.php`
+- `application/models/Discount_model.php`
 - `application/models/Diagnosis_model.php`
 - `application/views/patients/index.php`
 - `application/views/patients/form.php`
