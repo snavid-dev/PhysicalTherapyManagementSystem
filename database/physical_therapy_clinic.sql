@@ -127,7 +127,7 @@ CREATE TABLE `reference_doctors` (
 CREATE TABLE `patients` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`first_name` varchar(100) NOT NULL,
-	`last_name` varchar(100) NOT NULL,
+	`last_name` varchar(100) DEFAULT NULL,
 	`father_name` varchar(100) DEFAULT NULL,
 	`gender` varchar(20) DEFAULT NULL,
 	`phone` varchar(30) DEFAULT NULL,
@@ -142,6 +142,9 @@ CREATE TABLE `patients` (
 	KEY `patients_referred_by_index` (`referred_by`),
 	CONSTRAINT `fk_patients_referred_by` FOREIGN KEY (`referred_by`) REFERENCES `reference_doctors` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `patients`
+	MODIFY COLUMN `last_name` VARCHAR(100) DEFAULT NULL;
 
 CREATE TABLE `diagnoses` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,

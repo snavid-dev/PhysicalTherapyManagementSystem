@@ -348,6 +348,7 @@ $lang = array(
 	'Type' => 'Type',
 	'staff_member' => 'Staff Member',
 	'turn_number' => 'Session Number',
+	'session_number_hint' => 'Auto-suggested based on last session in this section. You can change this.',
 	'fee' => 'Fee',
 	'payment_type' => 'Payment Type',
 	'prepaid' => 'Prepaid (Wallet)',

@@ -43,13 +43,13 @@ class Patient_model extends CI_Model
 
 	public function create($data)
 	{
-		$this->db->insert('patients', $data);
+		$this->db->insert('patients', $this->normalize_patient_payload($data));
 		return $this->db->insert_id();
 	}
 
 	public function update($id, $data)
 	{
-		return $this->db->where('id', (int) $id)->update('patients', $data);
+		return $this->db->where('id', (int) $id)->update('patients', $this->normalize_patient_payload($data));
 	}
 
 	public function delete($id)
@@ -155,5 +155,19 @@ class Patient_model extends CI_Model
 			->order_by('name', 'asc')
 			->get()
 			->result_array();
+	}
+
+	protected function normalize_patient_payload($data)
+	{
+		if (!is_array($data)) {
+			return array();
+		}
+
+		if (array_key_exists('last_name', $data)) {
+			$last_name = trim((string) $data['last_name']);
+			$data['last_name'] = $last_name === '' ? NULL : $last_name;
+		}
+
+		return $data;
 	}
 }

@@ -3,7 +3,6 @@ $selected_patient_id = (int) set_value('patient_id', $turn['patient_id'] ?? 0);
 $selected_section_id = (int) set_value('section_id', $turn['section_id'] ?? 0);
 $selected_staff_id = (int) set_value('staff_id', $turn['staff_id'] ?? 0);
 $selected_turn_number = set_value('turn_number', $turn['turn_number'] ?? '');
-$turn_number_display = $selected_turn_number !== '' ? $selected_turn_number : '—';
 $selected_fee = set_value('fee', isset($turn['fee']) ? number_format((float) $turn['fee'], 2, '.', '') : number_format((float) $default_section_fee, 2, '.', ''));
 $selected_payment_type = set_value('payment_type', $turn['payment_type'] ?? 'cash');
 $selected_topup = set_value('topup_amount', isset($turn['topup_amount']) ? number_format((float) $turn['topup_amount'], 2, '.', '') : '0.00');
@@ -14,9 +13,20 @@ $selected_time = set_value('turn_time', (!empty($turn['turn_time']) && $turn['tu
 $selected_status = set_value('status', $turn['status'] ?? 'accepted');
 $selected_notes = set_value('notes', $turn['notes'] ?? '');
 $patient_lookup = array();
+$patient_display_name = static function ($patient) {
+	$first_name = trim((string) ($patient['first_name'] ?? ''));
+	$last_name = trim((string) ($patient['last_name'] ?? ''));
+	$father_name = trim((string) ($patient['father_name'] ?? ''));
+
+	if ($last_name !== '') {
+		return trim($first_name . ' ' . $last_name);
+	}
+
+	return $father_name !== '' ? trim($first_name . ' ' . $father_name) : $first_name;
+};
 
 foreach ($patients as $patient_item) {
-	$patient_lookup[(int) $patient_item['id']] = trim($patient_item['first_name'] . ' ' . $patient_item['last_name']);
+	$patient_lookup[(int) $patient_item['id']] = $patient_display_name($patient_item);
 }
 
 $selected_patient_name = isset($patient_lookup[$selected_patient_id]) ? $patient_lookup[$selected_patient_id] : '';
@@ -63,7 +73,7 @@ $staff_payload = array_map(static function ($staff_member) {
 									<select name="patient_id" id="patientSelect" class="form-select">
 										<option value=""><?= t('Select') ?></option>
 										<?php foreach ($patients as $patient) : ?>
-											<option value="<?= $patient['id'] ?>" <?= $selected_patient_id === (int) $patient['id'] ? 'selected' : '' ?>><?= html_escape($patient['first_name'] . ' ' . $patient['last_name']) ?></option>
+											<option value="<?= $patient['id'] ?>" <?= $selected_patient_id === (int) $patient['id'] ? 'selected' : '' ?>><?= html_escape($patient_display_name($patient)) ?></option>
 										<?php endforeach; ?>
 									</select>
 								<?php endif; ?>
@@ -137,8 +147,8 @@ $staff_payload = array_map(static function ($staff_member) {
 							</div>
 							<div class="col-lg-4">
 								<label class="form-label"><?= t('turn_number') ?></label>
-								<input type="text" id="turnNumberDisplay" class="form-control" value="<?= html_escape($turn_number_display) ?>" readonly>
-								<input type="hidden" name="turn_number" id="turnNumberInput" value="<?= html_escape($selected_turn_number) ?>">
+								<input type="number" name="turn_number" id="turnNumberInput" class="form-control" min="1" step="1" value="<?= html_escape($selected_turn_number) ?>">
+								<small class="text-muted d-block mt-2"><?= t('session_number_hint') ?></small>
 								<small class="text-danger"><?= form_error('turn_number') ?></small>
 							</div>
 							<div class="col-lg-4">
@@ -293,7 +303,6 @@ $staff_payload = array_map(static function ($staff_member) {
 	const patientSelect = document.getElementById('patientSelect');
 	const sectionSelect = document.getElementById('sectionSelect');
 	const staffSelect = document.getElementById('staffSelect');
-	const turnNumberDisplay = document.getElementById('turnNumberDisplay');
 	const turnNumberInput = document.getElementById('turnNumberInput');
 	const feeInput = document.getElementById('feeInput');
 	const topupRow = document.getElementById('topupRow');
@@ -322,6 +331,7 @@ $staff_payload = array_map(static function ($staff_member) {
 		totalOpenDebt: <?= json_encode((float) $total_open_debt) ?>,
 		openDebts: <?= json_encode($financial_payload['open_debts'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
 		staff: <?= json_encode($staff_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
+		sessionManuallyEdited: false,
 	};
 	const messages = {
 		noSessionNumber: <?= json_encode('—') ?>,
@@ -359,14 +369,12 @@ $staff_payload = array_map(static function ($staff_member) {
 		}).format(value);
 	}
 
-	function updateSessionNumber(value) {
-		if (!turnNumberDisplay || !turnNumberInput) {
+	function clearSessionNumber() {
+		if (!turnNumberInput) {
 			return;
 		}
 
-		const normalized = value === null || value === undefined || value === '' ? '' : String(value);
-		turnNumberInput.value = normalized;
-		turnNumberDisplay.value = normalized === '' ? messages.noSessionNumber : normalized;
+		turnNumberInput.value = '';
 	}
 
 	function renderOpenDebts() {
@@ -544,6 +552,29 @@ $staff_payload = array_map(static function ($staff_member) {
 		});
 	}
 
+	function requestSessionNumber() {
+		if (isEdit || !patientSelect || !sectionSelect || !turnNumberInput) {
+			return;
+		}
+
+		const patientId = patientSelect.value;
+		const sectionId = sectionSelect.value;
+
+		if (!patientId || !sectionId) {
+			clearSessionNumber();
+			state.sessionManuallyEdited = false;
+			return;
+		}
+
+		fetchJson(<?= json_encode(base_url('turns/get_session_number')) ?>, { patient_id: patientId, section_id: sectionId }, function (data) {
+			if (!data || data.success !== true || state.sessionManuallyEdited) {
+				return;
+			}
+
+			turnNumberInput.value = data.session_number ? String(data.session_number) : '';
+		});
+	}
+
 	if (!isEdit && patientSelect) {
 		patientSelect.addEventListener('change', function () {
 			const patientId = this.value;
@@ -551,14 +582,16 @@ $staff_payload = array_map(static function ($staff_member) {
 				state.walletBalance = 0;
 				state.totalOpenDebt = 0;
 				state.openDebts = [];
-				updateSessionNumber('');
+				clearSessionNumber();
+				state.sessionManuallyEdited = false;
 				updateFinancialBadges();
 				refreshSummary();
 				togglePanels();
 				return;
 			}
 
-			updateSessionNumber('');
+			clearSessionNumber();
+			state.sessionManuallyEdited = false;
 
 			fetchJson(<?= json_encode(base_url('turns/get_patient_financial')) ?>, { patient_id: patientId }, function (data) {
 				state.walletBalance = toNumber(data.wallet_balance);
@@ -569,9 +602,7 @@ $staff_payload = array_map(static function ($staff_member) {
 				togglePanels();
 			});
 
-			fetchJson(<?= json_encode(base_url('turns/get_session_number')) ?>, { patient_id: patientId }, function (data) {
-				updateSessionNumber(data && data.session_number ? data.session_number : '');
-			});
+			requestSessionNumber();
 		});
 	}
 
@@ -581,6 +612,10 @@ $staff_payload = array_map(static function ($staff_member) {
 			if (!sectionId) {
 				state.staff = [];
 				populateStaff();
+				if (!isEdit) {
+					clearSessionNumber();
+					state.sessionManuallyEdited = false;
+				}
 				togglePanels();
 				refreshSummary();
 				return;
@@ -597,6 +632,12 @@ $staff_payload = array_map(static function ($staff_member) {
 				togglePanels();
 				refreshSummary();
 			});
+
+			if (!isEdit) {
+				clearSessionNumber();
+				state.sessionManuallyEdited = false;
+				requestSessionNumber();
+			}
 		});
 	}
 
@@ -615,10 +656,15 @@ $staff_payload = array_map(static function ($staff_member) {
 		if (topupInput) {
 			topupInput.addEventListener('input', refreshSummary);
 		}
+
+		if (turnNumberInput) {
+			turnNumberInput.addEventListener('input', function () {
+				state.sessionManuallyEdited = true;
+			});
+		}
 	}
 
 	updateFinancialBadges();
-	updateSessionNumber(<?= json_encode($selected_turn_number) ?>);
 	populateStaff(selectedStaffId);
 	togglePanels();
 	refreshPaymentOptionState();
