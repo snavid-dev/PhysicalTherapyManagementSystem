@@ -4,6 +4,7 @@
 		<p class="text-muted mb-0"><?= html_escape($staff['first_name'] . ' ' . $staff['last_name']) ?></p>
 	</div>
 	<div class="d-flex gap-2">
+		<a href="<?= base_url('salaries/pay/' . $staff['id'] . '?month=' . rawurlencode($current_month)) ?>" class="btn btn-dark"><?= t('go_to_salary_payment') ?></a>
 		<a href="<?= base_url('staff/edit/' . $staff['id']) ?>" class="btn btn-outline-secondary"><?= t('Edit') ?></a>
 		<a href="<?= base_url('staff') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
 	</div>
@@ -100,39 +101,40 @@
 	</div>
 
 	<div class="col-12 col-lg-7">
-			<div class="card h-100">
-				<div class="card-body">
-					<h2 class="h5 mb-3"><?= t('calculate_salary') ?></h2>
-				<button type="button" class="btn btn-dark" id="openSalaryModalButton"><?= t('calculate_salary') ?></button>
-				<div id="salaryCalculationError" class="alert alert-danger mt-3 d-none"></div>
-				<div id="salaryCalculationResult" class="mt-3 d-none"></div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="modal fade" id="salaryRangeModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h2 class="modal-title fs-5"><?= t('Select Salary Date Range') ?></h2>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
-			</div>
-			<div class="modal-body">
-				<div class="row g-3">
-					<div class="col-md-6">
-						<label class="form-label" for="salaryFromDate"><?= t('From') ?></label>
-						<input type="date" id="salaryFromDate" class="form-control" value="<?= html_escape(date('Y-m-01')) ?>">
+		<div class="card h-100">
+			<div class="card-body">
+				<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+					<div>
+						<h2 class="h5 mb-1"><?= t('calculate_salary') ?></h2>
+						<p class="text-muted mb-0"><?= html_escape($current_month) ?></p>
 					</div>
-					<div class="col-md-6">
-						<label class="form-label" for="salaryToDate"><?= t('To') ?></label>
-						<input type="date" id="salaryToDate" class="form-control" value="<?= html_escape(date('Y-m-t')) ?>">
+					<div class="d-flex gap-2 flex-wrap">
+						<input type="month" id="salaryMonth" class="form-control" value="<?= html_escape($current_month) ?>" style="max-width: 180px;">
+						<button type="button" class="btn btn-dark" id="calculateSalaryButton"><?= t('calculate_salary') ?></button>
 					</div>
 				</div>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
-				<button type="button" class="btn btn-dark" id="calculateSalaryButton"><?= t('calculate_salary') ?></button>
+				<div id="salaryCalculationError" class="alert alert-danger d-none"></div>
+				<div id="salaryCalculationResult">
+					<?php $salary_rows = array(
+						array(t('month'), $current_month),
+						array(t('base_salary'), format_number($salary_calculation['base_salary'], 2)),
+						array(t('monthly_leave_quota'), format_number($salary_calculation['leave_quota'] ?? $salary_calculation['monthly_leave_quota'], 0)),
+						array(t('approved_leaves_in_range'), format_number($salary_calculation['approved_leaves'], 0)),
+						array(t('paid_leaves'), format_number($salary_calculation['paid_leaves'], 0)),
+						array(t('excess_leaves'), format_number($salary_calculation['excess_leaves'], 0)),
+						array(t('deduction'), format_number($salary_calculation['deduction'], 2)),
+						array(t('final_salary'), format_number($salary_calculation['final_salary'], 2)),
+					); ?>
+					<?php foreach ($salary_rows as $salary_row) : ?>
+						<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3">
+							<span class="text-muted"><?= html_escape($salary_row[0]) ?></span>
+							<strong><?= html_escape($salary_row[1]) ?></strong>
+						</div>
+					<?php endforeach; ?>
+					<?php if (($salary_calculation['salary_type'] ?? 'fixed') === 'hourly') : ?>
+						<div class="alert alert-warning mb-0"><?= t('hourly_manual_note') ?></div>
+					<?php endif; ?>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -140,24 +142,21 @@
 
 <script>
 (function () {
-	const openModalButton = document.getElementById('openSalaryModalButton');
 	const button = document.getElementById('calculateSalaryButton');
-	const modalElement = document.getElementById('salaryRangeModal');
-	const fromDateInput = document.getElementById('salaryFromDate');
-	const toDateInput = document.getElementById('salaryToDate');
+	const monthInput = document.getElementById('salaryMonth');
 	const result = document.getElementById('salaryCalculationResult');
 	const errorBox = document.getElementById('salaryCalculationError');
 	const locale = <?= json_encode($current_locale === 'farsi' ? 'fa-IR' : 'en-US') ?>;
 	const labels = {
-		from_date: <?= json_encode(t('From')) ?>,
-		to_date: <?= json_encode(t('To')) ?>,
+		month: <?= json_encode(t('month')) ?>,
 		base_salary: <?= json_encode(t('base_salary')) ?>,
 		monthly_leave_quota: <?= json_encode(t('monthly_leave_quota')) ?>,
 		approved_leaves: <?= json_encode(t('approved_leaves_in_range')) ?>,
 		paid_leaves: <?= json_encode(t('paid_leaves')) ?>,
 		excess_leaves: <?= json_encode(t('excess_leaves')) ?>,
 		deduction: <?= json_encode(t('deduction')) ?>,
-		final_salary: <?= json_encode(t('final_salary')) ?>
+		final_salary: <?= json_encode(t('final_salary')) ?>,
+		hourly_manual_note: <?= json_encode(t('hourly_manual_note')) ?>
 	};
 
 	function formatNumber(value, decimals) {
@@ -173,10 +172,9 @@
 
 	function renderRows(data) {
 		const rows = [
-			[labels.from_date, data.from_date],
-			[labels.to_date, data.to_date],
+			[labels.month, data.month],
 			[labels.base_salary, formatNumber(data.base_salary, 2)],
-			[labels.monthly_leave_quota, formatNumber(data.monthly_leave_quota, 0)],
+			[labels.monthly_leave_quota, formatNumber(data.leave_quota || data.monthly_leave_quota, 0)],
 			[labels.approved_leaves, formatNumber(data.approved_leaves, 0)],
 			[labels.paid_leaves, formatNumber(data.paid_leaves, 0)],
 			[labels.excess_leaves, formatNumber(data.excess_leaves, 0)],
@@ -184,41 +182,26 @@
 			[labels.final_salary, formatNumber(data.final_salary, 2)]
 		];
 
-		return rows.map(function (row) {
+		let html = rows.map(function (row) {
 			return '<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3">'
 				+ '<span class="text-muted">' + row[0] + '</span>'
 				+ '<strong>' + row[1] + '</strong>'
 				+ '</div>';
 		}).join('');
-	}
 
-	function getSalaryModal() {
-		if (!modalElement || !window.bootstrap || !window.bootstrap.Modal) {
-			return null;
+		if (data.salary_type === 'hourly') {
+			html += '<div class="alert alert-warning mb-0">' + labels.hourly_manual_note + '</div>';
 		}
 
-		return window.bootstrap.Modal.getOrCreateInstance(modalElement);
-	}
-
-	if (openModalButton) {
-		openModalButton.addEventListener('click', function () {
-			errorBox.classList.add('d-none');
-
-			const salaryModal = getSalaryModal();
-			if (salaryModal) {
-				salaryModal.show();
-			}
-		});
+		return html;
 	}
 
 	button.addEventListener('click', function () {
 		button.disabled = true;
 		errorBox.classList.add('d-none');
-		result.classList.add('d-none');
 
 		const payload = new URLSearchParams();
-		payload.set('from_date', fromDateInput.value);
-		payload.set('to_date', toDateInput.value);
+		payload.set('month', monthInput.value);
 
 		fetch(<?= json_encode(base_url('staff/calculate_salary/' . $staff['id'])) ?>, {
 			method: 'POST',
@@ -236,13 +219,7 @@
 					throw new Error(data.error);
 				}
 
-				const salaryModal = getSalaryModal();
-				if (salaryModal) {
-					salaryModal.hide();
-				}
-
 				result.innerHTML = renderRows(data);
-				result.classList.remove('d-none');
 			})
 			.catch(function (error) {
 				errorBox.textContent = error && error.message ? error.message : <?= json_encode(t('Unable to calculate salary right now.')) ?>;

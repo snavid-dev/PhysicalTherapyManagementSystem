@@ -7,6 +7,7 @@ class Preferences extends Base_Controller
 	{
 		parent::__construct();
 		$this->load->model('Diagnosis_model');
+		$this->load->model('Expense_category_model');
 	}
 
 	public function language($locale = 'farsi')
@@ -114,6 +115,65 @@ class Preferences extends Base_Controller
 		redirect('preferences/diagnoses');
 	}
 
+	public function expense_categories()
+	{
+		$this->require_permission('manage_expenses');
+
+		$this->render('preferences/expense_categories', array(
+			'title' => t('expense_categories'),
+			'current_section' => 'preferences',
+			'categories' => $this->Expense_category_model->get_all(),
+		));
+	}
+
+	public function expense_categories_store()
+	{
+		$this->require_permission('manage_expenses');
+		$this->require_post();
+		$this->validate_expense_category_form();
+
+		if (!$this->form_validation->run()) {
+			$this->session->set_flashdata('error', validation_errors("\n", "\n"));
+			return redirect('preferences/expense-categories');
+		}
+
+		$this->Expense_category_model->create($this->expense_category_payload());
+		$this->session->set_flashdata('success', t('Expense category created successfully.'));
+		redirect('preferences/expense-categories');
+	}
+
+	public function expense_categories_update($id)
+	{
+		$this->require_permission('manage_expenses');
+		$this->require_post();
+		show_404_if_empty($this->Expense_category_model->get_by_id($id));
+		$this->validate_expense_category_form();
+
+		if (!$this->form_validation->run()) {
+			$this->session->set_flashdata('error', validation_errors("\n", "\n"));
+			return redirect('preferences/expense-categories');
+		}
+
+		$this->Expense_category_model->update($id, $this->expense_category_payload());
+		$this->session->set_flashdata('success', t('Expense category updated successfully.'));
+		redirect('preferences/expense-categories');
+	}
+
+	public function expense_categories_delete($id)
+	{
+		$this->require_permission('manage_expenses');
+		$this->require_post();
+		show_404_if_empty($this->Expense_category_model->get_by_id($id));
+
+		if (!$this->Expense_category_model->delete($id)) {
+			$this->session->set_flashdata('error', t('expense_category_in_use'));
+			return redirect('preferences/expense-categories');
+		}
+
+		$this->session->set_flashdata('success', t('Expense category deleted successfully.'));
+		redirect('preferences/expense-categories');
+	}
+
 	protected function redirect_back()
 	{
 		$back = $this->input->server('HTTP_REFERER');
@@ -127,6 +187,20 @@ class Preferences extends Base_Controller
 	}
 
 	protected function diagnosis_payload()
+	{
+		return array(
+			'name' => trim((string) $this->input->post('name', TRUE)),
+			'name_fa' => $this->null_if_empty($this->input->post('name_fa', TRUE)),
+		);
+	}
+
+	protected function validate_expense_category_form()
+	{
+		$this->form_validation->set_rules('name', 'Name (EN)', 'required|trim|max_length[150]');
+		$this->form_validation->set_rules('name_fa', 'Name (FA)', 'trim|max_length[150]');
+	}
+
+	protected function expense_category_payload()
 	{
 		return array(
 			'name' => trim((string) $this->input->post('name', TRUE)),

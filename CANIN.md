@@ -22,6 +22,8 @@ The current live direction is no longer dental treatment planning, teeth charts,
 - reference doctors
 - turns or appointments
 - payments
+- expenses
+- staff salary payments
 - reports
 - doctor or therapist leaves
 
@@ -113,6 +115,8 @@ If you are editing this project in a future chat, assume this:
 - `application/controllers/Roles.php`
 - `application/controllers/Turns.php`
 - `application/controllers/Payments.php`
+- `application/controllers/Expenses.php`
+- `application/controllers/Salaries.php`
 - `application/controllers/Reports.php`
 - `application/controllers/Leaves.php`
 
@@ -130,6 +134,9 @@ If you are editing this project in a future chat, assume this:
 - `application/models/Wallet_model.php`
 - `application/models/Debt_model.php`
 - `application/models/Payment_model.php`
+- `application/models/Expense_model.php`
+- `application/models/Expense_category_model.php`
+- `application/models/Salary_model.php`
 - `application/models/Report_model.php`
 - `application/models/Leave_model.php`
 
@@ -145,8 +152,11 @@ If you are editing this project in a future chat, assume this:
 - `application/views/roles/`
 - `application/views/turns/`
 - `application/views/payments/`
+- `application/views/expenses/`
+- `application/views/salaries/`
 - `application/views/reports/`
 - `application/views/leaves/`
+- `application/views/preferences/expense_categories.php`
 
 ### Language files
 
@@ -209,6 +219,8 @@ These are the main active routes:
 - `/roles`
 - `/turns`
 - `/payments`
+- `/expenses`
+- `/salaries`
 - `/reports`
 - `/leaves`
 - `/preferences/language/{locale}`
@@ -278,6 +290,21 @@ This is the practical dependency map of the active system.
 - patient profile depends on payment history
 - dashboard depends on payment totals
 - reports depend on payment records
+
+### Expenses dependencies
+
+- `Expenses` depends on `Expense_model`
+- `Expenses` depends on `Expense_category_model`
+- `Expenses` depends on `Staff_model`
+- salary payments depend on expense records
+
+### Salaries dependencies
+
+- `Salaries` depends on `Salary_model`
+- `Salaries` depends on `Staff_model`
+- `Salaries` depends on `doctor_leaves`
+- salary payments depend on expense records
+- staff profile depends on salary calculation
 
 ### Reports dependencies
 
@@ -391,6 +418,20 @@ This section maps each active module to the main tables it reads or writes.
 - writes: `payments`
 - reads: `patients`
 
+### Expenses
+
+- writes: `expenses`
+- reads: `expense_categories`
+- reads: `staff`
+
+### Salaries
+
+- writes: `staff_salary_records`
+- writes: `staff_salary_payments`
+- writes: `expenses`
+- reads: `staff`
+- reads: `doctor_leaves`
+
 ### Reports
 
 - reads: `turns`
@@ -445,6 +486,8 @@ Important rules:
 - `manage_roles`
 - `manage_turns`
 - `manage_payments`
+- `manage_expenses`
+- `manage_salaries`
 - `view_reports`
 - `manage_leaves`
 
@@ -948,7 +991,95 @@ Pass these steps:
 
 ---
 
-## 18. Module: Reports
+## 18. Module: Expenses
+
+### Purpose
+
+This module records clinic operating expenses and keeps salary-paid expenses tied to payroll records.
+
+### Main files
+
+- `application/controllers/Expenses.php`
+- `application/models/Expense_model.php`
+- `application/models/Expense_category_model.php`
+- `application/views/expenses/index.php`
+- `application/views/expenses/form.php`
+- `application/views/preferences/expense_categories.php`
+- `database/physical_therapy_clinic.sql`
+
+### What it currently does
+
+- lists expenses with category, date, and staff filters
+- creates non-salary expenses
+- edits non-salary expenses
+- blocks direct salary expense creation from the normal expense form
+- blocks deleting expense rows linked to salary payments
+- supports mini-CRUD for expense categories under Preferences
+
+### If you want to change this module
+
+Pass these steps:
+
+1. Start with `Expenses.php` for validation and guards.
+2. Update `Expense_model.php` if query filters, joins, or delete rules change.
+3. Update `Expense_category_model.php` and the Preferences mini-CRUD if category behavior changes.
+4. Update `expenses/index.php` and `expenses/form.php` for list or form changes.
+5. Update both language files for any new labels or messages.
+6. If schema changes, update `database/physical_therapy_clinic.sql`.
+7. Verify salary-linked expenses remain read-only and non-deletable.
+8. Verify mobile table overflow and filter wrapping.
+
+### AI prompt example for this module
+
+> Read `CANIN.md` first. Work only on the Expenses module. Inspect `application/controllers/Expenses.php`, `application/models/Expense_model.php`, `application/models/Expense_category_model.php`, the views under `application/views/expenses/`, and `application/views/preferences/expense_categories.php`. Preserve `manage_expenses`, keep salary expenses restricted to the payroll flow, and keep the forms responsive in English and Persian.
+
+---
+
+## 19. Module: Salaries
+
+### Purpose
+
+This module calculates monthly staff salary, records partial or final payments, and mirrors each salary payment into expenses.
+
+### Main files
+
+- `application/controllers/Salaries.php`
+- `application/models/Salary_model.php`
+- `application/controllers/Staff.php`
+- `application/views/salaries/index.php`
+- `application/views/salaries/pay.php`
+- `application/views/staff/profile.php`
+- `database/physical_therapy_clinic.sql`
+
+### What it currently does
+
+- calculates monthly salary from staff salary data and approved leave days
+- creates one salary record per staff member per month
+- records advance and final payments
+- updates unpaid, partial, and paid salary status
+- creates matching expense entries for salary payments
+- reuses the same salary calculation in the staff profile and payroll screens
+
+### If you want to change this module
+
+Pass these steps:
+
+1. Start with `Salary_model.php` because it is the single source of truth for salary calculation.
+2. Update `Salaries.php` if the payment workflow or filters change.
+3. Update `Staff.php` and `staff/profile.php` only to consume the shared salary calculation contract.
+4. Update `salaries/index.php` and `salaries/pay.php` for payroll UI changes.
+5. Update both language files for any new labels or states.
+6. If schema changes, update `database/physical_therapy_clinic.sql`.
+7. Verify the join path between `staff.user_id` and `doctor_leaves.doctor_id` still matches the live schema.
+8. Verify partial payment, final payment, and overpayment-blocking behavior.
+
+### AI prompt example for this module
+
+> Read `CANIN.md` first. Work only on the Salaries module. Inspect `application/controllers/Salaries.php`, `application/models/Salary_model.php`, `application/controllers/Staff.php`, `application/views/salaries/`, and `application/views/staff/profile.php`. Preserve `manage_salaries`, keep salary calculation centralized in `Salary_model`, and keep salary payment writes transactional with matching expense rows.
+
+---
+
+## 20. Module: Reports
 
 ### Purpose
 
@@ -1004,7 +1135,7 @@ Pass these steps:
 
 ---
 
-## 19. Module: Leaves
+## 21. Module: Leaves
 
 ### Purpose
 
@@ -1066,7 +1197,7 @@ Pass these steps:
 
 ---
 
-## 20. Module: Reference Doctors
+## 22. Module: Reference Doctors
 
 ### Purpose
 
@@ -1145,7 +1276,7 @@ Pass these steps:
 
 ---
 
-## 21. Module: Staff
+## 23. Module: Staff
 
 ### Purpose
 
@@ -1217,7 +1348,7 @@ Pass these steps:
 
 ---
 
-## 22. Module: Sections
+## 24. Module: Sections
 
 ### Purpose
 
@@ -1282,7 +1413,7 @@ Pass these steps:
 
 ---
 
-## 23. Module: Preferences
+## 25. Module: Preferences
 
 ### Purpose
 
@@ -1330,7 +1461,7 @@ Pass these steps:
 
 ---
 
-## 24. Database Story
+## 26. Database Story
 
 The active simplified schema reference is:
 
@@ -1355,6 +1486,10 @@ This file defines the simplified physical therapy structure for:
 - patient_debts
 - payments
 - doctor leaves
+- expense_categories
+- expenses
+- staff_salary_records
+- staff_salary_payments
 
 If the database needs to evolve, update that file and then reflect the change in the related:
 
@@ -1365,7 +1500,7 @@ If the database needs to evolve, update that file and then reflect the change in
 
 ---
 
-## 25. Legacy Code Policy
+## 27. Legacy Code Policy
 
 This repository still contains old dental-era code.
 
@@ -1434,7 +1569,7 @@ Pass these checks:
 
 ---
 
-## 26. Global Change Process For Any Module
+## 28. Global Change Process For Any Module
 
 If you want to change any module, use this exact sequence:
 
@@ -1455,7 +1590,7 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 27. Module-Specific Change Matrix
+## 29. Module-Specific Change Matrix
 
 | Module | Start Here | Then Check | Then Update |
 |---|---|---|---|
@@ -1469,13 +1604,15 @@ If you want to change any module, use this exact sequence:
 | Roles | `Roles.php` | `Role_model.php`, `Auth.php` | `roles/index.php`, `roles/form.php`, `header.php` |
 | Turns | `Turns.php` | `Turn_model.php`, `Patient_model.php`, `User_model.php` | `turns/index.php`, `turns/form.php`, `turns/bulk_form.php` |
 | Payments | `Payments.php` | `Payment_model.php`, `Patient_model.php` | `payments/index.php`, `payments/form.php` |
+| Expenses | `Expenses.php` | `Expense_model.php`, `Expense_category_model.php`, `Staff_model.php` | `expenses/index.php`, `expenses/form.php`, `preferences/expense_categories.php` |
+| Salaries | `Salaries.php` | `Salary_model.php`, `Staff_model.php` | `salaries/index.php`, `salaries/pay.php`, `staff/profile.php` |
 | Reports | `Reports.php` | `Report_model.php` | `reports/index.php` |
 | Leaves | `Leaves.php` | `Leave_model.php`, `User_model.php` | `leaves/index.php`, `leaves/form.php` |
 | Preferences | `Preferences.php` | `app_helper.php` | `header.php`, `login.php`, `app.css` |
 
 ---
 
-## 28. Exact File Paths By Module
+## 30. Exact File Paths By Module
 
 This section is intentionally repetitive. It is here so future chats can jump directly into the correct files without re-discovering the structure.
 
@@ -1604,6 +1741,34 @@ This section is intentionally repetitive. It is here so future chats can jump di
 - `application/language/english/app_lang.php`
 - `application/language/farsi/app_lang.php`
 
+### Expenses exact paths
+
+- `application/controllers/Expenses.php`
+- `application/models/Expense_model.php`
+- `application/models/Expense_category_model.php`
+- `application/views/expenses/index.php`
+- `application/views/expenses/form.php`
+- `application/views/preferences/expense_categories.php`
+- `application/views/layout/header.php`
+- `application/controllers/Preferences.php`
+- `database/physical_therapy_clinic.sql`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+
+### Salaries exact paths
+
+- `application/controllers/Salaries.php`
+- `application/models/Salary_model.php`
+- `application/controllers/Staff.php`
+- `application/models/Staff_model.php`
+- `application/views/salaries/index.php`
+- `application/views/salaries/pay.php`
+- `application/views/staff/profile.php`
+- `application/views/layout/header.php`
+- `database/physical_therapy_clinic.sql`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+
 ### Reports exact paths
 
 - `application/controllers/Reports.php`
@@ -1639,13 +1804,13 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 ---
 
-## 29. AI Prompt Library
+## 31. AI Prompt Library
 
 These prompts are designed to be pasted into future chats.
 
 ### Full-project prompt
 
-> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
+> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, expenses, salaries, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
 
 ### Login prompt
 
@@ -1687,6 +1852,14 @@ These prompts are designed to be pasted into future chats.
 
 > Read `CANIN.md` first. Update only the Payments module. Start with `application/controllers/Payments.php`, `application/models/Payment_model.php`, and the views under `application/views/payments/`. Preserve patient linkage, reporting compatibility, and responsive forms and tables.
 
+### Expenses prompt
+
+> Read `CANIN.md` first. Update only the Expenses module. Start with `application/controllers/Expenses.php`, `application/models/Expense_model.php`, `application/models/Expense_category_model.php`, and the views under `application/views/expenses/`. Preserve `manage_expenses`, keep salary expenses restricted to payroll, and keep the expense category mini-CRUD aligned with Preferences.
+
+### Salaries prompt
+
+> Read `CANIN.md` first. Update only the Salaries module. Start with `application/controllers/Salaries.php`, `application/models/Salary_model.php`, `application/controllers/Staff.php`, and the views under `application/views/salaries/`. Preserve `manage_salaries`, keep salary calculation centralized in `Salary_model`, and keep salary-payment-to-expense writes transactional.
+
 ### Reports prompt
 
 > Read `CANIN.md` first. Update only the Reports module. Start with `application/controllers/Reports.php`, `application/models/Report_model.php`, and `application/views/reports/index.php`. Keep it read-only, date-consistent, and responsive.
@@ -1701,7 +1874,7 @@ These prompts are designed to be pasted into future chats.
 
 ---
 
-## 30. Language And Content Rules
+## 32. Language And Content Rules
 
 When adding UI text:
 
@@ -1713,7 +1886,7 @@ Do not leave new visible UI strings untranslated if the rest of the module is lo
 
 ---
 
-## 31. Responsive Rules
+## 33. Responsive Rules
 
 Every module change must be checked for:
 
@@ -1731,7 +1904,7 @@ If a module needs special responsive styling, prefer adding small, focused addit
 
 ---
 
-## 32. Validation Checklist Before Finishing Any Change
+## 34. Validation Checklist Before Finishing Any Change
 
 Before saying a task is complete, verify:
 
@@ -1746,15 +1919,15 @@ Before saying a task is complete, verify:
 
 ---
 
-## 33. Best Prompt To Reuse In Other Chats
+## 35. Best Prompt To Reuse In Other Chats
 
 If you want to continue this project in another chat, you can paste something like this:
 
-> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
+> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, expenses, salaries, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
 
 ---
 
-## 34. Final Rule
+## 36. Final Rule
 
 When in doubt:
 
