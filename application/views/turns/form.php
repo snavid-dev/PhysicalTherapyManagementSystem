@@ -4,6 +4,8 @@ $selected_section_id = (int) set_value('section_id', $turn['section_id'] ?? 0);
 $selected_staff_id = (int) set_value('staff_id', $turn['staff_id'] ?? 0);
 $selected_turn_number = set_value('turn_number', $turn['turn_number'] ?? '');
 $selected_fee = set_value('fee', isset($turn['fee']) ? number_format((float) $turn['fee'], 2, '.', '') : number_format((float) $default_section_fee, 2, '.', ''));
+$selected_discount_percent = set_value('discount_percent', isset($turn['discount_percent']) ? number_format((float) $turn['discount_percent'], 2, '.', '') : '0.00');
+$selected_discount_amount = set_value('discount_amount', isset($turn['discount_amount']) ? number_format((float) $turn['discount_amount'], 2, '.', '') : '0.00');
 $selected_payment_type = set_value('payment_type', $turn['payment_type'] ?? 'cash');
 $selected_topup = set_value('topup_amount', isset($turn['topup_amount']) ? number_format((float) $turn['topup_amount'], 2, '.', '') : '0.00');
 $selected_wallet_deducted = number_format((float) ($turn['wallet_deducted'] ?? 0), 2, '.', '');
@@ -12,6 +14,14 @@ $selected_date = set_value('turn_date', $turn['turn_date'] ?? date('Y-m-d'));
 $selected_time = set_value('turn_time', (!empty($turn['turn_time']) && $turn['turn_time'] !== '00:00:00') ? substr($turn['turn_time'], 0, 5) : '');
 $selected_status = set_value('status', $turn['status'] ?? 'accepted');
 $selected_notes = set_value('notes', $turn['notes'] ?? '');
+$initial_original_fee = (float) $default_section_fee;
+
+if ((float) $selected_discount_percent > 0) {
+	$initial_original_fee = round((float) $selected_fee + (float) $selected_discount_amount, 2);
+} elseif ($selected_section_id <= 0) {
+	$initial_original_fee = 0.00;
+}
+
 $patient_lookup = array();
 $patient_display_name = static function ($patient) {
 	$first_name = trim((string) ($patient['first_name'] ?? ''));
@@ -154,6 +164,13 @@ $staff_payload = array_map(static function ($staff_member) {
 							<div class="col-lg-4">
 								<label class="form-label"><?= t('fee') ?></label>
 								<input type="number" name="fee" id="feeInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_fee) ?>"<?= $is_edit ? ' readonly' : '' ?>>
+								<input type="hidden" name="discount_percent" id="discountPercentInput" value="<?= html_escape($selected_discount_percent) ?>">
+								<input type="hidden" name="discount_amount" id="discountAmountInput" value="<?= html_escape($selected_discount_amount) ?>">
+								<div id="discountInfoWrap" class="alert alert-info py-2 px-3 mt-2<?= (float) $selected_discount_percent > 0 ? '' : ' d-none' ?>">
+									<div id="discountInfoText" class="small fw-semibold"></div>
+									<div id="feeOverrideWarning" class="small text-warning-emphasis mt-2 d-none"><?= t('fee_overridden') ?></div>
+									<a href="#" id="resetDiscountedFeeLink" class="small d-none"><?= t('reset_to_discounted') ?></a>
+								</div>
 								<small class="text-danger"><?= form_error('fee') ?></small>
 							</div>
 							<div class="col-md-4">
@@ -273,7 +290,9 @@ $staff_payload = array_map(static function ($staff_member) {
 					<div class="turn-summary-block">
 						<h2 class="h5 mb-3"><?= t('payment_summary') ?></h2>
 						<div class="turn-summary-grid">
-							<div class="turn-summary-row"><span><?= t('fee') ?></span><strong id="summaryFee"><?= format_amount($selected_fee) ?></strong></div>
+							<div class="turn-summary-row"><span><?= t('original_fee') ?></span><strong id="summaryOriginalFee"><?= format_amount($initial_original_fee) ?></strong></div>
+							<div class="turn-summary-row<?= (float) $selected_discount_percent > 0 ? '' : ' d-none' ?>" id="summaryDiscountRow"><span><?= t('discount') ?></span><strong id="summaryDiscount">-<?= format_amount($selected_discount_amount) ?> (<?= format_amount((float) $selected_discount_percent) ?>%)</strong></div>
+							<div class="turn-summary-row"><span><?= t('discounted_fee') ?></span><strong id="summaryDiscountedFee"><?= format_amount($selected_fee) ?></strong></div>
 							<div class="turn-summary-row"><span><?= t('top_up_amount') ?></span><strong id="summaryTopup"><?= format_amount($selected_topup) ?></strong></div>
 							<div class="turn-summary-row"><span><?= t('wallet_deducted') ?></span><strong id="summaryWalletDeducted"><?= format_amount($selected_wallet_deducted) ?></strong></div>
 							<div class="turn-summary-row"><span><?= t('cash_collected') ?></span><strong id="summaryCashCollected"><?= format_amount($selected_cash_collected) ?></strong></div>
@@ -300,11 +319,18 @@ $staff_payload = array_map(static function ($staff_member) {
 	}
 
 	const isEdit = <?= $is_edit ? 'true' : 'false' ?>;
+	const hasValidationErrors = <?= json_encode(validation_errors() !== '') ?>;
 	const patientSelect = document.getElementById('patientSelect');
 	const sectionSelect = document.getElementById('sectionSelect');
 	const staffSelect = document.getElementById('staffSelect');
 	const turnNumberInput = document.getElementById('turnNumberInput');
 	const feeInput = document.getElementById('feeInput');
+	const discountPercentInput = document.getElementById('discountPercentInput');
+	const discountAmountInput = document.getElementById('discountAmountInput');
+	const discountInfoWrap = document.getElementById('discountInfoWrap');
+	const discountInfoText = document.getElementById('discountInfoText');
+	const feeOverrideWarning = document.getElementById('feeOverrideWarning');
+	const resetDiscountedFeeLink = document.getElementById('resetDiscountedFeeLink');
 	const topupRow = document.getElementById('topupRow');
 	const topupInput = document.getElementById('topupInput');
 	const paymentPanel = document.getElementById('paymentPanel');
@@ -318,7 +344,10 @@ $staff_payload = array_map(static function ($staff_member) {
 	const openDebtBadge = document.getElementById('openDebtBadge');
 	const openDebtToggleWrap = document.getElementById('openDebtToggleWrap');
 	const openDebtTableBody = document.getElementById('openDebtTableBody');
-	const summaryFee = document.getElementById('summaryFee');
+	const summaryOriginalFee = document.getElementById('summaryOriginalFee');
+	const summaryDiscountRow = document.getElementById('summaryDiscountRow');
+	const summaryDiscount = document.getElementById('summaryDiscount');
+	const summaryDiscountedFee = document.getElementById('summaryDiscountedFee');
 	const summaryTopup = document.getElementById('summaryTopup');
 	const summaryWalletDeducted = document.getElementById('summaryWalletDeducted');
 	const summaryCashCollected = document.getElementById('summaryCashCollected');
@@ -332,9 +361,16 @@ $staff_payload = array_map(static function ($staff_member) {
 		openDebts: <?= json_encode($financial_payload['open_debts'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
 		staff: <?= json_encode($staff_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
 		sessionManuallyEdited: false,
+		originalFee: <?= json_encode($initial_original_fee) ?>,
+		hasDiscount: <?= (float) $selected_discount_percent > 0 ? 'true' : 'false' ?>,
+		discountPercent: <?= json_encode((float) $selected_discount_percent) ?>,
+		discountAmount: <?= json_encode((float) $selected_discount_amount) ?>,
+		discountedFee: <?= json_encode((float) $selected_discount_percent > 0 ? round($initial_original_fee - ($initial_original_fee * (float) $selected_discount_percent / 100), 2) : (float) $selected_fee) ?>,
+		feeManuallyOverridden: <?= (float) $selected_discount_percent > 0 && abs((float) $selected_fee - round($initial_original_fee - ($initial_original_fee * (float) $selected_discount_percent / 100), 2)) > 0.009 ? 'true' : 'false' ?>,
+		isApplyingAutoFee: false,
 	};
 	const messages = {
-		noSessionNumber: <?= json_encode('—') ?>,
+		select: <?= json_encode(t('Select')) ?>,
 		noOpenDebt: <?= json_encode(t('no_open_debt')) ?>,
 		noStaff: <?= json_encode(t('no_staff_for_section')) ?>,
 		insufficientBalance: <?= json_encode(t('insufficient_balance')) ?>,
@@ -342,7 +378,9 @@ $staff_payload = array_map(static function ($staff_member) {
 		deferredDebt: <?= json_encode(t('full_fee_recorded_as_debt')) ?>,
 		noPaymentRequired: <?= json_encode(t('no_payment_required')) ?>,
 		amountBecomingDebt: <?= json_encode(t('amount_becoming_debt')) ?>,
-		openDebts: <?= json_encode(t('open_debts')) ?>,
+		discountApplied: <?= json_encode(t('discount_applied')) ?>,
+		saving: <?= json_encode(t('saving')) ?>,
+		discountedFee: <?= json_encode(t('discounted_fee')) ?>,
 	};
 
 	function paymentType() {
@@ -362,11 +400,25 @@ $staff_payload = array_map(static function ($staff_member) {
 		return Number.isFinite(parsed) ? parsed : 0;
 	}
 
+	function roundAmount(value) {
+		return Math.round((toNumber(value) + Number.EPSILON) * 100) / 100;
+	}
+
 	function formatAmount(value) {
 		return new Intl.NumberFormat(<?= json_encode($is_rtl ? 'fa-AF' : 'en-US') ?>, {
 			minimumFractionDigits: value % 1 === 0 ? 0 : 2,
 			maximumFractionDigits: 2
 		}).format(value);
+	}
+
+	function setFeeValue(value) {
+		if (!feeInput) {
+			return;
+		}
+
+		state.isApplyingAutoFee = true;
+		feeInput.value = roundAmount(value).toFixed(2);
+		state.isApplyingAutoFee = false;
 	}
 
 	function clearSessionNumber() {
@@ -375,6 +427,105 @@ $staff_payload = array_map(static function ($staff_member) {
 		}
 
 		turnNumberInput.value = '';
+	}
+
+	function currentDiscountAmount() {
+		if (!state.hasDiscount) {
+			return 0;
+		}
+
+		if (!state.feeManuallyOverridden || !feeInput) {
+			return roundAmount(state.discountAmount);
+		}
+
+		return roundAmount(state.originalFee - toNumber(feeInput.value));
+	}
+
+	function updateDiscountFields() {
+		if (discountPercentInput) {
+			discountPercentInput.value = state.hasDiscount ? roundAmount(state.discountPercent).toFixed(2) : '0.00';
+		}
+
+		if (discountAmountInput) {
+			discountAmountInput.value = state.hasDiscount ? currentDiscountAmount().toFixed(2) : '0.00';
+		}
+	}
+
+	function updateDiscountUI() {
+		const effectiveDiscountAmount = currentDiscountAmount();
+
+		if (discountInfoWrap) {
+			if (state.hasDiscount) {
+				discountInfoWrap.classList.remove('d-none');
+				discountInfoText.textContent = messages.discountApplied + ': '
+					+ formatAmount(state.discountPercent) + '% - '
+					+ messages.saving + ' ' + formatAmount(effectiveDiscountAmount) + ' - '
+					+ messages.discountedFee + ': ' + formatAmount(state.discountedFee);
+			} else {
+				discountInfoWrap.classList.add('d-none');
+				discountInfoText.textContent = '';
+			}
+		}
+
+		if (feeOverrideWarning) {
+			feeOverrideWarning.classList.toggle('d-none', !(state.hasDiscount && state.feeManuallyOverridden));
+		}
+
+		if (resetDiscountedFeeLink) {
+			resetDiscountedFeeLink.classList.toggle('d-none', !(state.hasDiscount && state.feeManuallyOverridden && !isEdit));
+		}
+
+		if (summaryOriginalFee) {
+			summaryOriginalFee.textContent = formatAmount(state.originalFee);
+		}
+
+		if (summaryDiscountRow) {
+			summaryDiscountRow.classList.toggle('d-none', !state.hasDiscount);
+		}
+
+		if (summaryDiscount) {
+			summaryDiscount.textContent = '-' + formatAmount(effectiveDiscountAmount)
+				+ ' (' + formatAmount(state.discountPercent) + '%)';
+		}
+
+		updateDiscountFields();
+	}
+
+	function resetDiscountState(baseFee) {
+		state.originalFee = roundAmount(baseFee);
+		state.hasDiscount = false;
+		state.discountPercent = 0;
+		state.discountAmount = 0;
+		state.discountedFee = roundAmount(baseFee);
+		state.feeManuallyOverridden = false;
+		updateDiscountUI();
+	}
+
+	function applySectionData(data, options) {
+		const requestOptions = options || {};
+
+		state.staff = Array.isArray(data.staff) ? data.staff : [];
+		populateStaff(isEdit ? 0 : Number(staffSelect.value || 0));
+
+		const baseFee = roundAmount(data && data.fee !== undefined ? data.fee : 0);
+		const discount = data && typeof data.discount === 'object' ? data.discount : null;
+		state.originalFee = baseFee;
+		state.hasDiscount = Boolean(discount && discount.has_discount);
+		state.discountPercent = state.hasDiscount ? roundAmount(discount.discount_percent) : 0;
+		state.discountAmount = state.hasDiscount ? roundAmount(discount.discount_amount) : 0;
+		state.discountedFee = state.hasDiscount ? roundAmount(discount.final_fee) : baseFee;
+
+		if (!isEdit && !requestOptions.preserveFee) {
+			setFeeValue(state.discountedFee);
+			state.feeManuallyOverridden = false;
+		} else if (state.hasDiscount && feeInput) {
+			state.feeManuallyOverridden = Math.abs(toNumber(feeInput.value) - state.discountedFee) > 0.009;
+		} else {
+			state.feeManuallyOverridden = false;
+		}
+
+		updateDiscountUI();
+		refreshSummary();
 	}
 
 	function renderOpenDebts() {
@@ -429,7 +580,7 @@ $staff_payload = array_map(static function ($staff_member) {
 			return;
 		}
 
-		const options = ['<option value="">' + <?= json_encode(t('Select')) ?> + '</option>'];
+		const options = ['<option value="">' + messages.select + '</option>'];
 
 		state.staff.forEach(function (staffMember) {
 			const selected = Number(selectedId) === Number(staffMember.id) ? ' selected' : '';
@@ -523,7 +674,8 @@ $staff_payload = array_map(static function ($staff_member) {
 			}
 		}
 
-		summaryFee.textContent = formatAmount(fee);
+		updateDiscountUI();
+		summaryDiscountedFee.textContent = formatAmount(fee);
 		summaryTopup.textContent = formatAmount(topup);
 		summaryWalletDeducted.textContent = formatAmount(walletDeducted);
 		summaryCashCollected.textContent = formatAmount(cashCollected);
@@ -549,6 +701,34 @@ $staff_payload = array_map(static function ($staff_member) {
 		.then(onSuccess)
 		.catch(function () {
 			return null;
+		});
+	}
+
+	function requestSectionData(sectionId, patientId, options) {
+		if (!sectionId) {
+			state.staff = [];
+			populateStaff();
+			if (!isEdit) {
+				setFeeValue(0);
+			}
+			resetDiscountState(0);
+			togglePanels();
+			refreshSummary();
+			return;
+		}
+
+		const payload = { section_id: sectionId };
+		if (patientId) {
+			payload.patient_id = patientId;
+		}
+
+		fetchJson(<?= json_encode(base_url('turns/get_section_data')) ?>, payload, function (data) {
+			if (!data) {
+				return;
+			}
+
+			applySectionData(data, options || {});
+			togglePanels();
 		});
 	}
 
@@ -585,6 +765,9 @@ $staff_payload = array_map(static function ($staff_member) {
 				clearSessionNumber();
 				state.sessionManuallyEdited = false;
 				updateFinancialBadges();
+				if (sectionSelect && sectionSelect.value) {
+					requestSectionData(sectionSelect.value, '');
+				}
 				refreshSummary();
 				togglePanels();
 				return;
@@ -602,6 +785,10 @@ $staff_payload = array_map(static function ($staff_member) {
 				togglePanels();
 			});
 
+			if (sectionSelect && sectionSelect.value) {
+				requestSectionData(sectionSelect.value, patientId);
+			}
+
 			requestSessionNumber();
 		});
 	}
@@ -610,9 +797,11 @@ $staff_payload = array_map(static function ($staff_member) {
 		sectionSelect.addEventListener('change', function () {
 			const sectionId = this.value;
 			if (!sectionId) {
+				resetDiscountState(0);
 				state.staff = [];
 				populateStaff();
 				if (!isEdit) {
+					setFeeValue(0);
 					clearSessionNumber();
 					state.sessionManuallyEdited = false;
 				}
@@ -621,17 +810,7 @@ $staff_payload = array_map(static function ($staff_member) {
 				return;
 			}
 
-			fetchJson(<?= json_encode(base_url('turns/get_section_data')) ?>, { section_id: sectionId }, function (data) {
-				state.staff = Array.isArray(data.staff) ? data.staff : [];
-				populateStaff(isEdit ? 0 : Number(staffSelect.value || 0));
-
-				if (!isEdit && feeInput) {
-					feeInput.value = toNumber(data.fee).toFixed(2);
-				}
-
-				togglePanels();
-				refreshSummary();
-			});
+			requestSectionData(sectionId, patientSelect ? patientSelect.value : '');
 
 			if (!isEdit) {
 				clearSessionNumber();
@@ -650,7 +829,14 @@ $staff_payload = array_map(static function ($staff_member) {
 		});
 
 		if (feeInput) {
-			feeInput.addEventListener('input', refreshSummary);
+			feeInput.addEventListener('input', function () {
+				if (state.isApplyingAutoFee) {
+					return;
+				}
+
+				state.feeManuallyOverridden = state.hasDiscount && Math.abs(toNumber(feeInput.value) - state.discountedFee) > 0.009;
+				refreshSummary();
+			});
 		}
 
 		if (topupInput) {
@@ -664,10 +850,28 @@ $staff_payload = array_map(static function ($staff_member) {
 		}
 	}
 
+	if (resetDiscountedFeeLink) {
+		resetDiscountedFeeLink.addEventListener('click', function (event) {
+			event.preventDefault();
+			if (!state.hasDiscount || isEdit) {
+				return;
+			}
+
+			setFeeValue(state.discountedFee);
+			state.feeManuallyOverridden = false;
+			refreshSummary();
+		});
+	}
+
 	updateFinancialBadges();
 	populateStaff(selectedStaffId);
 	togglePanels();
 	refreshPaymentOptionState();
+	updateDiscountUI();
 	refreshSummary();
+
+	if (!isEdit && sectionSelect && sectionSelect.value) {
+		requestSectionData(sectionSelect.value, patientSelect ? patientSelect.value : '', { preserveFee: hasValidationErrors });
+	}
 })();
 </script>

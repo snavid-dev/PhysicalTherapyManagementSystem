@@ -24,6 +24,9 @@ $display_time = static function ($time_value) {
 };
 $financial_summary = is_array($financial_summary ?? NULL) ? $financial_summary : array();
 $financial_timeline = is_array($financial_timeline ?? NULL) ? $financial_timeline : array();
+$discounts = is_array($discounts ?? NULL) ? $discounts : array();
+$all_sections = is_array($all_sections ?? NULL) ? $all_sections : array();
+$discounts_payload = json_encode($discounts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 $timeline_source_labels = array(
 	'wallet' => t('wallet_source'),
 	'turn' => t('turn_source'),
@@ -359,6 +362,18 @@ $timeline_amount_prefix = static function ($entry) {
 		</div>
 		<div class="card mb-4">
 			<div class="card-body">
+				<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+					<div>
+						<h2 class="h5 mb-1"><?= t('discounts') ?></h2>
+					</div>
+					<button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#discountModal"><?= t('add_discount') ?></button>
+				</div>
+				<div id="discountFeedback" class="alert d-none mb-3"></div>
+				<div id="patientDiscountsContent"></div>
+			</div>
+		</div>
+		<div class="card mb-4">
+			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Turn History') ?></h2>
 				<div class="table-responsive">
 					<table class="table">
@@ -414,6 +429,43 @@ $timeline_amount_prefix = static function ($entry) {
 					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="discountModal" tabindex="-1" aria-labelledby="discountModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2 class="modal-title h5 mb-0" id="discountModalLabel"><?= t('add_discount') ?></h2>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
+			</div>
+			<form id="discountForm" action="<?= base_url('patients/add-discount/' . $patient['id']) ?>" method="post">
+				<div class="modal-body">
+					<div id="discountModalFeedback" class="alert d-none mb-3"></div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('section') ?></label>
+						<select name="section_id" class="form-select" required>
+							<option value=""><?= t('Select') ?></option>
+							<?php foreach ($all_sections as $section) : ?>
+								<option value="<?= (int) $section['id'] ?>"><?= html_escape(t($section['name'])) ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('discount_percent') ?></label>
+						<input type="number" name="discount_percent" class="form-control" min="0.01" max="100" step="0.01" required>
+					</div>
+					<div class="mb-0">
+						<label class="form-label"><?= t('Notes') ?></label>
+						<input type="text" name="note" class="form-control" maxlength="255">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
+					<button type="submit" class="btn btn-dark"><?= t('save_discount') ?></button>
+				</div>
+			</form>
 		</div>
 	</div>
 </div>
@@ -743,5 +795,193 @@ $timeline_amount_prefix = static function ($entry) {
 		},
 		<?= json_encode(t('Unable to record debt payment right now.')) ?>
 	);
+})();
+</script>
+
+<script>
+(function () {
+	const container = document.getElementById('patientDiscountsContent');
+	if (!container) {
+		return;
+	}
+
+	const form = document.getElementById('discountForm');
+	const feedback = document.getElementById('discountFeedback');
+	const modalFeedback = document.getElementById('discountModalFeedback');
+	const modalElement = document.getElementById('discountModal');
+	const deleteUrlBase = <?= json_encode(base_url('patients/delete-discount/' . $patient['id'] . '/')) ?>;
+	let discounts = <?= $discounts_payload ?: '[]' ?>;
+
+	const labels = {
+		noDiscounts: <?= json_encode(t('no_discounts')) ?>,
+		section: <?= json_encode(t('section')) ?>,
+		discountPercent: <?= json_encode(t('discount_percent')) ?>,
+		note: <?= json_encode(t('Notes')) ?>,
+		dateAdded: <?= json_encode(t('date_added')) ?>,
+		active: <?= json_encode(t('active_discount')) ?>,
+		superseded: <?= json_encode(t('superseded_discount')) ?>,
+		actions: <?= json_encode(t('Actions')) ?>,
+		delete: <?= json_encode(t('Delete')) ?>,
+		deleteConfirm: <?= json_encode(t('delete_discount_confirm')) ?>,
+		fallbackError: <?= json_encode(t('unable_to_save_discount')) ?>,
+		fallbackDeleteError: <?= json_encode(t('unable_to_delete_discount')) ?>,
+	};
+
+	function escapeHtml(value) {
+		return String(value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
+
+	function formatNumber(value) {
+		return new Intl.NumberFormat(<?= json_encode($is_rtl ? 'fa-AF' : 'en-US') ?>, {
+			minimumFractionDigits: value % 1 === 0 ? 0 : 2,
+			maximumFractionDigits: 2
+		}).format(value);
+	}
+
+	function showFeedback(element, message, isError) {
+		if (!element) {
+			return;
+		}
+
+		element.className = 'alert mb-3 ' + (isError ? 'alert-danger' : 'alert-success');
+		element.classList.remove('d-none');
+		element.textContent = message;
+	}
+
+	function clearFeedback(element) {
+		if (!element) {
+			return;
+		}
+
+		element.className = 'alert d-none mb-3';
+		element.textContent = '';
+	}
+
+	function handleJsonResponse(response, fallbackMessage) {
+		return response.text().then(function (text) {
+			let data = {};
+			try {
+				data = JSON.parse(text);
+			} catch (error) {
+				data = { success: false, message: text || fallbackMessage };
+			}
+			return { ok: response.ok, data: data };
+		});
+	}
+
+	function renderDiscounts() {
+		if (!Array.isArray(discounts) || !discounts.length) {
+			container.innerHTML = '<div class="alert alert-light border mb-0">' + escapeHtml(labels.noDiscounts) + '</div>';
+			return;
+		}
+
+		container.innerHTML = '<div class="table-responsive"><table class="table align-middle mb-0">'
+			+ '<thead><tr>'
+			+ '<th>' + escapeHtml(labels.section) + '</th>'
+			+ '<th>' + escapeHtml(labels.discountPercent) + '</th>'
+			+ '<th>' + escapeHtml(labels.note) + '</th>'
+			+ '<th>' + escapeHtml(labels.dateAdded) + '</th>'
+			+ '<th>' + escapeHtml(labels.active) + '</th>'
+			+ '<th>' + escapeHtml(labels.actions) + '</th>'
+			+ '</tr></thead><tbody>'
+			+ discounts.map(function (discount) {
+				const statusBadge = discount.is_active
+					? '<span class="badge rounded-pill bg-success-subtle text-success">' + escapeHtml(labels.active) + '</span>'
+					: '<span class="badge rounded-pill bg-secondary-subtle text-secondary">' + escapeHtml(labels.superseded) + '</span>';
+
+				return '<tr>'
+					+ '<td>' + escapeHtml(discount.section_label || discount.section_name || '') + '</td>'
+					+ '<td>' + escapeHtml(formatNumber(parseFloat(discount.discount_percent || 0))) + '%</td>'
+					+ '<td>' + (discount.note ? escapeHtml(discount.note) : '&mdash;') + '</td>'
+					+ '<td>' + escapeHtml(discount.created_at || '') + '</td>'
+					+ '<td>' + statusBadge + '</td>'
+					+ '<td><button type="button" class="btn btn-sm btn-outline-danger" data-discount-delete="1" data-discount-id="' + escapeHtml(discount.id) + '" data-url="' + escapeHtml(deleteUrlBase + discount.id) + '">' + escapeHtml(labels.delete) + '</button></td>'
+					+ '</tr>';
+			}).join('')
+			+ '</tbody></table></div>';
+	}
+
+	form.addEventListener('submit', function (event) {
+		event.preventDefault();
+		clearFeedback(modalFeedback);
+
+		fetch(form.action, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+				'Accept': 'application/json'
+			},
+			body: new URLSearchParams(new FormData(form))
+		})
+		.then(function (response) {
+			return handleJsonResponse(response, labels.fallbackError);
+		})
+		.then(function (result) {
+			if (!result.ok || result.data.success === false) {
+				showFeedback(modalFeedback, result.data.message || labels.fallbackError, true);
+				return;
+			}
+
+			discounts = Array.isArray(result.data.discounts) ? result.data.discounts : [];
+			renderDiscounts();
+			form.reset();
+			clearFeedback(modalFeedback);
+			showFeedback(feedback, result.data.message || '', false);
+
+			if (modalElement && window.bootstrap && window.bootstrap.Modal) {
+				window.bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+			}
+		})
+		.catch(function () {
+			showFeedback(modalFeedback, labels.fallbackError, true);
+		});
+	});
+
+	container.addEventListener('click', function (event) {
+		const button = event.target.closest('[data-discount-delete]');
+		if (!button) {
+			return;
+		}
+
+		if (!window.confirm(labels.deleteConfirm)) {
+			return;
+		}
+
+		fetch(button.dataset.url, {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json'
+			}
+		})
+		.then(function (response) {
+			return handleJsonResponse(response, labels.fallbackDeleteError);
+		})
+		.then(function (result) {
+			if (!result.ok || result.data.success === false) {
+				showFeedback(feedback, result.data.message || labels.fallbackDeleteError, true);
+				return;
+			}
+
+			discounts = Array.isArray(result.data.discounts) ? result.data.discounts : [];
+			renderDiscounts();
+			showFeedback(feedback, result.data.message || '', false);
+		})
+		.catch(function () {
+			showFeedback(feedback, labels.fallbackDeleteError, true);
+		});
+	});
+
+	if (modalElement) {
+		modalElement.addEventListener('hidden.bs.modal', function () {
+			clearFeedback(modalFeedback);
+		});
+	}
+
+	renderDiscounts();
 })();
 </script>
