@@ -140,14 +140,21 @@ class Turn_model extends CI_Model
 			->result_array();
 	}
 
-	public function count_turns_for_patient($patient_id)
+	public function get_next_session_number($patient_id, $section_id)
 	{
 		$this->ensure_schema();
 
-		return (int) $this->db
+		$row = $this->db
+			->select_max('turn_number')
 			->from('turns')
 			->where('patient_id', (int) $patient_id)
-			->count_all_results();
+			->where('section_id', (int) $section_id)
+			->get()
+			->row_array();
+
+		$max_turn_number = isset($row['turn_number']) ? (int) $row['turn_number'] : 0;
+
+		return $max_turn_number > 0 ? $max_turn_number + 1 : 1;
 	}
 
 	protected function related_section_ids($section_name, $section_id)

@@ -303,7 +303,7 @@ class Patients extends Authenticated_Controller
 	protected function validate_form()
 	{
 		$this->form_validation->set_rules('first_name', 'First name', 'required|trim');
-		$this->form_validation->set_rules('last_name', 'Last name', 'required|trim');
+		$this->form_validation->set_rules('last_name', 'Last name', 'trim');
 		$this->form_validation->set_rules('gender', 'Gender', 'required|in_list[Male,Female]');
 		$this->form_validation->set_rules('age', 'Age', 'trim|integer|greater_than_equal_to[0]|less_than_equal_to[120]');
 		$this->form_validation->set_rules('phone', 'Phone 1', 'trim');
@@ -317,7 +317,7 @@ class Patients extends Authenticated_Controller
 
 		return array(
 			'first_name' => $this->input->post('first_name', TRUE),
-			'last_name' => $this->input->post('last_name', TRUE),
+			'last_name' => $this->null_if_empty($this->input->post('last_name', TRUE)),
 			'father_name' => $this->null_if_empty($this->input->post('father_name', TRUE)),
 			'gender' => $this->input->post('gender', TRUE),
 			'age' => $age === '' || $age === NULL ? NULL : (int) $age,

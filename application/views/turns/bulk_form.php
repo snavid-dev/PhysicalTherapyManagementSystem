@@ -9,11 +9,22 @@ $shared_input = array_merge(array(
 $submitted_turns = isset($submitted_turns) && is_array($submitted_turns) ? array_values($submitted_turns) : array();
 $shared_errors = isset($shared_errors) && is_array($shared_errors) ? $shared_errors : array();
 $row_errors = isset($row_errors) && is_array($row_errors) ? $row_errors : array();
+$patient_display_name = static function ($patient) {
+	$first_name = trim((string) ($patient['first_name'] ?? ''));
+	$last_name = trim((string) ($patient['last_name'] ?? ''));
+	$father_name = trim((string) ($patient['father_name'] ?? ''));
 
-$patients_payload = array_map(static function ($patient) {
+	if ($last_name !== '') {
+		return trim($first_name . ' ' . $last_name);
+	}
+
+	return $father_name !== '' ? trim($first_name . ' ' . $father_name) : $first_name;
+};
+
+$patients_payload = array_map(static function ($patient) use ($patient_display_name) {
 	return array(
 		'id' => (int) $patient['id'],
-		'name' => trim($patient['first_name'] . ' ' . $patient['last_name']),
+		'name' => $patient_display_name($patient),
 	);
 }, $patients);
 
@@ -124,8 +135,8 @@ $initial_rows = array_map(static function ($row) {
 						</div>
 						<div class="col-md-6">
 							<label class="form-label"><?= t('turn_number') ?></label>
-							<input type="text" class="form-control bulk-session-display" value="—" readonly>
-							<input type="hidden" class="bulk-session-input">
+							<input type="number" min="1" step="1" class="form-control bulk-session-input">
+							<small class="text-muted d-block mt-2"><?= t('session_number_hint') ?></small>
 						</div>
 						<div class="col-md-6">
 							<label class="form-label"><?= t('staff_member') ?></label>
@@ -441,7 +452,6 @@ $initial_rows = array_map(static function ($row) {
 	function updateSessionNumber(row, value) {
 		const normalized = value === null || value === undefined || value === '' ? '' : String(value);
 		row.querySelector('.bulk-session-input').value = normalized;
-		row.querySelector('.bulk-session-display').value = normalized === '' ? messages.noSessionNumber : normalized;
 	}
 
 	function renderDebtRows(row) {
@@ -605,19 +615,40 @@ $initial_rows = array_map(static function ($row) {
 		}
 
 		updateSessionNumber(row, '');
+		row._state.sessionManuallyEdited = false;
 
-		Promise.allSettled([
-			fetchJson(<?= json_encode(base_url('turns/get_patient_financial')) ?>, { patient_id: patientId }),
-			fetchJson(<?= json_encode(base_url('turns/get_session_number')) ?>, { patient_id: patientId })
-		]).then(function (results) {
-			if (results[0].status === 'fulfilled') {
-				applyPatientFinancial(row, results[0].value);
-			}
+		fetchJson(<?= json_encode(base_url('turns/get_patient_financial')) ?>, { patient_id: patientId })
+			.then(function (data) {
+				applyPatientFinancial(row, data);
+			})
+			.catch(function () {
+				return null;
+			});
 
-			if (results[1].status === 'fulfilled') {
-				updateSessionNumber(row, results[1].value && results[1].value.session_number ? results[1].value.session_number : '');
-			}
-		});
+		requestRowSessionNumber(row);
+	}
+
+	function requestRowSessionNumber(row) {
+		const patientId = row.querySelector('.bulk-patient-select').value;
+		const sectionId = sectionSelect.value;
+
+		if (!patientId || !sectionId) {
+			updateSessionNumber(row, '');
+			row._state.sessionManuallyEdited = false;
+			return;
+		}
+
+		fetchJson(<?= json_encode(base_url('turns/get_session_number')) ?>, { patient_id: patientId, section_id: sectionId })
+			.then(function (data) {
+				if (!data || data.success !== true || row._state.sessionManuallyEdited) {
+					return;
+				}
+
+				updateSessionNumber(row, data.session_number || '');
+			})
+			.catch(function () {
+				return null;
+			});
 	}
 
 	function attachRowEvents(row) {
@@ -634,6 +665,10 @@ $initial_rows = array_map(static function ($row) {
 			updatePatientOptions();
 			updateRowHeader(row);
 			loadPatientData(row, this.value);
+		});
+
+		row.querySelector('.bulk-session-input').addEventListener('input', function () {
+			row._state.sessionManuallyEdited = true;
 		});
 
 		row.querySelector('.bulk-fee-input').addEventListener('input', function () {
@@ -672,7 +707,8 @@ $initial_rows = array_map(static function ($row) {
 		row._state = {
 			walletBalance: 0,
 			totalOpenDebt: 0,
-			openDebts: []
+			openDebts: [],
+			sessionManuallyEdited: false
 		};
 
 		rowsContainer.appendChild(row);
@@ -724,6 +760,8 @@ $initial_rows = array_map(static function ($row) {
 
 			updateRowHeader(row);
 			refreshRowSummary(row);
+			row._state.sessionManuallyEdited = false;
+			requestRowSessionNumber(row);
 		});
 	}
 
@@ -736,6 +774,8 @@ $initial_rows = array_map(static function ($row) {
 				if (row.dataset.feeEdited !== '1') {
 					row.querySelector('.bulk-fee-input').value = '0.00';
 				}
+				row._state.sessionManuallyEdited = false;
+				updateSessionNumber(row, '');
 				updateRowHeader(row);
 				refreshRowSummary(row);
 			});

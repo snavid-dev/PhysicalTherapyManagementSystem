@@ -96,16 +96,28 @@ class Turns extends Authenticated_Controller
 		}
 
 		$patient_id = (int) $this->input->post('patient_id');
+		$section_id = (int) $this->input->post('section_id');
+
+		if ($patient_id <= 0 || $section_id <= 0) {
+			return $this->json_error('patient and section required');
+		}
+
 		$patient = $this->Patient_model->get_by_id($patient_id);
+		$section = $this->Section_model->get_by_id($section_id);
 
 		if (!$patient) {
 			return $this->json_error(t('Invalid patient selected.'));
 		}
 
+		if (!$section) {
+			return $this->json_error(t('Invalid section selected.'));
+		}
+
 		return $this->output
 			->set_content_type('application/json')
 			->set_output(json_encode(array(
-				'session_number' => $this->Turn_model->count_turns_for_patient($patient_id) + 1,
+				'success' => TRUE,
+				'session_number' => $this->Turn_model->get_next_session_number($patient_id, $section_id),
 			)));
 	}
 

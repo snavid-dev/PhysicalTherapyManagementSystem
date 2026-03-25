@@ -9,6 +9,17 @@
 <div class="card">
 	<div class="card-body">
 		<?= form_open($action) ?>
+			<?php $patient_display_name = static function ($patient) {
+				$first_name = trim((string) ($patient['first_name'] ?? ''));
+				$last_name = trim((string) ($patient['last_name'] ?? ''));
+				$father_name = trim((string) ($patient['father_name'] ?? ''));
+
+				if ($last_name !== '') {
+					return trim($first_name . ' ' . $last_name);
+				}
+
+				return $father_name !== '' ? trim($first_name . ' ' . $father_name) : $first_name;
+			}; ?>
 			<div class="row g-3">
 				<div class="col-md-6">
 					<label class="form-label"><?= t('Patient') ?></label>
@@ -16,7 +27,7 @@
 						<option value=""><?= t('Select') ?></option>
 						<?php $selected_patient = (int) set_value('patient_id', $payment['patient_id'] ?? 0); ?>
 						<?php foreach ($patients as $patient) : ?>
-							<option value="<?= $patient['id'] ?>" <?= $selected_patient === (int) $patient['id'] ? 'selected' : '' ?>><?= html_escape($patient['first_name'] . ' ' . $patient['last_name']) ?></option>
+							<option value="<?= $patient['id'] ?>" <?= $selected_patient === (int) $patient['id'] ? 'selected' : '' ?>><?= html_escape($patient_display_name($patient)) ?></option>
 						<?php endforeach; ?>
 					</select>
 					<small class="text-danger"><?= form_error('patient_id') ?></small>
