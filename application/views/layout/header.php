@@ -35,6 +35,12 @@
 				<?php if ($this->auth->has_permission('manage_payments')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'payments' ? 'active' : '' ?>" href="<?= base_url('payments') ?>"><?= t('Payments') ?></a></li>
 				<?php endif; ?>
+				<?php if ($this->auth->has_permission('manage_expenses')) : ?>
+					<li class="nav-item"><a class="nav-link <?= $current_section === 'expenses' ? 'active' : '' ?>" href="<?= base_url('expenses') ?>"><?= t('expenses') ?></a></li>
+				<?php endif; ?>
+				<?php if ($this->auth->has_permission('manage_salaries')) : ?>
+					<li class="nav-item"><a class="nav-link <?= $current_section === 'salaries' ? 'active' : '' ?>" href="<?= base_url('salaries') ?>"><?= t('salaries') ?></a></li>
+				<?php endif; ?>
 				<?php if ($this->auth->has_permission('view_reports')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'reports' ? 'active' : '' ?>" href="<?= base_url('reports') ?>"><?= t('Reports') ?></a></li>
 				<?php endif; ?>
@@ -55,11 +61,16 @@
 				<?php endif; ?>
 			</ul>
 			<div class="d-flex align-items-center gap-3 header-tools">
-				<?php if ($this->auth->has_permission('manage_patients')) : ?>
+				<?php if ($this->auth->has_permission('manage_patients') || $this->auth->has_permission('manage_expenses')) : ?>
 					<div class="dropdown">
 						<button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button"><?= t('Preferences') ?></button>
 						<ul class="dropdown-menu dropdown-menu-end">
-							<li><a class="dropdown-item" href="<?= base_url('preferences/diagnoses') ?>"><?= t('manage_diagnoses') ?></a></li>
+							<?php if ($this->auth->has_permission('manage_patients')) : ?>
+								<li><a class="dropdown-item" href="<?= base_url('preferences/diagnoses') ?>"><?= t('manage_diagnoses') ?></a></li>
+							<?php endif; ?>
+							<?php if ($this->auth->has_permission('manage_expenses')) : ?>
+								<li><a class="dropdown-item" href="<?= base_url('preferences/expense-categories') ?>"><?= t('expense_categories') ?></a></li>
+							<?php endif; ?>
 						</ul>
 					</div>
 				<?php endif; ?>

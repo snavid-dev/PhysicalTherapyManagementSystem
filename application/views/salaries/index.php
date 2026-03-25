@@ -1,0 +1,133 @@
+<?php
+$overall_total = 0;
+$grouped_totals = array();
+foreach ($records as $record) {
+	$overall_total += (float) $record['final_salary'];
+	if (!isset($grouped_totals[$record['month']])) {
+		$grouped_totals[$record['month']] = 0;
+	}
+	$grouped_totals[$record['month']] += (float) $record['final_salary'];
+}
+?>
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+	<div>
+		<h1 class="h3 mb-1"><?= t('Staff Salaries') ?></h1>
+		<p class="text-muted mb-0"><?= t('Review salary status by month and staff.') ?></p>
+	</div>
+</div>
+
+<div class="card mb-4">
+	<div class="card-body">
+		<form method="get" action="<?= base_url('salaries') ?>">
+			<div class="row g-3">
+				<div class="col-md-3">
+					<label class="form-label"><?= t('month') ?></label>
+					<input type="month" name="month" class="form-control" value="<?= html_escape($filters['month']) ?>">
+				</div>
+				<div class="col-md-3">
+					<label class="form-label"><?= t('Status') ?></label>
+					<select name="status" class="form-select">
+						<option value=""><?= t('Select') ?></option>
+						<option value="unpaid" <?= $filters['status'] === 'unpaid' ? 'selected' : '' ?>><?= t('salary_unpaid') ?></option>
+						<option value="partial" <?= $filters['status'] === 'partial' ? 'selected' : '' ?>><?= t('salary_partial') ?></option>
+						<option value="paid" <?= $filters['status'] === 'paid' ? 'selected' : '' ?>><?= t('Paid') ?></option>
+					</select>
+				</div>
+				<div class="col-md-4">
+					<label class="form-label"><?= t('staff') ?></label>
+					<select name="staff_id" class="form-select">
+						<option value=""><?= t('Select') ?></option>
+						<?php foreach ($staff_members as $staff_member) : ?>
+							<option value="<?= $staff_member['id'] ?>" <?= (int) $filters['staff_id'] === (int) $staff_member['id'] ? 'selected' : '' ?>>
+								<?= html_escape(trim($staff_member['first_name'] . ' ' . $staff_member['last_name'])) ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+				<div class="col-md-2 d-flex gap-2 align-items-end">
+					<button type="submit" class="btn btn-dark w-100"><?= t('Apply') ?></button>
+					<a href="<?= base_url('salaries') ?>" class="btn btn-outline-secondary w-100"><?= t('Reset') ?></a>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="card">
+	<div class="card-body">
+		<div class="table-responsive">
+			<table class="table align-middle">
+				<thead>
+					<tr>
+						<th><?= t('staff') ?></th>
+						<th><?= t('Type') ?></th>
+						<th><?= t('base_salary') ?></th>
+						<th><?= t('deduction') ?></th>
+						<th><?= t('final_salary') ?></th>
+						<th><?= t('total_paid') ?></th>
+						<th><?= t('remaining') ?></th>
+						<th><?= t('Status') ?></th>
+						<th class="text-end"><?= t('Actions') ?></th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php if ($records) : ?>
+					<?php $current_month_group = NULL; ?>
+					<?php foreach ($records as $index => $record) : ?>
+						<?php if ($current_month_group !== $record['month']) : ?>
+							<?php $current_month_group = $record['month']; ?>
+							<tr>
+								<td colspan="9" class="table-light fw-semibold"><?= html_escape($current_month_group) ?></td>
+							</tr>
+						<?php endif; ?>
+						<?php $remaining = max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)); ?>
+						<tr>
+							<td><?= html_escape(trim($record['first_name'] . ' ' . $record['last_name'])) ?></td>
+							<td><?= html_escape(t($record['salary_type'])) ?></td>
+							<td><?= format_number($record['base_salary'], 2) ?></td>
+							<td><?= format_number($record['calculated_deduction'], 2) ?></td>
+							<td><?= format_number($record['final_salary'], 2) ?></td>
+							<td><?= format_number($record['total_paid'], 2) ?></td>
+							<td><?= format_number($remaining, 2) ?></td>
+							<td>
+								<?php if ($record['status'] === 'paid') : ?>
+									<span class="badge text-bg-success"><?= t('Paid') ?></span>
+								<?php elseif ($record['status'] === 'partial') : ?>
+									<span class="badge text-bg-warning"><?= t('salary_partial') ?></span>
+								<?php else : ?>
+									<span class="badge text-bg-secondary"><?= t('salary_unpaid') ?></span>
+								<?php endif; ?>
+							</td>
+							<td class="text-end">
+								<a href="<?= base_url('salaries/pay/' . $record['staff_id'] . '?month=' . rawurlencode($record['month'])) ?>" class="btn btn-sm btn-dark"><?= t('salary_payment') ?></a>
+							</td>
+						</tr>
+						<?php $next_record = isset($records[$index + 1]) ? $records[$index + 1] : NULL; ?>
+						<?php if ($next_record === NULL || $next_record['month'] !== $record['month']) : ?>
+							<tr>
+								<td colspan="4" class="fw-semibold"><?= t('Month Total') ?></td>
+								<td class="fw-semibold"><?= format_number($grouped_totals[$record['month']], 2) ?></td>
+								<td colspan="4"></td>
+							</tr>
+						<?php endif; ?>
+					<?php endforeach; ?>
+				<?php else : ?>
+					<tr>
+						<td colspan="9" class="text-muted"><?= t('No salary records found.') ?></td>
+					</tr>
+				<?php endif; ?>
+				</tbody>
+				<?php if ($records) : ?>
+					<tfoot>
+						<tr>
+							<td colspan="4" class="fw-semibold"><?= t('Total:') ?></td>
+							<td class="fw-semibold"><?= format_number($overall_total, 2) ?></td>
+							<td colspan="4"></td>
+						</tr>
+					</tfoot>
+				<?php endif; ?>
+			</table>
+		</div>
+	</div>
+</div>

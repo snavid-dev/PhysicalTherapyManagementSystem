@@ -15,6 +15,10 @@ $route['preferences/diagnoses'] = 'Preferences/diagnoses';
 $route['preferences/diagnoses/store'] = 'Preferences/diagnoses_store';
 $route['preferences/diagnoses/update/(:num)'] = 'Preferences/diagnoses_update/$1';
 $route['preferences/diagnoses/delete/(:num)'] = 'Preferences/diagnoses_delete/$1';
+$route['preferences/expense-categories'] = 'Preferences/expense_categories';
+$route['preferences/expense-categories/store'] = 'Preferences/expense_categories_store';
+$route['preferences/expense-categories/update/(:num)'] = 'Preferences/expense_categories_update/$1';
+$route['preferences/expense-categories/delete/(:num)'] = 'Preferences/expense_categories_delete/$1';
 
 $route['patients'] = 'Patients/index';
 $route['patients/create'] = 'Patients/create';
@@ -74,6 +78,18 @@ $route['payments/store'] = 'Payments/store';
 $route['payments/(:num)/edit'] = 'Payments/edit/$1';
 $route['payments/(:num)/update'] = 'Payments/update/$1';
 $route['payments/(:num)/delete'] = 'Payments/delete/$1';
+
+$route['expenses'] = 'expenses/index';
+$route['expenses/create'] = 'expenses/create';
+$route['expenses/store'] = 'expenses/store';
+$route['expenses/edit/(:num)'] = 'expenses/edit/$1';
+$route['expenses/update/(:num)'] = 'expenses/update/$1';
+$route['expenses/delete/(:num)'] = 'expenses/delete/$1';
+
+$route['salaries'] = 'salaries/index';
+$route['salaries/pay/(:num)'] = 'salaries/pay/$1';
+$route['salaries/store-payment'] = 'salaries/store_payment';
+$route['salaries/get-calculation'] = 'salaries/get_calculation';
 
 $route['reports'] = 'Reports/index';
 

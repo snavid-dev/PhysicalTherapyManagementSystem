@@ -9,6 +9,7 @@ class Staff extends Authenticated_Controller
 		$this->load->model('Staff_model');
 		$this->load->model('Section_model');
 		$this->load->model('User_model');
+		$this->load->model('Salary_model');
 	}
 
 	public function index()
@@ -94,12 +95,16 @@ class Staff extends Authenticated_Controller
 		$staff = $this->Staff_model->get_by_id($id);
 		show_404_if_empty($staff);
 
+		$current_month = date('Y-m');
+
 		$this->render('staff/profile', array(
 			'title' => t('staff_profile'),
 			'current_section' => 'staff',
 			'staff' => $staff,
 			'patients_last_month' => $this->Staff_model->count_patients_last_month($id),
 			'show_section' => $this->requires_section($staff['staff_type_name']),
+			'current_month' => $current_month,
+			'salary_calculation' => $this->Salary_model->calculate_salary($id, $current_month),
 		));
 	}
 
@@ -114,41 +119,19 @@ class Staff extends Authenticated_Controller
 		$staff = $this->Staff_model->get_by_id($id);
 		show_404_if_empty($staff);
 
-		$from_date = $this->input->post('from_date', TRUE) ?: date('Y-m-01');
-		$to_date = $this->input->post('to_date', TRUE) ?: date('Y-m-t');
+		$month = $this->input->post('month', TRUE) ?: date('Y-m');
 
-		if (!$this->is_valid_date($from_date) || !$this->is_valid_date($to_date) || $from_date > $to_date) {
+		if (!$this->is_valid_month($month)) {
 			return $this->output
 				->set_status_header(422)
 				->set_content_type('application/json')
 				->set_output(json_encode(array(
-					'error' => t('Please choose a valid date range.'),
+					'error' => t('Please choose a valid month.'),
 				)));
 		}
 
-		$approved_leaves = $this->Staff_model->get_approved_leaves_in_range($id, $from_date, $to_date);
-		$monthly_leave_quota = (int) $staff['monthly_leave_quota'];
-		$paid_leaves = min($approved_leaves, $monthly_leave_quota);
-		$excess_leaves = max(0, $approved_leaves - $monthly_leave_quota);
-
-		$response = array(
-			'from_date' => $from_date,
-			'to_date' => $to_date,
-			'base_salary' => (float) $staff['salary'],
-			'monthly_leave_quota' => $monthly_leave_quota,
-			'approved_leaves' => $approved_leaves,
-			'paid_leaves' => $paid_leaves,
-			'excess_leaves' => $excess_leaves,
-			'deduction' => 0,
-			'final_salary' => NULL,
-		);
-
-		$daily_rate = ((float) $staff['salary']) / 30;
-		$deduction = round($excess_leaves * $daily_rate, 2);
-		$final_salary = round(((float) $staff['salary']) - $deduction, 2);
-
-		$response['deduction'] = $deduction;
-		$response['final_salary'] = $final_salary;
+		$response = $this->Salary_model->calculate_salary($id, $month);
+		$response['month'] = $month;
 
 		$this->output
 			->set_content_type('application/json')
@@ -275,6 +258,12 @@ class Staff extends Authenticated_Controller
 	{
 		$date = DateTime::createFromFormat('Y-m-d', (string) $value);
 		return $date && $date->format('Y-m-d') === $value;
+	}
+
+	protected function is_valid_month($value)
+	{
+		$date = DateTime::createFromFormat('Y-m', (string) $value);
+		return $date && $date->format('Y-m') === $value;
 	}
 
 	protected function resolve_linked_user_id($existing_staff = NULL)

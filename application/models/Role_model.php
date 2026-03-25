@@ -14,6 +14,8 @@ class Role_model extends CI_Model
 		array('name' => 'manage_staff', 'module_key' => 'staff'),
 		array('name' => 'manage_sections', 'module_key' => 'sections'),
 		array('name' => 'manage_reference_doctors', 'module_key' => 'reference_doctors'),
+		array('name' => 'manage_expenses', 'module_key' => 'expenses'),
+		array('name' => 'manage_salaries', 'module_key' => 'salaries'),
 	);
 
 	public function all()

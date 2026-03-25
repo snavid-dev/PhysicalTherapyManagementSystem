@@ -54,6 +54,28 @@ class Staff_model extends CI_Model
 			->result_array();
 	}
 
+	public function get_active()
+	{
+		$this->ensure_schema();
+
+		$rows = $this->db
+			->select('staff.*, staff_types.name AS staff_type_name, users.username AS linked_username, users.first_name AS linked_first_name, users.last_name AS linked_last_name')
+			->from('staff')
+			->join('staff_types', 'staff_types.id = staff.staff_type_id')
+			->join('users', 'users.id = staff.user_id', 'left')
+			->where('staff.status', 'active')
+			->order_by('staff.first_name', 'asc')
+			->order_by('staff.last_name', 'asc')
+			->get()
+			->result_array();
+
+		foreach ($rows as &$row) {
+			$row['sections'] = $this->get_sections($row['id']);
+		}
+
+		return $rows;
+	}
+
 	public function create($data)
 	{
 		$this->ensure_schema();
@@ -145,42 +167,6 @@ class Staff_model extends CI_Model
 			->where('turn_date >=', $month_start)
 			->where('turn_date <=', $month_end)
 			->count_all_results();
-	}
-
-	public function get_approved_leaves_in_range($staff_id, $from_date, $to_date)
-	{
-		$staff = $this->get_by_id($staff_id);
-
-		if (empty($staff) || empty($staff['user_id'])) {
-			return 0;
-		}
-
-		$rows = $this->db
-			->select('start_date, end_date')
-			->from('doctor_leaves')
-			->where('doctor_id', (int) $staff['user_id'])
-			->where('status', 'approved')
-			->where('start_date <=', $to_date)
-			->where('end_date >=', $from_date)
-			->get()
-			->result_array();
-
-		$total_days = 0;
-
-		foreach ($rows as $row) {
-			$effective_start = max($row['start_date'], $from_date);
-			$effective_end = min($row['end_date'], $to_date);
-
-			if ($effective_start > $effective_end) {
-				continue;
-			}
-
-			$start = new DateTime($effective_start);
-			$end = new DateTime($effective_end);
-			$total_days += ((int) $start->diff($end)->days) + 1;
-		}
-
-		return $total_days;
 	}
 
 	protected function ensure_schema()

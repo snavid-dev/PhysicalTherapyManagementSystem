@@ -1,6 +1,10 @@
 USE `sql_test_navid_c`;
 
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `staff_salary_payments`;
+DROP TABLE IF EXISTS `staff_salary_records`;
+DROP TABLE IF EXISTS `expenses`;
+DROP TABLE IF EXISTS `expense_categories`;
 DROP TABLE IF EXISTS `doctor_leaves`;
 DROP TABLE IF EXISTS `patient_debts`;
 DROP TABLE IF EXISTS `patient_wallet_transactions`;
@@ -267,6 +271,69 @@ CREATE TABLE `doctor_leaves` (
 	CONSTRAINT `doctor_leaves_doctor_fk` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `expense_categories` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`name` varchar(150) NOT NULL,
+	`name_fa` varchar(150) DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `expenses` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`category_id` int unsigned NOT NULL,
+	`staff_id` int unsigned DEFAULT NULL,
+	`amount` decimal(12,2) NOT NULL,
+	`expense_date` date NOT NULL,
+	`description` text DEFAULT NULL,
+	`created_by` int unsigned DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `expenses_category_id_index` (`category_id`),
+	KEY `expenses_staff_id_index` (`staff_id`),
+	KEY `expenses_created_by_index` (`created_by`),
+	CONSTRAINT `expenses_category_fk` FOREIGN KEY (`category_id`) REFERENCES `expense_categories` (`id`),
+	CONSTRAINT `expenses_staff_fk` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE SET NULL,
+	CONSTRAINT `expenses_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `staff_salary_records` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`staff_id` int unsigned NOT NULL,
+	`month` varchar(7) NOT NULL,
+	`base_salary` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`calculated_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`final_salary` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`total_paid` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`status` enum('unpaid','partial','paid') NOT NULL DEFAULT 'unpaid',
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	UNIQUE KEY `uq_staff_month` (`staff_id`, `month`),
+	CONSTRAINT `staff_salary_records_staff_fk` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `staff_salary_payments` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`salary_record_id` int unsigned NOT NULL,
+	`staff_id` int unsigned NOT NULL,
+	`expense_id` int unsigned DEFAULT NULL,
+	`amount` decimal(12,2) NOT NULL,
+	`payment_date` date NOT NULL,
+	`note` varchar(255) DEFAULT NULL,
+	`created_by` int unsigned DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `staff_salary_payments_record_id_index` (`salary_record_id`),
+	KEY `staff_salary_payments_staff_id_index` (`staff_id`),
+	KEY `staff_salary_payments_expense_id_index` (`expense_id`),
+	KEY `staff_salary_payments_created_by_index` (`created_by`),
+	CONSTRAINT `staff_salary_payments_record_fk` FOREIGN KEY (`salary_record_id`) REFERENCES `staff_salary_records` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `staff_salary_payments_staff_fk` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `staff_salary_payments_expense_fk` FOREIGN KEY (`expense_id`) REFERENCES `expenses` (`id`) ON DELETE SET NULL,
+	CONSTRAINT `staff_salary_payments_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `roles` (`id`, `name`, `slug`) VALUES
 	(1, 'Administrator', 'administrator'),
 	(2, 'Therapist', 'therapist'),
@@ -282,12 +349,19 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(7, 'manage_leaves', 'leaves'),
 	(8, 'manage_staff', 'staff'),
 	(9, 'manage_sections', 'sections'),
-	(10, 'manage_reference_doctors', 'reference_doctors');
+	(10, 'manage_reference_doctors', 'reference_doctors'),
+	(11, 'manage_expenses', 'expenses'),
+	(12, 'manage_salaries', 'salaries');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10),
+	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
 	(2, 1), (2, 4), (2, 6), (2, 7),
 	(3, 1), (3, 4), (3, 5), (3, 6);
+
+INSERT INTO `expense_categories` (`name`, `name_fa`) VALUES
+	('Staff Salary Payment', 'پرداخت معاش کارمند'),
+	('Rent / Utilities', 'کرایه و خدمات'),
+	('Other', 'سایر');
 
 INSERT INTO `staff_types` (`name`) VALUES
 	('Doctor'),
