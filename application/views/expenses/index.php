@@ -27,11 +27,11 @@
 				</div>
 				<div class="col-md-2">
 					<label class="form-label"><?= t('date_from') ?></label>
-					<input type="date" name="date_from" class="form-control" value="<?= html_escape($filters['date_from']) ?>">
+					<input type="text" name="date_from" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($filters['date_from']) ?>">
 				</div>
 				<div class="col-md-2">
 					<label class="form-label"><?= t('date_to') ?></label>
-					<input type="date" name="date_to" class="form-control" value="<?= html_escape($filters['date_to']) ?>">
+					<input type="text" name="date_to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($filters['date_to']) ?>">
 				</div>
 				<div class="col-md-3">
 					<label class="form-label"><?= t('staff') ?></label>
@@ -72,7 +72,7 @@
 					<?php foreach ($expenses as $expense) : ?>
 						<?php $is_salary_linked = !empty($expense['salary_payment_id']); ?>
 						<tr>
-							<td><?= html_escape($expense['expense_date']) ?></td>
+							<td><?= html_escape(to_shamsi($expense['expense_date'])) ?></td>
 							<td><?= html_escape($category_label(array('name' => $expense['category_name'], 'name_fa' => $expense['category_name_fa']))) ?></td>
 							<td>
 								<?php if (!empty($expense['staff_first_name']) || !empty($expense['staff_last_name'])) : ?>

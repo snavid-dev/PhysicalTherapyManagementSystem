@@ -5,10 +5,10 @@ $is_paid = $record['status'] === 'paid';
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 	<div>
-		<h1 class="h3 mb-1"><?= t('Pay Salary') ?> - <?= html_escape($staff_name) ?> - <?= html_escape($month) ?></h1>
+		<h1 class="h3 mb-1"><?= t('Pay Salary') ?> - <?= html_escape($staff_name) ?> - <?= html_escape($month_display) ?></h1>
 		<p class="text-muted mb-0"><?= t('salary_payment') ?></p>
 	</div>
-	<a href="<?= base_url('salaries?month=' . rawurlencode($month)) ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('salaries?month=' . rawurlencode($month_display)) ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
 </div>
 
 <div class="card mb-4">
@@ -16,10 +16,10 @@ $is_paid = $record['status'] === 'paid';
 		<div class="row g-3 align-items-end">
 			<div class="col-md-4">
 				<label class="form-label" for="salaryPayMonth"><?= t('month') ?></label>
-				<input type="month" id="salaryPayMonth" class="form-control" value="<?= html_escape($month) ?>">
+				<input type="text" id="salaryPayMonth" class="form-control shamsi-month" placeholder="1403/01" value="<?= html_escape($month_display) ?>">
 			</div>
 			<div class="col-md-4">
-				<a href="<?= base_url('salaries?month=' . rawurlencode($month)) ?>" class="btn btn-outline-secondary"><?= t('View All Salaries') ?></a>
+				<a href="<?= base_url('salaries?month=' . rawurlencode($month_display)) ?>" class="btn btn-outline-secondary"><?= t('View All Salaries') ?></a>
 			</div>
 		</div>
 	</div>
@@ -70,7 +70,7 @@ $is_paid = $record['status'] === 'paid';
 						<?php if ($payments) : ?>
 							<?php foreach ($payments as $payment) : ?>
 								<tr>
-									<td><?= html_escape($payment['payment_date']) ?></td>
+									<td><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
 									<td><?= format_number($payment['amount'], 2) ?></td>
 									<td><?= $payment['note'] ? html_escape($payment['note']) : '&mdash;' ?></td>
 									<td><?= !empty($payment['created_by_first_name']) || !empty($payment['created_by_last_name']) ? html_escape(trim($payment['created_by_first_name'] . ' ' . $payment['created_by_last_name'])) : '&mdash;' ?></td>
@@ -101,7 +101,7 @@ $is_paid = $record['status'] === 'paid';
 					<h2 class="h5 mb-3"><?= t('record_payment') ?></h2>
 					<?= form_open('salaries/store-payment') ?>
 						<input type="hidden" name="staff_id" value="<?= (int) $staff['id'] ?>">
-						<input type="hidden" name="month" id="paymentMonthInput" value="<?= html_escape($month) ?>">
+						<input type="hidden" name="month" id="paymentMonthInput" value="<?= html_escape($month_display) ?>">
 						<div class="row g-3">
 							<div class="col-md-4">
 								<label class="form-label"><?= t('Amount') ?></label>
@@ -109,7 +109,7 @@ $is_paid = $record['status'] === 'paid';
 							</div>
 							<div class="col-md-4">
 								<label class="form-label"><?= t('Payment Date') ?></label>
-								<input type="date" name="payment_date" class="form-control" value="<?= html_escape(date('Y-m-d')) ?>">
+								<input type="text" name="payment_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(shamsi_today()) ?>">
 							</div>
 							<div class="col-md-4">
 								<label class="form-label"><?= t('Notes') ?></label>
@@ -198,7 +198,7 @@ $is_paid = $record['status'] === 'paid';
 			const note = payment.note ? payment.note : labels.unknown_user;
 
 			return '<tr>'
-				+ '<td>' + escapeHtml(payment.payment_date) + '</td>'
+				+ '<td>' + escapeHtml(payment.payment_date_shamsi || payment.payment_date) + '</td>'
 				+ '<td>' + formatNumber(payment.amount, 2) + '</td>'
 				+ '<td>' + escapeHtml(note) + '</td>'
 				+ '<td>' + escapeHtml(recordedBy) + '</td>'
@@ -242,6 +242,10 @@ $is_paid = $record['status'] === 'paid';
 			.then(function (data) {
 				if (data.error) {
 					throw new Error(data.error);
+				}
+
+				if (data.month) {
+					monthInput.value = data.month;
 				}
 
 				renderCalculation(data.calculation);

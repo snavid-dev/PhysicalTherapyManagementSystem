@@ -102,7 +102,7 @@
 								<td><?= html_escape($patient['full_name']) ?></td>
 								<td><?= html_escape($patient['gender']) ?></td>
 								<td><?= html_escape($patient['phone']) ?></td>
-								<td><?= html_escape($patient['created_at']) ?></td>
+								<td><?= html_escape(to_shamsi($patient['created_at'], 'Y/m/d H:i')) ?></td>
 								<td class="text-end">
 									<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
 								</td>
@@ -132,11 +132,11 @@
 				<div class="row g-3 align-items-end">
 					<div class="col-md-4">
 						<label class="form-label" for="dateFromInput"><?= t('date_from') ?></label>
-						<input type="date" id="dateFromInput" class="form-control" value="<?= html_escape(date('Y-m-01')) ?>">
+						<input type="text" id="dateFromInput" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(to_shamsi(date('Y-m-01'))) ?>">
 					</div>
 					<div class="col-md-4">
 						<label class="form-label" for="dateToInput"><?= t('date_to') ?></label>
-						<input type="date" id="dateToInput" class="form-control" value="<?= html_escape(date('Y-m-t')) ?>">
+						<input type="text" id="dateToInput" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(to_shamsi(date('Y-m-t'))) ?>">
 					</div>
 					<div class="col-md-4">
 						<button type="button" class="btn btn-dark w-100" id="searchPatientCountButton">

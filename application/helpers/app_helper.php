@@ -103,7 +103,10 @@ if (!function_exists('safe_salary_payment_note')) {
 		$note = t('Salary payment for staff') . ' #' . format_number($staff_id);
 
 		if ($month !== NULL && trim((string) $month) !== '') {
-			$note .= ' ' . t('month') . ' ' . $month;
+			$display_month = preg_match('/^\d{4}-\d{2}$/', trim((string) $month))
+				? gregorian_month_to_shamsi($month)
+				: $month;
+			$note .= ' ' . t('month') . ' ' . $display_month;
 		}
 
 		return $note;
@@ -139,5 +142,68 @@ if (!function_exists('safe_reference_label')) {
 			default:
 				return html_escape($reference_table . ' #' . $reference_id);
 		}
+	}
+}
+
+if (!function_exists('to_shamsi')) {
+	function to_shamsi($date, $format = 'Y/m/d')
+	{
+		$CI =& get_instance();
+		$CI->load->library('Shamsi');
+		return $CI->shamsi->to_shamsi($date, $format);
+	}
+}
+
+if (!function_exists('to_gregorian')) {
+	function to_gregorian($shamsi_date)
+	{
+		$CI =& get_instance();
+		$CI->load->library('Shamsi');
+		return $CI->shamsi->to_gregorian($shamsi_date);
+	}
+}
+
+if (!function_exists('shamsi_today')) {
+	function shamsi_today($format = 'Y/m/d')
+	{
+		$CI =& get_instance();
+		$CI->load->library('Shamsi');
+		return $CI->shamsi->shamsi_today($format);
+	}
+}
+
+if (!function_exists('shamsi_now')) {
+	function shamsi_now($format = 'Y/m/d H:i')
+	{
+		$CI =& get_instance();
+		$CI->load->library('Shamsi');
+		return $CI->shamsi->shamsi_now($format);
+	}
+}
+
+if (!function_exists('shamsi_month_range')) {
+	function shamsi_month_range($shamsi_year, $shamsi_month)
+	{
+		$CI =& get_instance();
+		$CI->load->library('Shamsi');
+		return $CI->shamsi->shamsi_month_range($shamsi_year, $shamsi_month);
+	}
+}
+
+if (!function_exists('gregorian_month_to_shamsi')) {
+	function gregorian_month_to_shamsi($gregorian_ym)
+	{
+		$CI =& get_instance();
+		$CI->load->library('Shamsi');
+		return $CI->shamsi->gregorian_month_to_shamsi($gregorian_ym);
+	}
+}
+
+if (!function_exists('shamsi_month_to_gregorian')) {
+	function shamsi_month_to_gregorian($shamsi_ym)
+	{
+		$CI =& get_instance();
+		$CI->load->library('Shamsi');
+		return $CI->shamsi->shamsi_month_to_gregorian($shamsi_ym);
 	}
 }

@@ -104,6 +104,7 @@ class Staff extends Authenticated_Controller
 			'patients_last_month' => $this->Staff_model->count_patients_last_month($id),
 			'show_section' => $this->requires_section($staff['staff_type_name']),
 			'current_month' => $current_month,
+			'current_month_shamsi' => gregorian_month_to_shamsi($current_month),
 			'salary_calculation' => $this->Salary_model->calculate_salary($id, $current_month),
 		));
 	}
@@ -119,9 +120,10 @@ class Staff extends Authenticated_Controller
 		$staff = $this->Staff_model->get_by_id($id);
 		show_404_if_empty($staff);
 
-		$month = $this->input->post('month', TRUE) ?: date('Y-m');
+		$month_input = trim((string) $this->input->post('month', TRUE));
+		$month = $month_input !== '' ? $this->gregorian_month_from_shamsi($month_input) : date('Y-m');
 
-		if (!$this->is_valid_month($month)) {
+		if ($month === '') {
 			return $this->output
 				->set_status_header(422)
 				->set_content_type('application/json')
@@ -131,7 +133,8 @@ class Staff extends Authenticated_Controller
 		}
 
 		$response = $this->Salary_model->calculate_salary($id, $month);
-		$response['month'] = $month;
+		$response['month'] = $month_input !== '' ? $month_input : gregorian_month_to_shamsi($month);
+		$response['month_gregorian'] = $month;
 
 		$this->output
 			->set_content_type('application/json')
@@ -258,12 +261,6 @@ class Staff extends Authenticated_Controller
 	{
 		$date = DateTime::createFromFormat('Y-m-d', (string) $value);
 		return $date && $date->format('Y-m-d') === $value;
-	}
-
-	protected function is_valid_month($value)
-	{
-		$date = DateTime::createFromFormat('Y-m', (string) $value);
-		return $date && $date->format('Y-m') === $value;
 	}
 
 	protected function resolve_linked_user_id($existing_staff = NULL)

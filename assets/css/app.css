@@ -110,6 +110,13 @@ dd,
 	color: var(--text);
 }
 
+.shamsi-date,
+.shamsi-month {
+	direction: ltr;
+	text-align: left;
+	font-family: var(--font-en);
+}
+
 .form-control:focus,
 .form-select:focus {
 	background: var(--surface);
@@ -271,6 +278,24 @@ dd,
 .turn-payment-option__text {
 	font-size: 0.88rem;
 	color: var(--text-muted);
+}
+
+.datepicker-plot-area {
+	z-index: 1085 !important;
+	width: min(20rem, calc(100vw - 1.5rem));
+	max-width: calc(100vw - 1.5rem);
+	font-family: var(--font-en);
+}
+
+.datepicker-plot-area *,
+.datepicker-plot-area .toolbox {
+	font-family: var(--font-en);
+}
+
+.datepicker-plot-area .datepicker-day-view,
+.datepicker-plot-area .datepicker-month-view,
+.datepicker-plot-area .datepicker-year-view {
+	width: 100%;
 }
 
 .wallet-profile-form {

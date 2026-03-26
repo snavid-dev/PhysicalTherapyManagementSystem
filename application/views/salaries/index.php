@@ -23,7 +23,7 @@ foreach ($records as $record) {
 			<div class="row g-3">
 				<div class="col-md-3">
 					<label class="form-label"><?= t('month') ?></label>
-					<input type="month" name="month" class="form-control" value="<?= html_escape($filters['month']) ?>">
+					<input type="text" name="month" class="form-control shamsi-month" placeholder="1403/01" value="<?= html_escape($filters['month']) ?>">
 				</div>
 				<div class="col-md-3">
 					<label class="form-label"><?= t('Status') ?></label>
@@ -78,7 +78,7 @@ foreach ($records as $record) {
 						<?php if ($current_month_group !== $record['month']) : ?>
 							<?php $current_month_group = $record['month']; ?>
 							<tr>
-								<td colspan="9" class="table-light fw-semibold"><?= html_escape($current_month_group) ?></td>
+								<td colspan="9" class="table-light fw-semibold"><?= html_escape(gregorian_month_to_shamsi($current_month_group)) ?></td>
 							</tr>
 						<?php endif; ?>
 						<?php $remaining = max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)); ?>
@@ -100,7 +100,7 @@ foreach ($records as $record) {
 								<?php endif; ?>
 							</td>
 							<td class="text-end">
-								<a href="<?= base_url('salaries/pay/' . $record['staff_id'] . '?month=' . rawurlencode($record['month'])) ?>" class="btn btn-sm btn-dark"><?= t('salary_payment') ?></a>
+								<a href="<?= base_url('salaries/pay/' . $record['staff_id'] . '?month=' . rawurlencode(gregorian_month_to_shamsi($record['month']))) ?>" class="btn btn-sm btn-dark"><?= t('salary_payment') ?></a>
 							</td>
 						</tr>
 						<?php $next_record = isset($records[$index + 1]) ? $records[$index + 1] : NULL; ?>

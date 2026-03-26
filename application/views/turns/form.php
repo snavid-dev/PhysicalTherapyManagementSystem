@@ -10,7 +10,7 @@ $selected_payment_type = set_value('payment_type', $turn['payment_type'] ?? 'cas
 $selected_topup = set_value('topup_amount', isset($turn['topup_amount']) ? number_format((float) $turn['topup_amount'], 2, '.', '') : '0.00');
 $selected_wallet_deducted = number_format((float) ($turn['wallet_deducted'] ?? 0), 2, '.', '');
 $selected_cash_collected = number_format((float) ($turn['cash_collected'] ?? 0), 2, '.', '');
-$selected_date = set_value('turn_date', $turn['turn_date'] ?? date('Y-m-d'));
+$selected_date = set_value('turn_date', isset($turn['turn_date']) ? to_shamsi($turn['turn_date']) : shamsi_today());
 $selected_time = set_value('turn_time', (!empty($turn['turn_time']) && $turn['turn_time'] !== '00:00:00') ? substr($turn['turn_time'], 0, 5) : '');
 $selected_status = set_value('status', $turn['status'] ?? 'accepted');
 $selected_notes = set_value('notes', $turn['notes'] ?? '');
@@ -47,7 +47,7 @@ $financial_payload = array(
 		return array(
 			'id' => (int) $debt['id'],
 			'amount' => (float) $debt['amount'],
-			'created_at' => substr((string) $debt['created_at'], 0, 10),
+			'created_at' => to_shamsi(substr((string) $debt['created_at'], 0, 10)),
 		);
 	}, $open_debts),
 );
@@ -129,7 +129,7 @@ $staff_payload = array_map(static function ($staff_member) {
 									<?php if ($open_debts) : foreach ($open_debts as $debt) : ?>
 										<tr>
 											<td>#<?= (int) $debt['id'] ?></td>
-											<td><?= html_escape(substr((string) $debt['created_at'], 0, 10)) ?></td>
+											<td><?= html_escape(to_shamsi(substr((string) $debt['created_at'], 0, 10))) ?></td>
 											<td><?= format_amount($debt['amount']) ?></td>
 										</tr>
 									<?php endforeach; else : ?>
@@ -175,7 +175,7 @@ $staff_payload = array_map(static function ($staff_member) {
 							</div>
 							<div class="col-md-4">
 								<label class="form-label"><?= t('Date') ?></label>
-								<input type="date" name="turn_date" class="form-control" value="<?= html_escape($selected_date) ?>">
+								<input type="text" name="turn_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($selected_date) ?>">
 								<small class="text-danger"><?= form_error('turn_date') ?></small>
 							</div>
 							<div class="col-md-4">

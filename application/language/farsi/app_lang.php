@@ -579,4 +579,10 @@ $lang = array(
 	'Payment No.' => 'پرداخت شماره',
 	'Wallet Transaction No.' => 'تراکنش کیف پول شماره',
 	'Salary Payment No.' => 'پرداخت معاش شماره',
+	'Please choose a valid payment date.' => 'لطفا یک تاریخ پرداخت معتبر انتخاب کنید.',
+	'Please choose a valid start date.' => 'لطفا یک تاریخ شروع معتبر انتخاب کنید.',
+	'Please choose a valid end date.' => 'لطفا یک تاریخ ختم معتبر انتخاب کنید.',
+	'Please choose a valid date.' => 'لطفا یک تاریخ معتبر انتخاب کنید.',
+	'date_format_hint' => 'فرمت: 1403/01/15',
+	'month_format_hint' => 'فرمت: 1403/01',
 );

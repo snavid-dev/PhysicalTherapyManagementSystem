@@ -14,18 +14,22 @@ class Salaries extends Authenticated_Controller
 	{
 		$this->require_permission('manage_salaries');
 
+		$month_input = trim((string) $this->input->get('month', TRUE));
+		$month = $month_input !== '' ? $this->gregorian_month_from_shamsi($month_input) : date('Y-m');
+		if ($month === '') {
+			$month = date('Y-m');
+		}
+
 		$filters = array(
-			'month' => $this->input->get('month', TRUE) ?: date('Y-m'),
+			'month' => $month_input !== '' ? $month_input : gregorian_month_to_shamsi($month),
 			'status' => trim((string) $this->input->get('status', TRUE)),
 			'staff_id' => (int) $this->input->get('staff_id'),
 		);
 
-		if (!$this->is_valid_month($filters['month'])) {
-			$filters['month'] = date('Y-m');
-		}
-
-		$this->Salary_model->sync_month_records($filters['month'], $filters['staff_id'] ?: NULL);
-		$records = $this->Salary_model->get_all_salary_records($filters);
+		$query_filters = $filters;
+		$query_filters['month'] = $month;
+		$this->Salary_model->sync_month_records($month, $filters['staff_id'] ?: NULL);
+		$records = $this->Salary_model->get_all_salary_records($query_filters);
 
 		$this->render('salaries/index', array(
 			'title' => t('salaries'),
@@ -42,10 +46,12 @@ class Salaries extends Authenticated_Controller
 		$staff = $this->Staff_model->get_by_id($staff_id);
 		show_404_if_empty($staff);
 
-		$month = $this->input->get('month', TRUE) ?: date('Y-m');
-		if (!$this->is_valid_month($month)) {
+		$month_input = trim((string) $this->input->get('month', TRUE));
+		$month = $month_input !== '' ? $this->gregorian_month_from_shamsi($month_input) : date('Y-m');
+		if ($month === '') {
 			$month = date('Y-m');
 		}
+		$month_display = $month_input !== '' ? $month_input : gregorian_month_to_shamsi($month);
 
 		$calculation = $this->Salary_model->calculate_salary($staff_id, $month);
 		$record = $this->Salary_model->get_or_create_record($staff_id, $month);
@@ -58,6 +64,7 @@ class Salaries extends Authenticated_Controller
 			'current_section' => 'salaries',
 			'staff' => $staff,
 			'month' => $month,
+			'month_display' => $month_display,
 			'calculation' => $calculation,
 			'record' => $record,
 			'payments' => $payments,
@@ -70,17 +77,19 @@ class Salaries extends Authenticated_Controller
 		$this->require_permission('manage_salaries');
 
 		$staff_id = (int) $this->input->post('staff_id');
-		$month = trim((string) $this->input->post('month', TRUE));
+		$month_input = trim((string) $this->input->post('month', TRUE));
+		$month = $this->gregorian_month_from_shamsi($month_input);
 		$amount = round((float) $this->input->post('amount'), 2);
-		$payment_date = trim((string) $this->input->post('payment_date', TRUE));
+		$payment_date_input = trim((string) $this->input->post('payment_date', TRUE));
+		$payment_date = $this->gregorian_date_from_shamsi($payment_date_input);
 		$note = trim((string) $this->input->post('note', TRUE));
 
 		$staff = $this->Staff_model->get_by_id($staff_id);
 		show_404_if_empty($staff);
 
-		if (!$this->is_valid_month($month) || !$this->is_valid_date($payment_date)) {
+		if ($month === '' || $payment_date === '') {
 			$this->session->set_flashdata('error', t('Please choose valid salary payment details.'));
-			return redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month));
+			return redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month_input));
 		}
 
 		$this->Salary_model->sync_month_records($month, $staff_id);
@@ -89,7 +98,7 @@ class Salaries extends Authenticated_Controller
 
 		if ($amount <= 0 || $amount > $remaining) {
 			$this->session->set_flashdata('error', t('Salary payment amount exceeds the remaining unpaid amount.'));
-			return redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month));
+			return redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month_input));
 		}
 
 		$result = $this->Salary_model->record_payment(
@@ -103,11 +112,11 @@ class Salaries extends Authenticated_Controller
 
 		if (!$result) {
 			$this->session->set_flashdata('error', t('Unable to record salary payment right now.'));
-			return redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month));
+			return redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month_input));
 		}
 
 		$this->session->set_flashdata('success', t('Salary payment recorded successfully.'));
-		redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month));
+		redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month_input));
 	}
 
 	public function get_calculation()
@@ -119,10 +128,11 @@ class Salaries extends Authenticated_Controller
 		}
 
 		$staff_id = (int) $this->input->post('staff_id');
-		$month = trim((string) $this->input->post('month', TRUE));
+		$month_input = trim((string) $this->input->post('month', TRUE));
+		$month = $this->gregorian_month_from_shamsi($month_input);
 		$staff = $this->Staff_model->get_by_id($staff_id);
 
-		if (!$staff || !$this->is_valid_month($month)) {
+		if (!$staff || $month === '') {
 			return $this->output
 				->set_status_header(422)
 				->set_content_type('application/json')
@@ -133,28 +143,22 @@ class Salaries extends Authenticated_Controller
 
 		$this->Salary_model->sync_month_records($month, $staff_id);
 		$record = $this->Salary_model->get_or_create_record($staff_id, $month);
-		$payments = $this->Salary_model->get_payments_for_record($record['id']);
+		$payments = array_map(static function ($payment) {
+			$payment['payment_date_shamsi'] = to_shamsi($payment['payment_date']);
+			return $payment;
+		}, $this->Salary_model->get_payments_for_record($record['id']));
 		$calculation = $this->Salary_model->calculate_salary($staff_id, $month);
+		$calculation['month_shamsi'] = $month_input !== '' ? $month_input : gregorian_month_to_shamsi($month);
 
 		$this->output
 			->set_content_type('application/json')
 			->set_output(json_encode(array(
 				'calculation' => $calculation,
 				'record' => $record,
+				'month' => $month_input !== '' ? $month_input : gregorian_month_to_shamsi($month),
+				'month_gregorian' => $month,
 				'payments' => $payments,
 				'remaining_amount' => max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)),
 			)));
-	}
-
-	protected function is_valid_month($value)
-	{
-		$date = DateTime::createFromFormat('Y-m', (string) $value);
-		return $date && $date->format('Y-m') === $value;
-	}
-
-	protected function is_valid_date($value)
-	{
-		$date = DateTime::createFromFormat('Y-m-d', (string) $value);
-		return $date && $date->format('Y-m-d') === $value;
 	}
 }

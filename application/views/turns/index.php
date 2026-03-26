@@ -37,7 +37,7 @@ $display_time = static function ($time_value) {
 				<?php if ($turns) : foreach ($turns as $turn) : ?>
 					<?php $staff_name = !empty($turn['staff_full_name']) ? $turn['staff_full_name'] : ($turn['doctor_full_name'] ?? ''); ?>
 					<tr>
-						<td><?= html_escape($turn['turn_date']) ?></td>
+						<td><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
 						<td><?= $display_time($turn['turn_time']) ?></td>
 						<td><?= html_escape($turn['patient_first_name'] . ' ' . $turn['patient_last_name']) ?></td>
 						<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>

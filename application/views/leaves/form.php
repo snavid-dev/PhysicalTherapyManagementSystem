@@ -23,12 +23,12 @@
 				</div>
 				<div class="col-md-3">
 					<label class="form-label"><?= t('Start Date') ?></label>
-					<input type="date" name="start_date" class="form-control" value="<?= set_value('start_date', $leave['start_date'] ?? '') ?>">
+					<input type="text" name="start_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= set_value('start_date', isset($leave['start_date']) ? to_shamsi($leave['start_date']) : '') ?>">
 					<small class="text-danger"><?= form_error('start_date') ?></small>
 				</div>
 				<div class="col-md-3">
 					<label class="form-label"><?= t('End Date') ?></label>
-					<input type="date" name="end_date" class="form-control" value="<?= set_value('end_date', $leave['end_date'] ?? '') ?>">
+					<input type="text" name="end_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= set_value('end_date', isset($leave['end_date']) ? to_shamsi($leave['end_date']) : '') ?>">
 					<small class="text-danger"><?= form_error('end_date') ?></small>
 				</div>
 				<div class="col-md-4">
