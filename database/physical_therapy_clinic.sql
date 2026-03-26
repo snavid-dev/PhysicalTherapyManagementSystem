@@ -1,6 +1,8 @@
 USE `sql_test_navid_c`;
 
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `safe_adjustments`;
+DROP TABLE IF EXISTS `safe_transactions`;
 DROP TABLE IF EXISTS `staff_salary_payments`;
 DROP TABLE IF EXISTS `staff_salary_records`;
 DROP TABLE IF EXISTS `expenses`;
@@ -64,6 +66,41 @@ CREATE TABLE `users` (
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `users_username_unique` (`username`),
 	CONSTRAINT `users_role_fk` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `safe_transactions` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`type` enum('in','out','adjustment') NOT NULL,
+	`source` enum('turn_cash','wallet_topup','patient_payment','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL,
+	`amount` decimal(12,2) NOT NULL,
+	`balance_after` decimal(12,2) NOT NULL,
+	`reference_id` int unsigned DEFAULT NULL,
+	`reference_table` varchar(50) DEFAULT NULL,
+	`note` varchar(255) DEFAULT NULL,
+	`created_by` int unsigned DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `safe_transactions_type_index` (`type`),
+	KEY `safe_transactions_source_index` (`source`),
+	KEY `safe_transactions_created_by_index` (`created_by`),
+	KEY `safe_transactions_created_at_index` (`created_at`),
+	CONSTRAINT `safe_transactions_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `safe_adjustments` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`safe_transaction_id` int unsigned NOT NULL,
+	`previous_balance` decimal(12,2) NOT NULL,
+	`adjustment_amount` decimal(12,2) NOT NULL,
+	`new_balance` decimal(12,2) NOT NULL,
+	`reason` text NOT NULL,
+	`created_by` int unsigned DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `safe_adjustments_transaction_id_index` (`safe_transaction_id`),
+	KEY `safe_adjustments_created_by_index` (`created_by`),
+	CONSTRAINT `safe_adjustments_transaction_fk` FOREIGN KEY (`safe_transaction_id`) REFERENCES `safe_transactions` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `safe_adjustments_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `staff_types` (
@@ -351,10 +388,12 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(9, 'manage_sections', 'sections'),
 	(10, 'manage_reference_doctors', 'reference_doctors'),
 	(11, 'manage_expenses', 'expenses'),
-	(12, 'manage_salaries', 'salaries');
+	(12, 'manage_salaries', 'salaries'),
+	(13, 'view_safe', 'safe'),
+	(14, 'manage_safe', 'safe');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
+	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14),
 	(2, 1), (2, 4), (2, 6), (2, 7),
 	(3, 1), (3, 4), (3, 5), (3, 6);
 

@@ -38,6 +38,9 @@
 				<?php if ($this->auth->has_permission('manage_expenses')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'expenses' ? 'active' : '' ?>" href="<?= base_url('expenses') ?>"><?= t('expenses') ?></a></li>
 				<?php endif; ?>
+				<?php if ($this->auth->has_permission('view_safe')) : ?>
+					<li class="nav-item"><a class="nav-link <?= $current_section === 'safe' ? 'active' : '' ?>" href="<?= base_url('safe') ?>"><?= t('safe') ?></a></li>
+				<?php endif; ?>
 				<?php if ($this->auth->has_permission('manage_salaries')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'salaries' ? 'active' : '' ?>" href="<?= base_url('salaries') ?>"><?= t('salaries') ?></a></li>
 				<?php endif; ?>

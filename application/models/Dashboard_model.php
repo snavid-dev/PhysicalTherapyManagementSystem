@@ -3,6 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Dashboard_model extends CI_Model
 {
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('Safe_model');
+	}
+
 	public function stats()
 	{
 		$payments = $this->db
@@ -44,5 +50,10 @@ class Dashboard_model extends CI_Model
 			->limit(5)
 			->get()
 			->result_array();
+	}
+
+	public function get_safe_balance()
+	{
+		return $this->Safe_model->get_current_balance();
 	}
 }

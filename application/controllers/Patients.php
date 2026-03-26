@@ -11,6 +11,7 @@ class Patients extends Authenticated_Controller
 		$this->load->model('Wallet_model');
 		$this->load->model('Debt_model');
 		$this->load->model('Payment_model');
+		$this->load->model('Safe_model');
 	}
 
 	public function index()
@@ -103,6 +104,19 @@ class Patients extends Authenticated_Controller
 			}
 			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
 		}
+
+		$latest_wallet_transaction = $this->Wallet_model->get_transactions($id, 1);
+		$wallet_reference = !empty($latest_wallet_transaction[0]['id']) ? (int) $latest_wallet_transaction[0]['id'] : NULL;
+
+		$this->Safe_model->log_transaction(
+			'in',
+			'wallet_topup',
+			$amount,
+			$wallet_reference ?: (int) $id,
+			$wallet_reference ? 'patient_wallet_transactions' : 'patients',
+			$note ?: safe_patient_wallet_topup_note($id),
+			$this->session->userdata('user_id')
+		);
 
 		if (!$wants_json) {
 			$this->session->set_flashdata('success', t('Wallet updated successfully.'));
@@ -282,7 +296,11 @@ class Patients extends Authenticated_Controller
 		$patient = $this->Patient_model->get_by_id($id);
 		show_404_if_empty($patient);
 
-		$this->Patient_model->delete($id);
+		if (!$this->Patient_model->delete($id)) {
+			$this->session->set_flashdata('error', t('Unable to delete record right now.'));
+			return redirect('patients');
+		}
+
 		$this->session->set_flashdata('success', t('Patient deleted successfully.'));
 		redirect('patients');
 	}

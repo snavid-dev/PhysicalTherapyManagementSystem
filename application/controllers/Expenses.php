@@ -8,6 +8,7 @@ class Expenses extends Authenticated_Controller
 		parent::__construct();
 		$this->load->model('Expense_model');
 		$this->load->model('Expense_category_model');
+		$this->load->model('Safe_model');
 		$this->load->model('Staff_model');
 	}
 
@@ -60,7 +61,21 @@ class Expenses extends Authenticated_Controller
 			return redirect('expenses/create');
 		}
 
-		$this->Expense_model->create($this->expense_payload());
+		$payload = $this->expense_payload();
+		$expense_id = $this->Expense_model->create($payload);
+
+		if ($expense_id) {
+			$this->Safe_model->log_transaction(
+				'out',
+				'expense',
+				$payload['amount'],
+				$expense_id,
+				'expenses',
+				$payload['description'],
+				$this->session->userdata('user_id')
+			);
+		}
+
 		$this->session->set_flashdata('success', t('Expense created successfully.'));
 		redirect('expenses');
 	}
@@ -113,8 +128,13 @@ class Expenses extends Authenticated_Controller
 		$expense = $this->Expense_model->get_by_id($id);
 		show_404_if_empty($expense);
 
-		if (!$this->Expense_model->delete($id)) {
+		if ($this->Expense_model->is_linked_to_salary_payment($id)) {
 			$this->session->set_flashdata('error', t('expense_linked_salary'));
+			return redirect('expenses');
+		}
+
+		if (!$this->Expense_model->delete($id)) {
+			$this->session->set_flashdata('error', t('Unable to delete record right now.'));
 			return redirect('expenses');
 		}
 
