@@ -114,19 +114,25 @@ class Reference_doctors extends Authenticated_Controller
 
 		$date_from = $this->input->post('date_from', TRUE);
 		$date_to = $this->input->post('date_to', TRUE);
+		$date_from_gregorian = $this->gregorian_date_from_shamsi($date_from);
+		$date_to_gregorian = $this->gregorian_date_from_shamsi($date_to);
 
 		if (!$date_from || !$date_to) {
 			return $this->json_error(t('Both date fields are required.'), 422);
 		}
 
-		if (!$this->is_valid_date($date_from) || !$this->is_valid_date($date_to) || $date_from > $date_to) {
+		if ($date_from_gregorian === '' || $date_to_gregorian === '' || $date_from_gregorian > $date_to_gregorian) {
 			return $this->json_error(t('Please choose a valid date range.'), 422);
 		}
 
-		$date_from_start = $date_from . ' 00:00:00';
-		$date_to_end = $date_to . ' 23:59:59';
+		$date_from_start = $date_from_gregorian . ' 00:00:00';
+		$date_to_end = $date_to_gregorian . ' 23:59:59';
 		$patients = $this->Reference_doctor_model->get_referred_patients($id, $date_from_start, $date_to_end);
 		$count = $this->Reference_doctor_model->count_referred_patients($id, $date_from_start, $date_to_end);
+		$patients = array_map(static function ($patient) {
+			$patient['created_at'] = to_shamsi($patient['created_at'], 'Y/m/d H:i');
+			return $patient;
+		}, $patients);
 
 		return $this->output
 			->set_content_type('application/json')
@@ -175,12 +181,6 @@ class Reference_doctors extends Authenticated_Controller
 	{
 		$value = trim((string) $value);
 		return $value === '' ? NULL : $value;
-	}
-
-	protected function is_valid_date($value)
-	{
-		$date = DateTime::createFromFormat('Y-m-d', (string) $value);
-		return $date && $date->format('Y-m-d') === $value;
 	}
 
 	protected function json_error($message, $status = 422)

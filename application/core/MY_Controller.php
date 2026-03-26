@@ -47,6 +47,26 @@ class Base_Controller extends CI_Controller
 		$this->load->view($view, $data);
 		$this->load->view('layout/footer');
 	}
+
+	protected function gregorian_date_from_shamsi($value)
+	{
+		return to_gregorian($value);
+	}
+
+	protected function gregorian_month_from_shamsi($value)
+	{
+		return shamsi_month_to_gregorian($value);
+	}
+
+	protected function is_valid_shamsi_date_input($value)
+	{
+		return $this->gregorian_date_from_shamsi($value) !== '';
+	}
+
+	protected function is_valid_shamsi_month_input($value)
+	{
+		return $this->gregorian_month_from_shamsi($value) !== '';
+	}
 }
 
 class Authenticated_Controller extends Base_Controller

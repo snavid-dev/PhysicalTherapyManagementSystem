@@ -23,7 +23,7 @@ class Safe extends Authenticated_Controller
 			'latest_transaction' => $this->Safe_model->get_latest_transaction(),
 			'today_summary' => $this->Safe_model->get_summary($today, $today),
 			'month_summary' => $this->Safe_model->get_summary($month_start, $today),
-			'ledger' => $this->Safe_model->get_ledger($filters),
+			'ledger' => $this->Safe_model->get_ledger($this->safe_query_filters($filters)),
 			'filters' => $filters,
 		));
 	}
@@ -36,9 +36,10 @@ class Safe extends Authenticated_Controller
 
 		$amount = round((float) $this->input->post('amount'), 2);
 		$note = trim((string) $this->input->post('note', TRUE));
-		$income_date = trim((string) $this->input->post('income_date', TRUE));
+		$income_date_input = trim((string) $this->input->post('income_date', TRUE));
+		$income_date = $this->gregorian_date_from_shamsi($income_date_input);
 
-		if ($amount <= 0 || $note === '' || !$this->is_valid_date($income_date)) {
+		if ($amount <= 0 || $note === '' || $income_date === '') {
 			$this->session->set_flashdata('error', t('Please provide valid income details.'));
 			return redirect('safe');
 		}
@@ -104,9 +105,11 @@ class Safe extends Authenticated_Controller
 		);
 	}
 
-	protected function is_valid_date($value)
+	protected function safe_query_filters($filters)
 	{
-		$date = DateTime::createFromFormat('Y-m-d', (string) $value);
-		return $date && $date->format('Y-m-d') === $value;
+		$query_filters = $filters;
+		$query_filters['date_from'] = $filters['date_from'] !== '' ? $this->gregorian_date_from_shamsi($filters['date_from']) : '';
+		$query_filters['date_to'] = $filters['date_to'] !== '' ? $this->gregorian_date_from_shamsi($filters['date_to']) : '';
+		return $query_filters;
 	}
 }

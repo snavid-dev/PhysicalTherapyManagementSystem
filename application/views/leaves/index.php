@@ -15,8 +15,8 @@
 				<?php if ($leaves) : foreach ($leaves as $leave) : ?>
 					<tr>
 						<td><?= html_escape($leave['first_name'] . ' ' . $leave['last_name']) ?></td>
-						<td><?= html_escape($leave['start_date']) ?></td>
-						<td><?= html_escape($leave['end_date']) ?></td>
+						<td><?= html_escape(to_shamsi($leave['start_date'])) ?></td>
+						<td><?= html_escape(to_shamsi($leave['end_date'])) ?></td>
 						<td><?= t(ucfirst($leave['status'])) ?></td>
 						<td class="text-end">
 							<a href="<?= base_url('leaves/' . $leave['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>

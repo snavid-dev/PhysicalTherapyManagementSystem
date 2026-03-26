@@ -4,7 +4,7 @@
 		<p class="text-muted mb-0"><?= html_escape($staff['first_name'] . ' ' . $staff['last_name']) ?></p>
 	</div>
 	<div class="d-flex gap-2">
-		<a href="<?= base_url('salaries/pay/' . $staff['id'] . '?month=' . rawurlencode($current_month)) ?>" class="btn btn-dark"><?= t('go_to_salary_payment') ?></a>
+		<a href="<?= base_url('salaries/pay/' . $staff['id'] . '?month=' . rawurlencode($current_month_shamsi)) ?>" class="btn btn-dark"><?= t('go_to_salary_payment') ?></a>
 		<a href="<?= base_url('staff/edit/' . $staff['id']) ?>" class="btn btn-outline-secondary"><?= t('Edit') ?></a>
 		<a href="<?= base_url('staff') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
 	</div>
@@ -106,17 +106,17 @@
 				<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
 					<div>
 						<h2 class="h5 mb-1"><?= t('calculate_salary') ?></h2>
-						<p class="text-muted mb-0"><?= html_escape($current_month) ?></p>
+						<p class="text-muted mb-0"><?= html_escape($current_month_shamsi) ?></p>
 					</div>
 					<div class="d-flex gap-2 flex-wrap">
-						<input type="month" id="salaryMonth" class="form-control" value="<?= html_escape($current_month) ?>" style="max-width: 180px;">
+						<input type="text" id="salaryMonth" class="form-control shamsi-month" placeholder="1403/01" value="<?= html_escape($current_month_shamsi) ?>" style="max-width: 180px;">
 						<button type="button" class="btn btn-dark" id="calculateSalaryButton"><?= t('calculate_salary') ?></button>
 					</div>
 				</div>
 				<div id="salaryCalculationError" class="alert alert-danger d-none"></div>
 				<div id="salaryCalculationResult">
 					<?php $salary_rows = array(
-						array(t('month'), $current_month),
+						array(t('month'), $current_month_shamsi),
 						array(t('base_salary'), format_number($salary_calculation['base_salary'], 2)),
 						array(t('monthly_leave_quota'), format_number($salary_calculation['leave_quota'] ?? $salary_calculation['monthly_leave_quota'], 0)),
 						array(t('approved_leaves_in_range'), format_number($salary_calculation['approved_leaves'], 0)),

@@ -107,7 +107,7 @@ class Turns extends Authenticated_Controller
 					return array(
 						'id' => (int) $debt['id'],
 						'amount' => (float) $debt['amount'],
-						'created_at' => substr((string) $debt['created_at'], 0, 10),
+						'created_at' => to_shamsi(substr((string) $debt['created_at'], 0, 10)),
 					);
 				}, $open_debts),
 			)));
@@ -572,7 +572,7 @@ class Turns extends Authenticated_Controller
 	{
 		$shared_input = array_merge(array(
 			'section_id' => 0,
-			'date' => date('Y-m-d'),
+			'date' => shamsi_today(),
 			'status' => 'accepted',
 		), $shared_input);
 
@@ -597,7 +597,7 @@ class Turns extends Authenticated_Controller
 		$this->form_validation->set_rules('fee', 'Fee', 'required|numeric|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('payment_type', 'Payment type', 'required|in_list[prepaid,cash,deferred,free]');
 		$this->form_validation->set_rules('topup_amount', 'Top up amount', 'trim|numeric|greater_than_equal_to[0]');
-		$this->form_validation->set_rules('turn_date', 'Date', 'required');
+		$this->form_validation->set_rules('turn_date', 'Date', 'required|callback__valid_turn_date');
 		$this->form_validation->set_rules('turn_time', 'Time', 'trim');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[accepted,scheduled,completed,cancelled]');
 	}
@@ -607,9 +607,19 @@ class Turns extends Authenticated_Controller
 		$this->form_validation->set_rules('section_id', 'Section', 'required|integer|callback__valid_section_id');
 		$this->form_validation->set_rules('staff_id', 'Staff member', 'required|integer|callback__valid_staff_id');
 		$this->form_validation->set_rules('turn_number', 'Turn number', 'trim|callback__valid_turn_number');
-		$this->form_validation->set_rules('turn_date', 'Date', 'required');
+		$this->form_validation->set_rules('turn_date', 'Date', 'required|callback__valid_turn_date');
 		$this->form_validation->set_rules('turn_time', 'Time', 'trim');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[accepted,scheduled,completed,cancelled]');
+	}
+
+	public function _valid_turn_date($value)
+	{
+		if ($this->is_valid_shamsi_date_input($value)) {
+			return TRUE;
+		}
+
+		$this->form_validation->set_message('_valid_turn_date', t('Please choose a valid date.'));
+		return FALSE;
 	}
 
 	protected function turn_payload($overrides = array())
@@ -627,7 +637,7 @@ class Turns extends Authenticated_Controller
 			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
 			'topup_amount' => isset($overrides['topup_amount']) ? round((float) $overrides['topup_amount'], 2) : 0.00,
-			'turn_date' => $this->input->post('turn_date', TRUE),
+			'turn_date' => $this->gregorian_date_from_shamsi($this->input->post('turn_date', TRUE)),
 			'turn_time' => $this->normalize_time($this->input->post('turn_time', TRUE)),
 			'status' => $this->input->post('status', TRUE) ?: 'accepted',
 			'notes' => $this->null_if_empty($this->input->post('notes', TRUE)),
@@ -641,7 +651,7 @@ class Turns extends Authenticated_Controller
 			'section_id' => (int) $this->input->post('section_id'),
 			'staff_id' => (int) $this->input->post('staff_id'),
 			'turn_number' => $this->nullable_int($this->input->post('turn_number', TRUE)),
-			'turn_date' => $this->input->post('turn_date', TRUE),
+			'turn_date' => $this->gregorian_date_from_shamsi($this->input->post('turn_date', TRUE)),
 			'turn_time' => $this->normalize_time($this->input->post('turn_time', TRUE)),
 			'status' => $this->input->post('status', TRUE) ?: 'accepted',
 			'notes' => $this->null_if_empty($this->input->post('notes', TRUE)),
@@ -710,6 +720,8 @@ class Turns extends Authenticated_Controller
 
 		if ($shared_input['date'] === '') {
 			$shared_errors[] = t('Date') . ' ' . t('is required.');
+		} elseif (!$this->is_valid_shamsi_date_input($shared_input['date'])) {
+			$shared_errors[] = t('Please choose a valid date.');
 		}
 
 		if (empty($submitted_turns)) {
@@ -838,7 +850,7 @@ class Turns extends Authenticated_Controller
 			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
 			'topup_amount' => round((float) $row['topup_amount'], 2),
-			'turn_date' => $shared_input['date'],
+			'turn_date' => $this->gregorian_date_from_shamsi($shared_input['date']),
 			'turn_time' => NULL,
 			'status' => 'accepted',
 			'notes' => $row['notes'],

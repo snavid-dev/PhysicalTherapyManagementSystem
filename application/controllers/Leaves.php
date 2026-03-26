@@ -90,17 +90,40 @@ class Leaves extends Authenticated_Controller
 	protected function validate_form()
 	{
 		$this->form_validation->set_rules('doctor_id', 'Therapist', 'required|integer');
-		$this->form_validation->set_rules('start_date', 'Start date', 'required');
-		$this->form_validation->set_rules('end_date', 'End date', 'required');
+		$this->form_validation->set_rules('start_date', 'Start date', 'required|callback__valid_leave_start_date');
+		$this->form_validation->set_rules('end_date', 'End date', 'required|callback__valid_leave_end_date');
 		$this->form_validation->set_rules('status', 'Status', 'required');
+	}
+
+	public function _valid_leave_start_date($value)
+	{
+		if ($this->is_valid_shamsi_date_input($value)) {
+			return TRUE;
+		}
+
+		$this->form_validation->set_message('_valid_leave_start_date', t('Please choose a valid start date.'));
+		return FALSE;
+	}
+
+	public function _valid_leave_end_date($value)
+	{
+		$start_date = $this->gregorian_date_from_shamsi($this->input->post('start_date', TRUE));
+		$end_date = $this->gregorian_date_from_shamsi($value);
+
+		if ($end_date !== '' && $start_date !== '' && $end_date >= $start_date) {
+			return TRUE;
+		}
+
+		$this->form_validation->set_message('_valid_leave_end_date', t('Please choose a valid end date.'));
+		return FALSE;
 	}
 
 	protected function leave_payload()
 	{
 		return array(
 			'doctor_id' => (int) $this->input->post('doctor_id'),
-			'start_date' => $this->input->post('start_date', TRUE),
-			'end_date' => $this->input->post('end_date', TRUE),
+			'start_date' => $this->gregorian_date_from_shamsi($this->input->post('start_date', TRUE)),
+			'end_date' => $this->gregorian_date_from_shamsi($this->input->post('end_date', TRUE)),
 			'status' => $this->input->post('status', TRUE),
 			'reason' => $this->input->post('reason', TRUE),
 		);

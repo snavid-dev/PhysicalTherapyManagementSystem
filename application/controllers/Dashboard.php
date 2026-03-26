@@ -25,6 +25,7 @@ class Dashboard extends Authenticated_Controller
 			'today_turns' => $this->Dashboard_model->today_turns(),
 			'recent_payments' => $this->Dashboard_model->recent_payments(),
 			'safe_balance' => $safe_balance,
+			'today_shamsi' => shamsi_today(),
 		));
 	}
 }

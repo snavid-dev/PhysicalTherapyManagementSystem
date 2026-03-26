@@ -157,7 +157,7 @@ $timeline_amount_prefix = static function ($entry) {
 									$detail = trim((string) ($entry['detail'] ?? ''));
 									?>
 									<tr>
-										<td><?= html_escape(substr((string) ($entry['occurred_at'] ?? ''), 0, 16)) ?></td>
+										<td><?= html_escape((string) ($entry['occurred_at'] ?? '')) ?></td>
 										<td><span class="badge rounded-pill bg-<?= html_escape($badge) ?>-subtle text-<?= html_escape($badge) ?>"><?= html_escape($timeline_source_labels[$source] ?? ucfirst($source)) ?></span></td>
 										<td><?= html_escape($entry['label'] ?? '') ?></td>
 										<td><?= html_escape($amount_prefix) . format_amount($entry['amount'] ?? 0) ?></td>
@@ -259,7 +259,7 @@ $timeline_amount_prefix = static function ($entry) {
 									<?php if ($wallet_transactions) : foreach ($wallet_transactions as $transaction) : ?>
 										<?php $amount_prefix = $transaction['type'] === 'topup' ? '+' : '-'; ?>
 										<tr>
-											<td><?= html_escape(substr((string) $transaction['created_at'], 0, 16)) ?></td>
+											<td><?= html_escape(to_shamsi($transaction['created_at'], 'Y/m/d H:i')) ?></td>
 											<td><span class="badge rounded-pill <?= $transaction['type'] === 'topup' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' ?>"><?= html_escape(t($transaction['type'])) ?></span></td>
 											<td><?= html_escape($amount_prefix) . format_amount($transaction['amount']) ?></td>
 											<td><?= !empty($transaction['note']) ? html_escape($transaction['note']) : (!empty($transaction['turn_id']) ? '#' . (int) $transaction['turn_id'] : '&mdash;') ?></td>
@@ -344,7 +344,7 @@ $timeline_amount_prefix = static function ($entry) {
 										}
 										?>
 										<tr>
-											<td><?= html_escape($debt['debt_date']) ?></td>
+											<td><?= html_escape(to_shamsi($debt['debt_date'])) ?></td>
 											<td><?= html_escape(implode(' - ', $turn_label_parts)) ?></td>
 											<td><?= format_amount($debt['amount']) ?></td>
 											<td><?= t('open_status') ?></td>
@@ -382,7 +382,7 @@ $timeline_amount_prefix = static function ($entry) {
 						<?php if ($turns) : foreach ($turns as $turn) : ?>
 							<?php $staff_name = !empty($turn['staff_full_name']) ? $turn['staff_full_name'] : ($turn['doctor_full_name'] ?? ''); ?>
 							<tr>
-								<td><?= html_escape($turn['turn_date']) ?></td>
+								<td><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
 								<td><?= $display_time($turn['turn_time']) ?></td>
 								<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>
 								<td><?= $staff_name !== '' ? html_escape($staff_name) : '&mdash;' ?></td>
@@ -416,7 +416,7 @@ $timeline_amount_prefix = static function ($entry) {
 							<tbody id="paymentHistoryBody">
 							<?php if ($payments) : foreach ($payments as $payment) : ?>
 								<tr>
-									<td><?= html_escape($payment['payment_date']) ?></td>
+									<td><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
 									<td><?= html_escape(t(ucfirst((string) $payment['payment_method']))) ?></td>
 									<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
 									<td><?= html_escape($payment['reference_number']) ?></td>
@@ -575,7 +575,7 @@ $timeline_amount_prefix = static function ($entry) {
 			const isTopup = transaction.type === 'topup';
 			const note = transaction.note ? escapeHtml(transaction.note) : (transaction.turn_id ? ('#' + transaction.turn_id) : '&mdash;');
 			return '<tr>'
-				+ '<td>' + escapeHtml(String(transaction.created_at).slice(0, 16)) + '</td>'
+				+ '<td>' + escapeHtml(transaction.created_at || '') + '</td>'
 				+ '<td><span class="badge rounded-pill ' + (isTopup ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning') + '">' + escapeHtml(isTopup ? labels.topup : labels.deduction) + '</span></td>'
 				+ '<td>' + (isTopup ? '+' : '-') + formatAmount(parseFloat(transaction.amount || 0)) + '</td>'
 				+ '<td>' + note + '</td>'
@@ -619,7 +619,7 @@ $timeline_amount_prefix = static function ($entry) {
 				parts.push(debt.section_name);
 			}
 			return '<tr>'
-				+ '<td>' + escapeHtml(debt.debt_date || String(debt.created_at || '').slice(0, 10)) + '</td>'
+				+ '<td>' + escapeHtml(debt.debt_date || '') + '</td>'
 				+ '<td>' + escapeHtml(parts.join(' - ')) + '</td>'
 				+ '<td>' + formatAmount(parseFloat(debt.amount || 0)) + '</td>'
 				+ '<td>' + escapeHtml(labels.openStatus) + '</td>'
@@ -898,7 +898,7 @@ $timeline_amount_prefix = static function ($entry) {
 					+ '<td>' + escapeHtml(discount.section_label || discount.section_name || '') + '</td>'
 					+ '<td>' + escapeHtml(formatNumber(parseFloat(discount.discount_percent || 0))) + '%</td>'
 					+ '<td>' + (discount.note ? escapeHtml(discount.note) : '&mdash;') + '</td>'
-					+ '<td>' + escapeHtml(discount.created_at || '') + '</td>'
+					+ '<td>' + escapeHtml(window.formatShamsiDate ? window.formatShamsiDate(discount.created_at || '', 'YYYY/MM/DD HH:mm') : (discount.created_at || '')) + '</td>'
 					+ '<td>' + statusBadge + '</td>'
 					+ '<td><button type="button" class="btn btn-sm btn-outline-danger" data-discount-delete="1" data-discount-id="' + escapeHtml(discount.id) + '" data-url="' + escapeHtml(deleteUrlBase + discount.id) + '">' + escapeHtml(labels.delete) + '</button></td>'
 					+ '</tr>';

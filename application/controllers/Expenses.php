@@ -17,7 +17,7 @@ class Expenses extends Authenticated_Controller
 		$this->require_permission('manage_expenses');
 
 		$filters = $this->expense_filters();
-		$expenses = $this->Expense_model->get_all($filters);
+		$expenses = $this->Expense_model->get_all($this->expense_query_filters($filters));
 		$total_amount = 0;
 
 		foreach ($expenses as $expense) {
@@ -164,7 +164,7 @@ class Expenses extends Authenticated_Controller
 
 	public function _valid_expense_date($value)
 	{
-		if ($this->is_valid_date($value)) {
+		if ($this->is_valid_shamsi_date_input($value)) {
 			return TRUE;
 		}
 
@@ -185,7 +185,7 @@ class Expenses extends Authenticated_Controller
 			'category_id' => (int) $this->input->post('category_id'),
 			'staff_id' => $staff_id,
 			'amount' => round((float) $this->input->post('amount'), 2),
-			'expense_date' => $this->input->post('expense_date', TRUE),
+			'expense_date' => $this->gregorian_date_from_shamsi($this->input->post('expense_date', TRUE)),
 			'description' => $this->null_if_empty($this->input->post('description', TRUE)),
 		);
 	}
@@ -200,15 +200,17 @@ class Expenses extends Authenticated_Controller
 		);
 	}
 
+	protected function expense_query_filters($filters)
+	{
+		$query_filters = $filters;
+		$query_filters['date_from'] = $filters['date_from'] !== '' ? $this->gregorian_date_from_shamsi($filters['date_from']) : '';
+		$query_filters['date_to'] = $filters['date_to'] !== '' ? $this->gregorian_date_from_shamsi($filters['date_to']) : '';
+		return $query_filters;
+	}
+
 	protected function is_salary_category($category)
 	{
 		return isset($category['name']) && $category['name'] === 'Staff Salary Payment';
-	}
-
-	protected function is_valid_date($value)
-	{
-		$date = DateTime::createFromFormat('Y-m-d', (string) $value);
-		return $date && $date->format('Y-m-d') === $value;
 	}
 
 	protected function null_if_empty($value)

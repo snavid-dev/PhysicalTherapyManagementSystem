@@ -20,7 +20,7 @@
 				<tbody>
 				<?php if ($payments) : foreach ($payments as $payment) : ?>
 					<tr>
-						<td><?= html_escape($payment['payment_date']) ?></td>
+						<td><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
 						<td><?= html_escape($payment['first_name'] . ' ' . $payment['last_name']) ?></td>
 						<td><?= html_escape($payment['payment_method']) ?></td>
 						<td>$<?= number_format((float) $payment['amount'], 2) ?></td>

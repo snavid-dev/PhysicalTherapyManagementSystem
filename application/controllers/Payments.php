@@ -108,16 +108,26 @@ class Payments extends Authenticated_Controller
 	protected function validate_form()
 	{
 		$this->form_validation->set_rules('patient_id', 'Patient', 'required|integer');
-		$this->form_validation->set_rules('payment_date', 'Payment date', 'required');
+		$this->form_validation->set_rules('payment_date', 'Payment date', 'required|callback__valid_payment_date');
 		$this->form_validation->set_rules('amount', 'Amount', 'required|numeric');
 		$this->form_validation->set_rules('payment_method', 'Payment method', 'required');
+	}
+
+	public function _valid_payment_date($value)
+	{
+		if ($this->is_valid_shamsi_date_input($value)) {
+			return TRUE;
+		}
+
+		$this->form_validation->set_message('_valid_payment_date', t('Please choose a valid payment date.'));
+		return FALSE;
 	}
 
 	protected function payment_payload()
 	{
 		return array(
 			'patient_id' => (int) $this->input->post('patient_id'),
-			'payment_date' => $this->input->post('payment_date', TRUE),
+			'payment_date' => $this->gregorian_date_from_shamsi($this->input->post('payment_date', TRUE)),
 			'amount' => $this->input->post('amount', TRUE),
 			'payment_method' => $this->input->post('payment_method', TRUE),
 			'reference_number' => $this->input->post('reference_number', TRUE),

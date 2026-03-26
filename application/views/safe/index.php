@@ -77,7 +77,7 @@ $entry_links = static function ($entry) {
 		$url = 'salaries/pay/' . $entry['salary_staff_id'];
 
 		if (!empty($entry['salary_month'])) {
-			$url .= '?month=' . rawurlencode($entry['salary_month']);
+			$url .= '?month=' . rawurlencode(gregorian_month_to_shamsi($entry['salary_month']));
 		}
 
 		$links[] = array(
@@ -152,7 +152,7 @@ $reference_label = static function ($entry) {
 			</div>
 			<div class="col-lg-4">
 				<div class="safe-summary-label"><?= t('last_updated') ?></div>
-				<div class="fw-semibold"><?= !empty($latest_transaction['created_at']) ? html_escape($latest_transaction['created_at']) : t('No data available.') ?></div>
+				<div class="fw-semibold"><?= !empty($latest_transaction['created_at']) ? html_escape(to_shamsi($latest_transaction['created_at'], 'Y/m/d H:i')) : t('No data available.') ?></div>
 			</div>
 		</div>
 	</div>
@@ -215,11 +215,11 @@ $reference_label = static function ($entry) {
 				</div>
 				<div class="col-md-2">
 					<label class="form-label"><?= t('date_from') ?></label>
-					<input type="date" name="date_from" class="form-control" value="<?= html_escape($filters['date_from']) ?>">
+					<input type="text" name="date_from" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($filters['date_from']) ?>">
 				</div>
 				<div class="col-md-2">
 					<label class="form-label"><?= t('date_to') ?></label>
-					<input type="date" name="date_to" class="form-control" value="<?= html_escape($filters['date_to']) ?>">
+					<input type="text" name="date_to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($filters['date_to']) ?>">
 				</div>
 				<div class="col-md-2 d-flex align-items-end gap-2">
 					<button type="submit" class="btn btn-dark w-100"><?= t('Apply') ?></button>
@@ -252,11 +252,11 @@ $reference_label = static function ($entry) {
 				</thead>
 				<tbody>
 				<?php if ($ledger) : ?>
-					<?php foreach ($ledger as $entry) : ?>
-						<?php $badge = $type_badges[$entry['type']] ?? $type_badges['adjustment']; ?>
-						<tr>
-							<td><?= html_escape($entry['created_at']) ?></td>
-							<td><span class="badge <?= $badge['class'] ?>"><?= $badge['label'] ?></span></td>
+						<?php foreach ($ledger as $entry) : ?>
+							<?php $badge = $type_badges[$entry['type']] ?? $type_badges['adjustment']; ?>
+							<tr>
+								<td><?= html_escape(to_shamsi($entry['created_at'], 'Y/m/d H:i')) ?></td>
+								<td><span class="badge <?= $badge['class'] ?>"><?= $badge['label'] ?></span></td>
 							<td><?= html_escape($source_labels[$entry['source']] ?? $entry['source']) ?></td>
 							<td class="<?= $entry['type'] === 'in' ? 'text-success' : ($entry['type'] === 'out' ? 'text-danger' : '') ?>"><?= format_number($entry['amount'], 2) ?></td>
 							<td><?= format_number($entry['balance_after'], 2) ?></td>
@@ -316,7 +316,7 @@ $reference_label = static function ($entry) {
 					</div>
 					<div class="mb-3">
 						<label class="form-label"><?= t('income_date') ?></label>
-						<input type="date" name="income_date" class="form-control" value="<?= html_escape(date('Y-m-d')) ?>" required>
+						<input type="text" name="income_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(shamsi_today()) ?>" required>
 					</div>
 					<div class="d-flex gap-2 justify-content-end">
 						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>

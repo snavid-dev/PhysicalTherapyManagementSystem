@@ -34,7 +34,7 @@
 				</div>
 				<div class="col-md-3">
 					<label class="form-label"><?= t('Payment Date') ?></label>
-					<input type="date" name="payment_date" class="form-control" value="<?= set_value('payment_date', $payment['payment_date'] ?? date('Y-m-d')) ?>">
+					<input type="text" name="payment_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= set_value('payment_date', isset($payment['payment_date']) ? to_shamsi($payment['payment_date']) : shamsi_today()) ?>">
 					<small class="text-danger"><?= form_error('payment_date') ?></small>
 				</div>
 				<div class="col-md-3">

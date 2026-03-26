@@ -38,7 +38,10 @@
 	<div class="col-lg-7">
 		<div class="card">
 			<div class="card-body">
-				<h2 class="h5 mb-3"><?= t('Today Turns') ?></h2>
+				<div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+					<h2 class="h5 mb-0"><?= t('Today Turns') ?></h2>
+					<span class="text-muted small"><?= html_escape($today_shamsi) ?></span>
+				</div>
 				<div class="table-responsive">
 					<table class="table align-middle">
 						<thead><tr><th><?= t('Time') ?></th><th><?= t('Patient') ?></th><th><?= t('Therapist') ?></th><th><?= t('Status') ?></th></tr></thead>
@@ -69,7 +72,7 @@
 						<tbody>
 						<?php if ($recent_payments) : foreach ($recent_payments as $payment) : ?>
 							<tr>
-								<td><?= html_escape($payment['payment_date']) ?></td>
+								<td><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
 								<td><?= html_escape($payment['first_name'] . ' ' . $payment['last_name']) ?></td>
 								<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
 							</tr>

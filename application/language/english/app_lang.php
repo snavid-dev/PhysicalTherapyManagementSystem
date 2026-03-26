@@ -579,4 +579,10 @@ $lang = array(
 	'Payment No.' => 'Payment #',
 	'Wallet Transaction No.' => 'Wallet Transaction #',
 	'Salary Payment No.' => 'Salary Payment #',
+	'Please choose a valid payment date.' => 'Please choose a valid payment date.',
+	'Please choose a valid start date.' => 'Please choose a valid start date.',
+	'Please choose a valid end date.' => 'Please choose a valid end date.',
+	'Please choose a valid date.' => 'Please choose a valid date.',
+	'date_format_hint' => 'Format: 1403/01/15',
+	'month_format_hint' => 'Format: 1403/01',
 );

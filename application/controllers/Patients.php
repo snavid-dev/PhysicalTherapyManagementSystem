@@ -411,7 +411,7 @@ class Patients extends Authenticated_Controller
 				'type' => (string) $transaction['type'],
 				'amount' => (float) $transaction['amount'],
 				'note' => $transaction['note'],
-				'created_at' => (string) $transaction['created_at'],
+				'created_at' => to_shamsi((string) $transaction['created_at'], 'Y/m/d H:i'),
 			);
 		}, $transactions);
 	}
@@ -428,7 +428,7 @@ class Patients extends Authenticated_Controller
 				'id' => (int) $debt['id'],
 				'turn_id' => (int) $debt['turn_id'],
 				'amount' => (float) $debt['amount'],
-				'debt_date' => (string) $debt['debt_date'],
+				'debt_date' => to_shamsi((string) $debt['debt_date']),
 				'section_name' => !empty($debt['section_name']) ? t($debt['section_name']) : '',
 			);
 		}, $debts);
@@ -439,7 +439,7 @@ class Patients extends Authenticated_Controller
 		return array_map(static function ($payment) {
 			return array(
 				'id' => (int) $payment['id'],
-				'payment_date' => (string) $payment['payment_date'],
+				'payment_date' => to_shamsi((string) $payment['payment_date']),
 				'amount' => (float) $payment['amount'],
 				'payment_method' => ucfirst((string) ($payment['payment_method'] ?? 'cash')),
 				'reference_number' => (string) ($payment['reference_number'] ?? ''),
@@ -513,7 +513,7 @@ class Patients extends Authenticated_Controller
 
 		foreach ($wallet_transactions as $transaction) {
 			$timeline[] = array(
-				'occurred_at' => (string) $transaction['created_at'],
+				'occurred_at' => to_shamsi((string) $transaction['created_at'], 'Y/m/d H:i'),
 				'source' => 'wallet',
 				'badge' => ($transaction['type'] ?? '') === 'topup' ? 'success' : 'warning',
 				'label' => t($transaction['type'] ?? 'wallet'),
@@ -548,7 +548,10 @@ class Patients extends Authenticated_Controller
 			}
 
 			$timeline[] = array(
-				'occurred_at' => trim((string) $turn['turn_date'] . ' ' . ((string) ($turn['turn_time'] ?? '') === '00:00:00' ? '00:00' : substr((string) ($turn['turn_time'] ?? ''), 0, 5))),
+				'occurred_at' => to_shamsi(
+					trim((string) $turn['turn_date'] . ' ' . ((string) ($turn['turn_time'] ?? '') === '00:00:00' ? '00:00:00' : substr((string) ($turn['turn_time'] ?? ''), 0, 5) . ':00')),
+					'Y/m/d H:i'
+				),
 				'source' => 'turn',
 				'badge' => 'secondary',
 				'label' => t('turn_financial_entry'),
@@ -570,7 +573,7 @@ class Patients extends Authenticated_Controller
 			}
 
 			$timeline[] = array(
-				'occurred_at' => (string) $payment['payment_date'] . ' 00:00',
+				'occurred_at' => to_shamsi((string) $payment['payment_date'] . ' 00:00:00', 'Y/m/d H:i'),
 				'source' => 'payment',
 				'badge' => 'primary',
 				'label' => t('direct_payment_entry'),

@@ -22,7 +22,7 @@ if ($patient_name === '') {
 		<div class="row g-4">
 			<div class="col-md-6">
 				<div class="safe-summary-row"><span class="safe-summary-label"><?= t('Patient') ?></span><span class="safe-summary-value"><a href="<?= base_url('patients/' . $payment['patient_id']) ?>"><?= html_escape($patient_name) ?></a></span></div>
-				<div class="safe-summary-row"><span class="safe-summary-label"><?= t('Payment Date') ?></span><span class="safe-summary-value"><?= html_escape($payment['payment_date']) ?></span></div>
+				<div class="safe-summary-row"><span class="safe-summary-label"><?= t('Payment Date') ?></span><span class="safe-summary-value"><?= html_escape(to_shamsi($payment['payment_date'])) ?></span></div>
 				<div class="safe-summary-row"><span class="safe-summary-label"><?= t('Amount') ?></span><span class="safe-summary-value"><?= format_number($payment['amount'], 2) ?></span></div>
 			</div>
 			<div class="col-md-6">

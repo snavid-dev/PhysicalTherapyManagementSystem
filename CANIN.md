@@ -85,6 +85,8 @@ If you are editing this project in a future chat, assume this:
 | RTL Support | Enabled for Persian |
 | Auth | Session-based login |
 | RBAC | Roles + permissions |
+| Date System | Shamsi (Solar Hijri) display, Gregorian storage |
+| Datepicker | persian-datepicker (Babakhani) via CDN |
 | Main stylesheet | `assets/css/app.css` |
 | Main DB schema reference | `database/physical_therapy_clinic.sql` |
 
@@ -97,10 +99,12 @@ If you are editing this project in a future chat, assume this:
 - `application/config/routes.php`
 - `application/core/MY_Controller.php`
 - `application/libraries/Auth.php`
+- `application/libraries/Shamsi.php`
 - `application/helpers/app_helper.php`
 - `application/views/layout/header.php`
 - `application/views/layout/footer.php`
 - `assets/css/app.css`
+- `assets/js/shamsi.js`
 
 ### Controllers currently driving the active app
 
@@ -166,6 +170,19 @@ If you are editing this project in a future chat, assume this:
 - `application/language/english/app_lang.php`
 - `application/language/farsi/app_lang.php`
 - `application/language/farsi/form_validation_lang.php`
+
+---
+
+## X. Date Handling Rules
+
+- All dates are stored as Gregorian in the database.
+- All dates are displayed as Shamsi in the UI.
+- Western digits are always used (never Persian digits).
+- Use `to_shamsi($date)` in views for display.
+- Use `to_gregorian($shamsi)` in controllers before saving.
+- Use `shamsi_today()` for default date values in forms.
+- All date inputs use class `.shamsi-date` for the datepicker.
+- Never store Shamsi strings in `DATE` or `DATETIME` columns.
 
 ---
 

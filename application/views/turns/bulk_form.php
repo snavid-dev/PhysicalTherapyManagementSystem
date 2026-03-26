@@ -2,7 +2,7 @@
 $shared_input = isset($shared_input) && is_array($shared_input) ? $shared_input : array();
 $shared_input = array_merge(array(
 	'section_id' => 0,
-	'date' => date('Y-m-d'),
+	'date' => shamsi_today(),
 	'status' => 'accepted',
 ), $shared_input);
 
@@ -80,7 +80,7 @@ $initial_rows = array_map(static function ($row) {
 			</div>
 			<div class="col-lg-3">
 				<label class="form-label"><?= t('Date') ?></label>
-				<input type="date" name="date" id="bulkDateInput" class="form-control" value="<?= html_escape($shared_input['date']) ?>" required>
+				<input type="text" name="date" id="bulkDateInput" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($shared_input['date']) ?>" required>
 			</div>
 			<div class="col-lg-3">
 				<div class="bulk-turn-counter text-muted">

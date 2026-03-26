@@ -42,7 +42,7 @@ $selected_staff_id = (int) set_value('staff_id', $expense['staff_id'] ?? 0);
 				</div>
 				<div class="col-md-3">
 					<label class="form-label"><?= t('expense_date') ?></label>
-					<input type="date" name="expense_date" class="form-control" value="<?= set_value('expense_date', $expense['expense_date'] ?? date('Y-m-d')) ?>" <?= $read_only ? 'readonly' : '' ?>>
+					<input type="text" name="expense_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= set_value('expense_date', isset($expense['expense_date']) ? to_shamsi($expense['expense_date']) : shamsi_today()) ?>" <?= $read_only ? 'readonly' : '' ?>>
 					<small class="text-danger"><?= form_error('expense_date') ?></small>
 				</div>
 				<div class="col-md-6 d-none" id="staffWrap">
