@@ -227,7 +227,9 @@ class Turn_model extends CI_Model
 		$this->add_column_if_missing('turns', 'staff_id', "ALTER TABLE `turns` ADD COLUMN `staff_id` int unsigned DEFAULT NULL AFTER `section_id`");
 		$this->add_column_if_missing('turns', 'turn_number', "ALTER TABLE `turns` ADD COLUMN `turn_number` tinyint unsigned DEFAULT NULL AFTER `staff_id`");
 		$this->add_column_if_missing('turns', 'fee', "ALTER TABLE `turns` ADD COLUMN `fee` decimal(12,2) NOT NULL DEFAULT 0.00 AFTER `turn_number`");
-		$this->add_column_if_missing('turns', 'payment_type', "ALTER TABLE `turns` ADD COLUMN `payment_type` enum('prepaid','cash','deferred','free') NOT NULL DEFAULT 'cash' AFTER `fee`");
+		$this->add_column_if_missing('turns', 'discount_percent', "ALTER TABLE `turns` ADD COLUMN `discount_percent` decimal(5,2) NOT NULL DEFAULT 0.00 AFTER `fee`");
+		$this->add_column_if_missing('turns', 'discount_amount', "ALTER TABLE `turns` ADD COLUMN `discount_amount` decimal(12,2) NOT NULL DEFAULT 0.00 AFTER `discount_percent`");
+		$this->add_column_if_missing('turns', 'payment_type', "ALTER TABLE `turns` ADD COLUMN `payment_type` enum('prepaid','cash','deferred','free') NOT NULL DEFAULT 'cash' AFTER `discount_amount`");
 		$this->add_column_if_missing('turns', 'wallet_deducted', "ALTER TABLE `turns` ADD COLUMN `wallet_deducted` decimal(12,2) NOT NULL DEFAULT 0.00 AFTER `payment_type`");
 		$this->add_column_if_missing('turns', 'cash_collected', "ALTER TABLE `turns` ADD COLUMN `cash_collected` decimal(12,2) NOT NULL DEFAULT 0.00 AFTER `wallet_deducted`");
 		$this->add_column_if_missing('turns', 'topup_amount', "ALTER TABLE `turns` ADD COLUMN `topup_amount` decimal(12,2) NOT NULL DEFAULT 0.00 AFTER `cash_collected`");

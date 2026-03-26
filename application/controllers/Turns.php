@@ -14,6 +14,7 @@ class Turns extends Authenticated_Controller
 		$this->load->model('Debt_model');
 		$this->load->model('Safe_model');
 		$this->load->model('User_model');
+		$this->load->model('Discount_model');
 	}
 
 	public function index()
@@ -42,17 +43,41 @@ class Turns extends Authenticated_Controller
 		}
 
 		$section_id = (int) $this->input->post('section_id');
+		$patient_id = (int) $this->input->post('patient_id');
 		$section = $this->Section_model->get_by_id($section_id);
 
 		if (!$section) {
 			return $this->json_error(t('Invalid section selected.'));
 		}
 
+		$fee = (float) $this->Turn_model->get_section_fee($section_id);
+		$discount_response = array(
+			'has_discount' => FALSE,
+			'discount_percent' => 0,
+			'discount_amount' => 0,
+			'final_fee' => $fee,
+		);
+
+		if ($patient_id > 0) {
+			$active_discount = $this->Discount_model->get_active_discount($patient_id, $section_id);
+
+			if ($active_discount) {
+				$calculation = $this->Discount_model->calculate_discounted_fee($fee, $active_discount['discount_percent']);
+				$discount_response = array(
+					'has_discount' => TRUE,
+					'discount_percent' => (float) $calculation['discount_percent'],
+					'discount_amount' => (float) $calculation['discount_amount'],
+					'final_fee' => (float) $calculation['final_fee'],
+				);
+			}
+		}
+
 		return $this->output
 			->set_content_type('application/json')
 			->set_output(json_encode(array(
-				'fee' => (float) $this->Turn_model->get_section_fee($section_id),
+				'fee' => $fee,
 				'staff' => $this->Turn_model->get_staff_by_section($section_id),
+				'discount' => $discount_response,
 			)));
 	}
 
@@ -596,6 +621,8 @@ class Turns extends Authenticated_Controller
 			'staff_id' => (int) $this->input->post('staff_id'),
 			'turn_number' => $this->nullable_int($this->input->post('turn_number', TRUE)),
 			'fee' => $this->decimal_value($this->input->post('fee')),
+			'discount_percent' => $this->decimal_value($this->input->post('discount_percent')),
+			'discount_amount' => $this->decimal_value($this->input->post('discount_amount')),
 			'payment_type' => $this->input->post('payment_type', TRUE) ?: 'cash',
 			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
@@ -655,6 +682,8 @@ class Turns extends Authenticated_Controller
 				'staff_id' => trim((string) ($turn['staff_id'] ?? '')),
 				'turn_number' => trim((string) ($turn['turn_number'] ?? '')),
 				'fee' => trim((string) ($turn['fee'] ?? '')),
+				'discount_percent' => trim((string) ($turn['discount_percent'] ?? '0')),
+				'discount_amount' => trim((string) ($turn['discount_amount'] ?? '0')),
 				'payment_type' => trim((string) ($turn['payment_type'] ?? '')),
 				'topup_amount' => trim((string) ($turn['topup_amount'] ?? '0')),
 				'notes' => trim((string) ($turn['notes'] ?? '')),
@@ -745,6 +774,8 @@ class Turns extends Authenticated_Controller
 				'staff_id' => $staff_id,
 				'turn_number' => $this->nullable_int($row['turn_number']),
 				'fee' => round((float) $fee_raw, 2),
+				'discount_percent' => round((float) ($row['discount_percent'] === '' ? 0 : $row['discount_percent']), 2),
+				'discount_amount' => round((float) ($row['discount_amount'] === '' ? 0 : $row['discount_amount']), 2),
 				'payment_type' => $payment_type,
 				'topup_amount' => $topup_raw === '' ? 0.00 : round((float) $topup_raw, 2),
 				'notes' => $this->null_if_empty($row['notes']),
@@ -801,6 +832,8 @@ class Turns extends Authenticated_Controller
 			'staff_id' => (int) $row['staff_id'],
 			'turn_number' => $row['turn_number'],
 			'fee' => round((float) $row['fee'], 2),
+			'discount_percent' => round((float) ($row['discount_percent'] ?? 0), 2),
+			'discount_amount' => round((float) ($row['discount_amount'] ?? 0), 2),
 			'payment_type' => $row['payment_type'],
 			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,

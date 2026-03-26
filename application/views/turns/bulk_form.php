@@ -34,6 +34,8 @@ $initial_rows = array_map(static function ($row) {
 		'staff_id' => (string) ($row['staff_id'] ?? ''),
 		'turn_number' => (string) ($row['turn_number'] ?? ''),
 		'fee' => (string) ($row['fee'] ?? ''),
+		'discount_percent' => (string) ($row['discount_percent'] ?? '0'),
+		'discount_amount' => (string) ($row['discount_amount'] ?? '0'),
 		'payment_type' => (string) ($row['payment_type'] ?? 'cash'),
 		'topup_amount' => (string) ($row['topup_amount'] ?? '0'),
 		'notes' => (string) ($row['notes'] ?? ''),
@@ -183,6 +185,13 @@ $initial_rows = array_map(static function ($row) {
 						<div class="col-md-6">
 							<label class="form-label"><?= t('fee') ?></label>
 							<input type="number" min="0" step="0.01" class="form-control bulk-fee-input">
+							<input type="hidden" class="bulk-discount-percent-input" value="0.00">
+							<input type="hidden" class="bulk-discount-amount-input" value="0.00">
+							<div class="alert alert-info py-2 px-3 mt-2 d-none bulk-discount-info">
+								<div class="small fw-semibold bulk-discount-info-text"></div>
+								<div class="small text-warning-emphasis mt-2 d-none bulk-fee-warning"><?= t('fee_overridden') ?></div>
+								<a href="#" class="small d-none bulk-reset-discount-link"><?= t('reset_to_discounted') ?></a>
+							</div>
 						</div>
 						<div class="col-md-6 bulk-cash-wrap d-none">
 							<label class="form-label"><?= t('cash_amount') ?></label>
@@ -239,7 +248,9 @@ $initial_rows = array_map(static function ($row) {
 					<div class="turn-summary-block">
 						<h2 class="h5 mb-3"><?= t('payment_summary') ?></h2>
 						<div class="turn-summary-grid">
-							<div class="turn-summary-row"><span><?= t('fee') ?></span><strong class="bulk-summary-fee"><?= format_amount(0) ?></strong></div>
+							<div class="turn-summary-row"><span><?= t('original_fee') ?></span><strong class="bulk-summary-original-fee"><?= format_amount(0) ?></strong></div>
+							<div class="turn-summary-row d-none bulk-summary-discount-row"><span><?= t('discount') ?></span><strong class="bulk-summary-discount"><?= format_amount(0) ?></strong></div>
+							<div class="turn-summary-row"><span><?= t('discounted_fee') ?></span><strong class="bulk-summary-discounted-fee"><?= format_amount(0) ?></strong></div>
 							<div class="turn-summary-row"><span><?= t('top_up_amount') ?></span><strong class="bulk-summary-topup"><?= format_amount(0) ?></strong></div>
 							<div class="turn-summary-row"><span><?= t('wallet_deducted') ?></span><strong class="bulk-summary-wallet"><?= format_amount(0) ?></strong></div>
 							<div class="turn-summary-row"><span><?= t('cash_collected') ?></span><strong class="bulk-summary-cash"><?= format_amount(0) ?></strong></div>
@@ -289,6 +300,9 @@ $initial_rows = array_map(static function ($row) {
 		deferredDebt: <?= json_encode(t('full_fee_recorded_as_debt')) ?>,
 		noPaymentRequired: <?= json_encode(t('no_payment_required')) ?>,
 		amountBecomingDebt: <?= json_encode(t('amount_becoming_debt')) ?>,
+		discountApplied: <?= json_encode(t('discount_applied')) ?>,
+		saving: <?= json_encode(t('saving')) ?>,
+		discountedFee: <?= json_encode(t('discounted_fee')) ?>,
 		openDebts: <?= json_encode(t('open_debts')) ?>,
 		collapse: <?= json_encode(t('Collapse')) ?>,
 		expand: <?= json_encode(t('Expand')) ?>,
@@ -306,6 +320,10 @@ $initial_rows = array_map(static function ($row) {
 	function toNumber(value) {
 		const parsed = parseFloat(value);
 		return Number.isFinite(parsed) ? parsed : 0;
+	}
+
+	function roundAmount(value) {
+		return Math.round((toNumber(value) + Number.EPSILON) * 100) / 100;
 	}
 
 	function formatAmount(value) {
@@ -381,6 +399,8 @@ $initial_rows = array_map(static function ($row) {
 			row.querySelector('.bulk-session-input').name = 'turns[' + index + '][turn_number]';
 			row.querySelector('.bulk-staff-select').name = 'turns[' + index + '][staff_id]';
 			row.querySelector('.bulk-fee-input').name = 'turns[' + index + '][fee]';
+			row.querySelector('.bulk-discount-percent-input').name = 'turns[' + index + '][discount_percent]';
+			row.querySelector('.bulk-discount-amount-input').name = 'turns[' + index + '][discount_amount]';
 			row.querySelector('.bulk-topup-input').name = 'turns[' + index + '][topup_amount]';
 			row.querySelector('.bulk-notes-input').name = 'turns[' + index + '][notes]';
 			row.querySelectorAll('.bulk-payment-radio').forEach(function (radio) {
@@ -452,6 +472,105 @@ $initial_rows = array_map(static function ($row) {
 	function updateSessionNumber(row, value) {
 		const normalized = value === null || value === undefined || value === '' ? '' : String(value);
 		row.querySelector('.bulk-session-input').value = normalized;
+	}
+
+	function setRowFeeValue(row, value) {
+		const feeInput = row.querySelector('.bulk-fee-input');
+		row._state.isApplyingAutoFee = true;
+		feeInput.value = roundAmount(value).toFixed(2);
+		row._state.isApplyingAutoFee = false;
+	}
+
+	function currentRowDiscountAmount(row) {
+		if (!row._state.hasDiscount) {
+			return 0;
+		}
+
+		if (!row._state.feeManuallyOverridden) {
+			return roundAmount(row._state.discountAmount);
+		}
+
+		return roundAmount(row._state.originalFee - toNumber(row.querySelector('.bulk-fee-input').value));
+	}
+
+	function updateRowDiscountInputs(row) {
+		row.querySelector('.bulk-discount-percent-input').value = row._state.hasDiscount
+			? roundAmount(row._state.discountPercent).toFixed(2)
+			: '0.00';
+		row.querySelector('.bulk-discount-amount-input').value = row._state.hasDiscount
+			? currentRowDiscountAmount(row).toFixed(2)
+			: '0.00';
+	}
+
+	function updateRowDiscountUI(row) {
+		const stateData = row._state;
+		const infoWrap = row.querySelector('.bulk-discount-info');
+		const infoText = row.querySelector('.bulk-discount-info-text');
+		const feeWarning = row.querySelector('.bulk-fee-warning');
+		const resetLink = row.querySelector('.bulk-reset-discount-link');
+		const summaryOriginalFee = row.querySelector('.bulk-summary-original-fee');
+		const summaryDiscountRow = row.querySelector('.bulk-summary-discount-row');
+		const summaryDiscount = row.querySelector('.bulk-summary-discount');
+		const effectiveDiscountAmount = currentRowDiscountAmount(row);
+
+		if (stateData.hasDiscount) {
+			infoWrap.classList.remove('d-none');
+			infoText.textContent = messages.discountApplied + ': '
+				+ formatAmount(stateData.discountPercent) + '% - '
+				+ messages.saving + ' ' + formatAmount(effectiveDiscountAmount) + ' - '
+				+ messages.discountedFee + ': ' + formatAmount(stateData.discountedFee);
+		} else {
+			infoWrap.classList.add('d-none');
+			infoText.textContent = '';
+		}
+
+		feeWarning.classList.toggle('d-none', !(stateData.hasDiscount && stateData.feeManuallyOverridden));
+		resetLink.classList.toggle('d-none', !(stateData.hasDiscount && stateData.feeManuallyOverridden));
+		summaryOriginalFee.textContent = formatAmount(stateData.originalFee);
+		summaryDiscountRow.classList.toggle('d-none', !stateData.hasDiscount);
+		summaryDiscount.textContent = '-' + formatAmount(effectiveDiscountAmount)
+			+ ' (' + formatAmount(stateData.discountPercent) + '%)';
+
+		updateRowDiscountInputs(row);
+	}
+
+	function baseSectionResponse() {
+		return {
+			fee: state.sectionFee,
+			discount: {
+				has_discount: false,
+				discount_percent: 0,
+				discount_amount: 0,
+				final_fee: state.sectionFee
+			}
+		};
+	}
+
+	function applyRowSectionData(row, data, options) {
+		const config = options || {};
+		const stateData = row._state;
+		const baseFee = roundAmount(data && data.fee !== undefined ? data.fee : state.sectionFee);
+		const discount = data && typeof data.discount === 'object' ? data.discount : null;
+
+		stateData.originalFee = baseFee;
+		stateData.hasDiscount = Boolean(discount && discount.has_discount);
+		stateData.discountPercent = stateData.hasDiscount ? roundAmount(discount.discount_percent) : 0;
+		stateData.discountAmount = stateData.hasDiscount ? roundAmount(discount.discount_amount) : 0;
+		stateData.discountedFee = stateData.hasDiscount ? roundAmount(discount.final_fee) : baseFee;
+
+		if (!config.preserveFee) {
+			setRowFeeValue(row, stateData.discountedFee);
+			row.dataset.feeEdited = '0';
+			stateData.feeManuallyOverridden = false;
+		} else if (stateData.hasDiscount) {
+			stateData.feeManuallyOverridden = Math.abs(toNumber(row.querySelector('.bulk-fee-input').value) - stateData.discountedFee) > 0.009;
+		} else {
+			stateData.feeManuallyOverridden = false;
+		}
+
+		updateRowDiscountUI(row);
+		updateRowHeader(row);
+		refreshRowSummary(row);
 	}
 
 	function renderDebtRows(row) {
@@ -583,7 +702,8 @@ $initial_rows = array_map(static function ($row) {
 			warningsBox.textContent = '';
 		}
 
-		row.querySelector('.bulk-summary-fee').textContent = formatAmount(fee);
+		updateRowDiscountUI(row);
+		row.querySelector('.bulk-summary-discounted-fee').textContent = formatAmount(fee);
 		row.querySelector('.bulk-summary-topup').textContent = formatAmount(topup);
 		row.querySelector('.bulk-summary-wallet').textContent = formatAmount(walletDeducted);
 		row.querySelector('.bulk-summary-cash').textContent = formatAmount(cashCollected);
@@ -611,6 +731,11 @@ $initial_rows = array_map(static function ($row) {
 	function loadPatientData(row, patientId) {
 		if (!patientId) {
 			resetPatientState(row);
+			if (sectionSelect.value) {
+				applyRowSectionData(row, baseSectionResponse(), { preserveFee: false });
+			} else {
+				applyRowSectionData(row, { fee: 0, discount: { has_discount: false, discount_percent: 0, discount_amount: 0, final_fee: 0 } }, { preserveFee: false });
+			}
 			return;
 		}
 
@@ -624,6 +749,10 @@ $initial_rows = array_map(static function ($row) {
 			.catch(function () {
 				return null;
 			});
+
+		if (sectionSelect.value) {
+			requestRowSectionData(row);
+		}
 
 		requestRowSessionNumber(row);
 	}
@@ -651,6 +780,31 @@ $initial_rows = array_map(static function ($row) {
 			});
 	}
 
+	function requestRowSectionData(row, options) {
+		const sectionId = sectionSelect.value;
+		const patientId = row.querySelector('.bulk-patient-select').value;
+
+		if (!sectionId) {
+			applyRowSectionData(row, { fee: 0, discount: { has_discount: false, discount_percent: 0, discount_amount: 0, final_fee: 0 } }, { preserveFee: false });
+			updateSessionNumber(row, '');
+			return;
+		}
+
+		if (!patientId) {
+			applyRowSectionData(row, baseSectionResponse(), options || {});
+			updateSessionNumber(row, '');
+			return;
+		}
+
+		fetchJson(<?= json_encode(base_url('turns/get_section_data')) ?>, { section_id: sectionId, patient_id: patientId })
+			.then(function (data) {
+				applyRowSectionData(row, data || baseSectionResponse(), options || {});
+			})
+			.catch(function () {
+				return null;
+			});
+	}
+
 	function attachRowEvents(row) {
 		row.querySelector('.bulk-remove-row').addEventListener('click', function () {
 			row.remove();
@@ -672,7 +826,12 @@ $initial_rows = array_map(static function ($row) {
 		});
 
 		row.querySelector('.bulk-fee-input').addEventListener('input', function () {
+			if (row._state.isApplyingAutoFee) {
+				return;
+			}
+
 			row.dataset.feeEdited = '1';
+			row._state.feeManuallyOverridden = row._state.hasDiscount && Math.abs(toNumber(this.value) - row._state.discountedFee) > 0.009;
 			updateRowHeader(row);
 			refreshRowSummary(row);
 		});
@@ -692,6 +851,18 @@ $initial_rows = array_map(static function ($row) {
 				refreshRowSummary(row);
 			});
 		});
+
+		row.querySelector('.bulk-reset-discount-link').addEventListener('click', function (event) {
+			event.preventDefault();
+			if (!row._state.hasDiscount) {
+				return;
+			}
+
+			setRowFeeValue(row, row._state.discountedFee);
+			row._state.feeManuallyOverridden = false;
+			row.dataset.feeEdited = '0';
+			refreshRowSummary(row);
+		});
 	}
 
 	function addRow(data, errors) {
@@ -703,12 +874,29 @@ $initial_rows = array_map(static function ($row) {
 		wrapper.innerHTML = html.trim();
 		const row = wrapper.firstElementChild;
 		const rowData = data || {};
+		const initialFee = rowData.fee !== undefined && rowData.fee !== '' ? roundAmount(rowData.fee) : roundAmount(state.sectionFee);
+		const initialDiscountPercent = roundAmount(rowData.discount_percent || 0);
+		const initialDiscountAmount = roundAmount(rowData.discount_amount || 0);
+		const initialOriginalFee = initialDiscountPercent > 0
+			? roundAmount(initialFee + initialDiscountAmount)
+			: roundAmount(state.sectionFee || initialFee);
+		const initialDiscountedFee = initialDiscountPercent > 0
+			? roundAmount(initialOriginalFee - (initialOriginalFee * initialDiscountPercent / 100))
+			: initialFee;
 
 		row._state = {
 			walletBalance: 0,
 			totalOpenDebt: 0,
 			openDebts: [],
-			sessionManuallyEdited: false
+			sessionManuallyEdited: false,
+			originalFee: initialOriginalFee,
+			hasDiscount: initialDiscountPercent > 0,
+			discountPercent: initialDiscountPercent,
+			discountAmount: initialDiscountAmount,
+			discountedFee: initialDiscountedFee,
+			feeManuallyOverridden: initialDiscountPercent > 0 && Math.abs(initialFee - initialDiscountedFee) > 0.009,
+			initializedFromPost: Object.keys(rowData).length > 0,
+			isApplyingAutoFee: false
 		};
 
 		rowsContainer.appendChild(row);
@@ -723,7 +911,7 @@ $initial_rows = array_map(static function ($row) {
 
 		patientSelect.innerHTML = patientSelectOptions('', new Set());
 		patientSelect.value = rowData.patient_id || '';
-		feeInput.value = rowData.fee !== undefined && rowData.fee !== '' ? rowData.fee : state.sectionFee.toFixed(2);
+		feeInput.value = initialFee.toFixed(2);
 		topupInput.value = rowData.topup_amount !== undefined && rowData.topup_amount !== '' ? toNumber(rowData.topup_amount).toFixed(2) : '0.00';
 		notesInput.value = rowData.notes || '';
 		row.dataset.feeEdited = rowData.fee !== undefined && rowData.fee !== '' ? '1' : '0';
@@ -735,6 +923,7 @@ $initial_rows = array_map(static function ($row) {
 		updateSessionNumber(row, rowData.turn_number || '');
 		renderRowErrors(row, errors || []);
 		updateFinancialUI(row);
+		updateRowDiscountUI(row);
 		updateRowHeader(row);
 		refreshPaymentOptionState(row);
 		refreshRowSummary(row);
@@ -746,44 +935,44 @@ $initial_rows = array_map(static function ($row) {
 		}
 	}
 
-	function applySectionData(data) {
-		state.sectionFee = toNumber(data.fee);
-		state.staff = Array.isArray(data.staff) ? data.staff : [];
+	function loadSectionData(sectionId, options) {
+		const config = options || {};
 
-		getRows().forEach(function (row) {
-			const currentStaffId = row.querySelector('.bulk-staff-select').value;
-			populateStaffOptions(row, currentStaffId);
-
-			if (row.dataset.feeEdited !== '1') {
-				row.querySelector('.bulk-fee-input').value = state.sectionFee.toFixed(2);
-			}
-
-			updateRowHeader(row);
-			refreshRowSummary(row);
-			row._state.sessionManuallyEdited = false;
-			requestRowSessionNumber(row);
-		});
-	}
-
-	function loadSectionData(sectionId) {
 		if (!sectionId) {
 			state.sectionFee = 0;
 			state.staff = [];
 			getRows().forEach(function (row) {
 				populateStaffOptions(row, '');
-				if (row.dataset.feeEdited !== '1') {
-					row.querySelector('.bulk-fee-input').value = '0.00';
-				}
 				row._state.sessionManuallyEdited = false;
 				updateSessionNumber(row, '');
-				updateRowHeader(row);
-				refreshRowSummary(row);
+				applyRowSectionData(row, { fee: 0, discount: { has_discount: false, discount_percent: 0, discount_amount: 0, final_fee: 0 } }, { preserveFee: false });
 			});
 			return;
 		}
 
 		fetchJson(<?= json_encode(base_url('turns/get_section_data')) ?>, { section_id: sectionId })
-			.then(applySectionData)
+			.then(function (data) {
+				state.sectionFee = roundAmount(data.fee);
+				state.staff = Array.isArray(data.staff) ? data.staff : [];
+
+				getRows().forEach(function (row) {
+					const currentStaffId = row.querySelector('.bulk-staff-select').value;
+					const preserveFee = Boolean(config.preserveExistingRows && row._state.initializedFromPost);
+					const patientId = row.querySelector('.bulk-patient-select').value;
+
+					populateStaffOptions(row, currentStaffId);
+
+					if (patientId) {
+						requestRowSectionData(row, { preserveFee: preserveFee });
+						requestRowSessionNumber(row);
+					} else {
+						applyRowSectionData(row, baseSectionResponse(), { preserveFee: preserveFee });
+						updateSessionNumber(row, '');
+					}
+
+					row._state.sessionManuallyEdited = false;
+				});
+			})
 			.catch(function () {
 				return null;
 			});
@@ -813,7 +1002,7 @@ $initial_rows = array_map(static function ($row) {
 	}
 
 	if (sectionSelect.value) {
-		loadSectionData(sectionSelect.value);
+		loadSectionData(sectionSelect.value, { preserveExistingRows: initialRows.length > 0 });
 	}
 
 	updateRowCount();
