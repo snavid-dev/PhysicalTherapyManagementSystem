@@ -6,10 +6,32 @@
 </div>
 
 <div class="row g-3 mb-4">
-	<div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Patients') ?></div><div class="stat-value"><?= (int) $stats['patients'] ?></div></div></div></div>
-	<div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Users') ?></div><div class="stat-value"><?= (int) $stats['users'] ?></div></div></div></div>
-	<div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Today Turns') ?></div><div class="stat-value"><?= (int) $stats['today_turns'] ?></div></div></div></div>
-	<div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('This Month Payments') ?></div><div class="stat-value">$<?= number_format((float) $stats['payments_this_month'], 2) ?></div></div></div></div>
+	<?php if (isset($safe_balance) && $safe_balance !== NULL) : ?>
+		<div class="col-md-6 col-xl-4">
+			<div class="card h-100 dashboard-safe-card <?= (float) $safe_balance > 0 ? 'dashboard-safe-card--positive' : 'dashboard-safe-card--neutral' ?>">
+				<div class="card-body d-flex flex-column justify-content-between gap-3">
+					<div class="d-flex justify-content-between align-items-start gap-3">
+						<div>
+							<div class="stat-label"><?= t('safe') ?></div>
+							<div class="stat-value"><?= format_number($safe_balance, 2) ?></div>
+						</div>
+						<div class="dashboard-safe-card__icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a2 2 0 0 1 2 2v1.5H6.5A2.5 2.5 0 0 0 4 11v5.5A2.5 2.5 0 0 0 6.5 19H20V7"></path>
+								<path d="M20 10H17a2 2 0 0 0 0 4h3"></path>
+								<circle cx="17" cy="12" r=".25"></circle>
+							</svg>
+						</div>
+					</div>
+					<a href="<?= base_url('safe') ?>" class="dashboard-safe-card__link"><?= t('view_details') ?></a>
+				</div>
+			</div>
+		</div>
+	<?php endif; ?>
+	<div class="col-md-6 col-xl-2"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Patients') ?></div><div class="stat-value"><?= (int) $stats['patients'] ?></div></div></div></div>
+	<div class="col-md-6 col-xl-2"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Users') ?></div><div class="stat-value"><?= (int) $stats['users'] ?></div></div></div></div>
+	<div class="col-md-6 col-xl-2"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Today Turns') ?></div><div class="stat-value"><?= (int) $stats['today_turns'] ?></div></div></div></div>
+	<div class="col-md-6 col-xl-2"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('This Month Payments') ?></div><div class="stat-value"><?= format_number((float) $stats['payments_this_month'], 2) ?></div></div></div></div>
 </div>
 
 <div class="row g-4">

@@ -12,6 +12,7 @@ class Turns extends Authenticated_Controller
 		$this->load->model('Staff_model');
 		$this->load->model('Wallet_model');
 		$this->load->model('Debt_model');
+		$this->load->model('Safe_model');
 		$this->load->model('User_model');
 		$this->load->model('Discount_model');
 	}
@@ -231,6 +232,31 @@ class Turns extends Authenticated_Controller
 		}
 
 		$this->db->trans_commit();
+
+		if ($payment_type === 'cash' && $cash_collected > 0) {
+			$this->Safe_model->log_transaction(
+				'in',
+				'turn_cash',
+				$cash_collected,
+				$turn_id,
+				'turns',
+				safe_turn_cash_note($turn_id),
+				$this->session->userdata('user_id')
+			);
+		}
+
+		if ($topup_amount > 0) {
+			$this->Safe_model->log_transaction(
+				'in',
+				'wallet_topup',
+				$topup_amount,
+				$turn_id,
+				'turns',
+				safe_turn_wallet_topup_note($turn_id),
+				$this->session->userdata('user_id')
+			);
+		}
+
 		$this->session->set_flashdata('success', t('Turn created successfully.'));
 		redirect('turns');
 	}
@@ -252,6 +278,7 @@ class Turns extends Authenticated_Controller
 		}
 
 		$validated_rows = $validation['rows'];
+		$safe_entries = array();
 		$this->db->trans_begin();
 
 		foreach ($validated_rows as $index => $row) {
@@ -379,9 +406,44 @@ class Turns extends Authenticated_Controller
 					array($index => array(t('Unable to save turn right now.')))
 				);
 			}
+
+			if ($row['payment_type'] === 'cash' && $cash_collected > 0) {
+				$safe_entries[] = array(
+					'type' => 'in',
+					'source' => 'turn_cash',
+					'amount' => $cash_collected,
+					'reference_id' => $turn_id,
+					'reference_table' => 'turns',
+					'note' => safe_turn_cash_note($turn_id),
+				);
+			}
+
+			if ($row['topup_amount'] > 0) {
+				$safe_entries[] = array(
+					'type' => 'in',
+					'source' => 'wallet_topup',
+					'amount' => $row['topup_amount'],
+					'reference_id' => $turn_id,
+					'reference_table' => 'turns',
+					'note' => safe_turn_wallet_topup_note($turn_id),
+				);
+			}
 		}
 
 		$this->db->trans_commit();
+
+		foreach ($safe_entries as $entry) {
+			$this->Safe_model->log_transaction(
+				$entry['type'],
+				$entry['source'],
+				$entry['amount'],
+				$entry['reference_id'],
+				$entry['reference_table'],
+				$entry['note'],
+				$this->session->userdata('user_id')
+			);
+		}
+
 		$this->session->set_flashdata('success', count($validated_rows) . ' ' . t('bulk_success'));
 		redirect('turns');
 	}
@@ -419,7 +481,11 @@ class Turns extends Authenticated_Controller
 		$turn = $this->Turn_model->find($id);
 		show_404_if_empty($turn);
 
-		$this->Turn_model->delete($id);
+		if (!$this->Turn_model->delete($id)) {
+			$this->session->set_flashdata('error', t('Unable to delete record right now.'));
+			return redirect('turns');
+		}
+
 		$this->session->set_flashdata('success', t('Turn deleted successfully.'));
 		redirect('turns');
 	}

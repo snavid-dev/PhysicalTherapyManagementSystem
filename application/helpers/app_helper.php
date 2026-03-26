@@ -68,3 +68,76 @@ if (!function_exists('format_amount')) {
 		return format_number($number, $decimals);
 	}
 }
+
+if (!function_exists('safe_turn_cash_note')) {
+	function safe_turn_cash_note($turn_id)
+	{
+		return t('Cash payment for turn') . ' #' . format_number($turn_id);
+	}
+}
+
+if (!function_exists('safe_turn_wallet_topup_note')) {
+	function safe_turn_wallet_topup_note($turn_id)
+	{
+		return t('Wallet top-up for turn') . ' #' . format_number($turn_id);
+	}
+}
+
+if (!function_exists('safe_patient_payment_note')) {
+	function safe_patient_payment_note($payment_id)
+	{
+		return t('Patient payment') . ' #' . format_number($payment_id);
+	}
+}
+
+if (!function_exists('safe_patient_wallet_topup_note')) {
+	function safe_patient_wallet_topup_note($patient_id)
+	{
+		return t('Wallet top-up for patient') . ' #' . format_number($patient_id);
+	}
+}
+
+if (!function_exists('safe_salary_payment_note')) {
+	function safe_salary_payment_note($staff_id, $month = NULL)
+	{
+		$note = t('Salary payment for staff') . ' #' . format_number($staff_id);
+
+		if ($month !== NULL && trim((string) $month) !== '') {
+			$note .= ' ' . t('month') . ' ' . $month;
+		}
+
+		return $note;
+	}
+}
+
+if (!function_exists('safe_reference_label')) {
+	function safe_reference_label($reference_table, $reference_id)
+	{
+		$reference_table = trim((string) $reference_table);
+		$reference_id = (int) $reference_id;
+
+		if ($reference_id <= 0 || $reference_table === '') {
+			return '&mdash;';
+		}
+
+		switch ($reference_table) {
+			case 'turns':
+				return html_escape(t('Turn No.') . ' ' . format_number($reference_id));
+
+			case 'expenses':
+				return html_escape(t('Expense No.') . ' ' . format_number($reference_id));
+
+			case 'payments':
+				return html_escape(t('Payment No.') . ' ' . format_number($reference_id));
+
+			case 'patient_wallet_transactions':
+				return html_escape(t('Wallet Transaction No.') . ' ' . format_number($reference_id));
+
+			case 'staff_salary_payments':
+				return html_escape(t('Salary Payment No.') . ' ' . format_number($reference_id));
+
+			default:
+				return html_escape($reference_table . ' #' . $reference_id);
+		}
+	}
+}

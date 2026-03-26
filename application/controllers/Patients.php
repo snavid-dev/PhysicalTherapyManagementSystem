@@ -11,8 +11,7 @@ class Patients extends Authenticated_Controller
 		$this->load->model('Wallet_model');
 		$this->load->model('Debt_model');
 		$this->load->model('Payment_model');
-		$this->load->model('Section_model');
-		$this->load->model('Discount_model');
+		$this->load->model('Safe_model');
 	}
 
 	public function index()
@@ -73,80 +72,7 @@ class Patients extends Authenticated_Controller
 			'total_open_debt' => $total_open_debt,
 			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $payments, $wallet_balance, $total_open_debt),
 			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns, $payments),
-			'discounts' => $this->discount_rows_payload($id),
-			'all_sections' => $this->Section_model->get_all(),
 		));
-	}
-
-	public function add_discount($patient_id)
-	{
-		$this->require_permission('manage_patients');
-
-		if (strtolower($this->input->method()) !== 'post') {
-			show_error('Method Not Allowed', 405);
-		}
-
-		$patient = $this->Patient_model->get_by_id($patient_id);
-		if (!$patient) {
-			return $this->json_error(t('Invalid patient selected.'), 404);
-		}
-
-		$section_id = (int) $this->input->post('section_id');
-		$section = $this->Section_model->get_by_id($section_id);
-		if (!$section) {
-			return $this->json_error(t('Invalid section selected.'));
-		}
-
-		$discount_percent_raw = trim((string) $this->input->post('discount_percent', TRUE));
-		if ($discount_percent_raw === '' || !is_numeric($discount_percent_raw) || !$this->valid_discount_percent($discount_percent_raw)) {
-			return $this->json_error(t('discount_invalid'));
-		}
-
-		$discount_id = $this->Discount_model->create(
-			$patient_id,
-			$section_id,
-			$discount_percent_raw,
-			$this->input->post('note', TRUE),
-			$this->auth->user_id()
-		);
-
-		if (!$discount_id) {
-			return $this->json_error(t('unable_to_save_discount'));
-		}
-
-		return $this->output
-			->set_content_type('application/json')
-			->set_output(json_encode(array(
-				'success' => TRUE,
-				'message' => t('discount_saved'),
-				'discounts' => $this->discount_rows_payload($patient_id),
-			)));
-	}
-
-	public function delete_discount($patient_id, $discount_id)
-	{
-		$this->require_permission('manage_patients');
-
-		if (strtolower($this->input->method()) !== 'post') {
-			show_error('Method Not Allowed', 405);
-		}
-
-		$patient = $this->Patient_model->get_by_id($patient_id);
-		if (!$patient) {
-			return $this->json_error(t('Invalid patient selected.'), 404);
-		}
-
-		if (!$this->Discount_model->delete($discount_id, $patient_id)) {
-			return $this->json_error(t('discount_not_found'), 404);
-		}
-
-		return $this->output
-			->set_content_type('application/json')
-			->set_output(json_encode(array(
-				'success' => TRUE,
-				'message' => t('discount_deleted'),
-				'discounts' => $this->discount_rows_payload($patient_id),
-			)));
 	}
 
 	public function wallet_topup($id)
@@ -178,6 +104,19 @@ class Patients extends Authenticated_Controller
 			}
 			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
 		}
+
+		$latest_wallet_transaction = $this->Wallet_model->get_transactions($id, 1);
+		$wallet_reference = !empty($latest_wallet_transaction[0]['id']) ? (int) $latest_wallet_transaction[0]['id'] : NULL;
+
+		$this->Safe_model->log_transaction(
+			'in',
+			'wallet_topup',
+			$amount,
+			$wallet_reference ?: (int) $id,
+			$wallet_reference ? 'patient_wallet_transactions' : 'patients',
+			$note ?: safe_patient_wallet_topup_note($id),
+			$this->session->userdata('user_id')
+		);
 
 		if (!$wants_json) {
 			$this->session->set_flashdata('success', t('Wallet updated successfully.'));
@@ -357,7 +296,11 @@ class Patients extends Authenticated_Controller
 		$patient = $this->Patient_model->get_by_id($id);
 		show_404_if_empty($patient);
 
-		$this->Patient_model->delete($id);
+		if (!$this->Patient_model->delete($id)) {
+			$this->session->set_flashdata('error', t('Unable to delete record right now.'));
+			return redirect('patients');
+		}
+
 		$this->session->set_flashdata('success', t('Patient deleted successfully.'));
 		redirect('patients');
 	}
@@ -424,12 +367,6 @@ class Patients extends Authenticated_Controller
 	{
 		$value = trim((string) $value);
 		return $value === '' ? NULL : $value;
-	}
-
-	protected function valid_discount_percent($discount_percent)
-	{
-		$discount_percent = (float) $discount_percent;
-		return $discount_percent >= 0.01 && $discount_percent <= 100;
 	}
 
 	protected function json_error($message, $status = 422)
@@ -509,38 +446,6 @@ class Patients extends Authenticated_Controller
 				'notes' => (string) ($payment['notes'] ?? ''),
 			);
 		}, $payments);
-	}
-
-	protected function discount_rows_payload($patient_id)
-	{
-		$discounts = $this->Discount_model->get_all_for_patient($patient_id);
-		$active_ids = array();
-
-		foreach ($discounts as $discount) {
-			$section_id = (int) $discount['section_id'];
-			$discount_id = (int) $discount['id'];
-
-			if (!isset($active_ids[$section_id]) || $discount_id > $active_ids[$section_id]) {
-				$active_ids[$section_id] = $discount_id;
-			}
-		}
-
-		return array_map(static function ($discount) use ($active_ids) {
-			$section_id = (int) $discount['section_id'];
-			$discount_id = (int) $discount['id'];
-
-			return array(
-				'id' => $discount_id,
-				'patient_id' => (int) $discount['patient_id'],
-				'section_id' => $section_id,
-				'section_name' => (string) ($discount['section_name'] ?? ''),
-				'section_label' => !empty($discount['section_name']) ? t($discount['section_name']) : '',
-				'discount_percent' => (float) $discount['discount_percent'],
-				'note' => (string) ($discount['note'] ?? ''),
-				'created_at' => substr((string) $discount['created_at'], 0, 16),
-				'is_active' => isset($active_ids[$section_id]) && $active_ids[$section_id] === $discount_id,
-			);
-		}, $discounts);
 	}
 
 	protected function financial_profile_payload($patient_id)

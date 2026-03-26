@@ -28,6 +28,19 @@ class Payments extends Authenticated_Controller
 		$this->form(NULL, 'payments/store');
 	}
 
+	public function show($id)
+	{
+		$this->require_permission('manage_payments');
+		$payment = $this->Payment_model->find_with_patient($id);
+		show_404_if_empty($payment);
+
+		$this->render('payments/show', array(
+			'title' => t('Payment Details'),
+			'current_section' => 'payments',
+			'payment' => $payment,
+		));
+	}
+
 	public function store()
 	{
 		$this->require_permission('manage_payments');
@@ -72,7 +85,11 @@ class Payments extends Authenticated_Controller
 		$payment = $this->Payment_model->find($id);
 		show_404_if_empty($payment);
 
-		$this->Payment_model->delete($id);
+		if (!$this->Payment_model->delete($id)) {
+			$this->session->set_flashdata('error', t('Unable to delete record right now.'));
+			return redirect('payments');
+		}
+
 		$this->session->set_flashdata('success', t('Payment deleted successfully.'));
 		redirect('payments');
 	}

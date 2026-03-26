@@ -3,6 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Patient_model extends CI_Model
 {
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('Safe_model');
+	}
+
 	protected function diagnoses_tables_ready()
 	{
 		return $this->db->table_exists('diagnoses') && $this->db->table_exists('patient_diagnoses');
@@ -54,7 +60,21 @@ class Patient_model extends CI_Model
 
 	public function delete($id)
 	{
-		return $this->db->where('id', (int) $id)->delete('patients');
+		$id = (int) $id;
+
+		$this->db->trans_begin();
+
+		$safe_deleted = $this->Safe_model->delete_transactions_for_patient($id);
+		$deleted = $this->db->where('id', $id)->delete('patients');
+
+		if ($safe_deleted === FALSE || !$deleted || $this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
+
+		$this->db->trans_commit();
+
+		return TRUE;
 	}
 
 	public function get_diagnoses_for_patient($patient_id)

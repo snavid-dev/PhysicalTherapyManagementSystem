@@ -124,6 +124,17 @@ class Salary_model extends CI_Model
 			->where('id', (int) $payment_id)
 			->update('staff_salary_payments', array('expense_id' => $expense_id));
 
+		$this->load->model('Safe_model');
+		$this->Safe_model->log_transaction(
+			'out',
+			'salary_payment',
+			$amount,
+			$payment_id,
+			'staff_salary_payments',
+			safe_salary_payment_note($staff_id, $month),
+			$created_by
+		);
+
 		if ($this->db->trans_status() === FALSE) {
 			$this->db->trans_rollback();
 			return FALSE;

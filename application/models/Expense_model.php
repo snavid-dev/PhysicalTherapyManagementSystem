@@ -3,6 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Expense_model extends CI_Model
 {
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('Safe_model');
+	}
+
 	public function get_all($filters = array())
 	{
 		$this->ensure_schema();
@@ -73,14 +79,27 @@ class Expense_model extends CI_Model
 	public function delete($id)
 	{
 		$this->ensure_schema();
+		$id = (int) $id;
 
 		if ($this->is_linked_to_salary_payment($id)) {
 			return FALSE;
 		}
 
-		return $this->db
-			->where('id', (int) $id)
+		$this->db->trans_begin();
+
+		$safe_deleted = $this->Safe_model->delete_transaction_by_reference('expenses', $id, 'expense');
+		$deleted = $this->db
+			->where('id', $id)
 			->delete('expenses');
+
+		if ($safe_deleted === FALSE || !$deleted || $this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
+
+		$this->db->trans_commit();
+
+		return TRUE;
 	}
 
 	public function is_linked_to_salary_payment($id)

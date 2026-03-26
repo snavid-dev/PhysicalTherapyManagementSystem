@@ -385,6 +385,102 @@ dd,
 	padding-bottom: 0;
 }
 
+.dashboard-safe-card {
+	border: 1px solid var(--border);
+}
+
+.dashboard-safe-card--positive {
+	background: linear-gradient(180deg, rgba(34, 197, 94, 0.16), var(--surface));
+}
+
+.dashboard-safe-card--neutral {
+	background: linear-gradient(180deg, rgba(148, 163, 184, 0.16), var(--surface));
+}
+
+.dashboard-safe-card__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 999px;
+	background: rgba(15, 23, 42, 0.08);
+}
+
+.dashboard-safe-card__icon svg {
+	width: 1.35rem;
+	height: 1.35rem;
+}
+
+.dashboard-safe-card__link {
+	font-weight: 600;
+	color: var(--text);
+	text-decoration: none;
+}
+
+.safe-balance-card {
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, rgba(15, 23, 42, 0.03), var(--surface));
+}
+
+.safe-balance-card--positive {
+	background: linear-gradient(180deg, rgba(34, 197, 94, 0.16), var(--surface));
+}
+
+.safe-balance-card--negative {
+	background: linear-gradient(180deg, rgba(239, 68, 68, 0.14), var(--surface));
+}
+
+.safe-balance-value {
+	font-size: clamp(2rem, 5vw, 3.25rem);
+	font-weight: 700;
+	line-height: 1;
+}
+
+.safe-summary-card {
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, var(--surface), var(--surface-2));
+}
+
+.safe-summary-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.8rem 0;
+	border-bottom: 1px solid var(--border);
+}
+
+.safe-summary-row:last-child {
+	padding-bottom: 0;
+	border-bottom: 0;
+}
+
+.safe-summary-label {
+	color: var(--text-muted);
+}
+
+.safe-summary-value {
+	font-weight: 600;
+}
+
+.safe-summary-value--in {
+	color: #15803d;
+}
+
+.safe-summary-value--out {
+	color: #b91c1c;
+}
+
+.safe-table-note {
+	max-width: 24rem;
+	white-space: normal;
+}
+
+.safe-entry-links .btn {
+	width: auto;
+}
+
 .header-tools .btn,
 .header-tools .dropdown-toggle {
 	white-space: nowrap;
@@ -508,6 +604,10 @@ body.rtl .navbar-nav {
 
 	.preferences-diagnosis-actions .btn {
 		width: auto;
+	}
+
+	.safe-summary-row {
+		align-items: flex-start;
 	}
 }
 

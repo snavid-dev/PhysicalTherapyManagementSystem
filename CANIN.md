@@ -117,6 +117,7 @@ If you are editing this project in a future chat, assume this:
 - `application/controllers/Payments.php`
 - `application/controllers/Expenses.php`
 - `application/controllers/Salaries.php`
+- `application/controllers/Safe.php`
 - `application/controllers/Reports.php`
 - `application/controllers/Leaves.php`
 
@@ -125,7 +126,6 @@ If you are editing this project in a future chat, assume this:
 - `application/models/Login_model.php`
 - `application/models/Dashboard_model.php`
 - `application/models/Patient_model.php`
-- `application/models/Discount_model.php`
 - `application/models/Reference_doctor_model.php`
 - `application/models/Section_model.php`
 - `application/models/Staff_model.php`
@@ -138,6 +138,7 @@ If you are editing this project in a future chat, assume this:
 - `application/models/Expense_model.php`
 - `application/models/Expense_category_model.php`
 - `application/models/Salary_model.php`
+- `application/models/Safe_model.php`
 - `application/models/Report_model.php`
 - `application/models/Leave_model.php`
 
@@ -155,6 +156,7 @@ If you are editing this project in a future chat, assume this:
 - `application/views/payments/`
 - `application/views/expenses/`
 - `application/views/salaries/`
+- `application/views/safe/`
 - `application/views/reports/`
 - `application/views/leaves/`
 - `application/views/preferences/expense_categories.php`
@@ -212,6 +214,7 @@ These are the main active routes:
 - `/login`
 - `/logout`
 - `/dashboard`
+- `/safe`
 - `/patients`
 - `/reference_doctors`
 - `/sections`
@@ -291,6 +294,7 @@ This is the practical dependency map of the active system.
 - patient profile depends on payment history
 - dashboard depends on payment totals
 - reports depend on payment records
+- safe balance depends on payment records
 
 ### Expenses dependencies
 
@@ -306,6 +310,15 @@ This is the practical dependency map of the active system.
 - `Salaries` depends on `doctor_leaves`
 - salary payments depend on expense records
 - staff profile depends on salary calculation
+
+### Safe dependencies
+
+- `Safe` depends on `Safe_model`
+- `Safe` depends on `Auth`
+- `Safe` depends on `layout/header.php`
+- `Safe` depends on `safe/index.php`
+- `Safe` aggregates safe ledger writes from turns, expenses, salaries, and manual safe entries
+- dashboard safe widget depends on safe balance data
 
 ### Reports dependencies
 
@@ -360,17 +373,17 @@ This section maps each active module to the main tables it reads or writes.
 - reads: `users`
 - reads: `turns`
 - reads: `payments`
+- reads: `safe_transactions`
 
 ### Patients
 
 - writes: `patients`
 - writes: `patient_diagnoses`
-- writes: `patient_discounts`
 - reads: `reference_doctors`
 - reads: `diagnoses`
 - reads: `turns`
 - reads: `payments`
-- reads: `sections`
+- writes: `safe_transactions` as a side effect for manual wallet top-ups
 
 ### Reference Doctors
 
@@ -412,19 +425,21 @@ This section maps each active module to the main tables it reads or writes.
 - writes: `patient_wallet`
 - writes: `patient_wallet_transactions`
 - writes: `patient_debts`
+- writes: `safe_transactions` as a side effect for cash payments and wallet top-ups
 - reads: `patients`
 - reads: `staff`
 - reads: `sections`
-- reads: `patient_discounts`
 
 ### Payments
 
 - writes: `payments`
+- writes: `safe_transactions` as a side effect for patient payments
 - reads: `patients`
 
 ### Expenses
 
 - writes: `expenses`
+- writes: `safe_transactions` as a side effect for non-salary expense outflow
 - reads: `expense_categories`
 - reads: `staff`
 
@@ -433,8 +448,17 @@ This section maps each active module to the main tables it reads or writes.
 - writes: `staff_salary_records`
 - writes: `staff_salary_payments`
 - writes: `expenses`
+- writes: `safe_transactions` as a side effect for salary payment outflow
 - reads: `staff`
 - reads: `doctor_leaves`
+
+### Safe
+
+- writes: `safe_transactions`
+- writes: `safe_adjustments`
+- reads: `safe_transactions`
+- reads: `users`
+- aggregates: turns, payments, expenses, salaries, patient wallet top-ups, and manual treasury entries
 
 ### Reports
 
@@ -494,6 +518,8 @@ Important rules:
 - `manage_salaries`
 - `view_reports`
 - `manage_leaves`
+- `view_safe`
+- `manage_safe`
 
 ### Navigation rule
 
@@ -675,7 +701,6 @@ This module manages patient records and patient profiles.
 - shows patient profile
 - shows patient turn history
 - shows patient payment history
-- manages patient section-based discount history from the profile page
 
 ### Current data fields
 
@@ -692,7 +717,6 @@ Core patient fields currently include:
 - medical notes
 - referred_by
 - diagnoses
-- profile-based discount records by section
 
 ### If you want to change this module
 
@@ -1085,7 +1109,78 @@ Pass these steps:
 
 ---
 
-## 20. Module: Reports
+## 20. Module: Safe
+
+### Purpose
+
+This module tracks clinic cash entering or leaving the physical safe and keeps a running treasury ledger with balance snapshots and adjustment audit records.
+
+### Main files
+
+- `application/controllers/Safe.php`
+- `application/models/Safe_model.php`
+- `application/views/safe/index.php`
+- `application/controllers/Turns.php`
+- `application/controllers/Expenses.php`
+- `application/models/Salary_model.php`
+- `application/controllers/Dashboard.php`
+- `application/models/Dashboard_model.php`
+- `application/views/dashboard/index.php`
+- `application/views/layout/header.php`
+- `application/views/roles/form.php`
+- `database/physical_therapy_clinic.sql`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+
+### What it currently does
+
+- shows the current clinic safe balance
+- shows today and month treasury summaries
+- lists the full ledger with type, source, reference, note, and recorder
+- records cash turn payments into the safe ledger
+- records wallet top-ups into the safe ledger
+- records patient payments into the safe ledger
+- records non-salary expenses as safe outflow
+- records salary payments as safe outflow
+- records patient-profile wallet top-ups into the safe ledger
+- records manual other-income entries from the safe page
+- records audited balance adjustments with a separate adjustment table
+- exposes a permission-gated safe balance widget on the dashboard
+
+### If you want to change this module
+
+Pass these steps:
+
+1. Start with `Safe.php` for guards, filters, and form handling.
+2. Update `Safe_model.php` if the ledger query contract, summary logic, or balance math changes.
+3. Update `Turns.php`, `Expenses.php`, and `Salary_model.php` if a source module should write different safe ledger entries.
+4. Update `dashboard/index.php`, `Dashboard.php`, and `Dashboard_model.php` if the safe widget changes.
+5. Update `layout/header.php` and `roles/form.php` if access or navigation changes.
+6. Update both language files for any new visible safe text.
+7. If schema changes, update `database/physical_therapy_clinic.sql`.
+8. Verify `view_safe`, `manage_safe`, ledger filters, adjustment audit rows, and mobile table overflow.
+
+### Common safe changes
+
+- add more safe sources
+- add export or print for the ledger
+- add date-grouped treasury summaries
+- add richer reference labels or links later
+
+### Common risky changes
+
+- changing balance snapshot logic without verifying `balance_after`
+- adding backdated writes without thinking through historical balance display
+- bypassing the write hooks in turns, expenses, or salaries
+- exposing safe data without permission checks
+
+### AI prompt example for this module
+
+> Read `CANIN.md` first. Work only on the Safe module. Inspect `application/controllers/Safe.php`, `application/models/Safe_model.php`, `application/views/safe/index.php`, `application/controllers/Turns.php`, `application/controllers/Expenses.php`, `application/models/Salary_model.php`, and the safe dashboard/header integration. Preserve `view_safe` and `manage_safe`, keep `balance_after` as a running snapshot, and keep the ledger responsive in English and Persian.
+
+---
+
+## 21. Module: Reports
 
 ### Purpose
 
@@ -1141,7 +1236,7 @@ Pass these steps:
 
 ---
 
-## 21. Module: Leaves
+## 22. Module: Leaves
 
 ### Purpose
 
@@ -1203,7 +1298,7 @@ Pass these steps:
 
 ---
 
-## 22. Module: Reference Doctors
+## 23. Module: Reference Doctors
 
 ### Purpose
 
@@ -1282,7 +1377,7 @@ Pass these steps:
 
 ---
 
-## 23. Module: Staff
+## 24. Module: Staff
 
 ### Purpose
 
@@ -1354,7 +1449,7 @@ Pass these steps:
 
 ---
 
-## 24. Module: Sections
+## 25. Module: Sections
 
 ### Purpose
 
@@ -1419,7 +1514,7 @@ Pass these steps:
 
 ---
 
-## 25. Module: Preferences
+## 26. Module: Preferences
 
 ### Purpose
 
@@ -1467,7 +1562,7 @@ Pass these steps:
 
 ---
 
-## 26. Database Story
+## 27. Database Story
 
 The active simplified schema reference is:
 
@@ -1485,7 +1580,6 @@ This file defines the simplified physical therapy structure for:
 - patients
 - diagnoses
 - patient_diagnoses
-- patient_discounts
 - reference doctors
 - turns
 - patient_wallet
@@ -1497,11 +1591,8 @@ This file defines the simplified physical therapy structure for:
 - expenses
 - staff_salary_records
 - staff_salary_payments
-
-The `turns` table also stores discount snapshots in:
-
-- `discount_percent`
-- `discount_amount`
+- safe_transactions
+- safe_adjustments
 
 If the database needs to evolve, update that file and then reflect the change in the related:
 
@@ -1512,7 +1603,7 @@ If the database needs to evolve, update that file and then reflect the change in
 
 ---
 
-## 27. Legacy Code Policy
+## 28. Legacy Code Policy
 
 This repository still contains old dental-era code.
 
@@ -1581,7 +1672,7 @@ Pass these checks:
 
 ---
 
-## 28. Global Change Process For Any Module
+## 29. Global Change Process For Any Module
 
 If you want to change any module, use this exact sequence:
 
@@ -1602,7 +1693,7 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 29. Module-Specific Change Matrix
+## 30. Module-Specific Change Matrix
 
 | Module | Start Here | Then Check | Then Update |
 |---|---|---|---|
@@ -1618,13 +1709,14 @@ If you want to change any module, use this exact sequence:
 | Payments | `Payments.php` | `Payment_model.php`, `Patient_model.php` | `payments/index.php`, `payments/form.php` |
 | Expenses | `Expenses.php` | `Expense_model.php`, `Expense_category_model.php`, `Staff_model.php` | `expenses/index.php`, `expenses/form.php`, `preferences/expense_categories.php` |
 | Salaries | `Salaries.php` | `Salary_model.php`, `Staff_model.php` | `salaries/index.php`, `salaries/pay.php`, `staff/profile.php` |
+| Safe | `Safe.php` | `Safe_model.php`, `Turns.php`, `Expenses.php`, `Salary_model.php`, `Dashboard_model.php` | `safe/index.php`, `dashboard/index.php`, `header.php`, language files |
 | Reports | `Reports.php` | `Report_model.php` | `reports/index.php` |
 | Leaves | `Leaves.php` | `Leave_model.php`, `User_model.php` | `leaves/index.php`, `leaves/form.php` |
 | Preferences | `Preferences.php` | `app_helper.php` | `header.php`, `login.php`, `app.css` |
 
 ---
 
-## 30. Exact File Paths By Module
+## 31. Exact File Paths By Module
 
 This section is intentionally repetitive. It is here so future chats can jump directly into the correct files without re-discovering the structure.
 
@@ -1650,7 +1742,6 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 - `application/controllers/Patients.php`
 - `application/models/Patient_model.php`
-- `application/models/Discount_model.php`
 - `application/models/Diagnosis_model.php`
 - `application/views/patients/index.php`
 - `application/views/patients/form.php`
@@ -1782,6 +1873,23 @@ This section is intentionally repetitive. It is here so future chats can jump di
 - `application/language/english/app_lang.php`
 - `application/language/farsi/app_lang.php`
 
+### Safe exact paths
+
+- `application/controllers/Safe.php`
+- `application/models/Safe_model.php`
+- `application/views/safe/index.php`
+- `application/controllers/Turns.php`
+- `application/controllers/Expenses.php`
+- `application/models/Salary_model.php`
+- `application/controllers/Dashboard.php`
+- `application/models/Dashboard_model.php`
+- `application/views/dashboard/index.php`
+- `application/views/layout/header.php`
+- `application/views/roles/form.php`
+- `database/physical_therapy_clinic.sql`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+
 ### Reports exact paths
 
 - `application/controllers/Reports.php`
@@ -1817,13 +1925,13 @@ This section is intentionally repetitive. It is here so future chats can jump di
 
 ---
 
-## 31. AI Prompt Library
+## 32. AI Prompt Library
 
 These prompts are designed to be pasted into future chats.
 
 ### Full-project prompt
 
-> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, expenses, salaries, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
+> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, expenses, salaries, safe, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
 
 ### Login prompt
 
@@ -1873,6 +1981,10 @@ These prompts are designed to be pasted into future chats.
 
 > Read `CANIN.md` first. Update only the Salaries module. Start with `application/controllers/Salaries.php`, `application/models/Salary_model.php`, `application/controllers/Staff.php`, and the views under `application/views/salaries/`. Preserve `manage_salaries`, keep salary calculation centralized in `Salary_model`, and keep salary-payment-to-expense writes transactional.
 
+### Safe prompt
+
+> Read `CANIN.md` first. Update only the Safe module. Start with `application/controllers/Safe.php`, `application/models/Safe_model.php`, `application/views/safe/index.php`, `application/controllers/Turns.php`, `application/controllers/Expenses.php`, `application/models/Salary_model.php`, `application/controllers/Dashboard.php`, `application/models/Dashboard_model.php`, and `application/views/layout/header.php`. Preserve `view_safe` and `manage_safe`, keep `balance_after` accurate, and do not route new work into legacy dental code.
+
 ### Reports prompt
 
 > Read `CANIN.md` first. Update only the Reports module. Start with `application/controllers/Reports.php`, `application/models/Report_model.php`, and `application/views/reports/index.php`. Keep it read-only, date-consistent, and responsive.
@@ -1887,7 +1999,7 @@ These prompts are designed to be pasted into future chats.
 
 ---
 
-## 32. Language And Content Rules
+## 33. Language And Content Rules
 
 When adding UI text:
 
@@ -1899,7 +2011,7 @@ Do not leave new visible UI strings untranslated if the rest of the module is lo
 
 ---
 
-## 33. Responsive Rules
+## 34. Responsive Rules
 
 Every module change must be checked for:
 
@@ -1917,7 +2029,7 @@ If a module needs special responsive styling, prefer adding small, focused addit
 
 ---
 
-## 34. Validation Checklist Before Finishing Any Change
+## 35. Validation Checklist Before Finishing Any Change
 
 Before saying a task is complete, verify:
 
@@ -1932,15 +2044,15 @@ Before saying a task is complete, verify:
 
 ---
 
-## 35. Best Prompt To Reuse In Other Chats
+## 36. Best Prompt To Reuse In Other Chats
 
 If you want to continue this project in another chat, you can paste something like this:
 
-> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, expenses, salaries, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
+> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, payments, expenses, salaries, safe, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
 
 ---
 
-## 36. Final Rule
+## 37. Final Rule
 
 When in doubt:
 

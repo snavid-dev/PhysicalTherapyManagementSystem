@@ -5,6 +5,12 @@ class Turn_model extends CI_Model
 {
 	protected $schema_ready = FALSE;
 
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('Safe_model');
+	}
+
 	public function all()
 	{
 		$this->ensure_schema();
@@ -56,7 +62,21 @@ class Turn_model extends CI_Model
 	public function delete($id)
 	{
 		$this->ensure_schema();
-		return $this->db->where('id', (int) $id)->delete('turns');
+		$id = (int) $id;
+
+		$this->db->trans_begin();
+
+		$safe_deleted = $this->Safe_model->delete_transaction_by_reference('turns', $id);
+		$deleted = $this->db->where('id', $id)->delete('turns');
+
+		if ($safe_deleted === FALSE || !$deleted || $this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
+
+		$this->db->trans_commit();
+
+		return TRUE;
 	}
 
 	public function get_staff_by_section($section_id)

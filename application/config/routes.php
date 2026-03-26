@@ -6,6 +6,9 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 $route['dashboard'] = 'Dashboard/index';
+$route['safe'] = 'safe/index';
+$route['safe/add-income'] = 'safe/add_income';
+$route['safe/adjust'] = 'safe/adjust';
 
 $route['login'] = 'Login/index';
 $route['logout'] = 'Login/logout';
@@ -77,6 +80,7 @@ $route['turns/(:num)/delete'] = 'Turns/delete/$1';
 $route['payments'] = 'Payments/index';
 $route['payments/create'] = 'Payments/create';
 $route['payments/store'] = 'Payments/store';
+$route['payments/(:num)'] = 'Payments/show/$1';
 $route['payments/(:num)/edit'] = 'Payments/edit/$1';
 $route['payments/(:num)/update'] = 'Payments/update/$1';
 $route['payments/(:num)/delete'] = 'Payments/delete/$1';
