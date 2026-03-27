@@ -87,6 +87,7 @@ If you are editing this project in a future chat, assume this:
 | RBAC | Roles + permissions |
 | Date System | Shamsi (Solar Hijri) display, Gregorian storage |
 | Datepicker | persian-datepicker (Babakhani) via CDN |
+| Tables | DataTables 1.13.6 with Bootstrap 5 + Buttons |
 | Main stylesheet | `assets/css/app.css` |
 | Main DB schema reference | `database/physical_therapy_clinic.sql` |
 
@@ -104,6 +105,7 @@ If you are editing this project in a future chat, assume this:
 - `application/views/layout/header.php`
 - `application/views/layout/footer.php`
 - `assets/css/app.css`
+- `assets/js/datatables-init.js`
 - `assets/js/shamsi.js`
 
 ### Controllers currently driving the active app
@@ -170,6 +172,39 @@ If you are editing this project in a future chat, assume this:
 - `application/language/english/app_lang.php`
 - `application/language/farsi/app_lang.php`
 - `application/language/farsi/form_validation_lang.php`
+
+---
+
+## X. DataTables Rules
+
+Tables that use DataTables (`.dt-table` class):
+
+- `application/views/turns/index.php`
+- `application/views/patients/index.php`
+- `application/views/payments/index.php`
+- `application/views/expenses/index.php`
+- `application/views/safe/index.php`
+- `application/views/leaves/index.php`
+- `application/views/salaries/index.php`
+- `application/views/patients/show.php` for turn history, payment history, and wallet transactions
+- `application/views/reference_doctors/profile.php` for the all referred patients table
+
+Tables that do NOT use DataTables (small or stable data):
+
+- `application/views/users/index.php`
+- `application/views/roles/index.php`
+- `application/views/staff/index.php`
+- `application/views/reference_doctors/index.php`
+- `application/views/preferences/diagnoses.php`
+- `application/views/preferences/expense_categories.php`
+- modal result tables
+
+Rules for adding a new table:
+
+- If the table is expected to grow beyond 50 rows, add class `dt-table`.
+- Always add `no-export` class to action columns.
+- Always set `data-order-col` and `data-order-dir`.
+- Never apply DataTables to modal inner tables.
 
 ---
 

@@ -86,14 +86,14 @@
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('all_referred_patients') ?></h2>
 				<div class="table-responsive">
-					<table class="table align-middle">
+					<table class="table align-middle dt-table" data-order-col="3" data-order-dir="desc" data-no-export="false" data-no-sort-cols="4">
 						<thead>
 							<tr>
 								<th><?= t('Full Name') ?></th>
 								<th><?= t('Gender') ?></th>
 								<th><?= t('Phone') ?></th>
 								<th><?= t('date_registered') ?></th>
-								<th class="text-end"><?= t('Actions') ?></th>
+								<th class="no-export text-end"><?= t('Actions') ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -103,15 +103,11 @@
 								<td><?= html_escape($patient['gender']) ?></td>
 								<td><?= html_escape($patient['phone']) ?></td>
 								<td><?= html_escape(to_shamsi($patient['created_at'], 'Y/m/d H:i')) ?></td>
-								<td class="text-end">
+								<td class="no-export text-end">
 									<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
 								</td>
 							</tr>
-						<?php endforeach; else : ?>
-							<tr>
-								<td colspan="5" class="text-muted"><?= t('no_referred_patients') ?></td>
-							</tr>
-						<?php endif; ?>
+						<?php endforeach; endif; ?>
 						</tbody>
 					</table>
 				</div>

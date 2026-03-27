@@ -56,7 +56,7 @@
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle">
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="5">
 				<thead>
 					<tr>
 						<th><?= t('Date') ?></th>
@@ -64,7 +64,7 @@
 						<th><?= t('staff') ?></th>
 						<th><?= t('Amount') ?></th>
 						<th><?= t('Description') ?></th>
-						<th class="text-end"><?= t('Actions') ?></th>
+						<th class="no-export text-end"><?= t('Actions') ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -83,7 +83,7 @@
 							</td>
 							<td><?= format_number($expense['amount'], 2) ?></td>
 							<td><?= $expense['description'] ? html_escape($expense['description']) : '&mdash;' ?></td>
-							<td class="text-end">
+							<td class="no-export text-end">
 								<div class="d-flex gap-2 justify-content-end flex-wrap">
 									<a href="<?= base_url('expenses/edit/' . $expense['id']) ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
 									<?php if ($is_salary_linked) : ?>
@@ -95,17 +95,17 @@
 							</td>
 						</tr>
 					<?php endforeach; ?>
-					<tr>
-						<td colspan="3" class="fw-semibold"><?= t('Total:') ?></td>
-						<td class="fw-semibold"><?= format_number($total_amount, 2) ?></td>
-						<td colspan="2"></td>
-					</tr>
-				<?php else : ?>
-					<tr>
-						<td colspan="6" class="text-muted"><?= t('No expenses found.') ?></td>
-					</tr>
 				<?php endif; ?>
 				</tbody>
+				<?php if ($expenses) : ?>
+					<tfoot>
+						<tr>
+							<td colspan="3" class="fw-semibold"><?= t('Total:') ?></td>
+							<td class="fw-semibold"><?= format_number($total_amount, 2) ?></td>
+							<td colspan="2"></td>
+						</tr>
+					</tfoot>
+				<?php endif; ?>
 			</table>
 		</div>
 	</div>

@@ -15,8 +15,8 @@
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle">
-				<thead><tr><th><?= t('Date') ?></th><th><?= t('Patient') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th></th></tr></thead>
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="4">
+				<thead><tr><th><?= t('Date') ?></th><th><?= t('Patient') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
 				<tbody>
 				<?php if ($payments) : foreach ($payments as $payment) : ?>
 					<tr>
@@ -24,14 +24,12 @@
 						<td><?= html_escape($payment['first_name'] . ' ' . $payment['last_name']) ?></td>
 						<td><?= html_escape($payment['payment_method']) ?></td>
 						<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
-						<td class="text-end">
+						<td class="no-export text-end">
 							<a href="<?= base_url('payments/' . $payment['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
 							<a href="<?= base_url('payments/' . $payment['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this payment?') ?>')"><?= t('Delete') ?></a>
 						</td>
 					</tr>
-				<?php endforeach; else : ?>
-					<tr><td colspan="5" class="text-muted"><?= t('No payments found.') ?></td></tr>
-				<?php endif; ?>
+				<?php endforeach; endif; ?>
 				</tbody>
 			</table>
 		</div>

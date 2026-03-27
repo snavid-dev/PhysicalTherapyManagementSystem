@@ -9,7 +9,7 @@
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle">
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="asc" data-no-sort-cols="6">
 				<thead>
 					<tr>
 						<th><?= t('Full Name') ?></th>
@@ -18,7 +18,7 @@
 						<th><?= t('age') ?></th>
 						<th><?= t('Phone 1') ?></th>
 						<th><?= t('Status') ?></th>
-						<th class="text-end"><?= t('Actions') ?></th>
+						<th class="no-export text-end"><?= t('Actions') ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -34,7 +34,7 @@
 						<td><?= $age !== NULL ? format_number($age) : '&mdash;' ?></td>
 						<td><?= $phone ? html_escape($phone) : '&mdash;' ?></td>
 						<td><span class="badge text-bg-success"><?= t('Active') ?></span></td>
-						<td class="text-end">
+						<td class="no-export text-end">
 							<div class="d-flex gap-2 justify-content-end flex-wrap">
 								<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
 								<a href="<?= base_url('patients/' . $patient['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
@@ -42,9 +42,7 @@
 							</div>
 						</td>
 					</tr>
-				<?php endforeach; else : ?>
-					<tr><td colspan="7" class="text-muted"><?= t('No patients found.') ?></td></tr>
-				<?php endif; ?>
+				<?php endforeach; endif; ?>
 				</tbody>
 			</table>
 		</div>

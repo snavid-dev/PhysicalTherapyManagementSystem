@@ -1,12 +1,7 @@
 <?php
 $overall_total = 0;
-$grouped_totals = array();
 foreach ($records as $record) {
 	$overall_total += (float) $record['final_salary'];
-	if (!isset($grouped_totals[$record['month']])) {
-		$grouped_totals[$record['month']] = 0;
-	}
-	$grouped_totals[$record['month']] += (float) $record['final_salary'];
 }
 ?>
 
@@ -57,9 +52,10 @@ foreach ($records as $record) {
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle">
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="9">
 				<thead>
 					<tr>
+						<th><?= t('month') ?></th>
 						<th><?= t('staff') ?></th>
 						<th><?= t('Type') ?></th>
 						<th><?= t('base_salary') ?></th>
@@ -68,21 +64,15 @@ foreach ($records as $record) {
 						<th><?= t('total_paid') ?></th>
 						<th><?= t('remaining') ?></th>
 						<th><?= t('Status') ?></th>
-						<th class="text-end"><?= t('Actions') ?></th>
+						<th class="no-export text-end"><?= t('Actions') ?></th>
 					</tr>
 				</thead>
 				<tbody>
 				<?php if ($records) : ?>
-					<?php $current_month_group = NULL; ?>
-					<?php foreach ($records as $index => $record) : ?>
-						<?php if ($current_month_group !== $record['month']) : ?>
-							<?php $current_month_group = $record['month']; ?>
-							<tr>
-								<td colspan="9" class="table-light fw-semibold"><?= html_escape(gregorian_month_to_shamsi($current_month_group)) ?></td>
-							</tr>
-						<?php endif; ?>
+					<?php foreach ($records as $record) : ?>
 						<?php $remaining = max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)); ?>
 						<tr>
+							<td><?= html_escape(gregorian_month_to_shamsi($record['month'])) ?></td>
 							<td><?= html_escape(trim($record['first_name'] . ' ' . $record['last_name'])) ?></td>
 							<td><?= html_escape(t($record['salary_type'])) ?></td>
 							<td><?= format_number($record['base_salary'], 2) ?></td>
@@ -99,29 +89,17 @@ foreach ($records as $record) {
 									<span class="badge text-bg-secondary"><?= t('salary_unpaid') ?></span>
 								<?php endif; ?>
 							</td>
-							<td class="text-end">
+							<td class="no-export text-end">
 								<a href="<?= base_url('salaries/pay/' . $record['staff_id'] . '?month=' . rawurlencode(gregorian_month_to_shamsi($record['month']))) ?>" class="btn btn-sm btn-dark"><?= t('salary_payment') ?></a>
 							</td>
 						</tr>
-						<?php $next_record = isset($records[$index + 1]) ? $records[$index + 1] : NULL; ?>
-						<?php if ($next_record === NULL || $next_record['month'] !== $record['month']) : ?>
-							<tr>
-								<td colspan="4" class="fw-semibold"><?= t('Month Total') ?></td>
-								<td class="fw-semibold"><?= format_number($grouped_totals[$record['month']], 2) ?></td>
-								<td colspan="4"></td>
-							</tr>
-						<?php endif; ?>
 					<?php endforeach; ?>
-				<?php else : ?>
-					<tr>
-						<td colspan="9" class="text-muted"><?= t('No salary records found.') ?></td>
-					</tr>
 				<?php endif; ?>
 				</tbody>
 				<?php if ($records) : ?>
 					<tfoot>
 						<tr>
-							<td colspan="4" class="fw-semibold"><?= t('Total:') ?></td>
+							<td colspan="5" class="fw-semibold"><?= t('Total:') ?></td>
 							<td class="fw-semibold"><?= format_number($overall_total, 2) ?></td>
 							<td colspan="4"></td>
 						</tr>
