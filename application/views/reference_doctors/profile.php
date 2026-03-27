@@ -86,13 +86,13 @@
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('all_referred_patients') ?></h2>
 				<div class="table-responsive">
-					<table class="table align-middle dt-table" data-order-col="3" data-order-dir="desc" data-no-export="false" data-no-sort-cols="4">
+					<table class="table align-middle dt-table" data-order-col="3" data-order-dir="desc" data-no-export="false" data-no-sort-cols="4" data-col-widths='["28%","12%","18%","20%","22%"]'>
 						<thead>
 							<tr>
 								<th><?= t('Full Name') ?></th>
 								<th><?= t('Gender') ?></th>
 								<th><?= t('Phone') ?></th>
-								<th><?= t('date_registered') ?></th>
+								<th class="col-date"><?= t('date_registered') ?></th>
 								<th class="no-export text-end"><?= t('Actions') ?></th>
 							</tr>
 						</thead>
@@ -102,7 +102,7 @@
 								<td><?= html_escape($patient['full_name']) ?></td>
 								<td><?= html_escape($patient['gender']) ?></td>
 								<td><?= html_escape($patient['phone']) ?></td>
-								<td><?= html_escape(to_shamsi($patient['created_at'], 'Y/m/d H:i')) ?></td>
+								<td class="col-date"><?= html_escape(to_shamsi($patient['created_at'], 'Y/m/d H:i')) ?></td>
 								<td class="no-export text-end">
 									<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
 								</td>

@@ -6,6 +6,7 @@
  *   data-order-dir="desc"    - default sort direction
  *   data-no-export="true"    - hide export buttons
  *   data-no-sort-cols="4,5"  - comma-separated column indexes to disable sorting on
+ *   data-col-widths='["10%","20%","auto"]' - optional column widths by index
  */
 (function ($) {
 	'use strict';
@@ -43,6 +44,34 @@
 			.filter(function (value) {
 				return !Number.isNaN(value);
 			});
+	}
+
+	function parseColumnWidths($table) {
+		var rawValue = $table.attr('data-col-widths') || $table.data('col-widths');
+		var columnCount = $table.find('thead th').length;
+		var widths = [];
+
+		if (!rawValue) {
+			return null;
+		}
+
+		if (Array.isArray(rawValue)) {
+			widths = rawValue;
+		} else {
+			try {
+				widths = JSON.parse(rawValue);
+			} catch (error) {
+				widths = [];
+			}
+		}
+
+		if (!Array.isArray(widths) || widths.length !== columnCount) {
+			return null;
+		}
+
+		return widths.map(function (widthValue) {
+			return { width: String(widthValue) };
+		});
 	}
 
 	function buildLanguage() {
@@ -103,9 +132,9 @@
 		var $table = $(table);
 		var noExport = parseBoolean($table.data('no-export'));
 		var noSortCols = parseNoSortColumns($table);
+		var columns = parseColumnWidths($table);
 		var columnDefs = [];
 		var api;
-		var domLayout;
 		var tableKey;
 
 		if (!$table.length) {
@@ -123,26 +152,30 @@
 			});
 		}
 
-		domLayout = noExport
-			? '<"row mb-3"<"col-sm-12 text-end"f>>'
-				+ '<"row"<"col-sm-12"tr>>'
-				+ '<"row mt-3"<"col-sm-4"l><"col-sm-4 text-center"i><"col-sm-4"p>>'
-			: '<"row mb-3"<"col-sm-6"B><"col-sm-6 text-end"f>>'
-				+ '<"row"<"col-sm-12"tr>>'
-				+ '<"row mt-3"<"col-sm-4"l><"col-sm-4 text-center"i><"col-sm-4"p>>';
-
 		api = $table.DataTable({
 			processing: false,
 			serverSide: false,
 			order: [[parseOrderColumn($table), $table.data('order-dir') || 'desc']],
 			pageLength: 25,
 			lengthMenu: [10, 25, 50, 100],
+			columns: columns,
 			columnDefs: columnDefs,
-			dom: domLayout,
+			dom: '<"dt-top-bar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3"Bf>'
+				+ '<"row"<"col-sm-12"tr>>'
+				+ '<"dt-bottom-bar d-flex flex-wrap align-items-center justify-content-between mt-3"li<"ms-auto"p>>',
 			buttons: buildButtons(noExport),
 			language: buildLanguage(),
 			responsive: false,
-			scrollX: true
+			scrollX: true,
+			autoWidth: false,
+			initComplete: function () {
+				var tableApi = this.api();
+				tableApi.columns.adjust();
+
+				if (tableApi.responsive && typeof tableApi.responsive.recalc === 'function') {
+					tableApi.responsive.recalc();
+				}
+			}
 		});
 
 		tableKey = $table.attr('id') || $table.data('dt-key');
@@ -187,11 +220,11 @@
 	}
 
 	function adjustVisibleTables() {
-		$('.dt-table').each(function () {
-			if ($.fn.DataTable.isDataTable(this)) {
-				$(this).DataTable().columns.adjust();
-			}
-		});
+		var tables = $.fn.dataTable.tables({ visible: true, api: true });
+
+		if (tables && typeof tables.columns === 'function') {
+			tables.columns.adjust();
+		}
 	}
 
 	$(document).ready(function () {
@@ -199,6 +232,10 @@
 	});
 
 	$(document).on('shown.bs.collapse shown.bs.modal shown.bs.tab', function () {
+		adjustVisibleTables();
+	});
+
+	$(window).on('resize', function () {
 		adjustVisibleTables();
 	});
 

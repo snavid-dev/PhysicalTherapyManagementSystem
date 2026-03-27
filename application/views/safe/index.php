@@ -238,15 +238,15 @@ $reference_label = static function ($entry) {
 		</div>
 		<p class="text-muted small mb-3"><?= t('balance_sort_note') ?></p>
 		<div class="table-responsive">
-			<table class="table align-middle mb-0 dt-table" data-order-col="0" data-order-dir="desc" data-no-export="false">
+			<table class="table align-middle mb-0 dt-table" data-order-col="0" data-order-dir="desc" data-no-export="false" data-col-widths='["16%","8%","12%","10%","12%","20%","10%","12%"]'>
 				<thead>
 					<tr>
-						<th><?= t('Date') ?></th>
+						<th class="col-date"><?= t('Date') ?></th>
 						<th><?= t('Type') ?></th>
 						<th><?= t('Source') ?></th>
 						<th><?= t('Amount') ?></th>
 						<th><?= t('balance_after') ?></th>
-						<th><?= t('Notes') ?></th>
+						<th class="col-text"><?= t('Notes') ?></th>
 						<th><?= t('Reference') ?></th>
 						<th><?= t('recorded_by') ?></th>
 					</tr>
@@ -256,13 +256,13 @@ $reference_label = static function ($entry) {
 						<?php foreach ($ledger as $entry) : ?>
 							<?php $badge = $type_badges[$entry['type']] ?? $type_badges['adjustment']; ?>
 							<tr>
-								<td><?= html_escape(to_shamsi($entry['created_at'], 'Y/m/d H:i')) ?></td>
+								<td class="col-date"><?= html_escape(to_shamsi($entry['created_at'], 'Y/m/d H:i')) ?></td>
 								<td><span class="badge <?= $badge['class'] ?>"><?= $badge['label'] ?></span></td>
 							<td><?= html_escape($source_labels[$entry['source']] ?? $entry['source']) ?></td>
 							<td class="<?= $entry['type'] === 'in' ? 'text-success' : ($entry['type'] === 'out' ? 'text-danger' : '') ?>"><?= format_number($entry['amount'], 2) ?></td>
 							<td><?= format_number($entry['balance_after'], 2) ?></td>
 							<td class="safe-table-note">
-								<div><?= $entry['note'] ? html_escape($entry['note']) : '&mdash;' ?></div>
+								<div class="safe-note-text col-text"><?= $entry['note'] ? html_escape($entry['note']) : '&mdash;' ?></div>
 								<?php $owner = $entry_owner($entry); ?>
 								<?php if ($owner && $owner['label'] !== '') : ?>
 									<div class="small text-muted mt-2">

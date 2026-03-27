@@ -9,7 +9,7 @@
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="asc" data-no-sort-cols="6">
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="asc" data-no-sort-cols="6" data-col-widths='["22%","13%","9%","8%","14%","10%","24%"]'>
 				<thead>
 					<tr>
 						<th><?= t('Full Name') ?></th>
