@@ -128,6 +128,87 @@ class Wallet_model extends CI_Model
 		return $actual_deducted;
 	}
 
+	public function reverse_topup($patient_id, $amount, $turn_id, $note = NULL)
+	{
+		$this->ensure_schema();
+
+		$patient_id = (int) $patient_id;
+		$amount = round((float) $amount, 2);
+		$turn_id = $turn_id === NULL ? NULL : (int) $turn_id;
+
+		$this->ensure_wallet_exists($patient_id);
+
+		if ($amount <= 0) {
+			return 0.00;
+		}
+
+		$current_balance = $this->get_balance($patient_id);
+		$actual_reversed = min($current_balance, $amount);
+		$new_balance = round(max(0, $current_balance - $actual_reversed), 2);
+
+		$updated = $this->db
+			->where('patient_id', $patient_id)
+			->update('patient_wallet', array('balance' => $new_balance));
+
+		if (!$updated) {
+			return FALSE;
+		}
+
+		$inserted = $this->db->insert('patient_wallet_transactions', array(
+			'patient_id' => $patient_id,
+			'turn_id' => $turn_id,
+			'type' => 'deduction',
+			'amount' => $actual_reversed,
+			'note' => $this->reversal_note($note),
+		));
+
+		if (!$inserted) {
+			return FALSE;
+		}
+
+		return $actual_reversed;
+	}
+
+	public function reverse_deduction($patient_id, $amount, $turn_id, $note = NULL)
+	{
+		$this->ensure_schema();
+
+		$patient_id = (int) $patient_id;
+		$amount = round((float) $amount, 2);
+		$turn_id = $turn_id === NULL ? NULL : (int) $turn_id;
+
+		$this->ensure_wallet_exists($patient_id);
+
+		if ($amount <= 0) {
+			return $this->get_balance($patient_id);
+		}
+
+		$current_balance = $this->get_balance($patient_id);
+		$new_balance = round($current_balance + $amount, 2);
+
+		$updated = $this->db
+			->where('patient_id', $patient_id)
+			->update('patient_wallet', array('balance' => $new_balance));
+
+		if (!$updated) {
+			return FALSE;
+		}
+
+		$inserted = $this->db->insert('patient_wallet_transactions', array(
+			'patient_id' => $patient_id,
+			'turn_id' => $turn_id,
+			'type' => 'topup',
+			'amount' => $amount,
+			'note' => $this->reversal_note($note),
+		));
+
+		if (!$inserted) {
+			return FALSE;
+		}
+
+		return $new_balance;
+	}
+
 	public function get_transactions($patient_id, $limit = 20)
 	{
 		$this->ensure_schema();
@@ -182,5 +263,11 @@ class Wallet_model extends CI_Model
 		}
 
 		$this->schema_ready = TRUE;
+	}
+
+	protected function reversal_note($note)
+	{
+		$note = trim((string) $note);
+		return $note === '' ? 'REVERSAL:' : 'REVERSAL: ' . $note;
 	}
 }

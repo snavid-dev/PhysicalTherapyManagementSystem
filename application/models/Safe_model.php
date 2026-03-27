@@ -100,7 +100,7 @@ class Safe_model extends CI_Model
 			->row_array();
 	}
 
-	public function log_transaction($type, $source, $amount, $reference_id = NULL, $reference_table = NULL, $note = NULL, $created_by = NULL, $created_at = NULL)
+	public function log_transaction($type, $source, $amount, $reference_id = NULL, $reference_table = NULL, $note = NULL, $created_by = NULL, $created_at = NULL, $options = array())
 	{
 		$this->ensure_schema();
 
@@ -113,6 +113,7 @@ class Safe_model extends CI_Model
 			'note' => $this->null_if_empty($note),
 			'created_by' => $created_by ? (int) $created_by : NULL,
 			'created_at' => $created_at,
+			'skip_duplicate_check' => !empty($options['skip_duplicate_check']),
 		));
 
 		if ($result === FALSE) {
@@ -125,6 +126,51 @@ class Safe_model extends CI_Model
 		}
 
 		return $result;
+	}
+
+	public function reverse_turn_transactions($turn_id)
+	{
+		$this->ensure_schema();
+
+		$turn_id = (int) $turn_id;
+
+		if ($turn_id <= 0) {
+			return 0;
+		}
+
+		$transactions = $this->db
+			->from('safe_transactions')
+			->where('reference_table', 'turns')
+			->where('reference_id', $turn_id)
+			->order_by('created_at', 'asc')
+			->order_by('id', 'asc')
+			->get()
+			->result_array();
+
+		$reversed = 0;
+
+		foreach ($transactions as $transaction) {
+			$reverse_type = $transaction['type'] === 'out' ? 'in' : 'out';
+			$result = $this->log_transaction(
+				$reverse_type,
+				$transaction['source'],
+				(float) $transaction['amount'],
+				$turn_id,
+				'turns',
+				$this->turn_edit_reversal_note((int) $turn_id, (int) $transaction['id']),
+				!empty($transaction['created_by']) ? (int) $transaction['created_by'] : NULL,
+				NULL,
+				array('skip_duplicate_check' => TRUE)
+			);
+
+			if ($result === FALSE) {
+				return FALSE;
+			}
+
+			$reversed++;
+		}
+
+		return $reversed;
 	}
 
 	public function adjust_balance($new_balance, $reason, $created_by)
@@ -759,7 +805,9 @@ class Safe_model extends CI_Model
 		$source = trim((string) ($data['source'] ?? ''));
 		$amount = round((float) ($data['amount'] ?? 0), 2);
 
-		if (!empty($data['reference_id']) && !empty($data['reference_table']) && $this->transaction_exists($source, (int) $data['reference_id'], (string) $data['reference_table'])) {
+		$skip_duplicate_check = !empty($data['skip_duplicate_check']);
+
+		if (!$skip_duplicate_check && !empty($data['reference_id']) && !empty($data['reference_table']) && $this->transaction_exists($source, (int) $data['reference_id'], (string) $data['reference_table'])) {
 			return $this->get_current_balance();
 		}
 
@@ -984,5 +1032,14 @@ class Safe_model extends CI_Model
 	{
 		$value = trim((string) $value);
 		return $value === '' ? NULL : $value;
+	}
+
+	protected function turn_edit_reversal_note($turn_id, $transaction_id)
+	{
+		return sprintf(
+			t('turn_edit_reversal_note'),
+			(int) $turn_id,
+			(int) $transaction_id
+		);
 	}
 }

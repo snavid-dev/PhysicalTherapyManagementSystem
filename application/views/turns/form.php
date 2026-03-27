@@ -14,6 +14,7 @@ $selected_date = set_value('turn_date', isset($turn['turn_date']) ? to_shamsi($t
 $selected_time = set_value('turn_time', (!empty($turn['turn_time']) && $turn['turn_time'] !== '00:00:00') ? substr($turn['turn_time'], 0, 5) : '');
 $selected_status = set_value('status', $turn['status'] ?? 'accepted');
 $selected_notes = set_value('notes', $turn['notes'] ?? '');
+$stored_discounted_fee = round((float) ($turn['fee'] ?? $selected_fee), 2);
 $initial_original_fee = (float) $default_section_fee;
 
 if ((float) $selected_discount_percent > 0) {
@@ -163,15 +164,23 @@ $staff_payload = array_map(static function ($staff_member) {
 							</div>
 							<div class="col-lg-4">
 								<label class="form-label"><?= t('fee') ?></label>
-								<input type="number" name="fee" id="feeInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_fee) ?>"<?= $is_edit ? ' readonly' : '' ?>>
-								<input type="hidden" name="discount_percent" id="discountPercentInput" value="<?= html_escape($selected_discount_percent) ?>">
-								<input type="hidden" name="discount_amount" id="discountAmountInput" value="<?= html_escape($selected_discount_amount) ?>">
+								<input type="number" name="fee" id="feeInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_fee) ?>">
 								<div id="discountInfoWrap" class="alert alert-info py-2 px-3 mt-2<?= (float) $selected_discount_percent > 0 ? '' : ' d-none' ?>">
 									<div id="discountInfoText" class="small fw-semibold"></div>
 									<div id="feeOverrideWarning" class="small text-warning-emphasis mt-2 d-none"><?= t('fee_overridden') ?></div>
 									<a href="#" id="resetDiscountedFeeLink" class="small d-none"><?= t('reset_to_discounted') ?></a>
 								</div>
 								<small class="text-danger"><?= form_error('fee') ?></small>
+							</div>
+							<div class="col-lg-4">
+								<label class="form-label"><?= t('discount_percent') ?></label>
+								<input type="number" name="discount_percent" id="discountPercentInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_discount_percent) ?>"<?= $is_edit ? '' : ' readonly' ?>>
+								<small class="text-danger"><?= form_error('discount_percent') ?></small>
+							</div>
+							<div class="col-lg-4">
+								<label class="form-label"><?= t('discount_amount') ?></label>
+								<input type="number" name="discount_amount" id="discountAmountInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_discount_amount) ?>"<?= $is_edit ? '' : ' readonly' ?>>
+								<small class="text-danger"><?= form_error('discount_amount') ?></small>
 							</div>
 							<div class="col-md-4">
 								<label class="form-label"><?= t('Date') ?></label>
@@ -203,86 +212,67 @@ $staff_payload = array_map(static function ($staff_member) {
 
 				<div class="col-12" id="paymentPanel">
 					<div class="turn-form-block">
-						<?php if ($is_edit) : ?>
-							<div class="row g-3">
-								<div class="col-md-4">
-									<label class="form-label"><?= t('payment_type') ?></label>
-									<input type="text" class="form-control" value="<?= html_escape(t($selected_payment_type)) ?>" readonly>
-								</div>
-								<div class="col-md-4">
-									<label class="form-label"><?= t('top_up_amount') ?></label>
-									<input type="text" class="form-control" value="<?= html_escape($selected_topup) ?>" readonly>
-								</div>
-								<div class="col-md-4">
-									<label class="form-label"><?= t('wallet_deducted') ?></label>
-									<input type="text" class="form-control" value="<?= html_escape($selected_wallet_deducted) ?>" readonly>
-								</div>
-								<div class="col-md-4">
-									<label class="form-label"><?= t('cash_collected') ?></label>
-									<input type="text" class="form-control" value="<?= html_escape($selected_cash_collected) ?>" readonly>
-								</div>
+						<div class="row g-3">
+							<?php if ($is_edit) : ?>
 								<div class="col-12">
-									<div class="alert alert-secondary mb-0"><?= t('payment_locked_after_creation') ?></div>
+									<div class="alert alert-info mb-0"><?= t('edit_financial_warning') ?></div>
 								</div>
-							</div>
-						<?php else : ?>
-							<div class="row g-3">
-								<div class="col-12" id="topupRow">
-									<div class="turn-topup-box">
-										<div>
-											<label class="form-label mb-1"><?= t('top_up_wallet') ?></label>
-											<p class="text-muted mb-0"><?= t('wallet_balance') ?>: <strong id="topupWalletBalanceText"><?= format_amount($wallet_balance) ?></strong></p>
-										</div>
-										<div class="turn-topup-input">
-											<input type="number" name="topup_amount" id="topupInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_topup) ?>">
-											<small class="text-muted d-block mt-2"><?= t('topup_applies_before_payment') ?></small>
-											<small class="text-danger"><?= form_error('topup_amount') ?></small>
-										</div>
+							<?php endif; ?>
+							<div class="col-12" id="topupRow">
+								<div class="turn-topup-box">
+									<div>
+										<label class="form-label mb-1"><?= t('top_up_wallet') ?></label>
+										<p class="text-muted mb-0"><?= t('wallet_balance') ?>: <strong id="topupWalletBalanceText"><?= format_amount($wallet_balance) ?></strong></p>
+									</div>
+									<div class="turn-topup-input">
+										<input type="number" name="topup_amount" id="topupInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_topup) ?>">
+										<small class="text-muted d-block mt-2"><?= t('topup_applies_before_payment') ?></small>
+										<small class="text-danger"><?= form_error('topup_amount') ?></small>
 									</div>
 								</div>
-								<div class="col-12">
-									<label class="form-label d-block mb-3"><?= t('payment_type') ?></label>
-									<div class="row g-3">
-										<div class="col-md-6 col-xl-3">
-											<label class="turn-payment-option">
-												<input type="radio" class="form-check-input" name="payment_type" value="prepaid" <?= $selected_payment_type === 'prepaid' ? 'checked' : '' ?>>
-												<span class="turn-payment-option__title"><?= t('prepaid') ?></span>
-												<span class="turn-payment-option__text"><?= t('wallet_balance') ?></span>
-											</label>
-										</div>
-										<div class="col-md-6 col-xl-3">
-											<label class="turn-payment-option">
-												<input type="radio" class="form-check-input" name="payment_type" value="cash" <?= $selected_payment_type === 'cash' ? 'checked' : '' ?>>
-												<span class="turn-payment-option__title"><?= t('cash') ?></span>
-												<span class="turn-payment-option__text"><?= t('cash_collected') ?></span>
-											</label>
-										</div>
-										<div class="col-md-6 col-xl-3">
-											<label class="turn-payment-option">
-												<input type="radio" class="form-check-input" name="payment_type" value="deferred" <?= $selected_payment_type === 'deferred' ? 'checked' : '' ?>>
-												<span class="turn-payment-option__title"><?= t('deferred') ?></span>
-												<span class="turn-payment-option__text"><?= t('amount_becoming_debt') ?></span>
-											</label>
-										</div>
-										<div class="col-md-6 col-xl-3">
-											<label class="turn-payment-option">
-												<input type="radio" class="form-check-input" name="payment_type" value="free" <?= $selected_payment_type === 'free' ? 'checked' : '' ?>>
-												<span class="turn-payment-option__title"><?= t('free') ?></span>
-												<span class="turn-payment-option__text"><?= t('fee') ?></span>
-											</label>
-										</div>
-									</div>
-									<small class="text-danger d-block mt-2"><?= form_error('payment_type') ?></small>
-								</div>
-								<div class="col-md-6" id="cashFieldWrap">
-									<label class="form-label"><?= t('cash_amount') ?></label>
-									<input type="text" id="cashAmountPreview" class="form-control" value="<?= html_escape($selected_fee) ?>" readonly>
-								</div>
-								<div class="col-12">
-									<div id="paymentWarnings" class="alert alert-warning d-none mb-0"></div>
-								</div>
 							</div>
-						<?php endif; ?>
+							<div class="col-12">
+								<label class="form-label d-block mb-3"><?= t('payment_type') ?></label>
+								<div class="row g-3">
+									<div class="col-md-6 col-xl-3">
+										<label class="turn-payment-option">
+											<input type="radio" class="form-check-input" name="payment_type" value="prepaid" <?= $selected_payment_type === 'prepaid' ? 'checked' : '' ?>>
+											<span class="turn-payment-option__title"><?= t('prepaid') ?></span>
+											<span class="turn-payment-option__text"><?= t('wallet_balance') ?></span>
+										</label>
+									</div>
+									<div class="col-md-6 col-xl-3">
+										<label class="turn-payment-option">
+											<input type="radio" class="form-check-input" name="payment_type" value="cash" <?= $selected_payment_type === 'cash' ? 'checked' : '' ?>>
+											<span class="turn-payment-option__title"><?= t('cash') ?></span>
+											<span class="turn-payment-option__text"><?= t('cash_collected') ?></span>
+										</label>
+									</div>
+									<div class="col-md-6 col-xl-3">
+										<label class="turn-payment-option">
+											<input type="radio" class="form-check-input" name="payment_type" value="deferred" <?= $selected_payment_type === 'deferred' ? 'checked' : '' ?>>
+											<span class="turn-payment-option__title"><?= t('deferred') ?></span>
+											<span class="turn-payment-option__text"><?= t('amount_becoming_debt') ?></span>
+										</label>
+									</div>
+									<div class="col-md-6 col-xl-3">
+										<label class="turn-payment-option">
+											<input type="radio" class="form-check-input" name="payment_type" value="free" <?= $selected_payment_type === 'free' ? 'checked' : '' ?>>
+											<span class="turn-payment-option__title"><?= t('free') ?></span>
+											<span class="turn-payment-option__text"><?= t('fee') ?></span>
+										</label>
+									</div>
+								</div>
+								<small class="text-danger d-block mt-2"><?= form_error('payment_type') ?></small>
+							</div>
+							<div class="col-md-6" id="cashFieldWrap">
+								<label class="form-label"><?= t('cash_amount') ?></label>
+								<input type="text" id="cashAmountPreview" class="form-control" value="<?= html_escape($selected_fee) ?>" readonly>
+							</div>
+							<div class="col-12">
+								<div id="paymentWarnings" class="alert alert-warning d-none mb-0"></div>
+							</div>
+						</div>
 					</div>
 				</div>
 
@@ -356,12 +346,16 @@ $staff_payload = array_map(static function ($staff_member) {
 	const summaryRemainingAfterDeduction = document.getElementById('summaryRemainingAfterDeduction');
 	const selectedStaffId = <?= (int) $selected_staff_id ?>;
 	const state = {
+		currentWalletBalance: <?= json_encode((float) $wallet_balance) ?>,
 		walletBalance: <?= json_encode((float) $wallet_balance) ?>,
 		totalOpenDebt: <?= json_encode((float) $total_open_debt) ?>,
 		openDebts: <?= json_encode($financial_payload['open_debts'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
 		staff: <?= json_encode($staff_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
 		sessionManuallyEdited: false,
 		originalFee: <?= json_encode($initial_original_fee) ?>,
+		storedDiscountedFee: <?= json_encode($stored_discounted_fee) ?>,
+		originalTurnTopup: <?= json_encode((float) ($turn['topup_amount'] ?? 0)) ?>,
+		originalTurnWalletDeducted: <?= json_encode((float) ($turn['wallet_deducted'] ?? 0)) ?>,
 		hasDiscount: <?= (float) $selected_discount_percent > 0 ? 'true' : 'false' ?>,
 		discountPercent: <?= json_encode((float) $selected_discount_percent) ?>,
 		discountAmount: <?= json_encode((float) $selected_discount_amount) ?>,
@@ -430,6 +424,10 @@ $staff_payload = array_map(static function ($staff_member) {
 	}
 
 	function currentDiscountAmount() {
+		if (isEdit && discountAmountInput) {
+			return roundAmount(discountAmountInput.value);
+		}
+
 		if (!state.hasDiscount) {
 			return 0;
 		}
@@ -472,7 +470,7 @@ $staff_payload = array_map(static function ($staff_member) {
 		}
 
 		if (resetDiscountedFeeLink) {
-			resetDiscountedFeeLink.classList.toggle('d-none', !(state.hasDiscount && state.feeManuallyOverridden && !isEdit));
+			resetDiscountedFeeLink.classList.toggle('d-none', !(state.hasDiscount && state.feeManuallyOverridden));
 		}
 
 		if (summaryOriginalFee) {
@@ -601,77 +599,85 @@ $staff_payload = array_map(static function ($staff_member) {
 		submitButton.disabled = !ready;
 	}
 
+	function baseWalletAfterReversal() {
+		if (!isEdit) {
+			return state.walletBalance;
+		}
+
+		return roundAmount(Math.max(0, state.currentWalletBalance - state.originalTurnTopup) + state.originalTurnWalletDeducted);
+	}
+
+	function showPaymentSection(type) {
+		if (topupRow) {
+			topupRow.style.display = '';
+		}
+
+		if (cashFieldWrap) {
+			cashFieldWrap.style.display = type === 'cash' ? '' : 'none';
+		}
+	}
+
 	function refreshSummary() {
 		const fee = toNumber(feeInput ? feeInput.value : 0);
 		const type = paymentType();
-		let topup = isEdit ? toNumber(<?= json_encode((float) ($turn['topup_amount'] ?? 0)) ?>) : toNumber(topupInput ? topupInput.value : 0);
-		let walletDeducted = isEdit ? toNumber(<?= json_encode((float) ($turn['wallet_deducted'] ?? 0)) ?>) : 0;
-		let cashCollected = isEdit ? toNumber(<?= json_encode((float) ($turn['cash_collected'] ?? 0)) ?>) : 0;
+		let topup = toNumber(topupInput ? topupInput.value : 0);
+		let walletDeducted = 0;
+		let cashCollected = 0;
 		let debtAmount = 0;
-		let newBalance = state.walletBalance;
+		let newBalance = baseWalletAfterReversal();
 		let remainingAfterDeduction = 0;
 		const warnings = [];
 
-		if (!isEdit) {
-			if (topupRow) {
-				topupRow.style.display = type === 'prepaid' ? '' : 'none';
-			}
+		if (isEdit) {
+			state.discountedFee = roundAmount(fee);
+			state.originalFee = state.hasDiscount ? roundAmount(fee + currentDiscountAmount()) : roundAmount(fee);
+		}
 
-			if (cashFieldWrap) {
-				cashFieldWrap.style.display = type === 'cash' ? '' : 'none';
-			}
+		if (cashAmountPreview) {
+			cashAmountPreview.value = fee.toFixed(2);
+		}
 
-			if (cashAmountPreview) {
-				cashAmountPreview.value = fee.toFixed(2);
-			}
+		const availableWallet = baseWalletAfterReversal() + topup;
 
-			if (type !== 'prepaid' && topupInput) {
-				topup = 0;
-				topupInput.value = '0.00';
-			}
+		switch (type) {
+			case 'prepaid':
+				walletDeducted = Math.min(availableWallet, fee);
+				remainingAfterDeduction = Math.max(0, fee - walletDeducted);
+				debtAmount = remainingAfterDeduction;
+				newBalance = Math.max(0, availableWallet - walletDeducted);
+				if (remainingAfterDeduction > 0) {
+					warnings.push(messages.insufficientBalance + ' - ' + messages.amountBecomingDebt + ': ' + formatAmount(remainingAfterDeduction));
+				}
+				break;
 
-			const availableWallet = state.walletBalance + topup;
+			case 'cash':
+				cashCollected = fee;
+				newBalance = baseWalletAfterReversal() + topup;
+				if (state.totalOpenDebt > 0) {
+					warnings.push(messages.cashClearsDebts);
+				}
+				break;
 
-			switch (type) {
-				case 'prepaid':
-					walletDeducted = Math.min(availableWallet, fee);
-					remainingAfterDeduction = Math.max(0, fee - walletDeducted);
-					debtAmount = remainingAfterDeduction;
-					newBalance = Math.max(0, availableWallet - walletDeducted);
-					if (remainingAfterDeduction > 0) {
-						warnings.push(messages.insufficientBalance + ' - ' + messages.amountBecomingDebt + ': ' + formatAmount(remainingAfterDeduction));
-					}
-					break;
+			case 'deferred':
+				debtAmount = fee;
+				newBalance = baseWalletAfterReversal() + topup;
+				if (fee > 0) {
+					warnings.push(messages.deferredDebt);
+				}
+				break;
 
-				case 'cash':
-					cashCollected = fee;
-					newBalance = state.walletBalance;
-					if (state.totalOpenDebt > 0) {
-						warnings.push(messages.cashClearsDebts);
-					}
-					break;
+			case 'free':
+				newBalance = baseWalletAfterReversal() + topup;
+				warnings.push(messages.noPaymentRequired);
+				break;
+		}
 
-				case 'deferred':
-					debtAmount = fee;
-					newBalance = state.walletBalance;
-					if (fee > 0) {
-						warnings.push(messages.deferredDebt);
-					}
-					break;
-
-				case 'free':
-					newBalance = state.walletBalance;
-					warnings.push(messages.noPaymentRequired);
-					break;
-			}
-
-			if (warnings.length) {
-				warningsBox.classList.remove('d-none');
-				warningsBox.innerHTML = warnings.join('<br>');
-			} else {
-				warningsBox.classList.add('d-none');
-				warningsBox.textContent = '';
-			}
+		if (warnings.length) {
+			warningsBox.classList.remove('d-none');
+			warningsBox.innerHTML = warnings.join('<br>');
+		} else {
+			warningsBox.classList.add('d-none');
+			warningsBox.textContent = '';
 		}
 
 		updateDiscountUI();
@@ -820,44 +826,68 @@ $staff_payload = array_map(static function ($staff_member) {
 		});
 	}
 
-	if (!isEdit) {
-		form.querySelectorAll('input[name="payment_type"]').forEach(function (input) {
-			input.addEventListener('change', function () {
-				refreshPaymentOptionState();
-				refreshSummary();
-			});
+	form.querySelectorAll('input[name="payment_type"]').forEach(function (input) {
+		input.addEventListener('change', function () {
+			showPaymentSection(paymentType());
+			refreshPaymentOptionState();
+			refreshSummary();
 		});
+	});
 
-		if (feeInput) {
-			feeInput.addEventListener('input', function () {
-				if (state.isApplyingAutoFee) {
-					return;
-				}
+	if (feeInput) {
+		feeInput.addEventListener('input', function () {
+			if (state.isApplyingAutoFee) {
+				return;
+			}
 
-				state.feeManuallyOverridden = state.hasDiscount && Math.abs(toNumber(feeInput.value) - state.discountedFee) > 0.009;
-				refreshSummary();
-			});
-		}
+			state.feeManuallyOverridden = state.hasDiscount && Math.abs(toNumber(feeInput.value) - (isEdit ? state.storedDiscountedFee : state.discountedFee)) > 0.009;
+			refreshSummary();
+		});
+	}
 
-		if (topupInput) {
-			topupInput.addEventListener('input', refreshSummary);
-		}
+	if (topupInput) {
+		topupInput.addEventListener('input', refreshSummary);
+	}
 
-		if (turnNumberInput) {
-			turnNumberInput.addEventListener('input', function () {
-				state.sessionManuallyEdited = true;
-			});
-		}
+	if (discountPercentInput) {
+		discountPercentInput.addEventListener('input', function () {
+			if (!isEdit) {
+				return;
+			}
+
+			state.discountPercent = roundAmount(this.value);
+			state.hasDiscount = state.discountPercent > 0 || state.discountAmount > 0;
+			refreshSummary();
+		});
+	}
+
+	if (discountAmountInput) {
+		discountAmountInput.addEventListener('input', function () {
+			if (!isEdit) {
+				return;
+			}
+
+			state.discountAmount = roundAmount(this.value);
+			state.originalFee = roundAmount(toNumber(feeInput ? feeInput.value : 0) + state.discountAmount);
+			state.hasDiscount = state.discountPercent > 0 || state.discountAmount > 0;
+			refreshSummary();
+		});
+	}
+
+	if (!isEdit && turnNumberInput) {
+		turnNumberInput.addEventListener('input', function () {
+			state.sessionManuallyEdited = true;
+		});
 	}
 
 	if (resetDiscountedFeeLink) {
 		resetDiscountedFeeLink.addEventListener('click', function (event) {
 			event.preventDefault();
-			if (!state.hasDiscount || isEdit) {
+			if (!state.hasDiscount) {
 				return;
 			}
 
-			setFeeValue(state.discountedFee);
+			setFeeValue(isEdit ? state.storedDiscountedFee : state.discountedFee);
 			state.feeManuallyOverridden = false;
 			refreshSummary();
 		});
@@ -866,6 +896,7 @@ $staff_payload = array_map(static function ($staff_member) {
 	updateFinancialBadges();
 	populateStaff(selectedStaffId);
 	togglePanels();
+	showPaymentSection(paymentType());
 	refreshPaymentOptionState();
 	updateDiscountUI();
 	refreshSummary();

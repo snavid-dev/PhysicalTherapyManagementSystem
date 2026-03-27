@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Debt_model extends CI_Model
 {
 	protected $schema_ready = FALSE;
+	protected $last_reversal_skipped_cleared_count = 0;
 
 	public function create($patient_id, $turn_id, $amount, $note = NULL)
 	{
@@ -102,6 +103,35 @@ class Debt_model extends CI_Model
 			->order_by('patient_debts.id', 'desc')
 			->get()
 			->result_array();
+	}
+
+	public function reverse_turn_debts($turn_id)
+	{
+		$this->ensure_schema();
+
+		$turn_id = (int) $turn_id;
+		$this->last_reversal_skipped_cleared_count = 0;
+
+		if ($turn_id <= 0) {
+			return 0;
+		}
+
+		$this->last_reversal_skipped_cleared_count = (int) $this->db
+			->where('turn_id', $turn_id)
+			->where('status', 'cleared')
+			->count_all_results('patient_debts');
+
+		$this->db
+			->where('turn_id', $turn_id)
+			->where('status', 'open')
+			->delete('patient_debts');
+
+		return (int) $this->db->affected_rows();
+	}
+
+	public function get_last_reversal_skipped_cleared_count()
+	{
+		return (int) $this->last_reversal_skipped_cleared_count;
 	}
 
 	protected function base_debt_query()
