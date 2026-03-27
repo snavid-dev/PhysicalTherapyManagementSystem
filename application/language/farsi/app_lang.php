@@ -585,4 +585,12 @@ $lang = array(
 	'Please choose a valid date.' => 'لطفا یک تاریخ معتبر انتخاب کنید.',
 	'date_format_hint' => 'فرمت: 1403/01/15',
 	'month_format_hint' => 'فرمت: 1403/01',
+	'dt_search' => 'جستجو',
+	'dt_show' => 'نمایش',
+	'dt_entries' => 'ردیف',
+	'dt_no_data' => 'داده‌ای موجود نیست',
+	'dt_export_excel' => 'اکسل',
+	'dt_export_pdf' => 'PDF',
+	'dt_print' => 'چاپ',
+	'balance_sort_note' => 'برای نمایش درست موجودی پس از تراکنش، بر اساس تاریخ مرتب کنید.',
 );

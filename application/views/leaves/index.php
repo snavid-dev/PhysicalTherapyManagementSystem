@@ -9,8 +9,8 @@
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle">
-				<thead><tr><th><?= t('Therapist') ?></th><th><?= t('From') ?></th><th><?= t('To') ?></th><th><?= t('Status') ?></th><th></th></tr></thead>
+			<table class="table align-middle dt-table" data-order-col="1" data-order-dir="desc" data-no-sort-cols="4">
+				<thead><tr><th><?= t('Therapist') ?></th><th><?= t('From') ?></th><th><?= t('To') ?></th><th><?= t('Status') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
 				<tbody>
 				<?php if ($leaves) : foreach ($leaves as $leave) : ?>
 					<tr>
@@ -18,14 +18,12 @@
 						<td><?= html_escape(to_shamsi($leave['start_date'])) ?></td>
 						<td><?= html_escape(to_shamsi($leave['end_date'])) ?></td>
 						<td><?= t(ucfirst($leave['status'])) ?></td>
-						<td class="text-end">
+						<td class="no-export text-end">
 							<a href="<?= base_url('leaves/' . $leave['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
 							<a href="<?= base_url('leaves/' . $leave['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this leave?') ?>')"><?= t('Delete') ?></a>
 						</td>
 					</tr>
-				<?php endforeach; else : ?>
-					<tr><td colspan="5" class="text-muted"><?= t('No leaves found.') ?></td></tr>
-				<?php endif; ?>
+				<?php endforeach; endif; ?>
 				</tbody>
 			</table>
 		</div>

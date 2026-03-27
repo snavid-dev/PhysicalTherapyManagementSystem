@@ -19,7 +19,7 @@ $display_time = static function ($time_value) {
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle">
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="8">
 				<thead>
 					<tr>
 						<th><?= t('Date') ?></th>
@@ -30,7 +30,7 @@ $display_time = static function ($time_value) {
 						<th><?= t('fee') ?></th>
 						<th><?= t('payment_type') ?></th>
 						<th><?= t('Status') ?></th>
-						<th></th>
+						<th class="no-export text-end"><?= t('Actions') ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -45,14 +45,12 @@ $display_time = static function ($time_value) {
 						<td><?= format_amount($turn['fee'] ?? 0) ?></td>
 						<td><?= html_escape(t($turn['payment_type'] ?? 'cash')) ?></td>
 						<td><?= t(ucfirst($turn['status'])) ?></td>
-						<td class="text-end">
+						<td class="no-export text-end">
 							<a href="<?= base_url('turns/' . $turn['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
 							<a href="<?= base_url('turns/' . $turn['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this turn?') ?>')"><?= t('Delete') ?></a>
 						</td>
 					</tr>
-				<?php endforeach; else : ?>
-					<tr><td colspan="9" class="text-muted"><?= t('No turns found.') ?></td></tr>
-				<?php endif; ?>
+				<?php endforeach; endif; ?>
 				</tbody>
 			</table>
 		</div>

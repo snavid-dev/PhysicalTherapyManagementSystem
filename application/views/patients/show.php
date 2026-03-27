@@ -246,7 +246,7 @@ $timeline_amount_prefix = static function ($entry) {
 						</div>
 						<div class="collapse" id="walletTransactionsCollapse">
 							<div class="table-responsive">
-								<table class="table table-sm align-middle mb-0">
+								<table id="patientWalletTransactionsTable" class="table table-sm align-middle mb-0 dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true">
 									<thead>
 										<tr>
 											<th><?= t('date_time') ?></th>
@@ -264,9 +264,7 @@ $timeline_amount_prefix = static function ($entry) {
 											<td><?= html_escape($amount_prefix) . format_amount($transaction['amount']) ?></td>
 											<td><?= !empty($transaction['note']) ? html_escape($transaction['note']) : (!empty($transaction['turn_id']) ? '#' . (int) $transaction['turn_id'] : '&mdash;') ?></td>
 										</tr>
-									<?php endforeach; else : ?>
-										<tr><td colspan="4" class="text-muted"><?= t('no_transactions') ?></td></tr>
-									<?php endif; ?>
+									<?php endforeach; endif; ?>
 									</tbody>
 								</table>
 							</div>
@@ -376,7 +374,7 @@ $timeline_amount_prefix = static function ($entry) {
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Turn History') ?></h2>
 				<div class="table-responsive">
-					<table class="table">
+					<table id="patientTurnHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true">
 						<thead><tr><th><?= t('Date') ?></th><th><?= t('Time') ?></th><th><?= t('section') ?></th><th><?= t('staff_member') ?></th><th><?= t('payment_type') ?></th><th><?= t('fee') ?></th><th><?= t('Status') ?></th></tr></thead>
 						<tbody>
 						<?php if ($turns) : foreach ($turns as $turn) : ?>
@@ -390,9 +388,7 @@ $timeline_amount_prefix = static function ($entry) {
 								<td><?= format_amount($turn['fee'] ?? 0) ?></td>
 								<td><?= t(ucfirst($turn['status'])) ?></td>
 							</tr>
-						<?php endforeach; else : ?>
-							<tr><td colspan="7" class="text-muted"><?= t('No turns found.') ?></td></tr>
-						<?php endif; ?>
+						<?php endforeach; endif; ?>
 						</tbody>
 					</table>
 				</div>
@@ -411,7 +407,7 @@ $timeline_amount_prefix = static function ($entry) {
 				</div>
 				<div class="collapse<?= empty($payments) ? ' show' : '' ?>" id="paymentHistoryCollapse">
 					<div class="table-responsive">
-						<table class="table">
+						<table id="patientPaymentHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true">
 							<thead><tr><th><?= t('Date') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th><?= t('Reference Number') ?></th></tr></thead>
 							<tbody id="paymentHistoryBody">
 							<?php if ($payments) : foreach ($payments as $payment) : ?>
@@ -421,9 +417,7 @@ $timeline_amount_prefix = static function ($entry) {
 									<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
 									<td><?= html_escape($payment['reference_number']) ?></td>
 								</tr>
-							<?php endforeach; else : ?>
-								<tr><td colspan="4" class="text-muted"><?= t('No payments found.') ?></td></tr>
-							<?php endif; ?>
+							<?php endforeach; endif; ?>
 							</tbody>
 						</table>
 					</div>
@@ -567,7 +561,10 @@ $timeline_amount_prefix = static function ($entry) {
 		}
 
 		if (!transactions.length) {
-			transactionsBody.innerHTML = '<tr><td colspan="4" class="text-muted">' + labels.noTransactions + '</td></tr>';
+			transactionsBody.innerHTML = '';
+			if (window.CANINDataTables) {
+				window.CANINDataTables.refreshTable('#patientWalletTransactionsTable');
+			}
 			return;
 		}
 
@@ -581,6 +578,10 @@ $timeline_amount_prefix = static function ($entry) {
 				+ '<td>' + note + '</td>'
 				+ '</tr>';
 		}).join('');
+
+		if (window.CANINDataTables) {
+			window.CANINDataTables.refreshTable('#patientWalletTransactionsTable');
+		}
 	}
 
 	function renderPayments(payments) {
@@ -589,7 +590,10 @@ $timeline_amount_prefix = static function ($entry) {
 		}
 
 		if (!payments.length) {
-			paymentHistoryBody.innerHTML = '<tr><td colspan="4" class="text-muted">' + labels.noPayments + '</td></tr>';
+			paymentHistoryBody.innerHTML = '';
+			if (window.CANINDataTables) {
+				window.CANINDataTables.refreshTable('#patientPaymentHistoryTable');
+			}
 			return;
 		}
 
@@ -601,6 +605,10 @@ $timeline_amount_prefix = static function ($entry) {
 				+ '<td>' + escapeHtml(payment.reference_number || '') + '</td>'
 				+ '</tr>';
 		}).join('');
+
+		if (window.CANINDataTables) {
+			window.CANINDataTables.refreshTable('#patientPaymentHistoryTable');
+		}
 	}
 
 	function renderOpenDebts(debts) {

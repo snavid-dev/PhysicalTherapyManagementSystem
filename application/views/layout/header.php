@@ -10,7 +10,22 @@
 	<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" type="text/css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 	<link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>">
+	<script>
+		window.APP_LANG = <?= json_encode($current_locale ?? ($this->session->userdata('app_locale') ?: 'farsi')) ?>;
+		window.DT_I18N = {
+			search: <?= json_encode(t('dt_search')) ?>,
+			show: <?= json_encode(t('dt_show')) ?>,
+			entries: <?= json_encode(t('dt_entries')) ?>,
+			noData: <?= json_encode(t('dt_no_data')) ?>,
+			exportExcel: <?= json_encode(t('dt_export_excel')) ?>,
+			exportPdf: <?= json_encode(t('dt_export_pdf')) ?>,
+			print: <?= json_encode(t('dt_print')) ?>,
+			balanceSortNote: <?= json_encode(t('balance_sort_note')) ?>
+		};
+	</script>
 </head>
 <body data-theme="<?= html_escape($current_theme) ?>" class="<?= $is_rtl ? 'rtl' : 'ltr' ?>">
 <?php $current_section = isset($current_section) ? $current_section : ''; ?>

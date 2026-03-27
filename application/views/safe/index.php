@@ -236,8 +236,9 @@ $reference_label = static function ($entry) {
 			<h2 class="h5 mb-0"><?= t('Ledger') ?></h2>
 			<div class="text-muted"><?= t('safe_balance') ?>: <strong><?= format_number($current_balance, 2) ?></strong></div>
 		</div>
+		<p class="text-muted small mb-3"><?= t('balance_sort_note') ?></p>
 		<div class="table-responsive">
-			<table class="table align-middle mb-0">
+			<table class="table align-middle mb-0 dt-table" data-order-col="0" data-order-dir="desc" data-no-export="false">
 				<thead>
 					<tr>
 						<th><?= t('Date') ?></th>
@@ -286,10 +287,6 @@ $reference_label = static function ($entry) {
 							<td><?= !empty($entry['created_by_name']) ? html_escape($entry['created_by_name']) : '&mdash;' ?></td>
 						</tr>
 					<?php endforeach; ?>
-				<?php else : ?>
-					<tr>
-						<td colspan="8" class="text-muted"><?= t('No safe transactions found.') ?></td>
-					</tr>
 				<?php endif; ?>
 				</tbody>
 			</table>

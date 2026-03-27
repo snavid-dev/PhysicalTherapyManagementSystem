@@ -585,4 +585,12 @@ $lang = array(
 	'Please choose a valid date.' => 'Please choose a valid date.',
 	'date_format_hint' => 'Format: 1403/01/15',
 	'month_format_hint' => 'Format: 1403/01',
+	'dt_search' => 'Search',
+	'dt_show' => 'Show',
+	'dt_entries' => 'entries',
+	'dt_no_data' => 'No data available',
+	'dt_export_excel' => 'Excel',
+	'dt_export_pdf' => 'PDF',
+	'dt_print' => 'Print',
+	'balance_sort_note' => 'Sort by date for correct balance order.',
 );
