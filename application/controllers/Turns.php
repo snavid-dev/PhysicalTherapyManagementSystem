@@ -468,9 +468,187 @@ class Turns extends Authenticated_Controller
 		}
 
 		$staff = $this->Staff_model->get_by_id((int) $this->input->post('staff_id'));
-		$doctor_id = (int) $staff['user_id'];
+		if (!$staff || empty($staff['user_id'])) {
+			$this->session->set_flashdata('error', t('Invalid staff member selected.'));
+			return redirect('turns/' . $id . '/edit');
+		}
 
-		$this->Turn_model->update($id, $this->turn_update_payload($doctor_id));
+		$patient_id = (int) $turn['patient_id'];
+		$fee = $this->decimal_value($this->input->post('fee'));
+		$payment_type = $this->input->post('payment_type', TRUE);
+		$topup_amount = $this->decimal_value($this->input->post('topup_amount'));
+		$discount_percent = $this->decimal_value($this->input->post('discount_percent'));
+		$discount_amount = $this->decimal_value($this->input->post('discount_amount'));
+		$doctor_id = (int) $staff['user_id'];
+		$user_id = (int) $this->session->userdata('user_id');
+		$financials_changed = $this->turn_financials_changed($turn, array(
+			'fee' => $fee,
+			'payment_type' => $payment_type,
+			'topup_amount' => $topup_amount,
+			'discount_percent' => $discount_percent,
+			'discount_amount' => $discount_amount,
+		));
+
+		if (!$financials_changed) {
+			$updated = $this->Turn_model->update($id, $this->turn_update_payload($doctor_id, array(
+				'fee' => (float) $turn['fee'],
+				'payment_type' => (string) $turn['payment_type'],
+				'wallet_deducted' => (float) $turn['wallet_deducted'],
+				'cash_collected' => (float) $turn['cash_collected'],
+				'topup_amount' => (float) $turn['topup_amount'],
+				'discount_percent' => (float) $turn['discount_percent'],
+				'discount_amount' => (float) $turn['discount_amount'],
+			)));
+
+			if (!$updated) {
+				$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+				return redirect('turns/' . $id . '/edit');
+			}
+
+			$this->session->set_flashdata('success', t('Turn updated successfully.'));
+			return redirect('turns');
+		}
+
+		$wallet_deducted = 0.00;
+		$cash_collected = 0.00;
+
+		$this->db->trans_begin();
+
+		$reversed = $this->reverse_turn_financials($turn);
+
+		if ($reversed === FALSE) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+			return redirect('turns/' . $id . '/edit');
+		}
+
+		if ($topup_amount > 0) {
+			$new_balance = $this->Wallet_model->top_up($patient_id, $topup_amount, $id, 'Top-up on edit of turn #' . $id);
+
+			if ($new_balance === FALSE) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+				return redirect('turns/' . $id . '/edit');
+			}
+		}
+
+		switch ($payment_type) {
+			case 'free':
+				break;
+
+			case 'cash':
+				$cash_collected = $fee;
+				$remaining_cash = $this->Debt_model->clear_debts($patient_id, $cash_collected, $id);
+
+				if ($remaining_cash === FALSE) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+					return redirect('turns/' . $id . '/edit');
+				}
+				break;
+
+			case 'deferred':
+				$debt_id = $this->Debt_model->create($patient_id, $id, $fee);
+
+				if (!$debt_id) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+					return redirect('turns/' . $id . '/edit');
+				}
+				break;
+
+			case 'prepaid':
+				$actual_deducted = $this->Wallet_model->deduct($patient_id, $fee, $id, 'Deduction on edit of turn #' . $id);
+
+				if ($actual_deducted === FALSE) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+					return redirect('turns/' . $id . '/edit');
+				}
+
+				$wallet_deducted = $actual_deducted;
+				$remaining = round($fee - $actual_deducted, 2);
+
+				if ($remaining > 0) {
+					$debt_id = $this->Debt_model->create($patient_id, $id, $remaining, 'Partial wallet on edit - remaining after deduction');
+
+					if (!$debt_id) {
+						$this->db->trans_rollback();
+						$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+						return redirect('turns/' . $id . '/edit');
+					}
+				}
+				break;
+
+			default:
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('Invalid payment type selected.'));
+				return redirect('turns/' . $id . '/edit');
+		}
+
+		$updated = $this->Turn_model->update($id, $this->turn_update_payload($doctor_id, array(
+			'fee' => $fee,
+			'payment_type' => $payment_type,
+			'wallet_deducted' => $wallet_deducted,
+			'cash_collected' => $cash_collected,
+			'topup_amount' => $topup_amount,
+			'discount_percent' => $discount_percent,
+			'discount_amount' => $discount_amount,
+		)));
+
+		if (!$updated) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+			return redirect('turns/' . $id . '/edit');
+		}
+
+		if ($payment_type === 'cash' && $cash_collected > 0) {
+			$logged = $this->Safe_model->log_transaction(
+				'in',
+				'turn_cash',
+				$cash_collected,
+				$id,
+				'turns',
+				'Cash on edit of turn #' . $id,
+				$user_id,
+				NULL,
+				array('skip_duplicate_check' => TRUE)
+			);
+
+			if ($logged === FALSE) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+				return redirect('turns/' . $id . '/edit');
+			}
+		}
+
+		if ($topup_amount > 0) {
+			$logged = $this->Safe_model->log_transaction(
+				'in',
+				'wallet_topup',
+				$topup_amount,
+				$id,
+				'turns',
+				'Top-up on edit of turn #' . $id,
+				$user_id,
+				NULL,
+				array('skip_duplicate_check' => TRUE)
+			);
+
+			if ($logged === FALSE) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+				return redirect('turns/' . $id . '/edit');
+			}
+		}
+
+		if ($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+			return redirect('turns/' . $id . '/edit');
+		}
+
+		$this->db->trans_commit();
 		$this->session->set_flashdata('success', t('Turn updated successfully.'));
 		redirect('turns');
 	}
@@ -604,9 +782,15 @@ class Turns extends Authenticated_Controller
 
 	protected function validate_update_form()
 	{
+		$this->form_validation->set_rules('patient_id', 'Patient', 'required|integer|callback__valid_patient_id');
 		$this->form_validation->set_rules('section_id', 'Section', 'required|integer|callback__valid_section_id');
 		$this->form_validation->set_rules('staff_id', 'Staff member', 'required|integer|callback__valid_staff_id');
 		$this->form_validation->set_rules('turn_number', 'Turn number', 'trim|callback__valid_turn_number');
+		$this->form_validation->set_rules('fee', 'Fee', 'required|numeric|greater_than_equal_to[0]');
+		$this->form_validation->set_rules('payment_type', 'Payment type', 'required|in_list[prepaid,cash,deferred,free]');
+		$this->form_validation->set_rules('topup_amount', 'Top up amount', 'trim|numeric|greater_than_equal_to[0]');
+		$this->form_validation->set_rules('discount_percent', 'Discount percent', 'trim|numeric|greater_than_equal_to[0]');
+		$this->form_validation->set_rules('discount_amount', 'Discount amount', 'trim|numeric|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('turn_date', 'Date', 'required|callback__valid_turn_date');
 		$this->form_validation->set_rules('turn_time', 'Time', 'trim');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[accepted,scheduled,completed,cancelled]');
@@ -644,18 +828,80 @@ class Turns extends Authenticated_Controller
 		);
 	}
 
-	protected function turn_update_payload($doctor_id)
+	protected function turn_update_payload($doctor_id, $overrides = array())
 	{
 		return array(
 			'doctor_id' => (int) $doctor_id,
 			'section_id' => (int) $this->input->post('section_id'),
 			'staff_id' => (int) $this->input->post('staff_id'),
 			'turn_number' => $this->nullable_int($this->input->post('turn_number', TRUE)),
+			'fee' => isset($overrides['fee']) ? round((float) $overrides['fee'], 2) : $this->decimal_value($this->input->post('fee')),
+			'discount_percent' => isset($overrides['discount_percent']) ? round((float) $overrides['discount_percent'], 2) : $this->decimal_value($this->input->post('discount_percent')),
+			'discount_amount' => isset($overrides['discount_amount']) ? round((float) $overrides['discount_amount'], 2) : $this->decimal_value($this->input->post('discount_amount')),
+			'payment_type' => isset($overrides['payment_type']) ? (string) $overrides['payment_type'] : ($this->input->post('payment_type', TRUE) ?: 'cash'),
+			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
+			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
+			'topup_amount' => isset($overrides['topup_amount']) ? round((float) $overrides['topup_amount'], 2) : $this->decimal_value($this->input->post('topup_amount')),
 			'turn_date' => $this->gregorian_date_from_shamsi($this->input->post('turn_date', TRUE)),
 			'turn_time' => $this->normalize_time($this->input->post('turn_time', TRUE)),
 			'status' => $this->input->post('status', TRUE) ?: 'accepted',
 			'notes' => $this->null_if_empty($this->input->post('notes', TRUE)),
 		);
+	}
+
+	private function reverse_turn_financials($original_turn)
+	{
+		$patient_id = (int) $original_turn['patient_id'];
+		$turn_id = (int) $original_turn['id'];
+
+		if ((float) $original_turn['topup_amount'] > 0) {
+			$reversed = $this->Wallet_model->reverse_topup(
+				$patient_id,
+				(float) $original_turn['topup_amount'],
+				$turn_id,
+				'Reversal of top-up for turn #' . $turn_id
+			);
+
+			if ($reversed === FALSE) {
+				return FALSE;
+			}
+		}
+
+		if ((float) $original_turn['wallet_deducted'] > 0) {
+			$reversed = $this->Wallet_model->reverse_deduction(
+				$patient_id,
+				(float) $original_turn['wallet_deducted'],
+				$turn_id,
+				'Reversal of deduction for turn #' . $turn_id
+			);
+
+			if ($reversed === FALSE) {
+				return FALSE;
+			}
+		}
+
+		$debt_reversed = $this->Debt_model->reverse_turn_debts($turn_id);
+
+		if ($debt_reversed === FALSE) {
+			return FALSE;
+		}
+
+		$safe_reversed = $this->Safe_model->reverse_turn_transactions($turn_id);
+
+		if ($safe_reversed === FALSE) {
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+	private function turn_financials_changed($original_turn, $new_values)
+	{
+		return round((float) $original_turn['fee'], 2) !== round((float) $new_values['fee'], 2)
+			|| (string) $original_turn['payment_type'] !== (string) $new_values['payment_type']
+			|| round((float) $original_turn['topup_amount'], 2) !== round((float) $new_values['topup_amount'], 2)
+			|| round((float) $original_turn['discount_percent'], 2) !== round((float) $new_values['discount_percent'], 2)
+			|| round((float) $original_turn['discount_amount'], 2) !== round((float) $new_values['discount_amount'], 2);
 	}
 
 	protected function decimal_value($value)
