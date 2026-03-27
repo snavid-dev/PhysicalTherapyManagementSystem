@@ -56,14 +56,14 @@
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="5">
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="5" data-col-widths='["14%","18%","18%","10%","20%","20%"]'>
 				<thead>
 					<tr>
-						<th><?= t('Date') ?></th>
+						<th class="col-date"><?= t('Date') ?></th>
 						<th><?= t('expense_category') ?></th>
 						<th><?= t('staff') ?></th>
 						<th><?= t('Amount') ?></th>
-						<th><?= t('Description') ?></th>
+						<th class="col-text"><?= t('Description') ?></th>
 						<th class="no-export text-end"><?= t('Actions') ?></th>
 					</tr>
 				</thead>
@@ -72,7 +72,7 @@
 					<?php foreach ($expenses as $expense) : ?>
 						<?php $is_salary_linked = !empty($expense['salary_payment_id']); ?>
 						<tr>
-							<td><?= html_escape(to_shamsi($expense['expense_date'])) ?></td>
+							<td class="col-date"><?= html_escape(to_shamsi($expense['expense_date'])) ?></td>
 							<td><?= html_escape($category_label(array('name' => $expense['category_name'], 'name_fa' => $expense['category_name_fa']))) ?></td>
 							<td>
 								<?php if (!empty($expense['staff_first_name']) || !empty($expense['staff_last_name'])) : ?>
@@ -82,7 +82,7 @@
 								<?php endif; ?>
 							</td>
 							<td><?= format_number($expense['amount'], 2) ?></td>
-							<td><?= $expense['description'] ? html_escape($expense['description']) : '&mdash;' ?></td>
+							<td class="col-text"><?= $expense['description'] ? html_escape($expense['description']) : '&mdash;' ?></td>
 							<td class="no-export text-end">
 								<div class="d-flex gap-2 justify-content-end flex-wrap">
 									<a href="<?= base_url('expenses/edit/' . $expense['id']) ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>

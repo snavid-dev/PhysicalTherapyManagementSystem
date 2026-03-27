@@ -246,23 +246,23 @@ $timeline_amount_prefix = static function ($entry) {
 						</div>
 						<div class="collapse" id="walletTransactionsCollapse">
 							<div class="table-responsive">
-								<table id="patientWalletTransactionsTable" class="table table-sm align-middle mb-0 dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true">
+								<table id="patientWalletTransactionsTable" class="table table-sm align-middle mb-0 dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true" data-col-widths='["26%","18%","14%","42%"]'>
 									<thead>
 										<tr>
-											<th><?= t('date_time') ?></th>
+											<th class="col-date"><?= t('date_time') ?></th>
 											<th><?= t('wallet_action') ?></th>
 											<th><?= t('Amount') ?></th>
-											<th><?= t('wallet_note') ?></th>
+											<th class="col-text"><?= t('wallet_note') ?></th>
 										</tr>
 									</thead>
 									<tbody id="walletTransactionsBody">
 									<?php if ($wallet_transactions) : foreach ($wallet_transactions as $transaction) : ?>
 										<?php $amount_prefix = $transaction['type'] === 'topup' ? '+' : '-'; ?>
 										<tr>
-											<td><?= html_escape(to_shamsi($transaction['created_at'], 'Y/m/d H:i')) ?></td>
+											<td class="col-date"><?= html_escape(to_shamsi($transaction['created_at'], 'Y/m/d H:i')) ?></td>
 											<td><span class="badge rounded-pill <?= $transaction['type'] === 'topup' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' ?>"><?= html_escape(t($transaction['type'])) ?></span></td>
 											<td><?= html_escape($amount_prefix) . format_amount($transaction['amount']) ?></td>
-											<td><?= !empty($transaction['note']) ? html_escape($transaction['note']) : (!empty($transaction['turn_id']) ? '#' . (int) $transaction['turn_id'] : '&mdash;') ?></td>
+											<td class="col-text"><?= !empty($transaction['note']) ? html_escape($transaction['note']) : (!empty($transaction['turn_id']) ? '#' . (int) $transaction['turn_id'] : '&mdash;') ?></td>
 										</tr>
 									<?php endforeach; endif; ?>
 									</tbody>
@@ -374,13 +374,13 @@ $timeline_amount_prefix = static function ($entry) {
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Turn History') ?></h2>
 				<div class="table-responsive">
-					<table id="patientTurnHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true">
-						<thead><tr><th><?= t('Date') ?></th><th><?= t('Time') ?></th><th><?= t('section') ?></th><th><?= t('staff_member') ?></th><th><?= t('payment_type') ?></th><th><?= t('fee') ?></th><th><?= t('Status') ?></th></tr></thead>
+					<table id="patientTurnHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true" data-col-widths='["15%","10%","16%","20%","13%","11%","15%"]'>
+						<thead><tr><th class="col-date"><?= t('Date') ?></th><th><?= t('Time') ?></th><th><?= t('section') ?></th><th><?= t('staff_member') ?></th><th><?= t('payment_type') ?></th><th><?= t('fee') ?></th><th><?= t('Status') ?></th></tr></thead>
 						<tbody>
 						<?php if ($turns) : foreach ($turns as $turn) : ?>
 							<?php $staff_name = !empty($turn['staff_full_name']) ? $turn['staff_full_name'] : ($turn['doctor_full_name'] ?? ''); ?>
 							<tr>
-								<td><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
+								<td class="col-date"><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
 								<td><?= $display_time($turn['turn_time']) ?></td>
 								<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>
 								<td><?= $staff_name !== '' ? html_escape($staff_name) : '&mdash;' ?></td>
@@ -407,12 +407,12 @@ $timeline_amount_prefix = static function ($entry) {
 				</div>
 				<div class="collapse<?= empty($payments) ? ' show' : '' ?>" id="paymentHistoryCollapse">
 					<div class="table-responsive">
-						<table id="patientPaymentHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true">
-							<thead><tr><th><?= t('Date') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th><?= t('Reference Number') ?></th></tr></thead>
+						<table id="patientPaymentHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true" data-col-widths='["20%","20%","16%","44%"]'>
+							<thead><tr><th class="col-date"><?= t('Date') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th><?= t('Reference Number') ?></th></tr></thead>
 							<tbody id="paymentHistoryBody">
 							<?php if ($payments) : foreach ($payments as $payment) : ?>
 								<tr>
-									<td><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
+									<td class="col-date"><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
 									<td><?= html_escape(t(ucfirst((string) $payment['payment_method']))) ?></td>
 									<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
 									<td><?= html_escape($payment['reference_number']) ?></td>
@@ -572,10 +572,10 @@ $timeline_amount_prefix = static function ($entry) {
 			const isTopup = transaction.type === 'topup';
 			const note = transaction.note ? escapeHtml(transaction.note) : (transaction.turn_id ? ('#' + transaction.turn_id) : '&mdash;');
 			return '<tr>'
-				+ '<td>' + escapeHtml(transaction.created_at || '') + '</td>'
+				+ '<td class="col-date">' + escapeHtml(transaction.created_at || '') + '</td>'
 				+ '<td><span class="badge rounded-pill ' + (isTopup ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning') + '">' + escapeHtml(isTopup ? labels.topup : labels.deduction) + '</span></td>'
 				+ '<td>' + (isTopup ? '+' : '-') + formatAmount(parseFloat(transaction.amount || 0)) + '</td>'
-				+ '<td>' + note + '</td>'
+				+ '<td class="col-text">' + note + '</td>'
 				+ '</tr>';
 		}).join('');
 
@@ -599,7 +599,7 @@ $timeline_amount_prefix = static function ($entry) {
 
 		paymentHistoryBody.innerHTML = payments.map(function (payment) {
 			return '<tr>'
-				+ '<td>' + escapeHtml(payment.payment_date || '') + '</td>'
+				+ '<td class="col-date">' + escapeHtml(payment.payment_date || '') + '</td>'
 				+ '<td>' + escapeHtml(payment.payment_method || '') + '</td>'
 				+ '<td>$' + Number(payment.amount || 0).toFixed(2) + '</td>'
 				+ '<td>' + escapeHtml(payment.reference_number || '') + '</td>'

@@ -19,10 +19,10 @@ $display_time = static function ($time_value) {
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="8">
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="8" data-col-widths='["12%","10%","17%","11%","13%","8%","11%","8%","10%"]'>
 				<thead>
 					<tr>
-						<th><?= t('Date') ?></th>
+						<th class="col-date"><?= t('Date') ?></th>
 						<th><?= t('Time') ?></th>
 						<th><?= t('Patient') ?></th>
 						<th><?= t('section') ?></th>
@@ -37,7 +37,7 @@ $display_time = static function ($time_value) {
 				<?php if ($turns) : foreach ($turns as $turn) : ?>
 					<?php $staff_name = !empty($turn['staff_full_name']) ? $turn['staff_full_name'] : ($turn['doctor_full_name'] ?? ''); ?>
 					<tr>
-						<td><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
+						<td class="col-date"><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
 						<td><?= $display_time($turn['turn_time']) ?></td>
 						<td><?= html_escape($turn['patient_first_name'] . ' ' . $turn['patient_last_name']) ?></td>
 						<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>

@@ -15,12 +15,12 @@
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="4">
-				<thead><tr><th><?= t('Date') ?></th><th><?= t('Patient') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="4" data-col-widths='["16%","31%","15%","12%","26%"]'>
+				<thead><tr><th class="col-date"><?= t('Date') ?></th><th><?= t('Patient') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
 				<tbody>
 				<?php if ($payments) : foreach ($payments as $payment) : ?>
 					<tr>
-						<td><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
+						<td class="col-date"><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
 						<td><?= html_escape($payment['first_name'] . ' ' . $payment['last_name']) ?></td>
 						<td><?= html_escape($payment['payment_method']) ?></td>
 						<td>$<?= number_format((float) $payment['amount'], 2) ?></td>

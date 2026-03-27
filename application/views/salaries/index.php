@@ -52,10 +52,10 @@ foreach ($records as $record) {
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="9">
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="9" data-col-widths='["10%","16%","10%","9%","9%","10%","10%","10%","8%","8%"]'>
 				<thead>
 					<tr>
-						<th><?= t('month') ?></th>
+						<th class="col-date"><?= t('month') ?></th>
 						<th><?= t('staff') ?></th>
 						<th><?= t('Type') ?></th>
 						<th><?= t('base_salary') ?></th>
@@ -72,7 +72,7 @@ foreach ($records as $record) {
 					<?php foreach ($records as $record) : ?>
 						<?php $remaining = max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)); ?>
 						<tr>
-							<td><?= html_escape(gregorian_month_to_shamsi($record['month'])) ?></td>
+							<td class="col-date"><?= html_escape(gregorian_month_to_shamsi($record['month'])) ?></td>
 							<td><?= html_escape(trim($record['first_name'] . ' ' . $record['last_name'])) ?></td>
 							<td><?= html_escape(t($record['salary_type'])) ?></td>
 							<td><?= format_number($record['base_salary'], 2) ?></td>

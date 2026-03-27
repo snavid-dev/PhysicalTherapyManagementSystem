@@ -9,14 +9,14 @@
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle dt-table" data-order-col="1" data-order-dir="desc" data-no-sort-cols="4">
-				<thead><tr><th><?= t('Therapist') ?></th><th><?= t('From') ?></th><th><?= t('To') ?></th><th><?= t('Status') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
+			<table class="table align-middle dt-table" data-order-col="1" data-order-dir="desc" data-no-sort-cols="4" data-col-widths='["30%","16%","16%","12%","26%"]'>
+				<thead><tr><th><?= t('Therapist') ?></th><th class="col-date"><?= t('From') ?></th><th class="col-date"><?= t('To') ?></th><th><?= t('Status') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
 				<tbody>
 				<?php if ($leaves) : foreach ($leaves as $leave) : ?>
 					<tr>
 						<td><?= html_escape($leave['first_name'] . ' ' . $leave['last_name']) ?></td>
-						<td><?= html_escape(to_shamsi($leave['start_date'])) ?></td>
-						<td><?= html_escape(to_shamsi($leave['end_date'])) ?></td>
+						<td class="col-date"><?= html_escape(to_shamsi($leave['start_date'])) ?></td>
+						<td class="col-date"><?= html_escape(to_shamsi($leave['end_date'])) ?></td>
 						<td><?= t(ucfirst($leave['status'])) ?></td>
 						<td class="no-export text-end">
 							<a href="<?= base_url('leaves/' . $leave['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
