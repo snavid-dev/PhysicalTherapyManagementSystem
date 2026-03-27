@@ -5,6 +5,42 @@ class Wallet_model extends CI_Model
 {
 	protected $schema_ready = FALSE;
 
+	public function attach_latest_transaction_to_turn($patient_id, $type, $amount, $turn_id)
+	{
+		$this->ensure_schema();
+
+		$patient_id = (int) $patient_id;
+		$turn_id = (int) $turn_id;
+		$type = trim((string) $type);
+		$amount = round((float) $amount, 2);
+
+		if ($patient_id <= 0 || $turn_id <= 0 || $amount <= 0 || !in_array($type, array('topup', 'deduction'), TRUE)) {
+			return FALSE;
+		}
+
+		$transaction = $this->db
+			->select('id')
+			->from('patient_wallet_transactions')
+			->where('patient_id', $patient_id)
+			->where('type', $type)
+			->where('amount', $amount)
+			->where('turn_id IS NULL', NULL, FALSE)
+			->order_by('id', 'desc')
+			->limit(1)
+			->get()
+			->row_array();
+
+		if (!$transaction) {
+			return FALSE;
+		}
+
+		return $this->db
+			->where('id', (int) $transaction['id'])
+			->update('patient_wallet_transactions', array(
+				'turn_id' => $turn_id,
+			));
+	}
+
 	public function get_balance($patient_id)
 	{
 		$this->ensure_schema();

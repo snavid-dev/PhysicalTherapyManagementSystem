@@ -4,9 +4,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Safe_model extends CI_Model
 {
 	protected $schema_ready = FALSE;
+	protected $historical_sync_checked = FALSE;
 
 	public function delete_transaction_by_reference($reference_table, $reference_id, $source = NULL)
 	{
+		$this->ensure_schema(FALSE);
 		$deleted = $this->delete_transactions_by_reference($reference_table, array($reference_id), $source, FALSE);
 
 		if ($deleted === FALSE) {
@@ -22,7 +24,7 @@ class Safe_model extends CI_Model
 
 	public function delete_transactions_for_patient($patient_id)
 	{
-		$this->ensure_schema();
+		$this->ensure_schema(FALSE);
 
 		$patient_id = (int) $patient_id;
 
@@ -69,9 +71,9 @@ class Safe_model extends CI_Model
 		return TRUE;
 	}
 
-	public function get_current_balance()
+	public function get_current_balance($with_historical_sync = TRUE)
 	{
-		$this->ensure_schema();
+		$this->ensure_schema($with_historical_sync);
 
 		$row = $this->db
 			->select('balance_after')
@@ -102,7 +104,7 @@ class Safe_model extends CI_Model
 
 	public function log_transaction($type, $source, $amount, $reference_id = NULL, $reference_table = NULL, $note = NULL, $created_by = NULL, $created_at = NULL, $options = array())
 	{
-		$this->ensure_schema();
+		$this->ensure_schema(FALSE);
 
 		$result = $this->insert_transaction(array(
 			'type' => trim((string) $type),
@@ -122,43 +124,58 @@ class Safe_model extends CI_Model
 
 		if ($created_at && $this->is_valid_datetime($created_at)) {
 			$this->recalculate_balances();
-			return $this->get_current_balance();
+			return $this->get_current_balance(FALSE);
 		}
 
 		return $result;
 	}
 
-	public function reverse_turn_transactions($turn_id)
+	public function reverse_turn_transactions($turn, $created_by = NULL)
 	{
-		$this->ensure_schema();
+		$this->ensure_schema(FALSE);
 
-		$turn_id = (int) $turn_id;
+		if (!is_array($turn) || empty($turn['id'])) {
+			return 0;
+		}
+
+		$turn_id = (int) $turn['id'];
+		$created_by = $created_by ? (int) $created_by : NULL;
 
 		if ($turn_id <= 0) {
 			return 0;
 		}
 
-		$transactions = $this->db
-			->from('safe_transactions')
-			->where('reference_table', 'turns')
-			->where('reference_id', $turn_id)
-			->order_by('created_at', 'asc')
-			->order_by('id', 'asc')
-			->get()
-			->result_array();
-
 		$reversed = 0;
 
-		foreach ($transactions as $transaction) {
-			$reverse_type = $transaction['type'] === 'out' ? 'in' : 'out';
+		if ((float) ($turn['cash_collected'] ?? 0) > 0) {
 			$result = $this->log_transaction(
-				$reverse_type,
-				$transaction['source'],
-				(float) $transaction['amount'],
+				'out',
+				'turn_cash',
+				(float) $turn['cash_collected'],
 				$turn_id,
 				'turns',
-				$this->turn_edit_reversal_note((int) $turn_id, (int) $transaction['id']),
-				!empty($transaction['created_by']) ? (int) $transaction['created_by'] : NULL,
+				safe_turn_cash_reversal_note($turn_id),
+				$created_by,
+				NULL,
+				array('skip_duplicate_check' => TRUE)
+			);
+
+			if ($result === FALSE) {
+				return FALSE;
+			}
+
+			$reversed++;
+		}
+
+		if ((float) ($turn['topup_amount'] ?? 0) > 0) {
+			$result = $this->log_transaction(
+				'out',
+				'wallet_topup',
+				(float) $turn['topup_amount'],
+				$turn_id,
+				'turns',
+				safe_turn_wallet_topup_reversal_note($turn_id),
+				$created_by,
 				NULL,
 				array('skip_duplicate_check' => TRUE)
 			);
@@ -373,59 +390,61 @@ class Safe_model extends CI_Model
 		}
 	}
 
-	protected function ensure_schema()
+	protected function ensure_schema($with_historical_sync = TRUE)
 	{
-		if ($this->schema_ready) {
-			return;
+		if (!$this->schema_ready) {
+			if (!$this->db->table_exists('safe_transactions')) {
+				$this->db->query("
+					CREATE TABLE IF NOT EXISTS `safe_transactions` (
+						`id` int unsigned NOT NULL AUTO_INCREMENT,
+						`type` enum('in','out','adjustment') NOT NULL,
+						`source` enum('turn_cash','wallet_topup','patient_payment','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL,
+						`amount` decimal(12,2) NOT NULL,
+						`balance_after` decimal(12,2) NOT NULL,
+						`reference_id` int unsigned DEFAULT NULL,
+						`reference_table` varchar(50) DEFAULT NULL,
+						`note` varchar(255) DEFAULT NULL,
+						`created_by` int unsigned DEFAULT NULL,
+						`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+						PRIMARY KEY (`id`),
+						KEY `safe_transactions_type_index` (`type`),
+						KEY `safe_transactions_source_index` (`source`),
+						KEY `safe_transactions_created_by_index` (`created_by`),
+						KEY `safe_transactions_created_at_index` (`created_at`),
+						CONSTRAINT `safe_transactions_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+					) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+				");
+			}
+
+			if (!$this->db->table_exists('safe_adjustments')) {
+				$this->db->query("
+					CREATE TABLE IF NOT EXISTS `safe_adjustments` (
+						`id` int unsigned NOT NULL AUTO_INCREMENT,
+						`safe_transaction_id` int unsigned NOT NULL,
+						`previous_balance` decimal(12,2) NOT NULL,
+						`adjustment_amount` decimal(12,2) NOT NULL,
+						`new_balance` decimal(12,2) NOT NULL,
+						`reason` text NOT NULL,
+						`created_by` int unsigned DEFAULT NULL,
+						`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+						PRIMARY KEY (`id`),
+						KEY `safe_adjustments_transaction_id_index` (`safe_transaction_id`),
+						KEY `safe_adjustments_created_by_index` (`created_by`),
+						CONSTRAINT `safe_adjustments_transaction_fk` FOREIGN KEY (`safe_transaction_id`) REFERENCES `safe_transactions` (`id`) ON DELETE CASCADE,
+						CONSTRAINT `safe_adjustments_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+					) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+				");
+			}
+
+			$this->ensure_source_enum();
+			$this->schema_ready = TRUE;
 		}
 
-		if (!$this->db->table_exists('safe_transactions')) {
-			$this->db->query("
-				CREATE TABLE IF NOT EXISTS `safe_transactions` (
-					`id` int unsigned NOT NULL AUTO_INCREMENT,
-					`type` enum('in','out','adjustment') NOT NULL,
-					`source` enum('turn_cash','wallet_topup','patient_payment','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL,
-					`amount` decimal(12,2) NOT NULL,
-					`balance_after` decimal(12,2) NOT NULL,
-					`reference_id` int unsigned DEFAULT NULL,
-					`reference_table` varchar(50) DEFAULT NULL,
-					`note` varchar(255) DEFAULT NULL,
-					`created_by` int unsigned DEFAULT NULL,
-					`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-					PRIMARY KEY (`id`),
-					KEY `safe_transactions_type_index` (`type`),
-					KEY `safe_transactions_source_index` (`source`),
-					KEY `safe_transactions_created_by_index` (`created_by`),
-					KEY `safe_transactions_created_at_index` (`created_at`),
-					CONSTRAINT `safe_transactions_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-			");
+		if ($with_historical_sync && !$this->historical_sync_checked) {
+			$this->historical_sync_checked = TRUE;
+			$this->sync_historical_transactions();
+			$this->cleanup_deleted_reference_transactions();
 		}
-
-		if (!$this->db->table_exists('safe_adjustments')) {
-			$this->db->query("
-				CREATE TABLE IF NOT EXISTS `safe_adjustments` (
-					`id` int unsigned NOT NULL AUTO_INCREMENT,
-					`safe_transaction_id` int unsigned NOT NULL,
-					`previous_balance` decimal(12,2) NOT NULL,
-					`adjustment_amount` decimal(12,2) NOT NULL,
-					`new_balance` decimal(12,2) NOT NULL,
-					`reason` text NOT NULL,
-					`created_by` int unsigned DEFAULT NULL,
-					`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-					PRIMARY KEY (`id`),
-					KEY `safe_adjustments_transaction_id_index` (`safe_transaction_id`),
-					KEY `safe_adjustments_created_by_index` (`created_by`),
-					CONSTRAINT `safe_adjustments_transaction_fk` FOREIGN KEY (`safe_transaction_id`) REFERENCES `safe_transactions` (`id`) ON DELETE CASCADE,
-					CONSTRAINT `safe_adjustments_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-			");
-		}
-
-		$this->ensure_source_enum();
-		$this->schema_ready = TRUE;
-		$this->sync_historical_transactions();
-		$this->cleanup_deleted_reference_transactions();
 	}
 
 	protected function ensure_source_enum()
@@ -531,12 +550,13 @@ class Safe_model extends CI_Model
 				"turns.patient_id = patient_wallet_transactions.patient_id
 				AND turns.topup_amount = patient_wallet_transactions.amount
 				AND turns.topup_amount > 0
-				AND turns.turn_date = DATE(patient_wallet_transactions.created_at)",
+				AND DATE(turns.created_at) = DATE(patient_wallet_transactions.created_at)",
 				'left',
 				FALSE
 			)
 			->where('patient_wallet_transactions.type', 'topup')
 			->where('patient_wallet_transactions.amount >', 0)
+			->where('patient_wallet_transactions.turn_id IS NULL', NULL, FALSE)
 			->group_start()
 				->where("patient_wallet_transactions.note IS NOT NULL AND patient_wallet_transactions.note != ''", NULL, FALSE)
 				->or_where('turns.id IS NULL', NULL, FALSE)
@@ -608,7 +628,7 @@ class Safe_model extends CI_Model
 	protected function legacy_turn_cash_events()
 	{
 		$rows = $this->db
-			->select('id, cash_collected, turn_date, turn_time')
+			->select('id, cash_collected, turn_date, turn_time, created_at')
 			->from('turns')
 			->where('cash_collected >', 0)
 			->order_by('turn_date', 'asc')
@@ -626,7 +646,7 @@ class Safe_model extends CI_Model
 				'reference_table' => 'turns',
 				'note' => safe_turn_cash_note($row['id']),
 				'created_by' => NULL,
-				'created_at' => $this->datetime_from_date_and_time($row['turn_date'], $row['turn_time']),
+				'created_at' => !empty($row['created_at']) ? $row['created_at'] : $this->datetime_from_date_and_time($row['turn_date'], $row['turn_time']),
 				'priority' => 10,
 			);
 		}, $rows);
@@ -635,7 +655,7 @@ class Safe_model extends CI_Model
 	protected function legacy_turn_wallet_topup_events()
 	{
 		$rows = $this->db
-			->select('id, topup_amount, turn_date, turn_time')
+			->select('id, topup_amount, turn_date, turn_time, created_at')
 			->from('turns')
 			->where('topup_amount >', 0)
 			->order_by('turn_date', 'asc')
@@ -653,7 +673,7 @@ class Safe_model extends CI_Model
 				'reference_table' => 'turns',
 				'note' => safe_turn_wallet_topup_note($row['id']),
 				'created_by' => NULL,
-				'created_at' => $this->datetime_from_date_and_time($row['turn_date'], $row['turn_time']),
+				'created_at' => !empty($row['created_at']) ? $row['created_at'] : $this->datetime_from_date_and_time($row['turn_date'], $row['turn_time']),
 				'priority' => 20,
 			);
 		}, $rows);
@@ -701,12 +721,13 @@ class Safe_model extends CI_Model
 				"turns.patient_id = patient_wallet_transactions.patient_id
 				AND turns.topup_amount = patient_wallet_transactions.amount
 				AND turns.topup_amount > 0
-				AND turns.turn_date = DATE(patient_wallet_transactions.created_at)",
+				AND DATE(turns.created_at) = DATE(patient_wallet_transactions.created_at)",
 				'left',
 				FALSE
 			)
 			->where('patient_wallet_transactions.type', 'topup')
 			->where('patient_wallet_transactions.amount >', 0)
+			->where('patient_wallet_transactions.turn_id IS NULL', NULL, FALSE)
 			->group_start()
 				->where("patient_wallet_transactions.note IS NOT NULL AND patient_wallet_transactions.note != ''", NULL, FALSE)
 				->or_where('turns.id IS NULL', NULL, FALSE)
@@ -808,10 +829,10 @@ class Safe_model extends CI_Model
 		$skip_duplicate_check = !empty($data['skip_duplicate_check']);
 
 		if (!$skip_duplicate_check && !empty($data['reference_id']) && !empty($data['reference_table']) && $this->transaction_exists($source, (int) $data['reference_id'], (string) $data['reference_table'])) {
-			return $this->get_current_balance();
+			return $this->get_current_balance(FALSE);
 		}
 
-		$current_balance = $this->get_current_balance();
+		$current_balance = $this->get_current_balance(FALSE);
 		$new_balance = $current_balance;
 
 		if ($type === 'in') {
@@ -846,7 +867,7 @@ class Safe_model extends CI_Model
 
 	protected function delete_transactions_by_reference($reference_table, array $reference_ids, $source = NULL, $recalculate = TRUE)
 	{
-		$this->ensure_schema();
+		$this->ensure_schema(FALSE);
 
 		$reference_table = trim((string) $reference_table);
 		$reference_ids = array_values(array_unique(array_filter(array_map('intval', $reference_ids))));

@@ -122,11 +122,19 @@ $entry_owner = static function ($entry) {
 };
 
 $reference_label = static function ($entry) {
-	if (empty($entry['reference_id']) || empty($entry['reference_table'])) {
-		return '&mdash;';
+	if ($entry['reference_table'] === 'turns' && !empty($entry['reference_id'])) {
+		return '<a href="' . site_url('turns/edit/' . $entry['reference_id']) . '" target="_blank">#' . (int) $entry['reference_id'] . ' ' . html_escape(t('view_turn')) . '</a>';
 	}
 
-	return safe_reference_label($entry['reference_table'], $entry['reference_id']);
+	if ($entry['reference_table'] === 'expenses' && !empty($entry['reference_id'])) {
+		return '<a href="' . site_url('expenses/edit/' . $entry['reference_id']) . '" target="_blank">#' . (int) $entry['reference_id'] . ' ' . html_escape(t('view_expense')) . '</a>';
+	}
+
+	if ($entry['reference_table'] === 'staff_salary_payments' && !empty($entry['reference_id'])) {
+		return '#' . (int) $entry['reference_id'];
+	}
+
+	return '&mdash;';
 };
 ?>
 
