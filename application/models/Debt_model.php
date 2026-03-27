@@ -129,6 +129,16 @@ class Debt_model extends CI_Model
 		return (int) $this->db->affected_rows();
 	}
 
+	public function has_cleared_debts_for_turn($turn_id)
+	{
+		$this->ensure_schema();
+
+		return $this->db
+			->where('turn_id', (int) $turn_id)
+			->where('status', 'cleared')
+			->count_all_results('patient_debts') > 0;
+	}
+
 	public function get_last_reversal_skipped_cleared_count()
 	{
 		return (int) $this->last_reversal_skipped_cleared_count;

@@ -83,6 +83,20 @@ if (!function_exists('safe_turn_wallet_topup_note')) {
 	}
 }
 
+if (!function_exists('safe_turn_cash_reversal_note')) {
+	function safe_turn_cash_reversal_note($turn_id)
+	{
+		return t('Reversal of cash payment for turn') . ' #' . format_number($turn_id);
+	}
+}
+
+if (!function_exists('safe_turn_wallet_topup_reversal_note')) {
+	function safe_turn_wallet_topup_reversal_note($turn_id)
+	{
+		return t('Reversal of wallet top-up for turn') . ' #' . format_number($turn_id);
+	}
+}
+
 if (!function_exists('safe_patient_payment_note')) {
 	function safe_patient_payment_note($payment_id)
 	{

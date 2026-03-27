@@ -213,6 +213,14 @@ class Turns extends Authenticated_Controller
 			return redirect('turns/create');
 		}
 
+		if ($topup_amount > 0) {
+			$this->Wallet_model->attach_latest_transaction_to_turn($patient_id, 'topup', $topup_amount, $turn_id);
+		}
+
+		if ($wallet_deducted > 0) {
+			$this->Wallet_model->attach_latest_transaction_to_turn($patient_id, 'deduction', $wallet_deducted, $turn_id);
+		}
+
 		if ($payment_type === 'cash') {
 			$this->Debt_model->clear_debts($patient_id, $cash_collected, $turn_id);
 		}
@@ -363,6 +371,14 @@ class Turns extends Authenticated_Controller
 					array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
 					array($index => array(t('Unable to save turn right now.')))
 				);
+			}
+
+			if ($row['topup_amount'] > 0) {
+				$this->Wallet_model->attach_latest_transaction_to_turn($row['patient_id'], 'topup', $row['topup_amount'], $turn_id);
+			}
+
+			if ($wallet_deducted > 0) {
+				$this->Wallet_model->attach_latest_transaction_to_turn($row['patient_id'], 'deduction', $wallet_deducted, $turn_id);
 			}
 
 			if ($row['payment_type'] === 'cash') {
@@ -602,6 +618,14 @@ class Turns extends Authenticated_Controller
 			return redirect('turns/' . $id . '/edit');
 		}
 
+		if ($topup_amount > 0) {
+			$this->Wallet_model->attach_latest_transaction_to_turn($patient_id, 'topup', $topup_amount, $id);
+		}
+
+		if ($wallet_deducted > 0) {
+			$this->Wallet_model->attach_latest_transaction_to_turn($patient_id, 'deduction', $wallet_deducted, $id);
+		}
+
 		if ($payment_type === 'cash' && $cash_collected > 0) {
 			$logged = $this->Safe_model->log_transaction(
 				'in',
@@ -659,12 +683,30 @@ class Turns extends Authenticated_Controller
 		$turn = $this->Turn_model->find($id);
 		show_404_if_empty($turn);
 
-		if (!$this->Turn_model->delete($id)) {
+		if ($this->Debt_model->has_cleared_debts_for_turn($id)) {
+			$this->session->set_flashdata('error', t('turn_delete_blocked'));
+			return redirect('turns');
+		}
+
+		$this->db->trans_begin();
+
+		$reversed = $this->reverse_turn_financials($turn);
+
+		if ($reversed === FALSE) {
+			$this->db->trans_rollback();
 			$this->session->set_flashdata('error', t('Unable to delete record right now.'));
 			return redirect('turns');
 		}
 
-		$this->session->set_flashdata('success', t('Turn deleted successfully.'));
+		if (!$this->Turn_model->delete($id) || $this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('Unable to delete record right now.'));
+			return redirect('turns');
+		}
+
+		$this->db->trans_commit();
+
+		$this->session->set_flashdata('success', t('turn_delete_success'));
 		redirect('turns');
 	}
 
@@ -886,7 +928,10 @@ class Turns extends Authenticated_Controller
 			return FALSE;
 		}
 
-		$safe_reversed = $this->Safe_model->reverse_turn_transactions($turn_id);
+		$safe_reversed = $this->Safe_model->reverse_turn_transactions(
+			$original_turn,
+			$this->session->userdata('user_id')
+		);
 
 		if ($safe_reversed === FALSE) {
 			return FALSE;
