@@ -66,9 +66,12 @@ class Report_model extends CI_Model
 		return $this->daily_register_base_query($filters)
 			->select("
 				turns.id,
+				turns.patient_id,
 				turns.turn_number,
 				TRIM(CONCAT(patients.first_name, ' ', COALESCE(patients.last_name, ''))) AS patient_name,
 				patients.gender,
+				patients.referred_by AS reference_doctor_id,
+				TRIM(CONCAT(reference_doctors.first_name, ' ', COALESCE(reference_doctors.last_name, ''))) AS reference_doctor_name,
 				sections.name AS section_name,
 				TRIM(CONCAT(staff.first_name, ' ', COALESCE(staff.last_name, ''))) AS staff_name,
 				turns.fee,
@@ -171,6 +174,7 @@ class Report_model extends CI_Model
 		$query = $this->db
 			->from('turns')
 			->join('patients', 'patients.id = turns.patient_id')
+			->join('reference_doctors', 'reference_doctors.id = patients.referred_by', 'left')
 			->join('sections', 'sections.id = turns.section_id', 'left')
 			->join('staff', 'staff.id = turns.staff_id', 'left')
 			->where('turns.turn_date >=', $filters['date_from'])

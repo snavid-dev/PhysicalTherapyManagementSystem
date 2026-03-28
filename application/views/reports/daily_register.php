@@ -57,6 +57,10 @@ $income_total = 0.00;
 foreach ($income_by_section as $section_income) {
 	$income_total += (float) ($section_income['total_cash'] ?? 0);
 }
+
+$can_open_turn = $this->auth->has_permission('manage_turns');
+$can_open_patient = $this->auth->has_permission('manage_patients');
+$can_open_reference_doctor = $this->auth->has_permission('manage_reference_doctors');
 ?>
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -229,6 +233,7 @@ foreach ($income_by_section as $section_income) {
 						<th>#</th>
 						<th class="col-date"><?= t('Date') ?></th>
 						<th><?= t('Patient') ?></th>
+						<th><?= t('reference_doctor') ?></th>
 						<th><?= t('Gender') ?></th>
 						<th><?= t('section') ?></th>
 						<th><?= t('Staff') ?></th>
@@ -246,6 +251,7 @@ foreach ($income_by_section as $section_income) {
 					<?php foreach ($turns as $turn) : ?>
 						<?php
 						$turn_id = (int) ($turn['id'] ?? 0);
+						$patient_id = (int) ($turn['patient_id'] ?? 0);
 						$payment_type = (string) ($turn['payment_type'] ?? 'cash');
 						$fee = (float) ($turn['fee'] ?? 0);
 						$wallet_used = (float) ($turn['wallet_deducted'] ?? 0);
@@ -268,11 +274,40 @@ foreach ($income_by_section as $section_income) {
 
 						$note_value = trim((string) ($turn['notes'] ?? ''));
 						$badge_class = $payment_badges[$payment_type] ?? $payment_badges['cash'];
+						$turn_url = $can_open_turn && $turn_id > 0 ? base_url('turns/' . $turn_id . '/edit') : NULL;
+						$patient_url = $can_open_patient && $patient_id > 0 ? base_url('patients/' . $patient_id) : NULL;
+						$reference_doctor_url = $can_open_reference_doctor && !empty($turn['reference_doctor_id']) ? base_url('reference_doctors/profile/' . (int) $turn['reference_doctor_id']) : NULL;
 						?>
 						<tr>
-							<td><?= !empty($turn['turn_number']) ? format_number($turn['turn_number']) : '&mdash;' ?></td>
+							<td>
+								<?php if (!empty($turn['turn_number']) && $turn_url) : ?>
+									<a href="<?= $turn_url ?>" class="fw-semibold text-decoration-none"><?= format_number($turn['turn_number']) ?></a>
+								<?php elseif (!empty($turn['turn_number'])) : ?>
+									<?= format_number($turn['turn_number']) ?>
+								<?php else : ?>
+									&mdash;
+								<?php endif; ?>
+							</td>
 							<td class="col-date"><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
-							<td><?= html_escape($turn['patient_name']) ?></td>
+							<td>
+								<?php if ($patient_url) : ?>
+									<a href="<?= $patient_url ?>" class="fw-semibold text-decoration-none"><?= html_escape($turn['patient_name']) ?></a>
+									<div class="mt-2"><a href="<?= $patient_url ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a></div>
+								<?php else : ?>
+									<?= html_escape($turn['patient_name']) ?>
+								<?php endif; ?>
+							</td>
+							<td>
+								<?php if (!empty($turn['reference_doctor_name'])) : ?>
+									<?php if ($reference_doctor_url) : ?>
+										<a href="<?= $reference_doctor_url ?>" class="text-decoration-none"><?= html_escape($turn['reference_doctor_name']) ?></a>
+									<?php else : ?>
+										<?= html_escape($turn['reference_doctor_name']) ?>
+									<?php endif; ?>
+								<?php else : ?>
+									&mdash;
+								<?php endif; ?>
+							</td>
 							<td><?= html_escape(t(ucfirst(strtolower((string) ($turn['gender'] ?? ''))))) ?></td>
 							<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>
 							<td><?= !empty($turn['staff_name']) ? html_escape($turn['staff_name']) : '&mdash;' ?></td>
@@ -299,13 +334,13 @@ foreach ($income_by_section as $section_income) {
 					<?php endforeach; ?>
 				<?php else : ?>
 					<tr>
-						<td colspan="13" class="text-center text-muted"><?= t('No turns in this range.') ?></td>
+						<td colspan="14" class="text-center text-muted"><?= t('No turns in this range.') ?></td>
 					</tr>
 				<?php endif; ?>
 				</tbody>
 				<tfoot>
 					<tr>
-						<td colspan="6" class="fw-semibold"><?= t('Total:') ?></td>
+						<td colspan="7" class="fw-semibold"><?= t('Total:') ?></td>
 						<td class="fw-semibold">
 							<span class="d-block small text-muted"><?= t('fee') ?></span>
 							<?= format_amount($summary['total_fees'] ?? 0) ?>

@@ -130,6 +130,7 @@ foreach ($income_by_section as $section_income) {
 				<th>#</th>
 				<th><?= t('Date') ?></th>
 				<th><?= t('Patient') ?></th>
+				<th><?= t('reference_doctor') ?></th>
 				<th><?= t('Gender') ?></th>
 				<th><?= t('section') ?></th>
 				<th><?= t('Staff') ?></th>
@@ -171,6 +172,7 @@ foreach ($income_by_section as $section_income) {
 					<td><?= !empty($turn['turn_number']) ? format_number($turn['turn_number']) : '-' ?></td>
 					<td><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
 					<td><?= html_escape($turn['patient_name']) ?></td>
+					<td><?= !empty($turn['reference_doctor_name']) ? html_escape($turn['reference_doctor_name']) : '-' ?></td>
 					<td><?= html_escape(t(ucfirst(strtolower((string) ($turn['gender'] ?? ''))))) ?></td>
 					<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '-' ?></td>
 					<td><?= !empty($turn['staff_name']) ? html_escape($turn['staff_name']) : '-' ?></td>
@@ -191,13 +193,13 @@ foreach ($income_by_section as $section_income) {
 			<?php endforeach; ?>
 		<?php else : ?>
 			<tr>
-				<td colspan="13"><?= t('No turns in this range.') ?></td>
+				<td colspan="14"><?= t('No turns in this range.') ?></td>
 			</tr>
 		<?php endif; ?>
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="6"><?= t('Total:') ?></td>
+				<td colspan="7"><?= t('Total:') ?></td>
 				<td><span class="tfoot-label"><?= t('fee') ?></span><?= format_amount($summary['total_fees'] ?? 0) ?></td>
 				<td><span class="tfoot-label"><?= t('discount') ?></span><?= format_amount($summary['total_discounts'] ?? 0) ?></td>
 				<td></td>
