@@ -10,7 +10,6 @@ class Patients extends Authenticated_Controller
 		$this->load->model('Turn_model');
 		$this->load->model('Wallet_model');
 		$this->load->model('Debt_model');
-		$this->load->model('Payment_model');
 		$this->load->model('Safe_model');
 	}
 
@@ -52,7 +51,6 @@ class Patients extends Authenticated_Controller
 		$patient = $this->Patient_model->get_by_id($id);
 		$patient_diagnoses = $this->Patient_model->get_diagnoses_for_patient($id);
 		$turns = $this->Turn_model->get_turns_for_patient($id);
-		$payments = $this->Patient_model->payment_history($id);
 		$wallet_balance = $this->Wallet_model->get_balance($id);
 		$wallet_transactions = $this->Wallet_model->get_transactions($id);
 		$open_debts = $this->Debt_model->get_open_debts($id);
@@ -65,13 +63,12 @@ class Patients extends Authenticated_Controller
 			'patient' => $patient,
 			'patient_diagnoses' => $patient_diagnoses,
 			'turns' => $turns,
-			'payments' => $payments,
 			'wallet_balance' => $wallet_balance,
 			'wallet_transactions' => $wallet_transactions,
 			'open_debts' => $open_debts,
 			'total_open_debt' => $total_open_debt,
-			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $payments, $wallet_balance, $total_open_debt),
-			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns, $payments),
+			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt),
+			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns),
 		));
 	}
 
@@ -225,14 +222,16 @@ class Patients extends Authenticated_Controller
 		}
 
 		$payment_note = trim(t('Debt payment from patient profile') . ($note ? ' - ' . $note : ''));
-		$this->Payment_model->create(array(
-			'patient_id' => (int) $id,
-			'payment_date' => date('Y-m-d'),
-			'amount' => $applied_amount,
-			'payment_method' => $payment_method,
-			'reference_number' => NULL,
-			'notes' => $payment_note,
-		));
+
+		if (!$this->record_debt_payment($id, $applied_amount, $payment_method, $payment_note)) {
+			$this->db->trans_rollback();
+			$db_error = $this->db->error();
+			$message = t('Unable to record debt payment right now.');
+			if (ENVIRONMENT !== 'production' && !empty($db_error['message'])) {
+				$message .= ' ' . $db_error['message'];
+			}
+			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
+		}
 
 		if ($this->db->trans_status() === FALSE) {
 			$this->db->trans_rollback();
@@ -434,25 +433,10 @@ class Patients extends Authenticated_Controller
 		}, $debts);
 	}
 
-	protected function normalize_payments_rows(array $payments)
-	{
-		return array_map(static function ($payment) {
-			return array(
-				'id' => (int) $payment['id'],
-				'payment_date' => to_shamsi((string) $payment['payment_date']),
-				'amount' => (float) $payment['amount'],
-				'payment_method' => ucfirst((string) ($payment['payment_method'] ?? 'cash')),
-				'reference_number' => (string) ($payment['reference_number'] ?? ''),
-				'notes' => (string) ($payment['notes'] ?? ''),
-			);
-		}, $payments);
-	}
-
 	protected function financial_profile_payload($patient_id)
 	{
 		$wallet_transactions = $this->Wallet_model->get_transactions($patient_id);
 		$turns = $this->Turn_model->get_turns_for_patient($patient_id);
-		$payments = $this->Patient_model->payment_history($patient_id);
 		$wallet_balance = (float) $this->Wallet_model->get_balance($patient_id);
 		$open_debts = $this->Debt_model->get_open_debts($patient_id);
 		$total_open_debt = (float) $this->Debt_model->get_total_open_debt($patient_id);
@@ -461,20 +445,18 @@ class Patients extends Authenticated_Controller
 			'wallet_balance' => $wallet_balance,
 			'wallet_transactions' => $this->normalize_wallet_transactions_rows($wallet_transactions),
 			'open_debts' => $this->normalize_open_debts_rows($open_debts),
-			'payments' => $this->normalize_payments_rows($payments),
 			'total_open_debt' => $total_open_debt,
-			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $payments, $wallet_balance, $total_open_debt),
-			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns, $payments),
+			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt),
+			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns),
 		);
 	}
 
-	protected function build_financial_summary(array $wallet_transactions, array $turns, array $payments, $wallet_balance, $total_open_debt)
+	protected function build_financial_summary(array $wallet_transactions, array $turns, $wallet_balance, $total_open_debt)
 	{
 		$wallet_topups = 0.00;
 		$wallet_deductions = 0.00;
 		$turn_cash_total = 0.00;
 		$turn_debt_total = 0.00;
-		$payments_total = 0.00;
 
 		foreach ($wallet_transactions as $transaction) {
 			if (($transaction['type'] ?? '') === 'topup') {
@@ -492,22 +474,17 @@ class Patients extends Authenticated_Controller
 			$turn_debt_total += max(0, (float) ($turn['fee'] ?? 0) - (float) ($turn['wallet_deducted'] ?? 0) - (float) ($turn['cash_collected'] ?? 0));
 		}
 
-		foreach ($payments as $payment) {
-			$payments_total += (float) ($payment['amount'] ?? 0);
-		}
-
 		return array(
 			'wallet_balance' => (float) $wallet_balance,
 			'total_open_debt' => (float) $total_open_debt,
 			'wallet_topups' => $wallet_topups,
 			'wallet_deductions' => $wallet_deductions,
-			'direct_payments' => $payments_total,
 			'turn_cash_total' => $turn_cash_total,
 			'turn_debt_total' => $turn_debt_total,
 		);
 	}
 
-	protected function build_financial_timeline(array $wallet_transactions, array $turns, array $payments)
+	protected function build_financial_timeline(array $wallet_transactions, array $turns)
 	{
 		$timeline = array();
 
@@ -560,32 +537,58 @@ class Patients extends Authenticated_Controller
 			);
 		}
 
-		foreach ($payments as $payment) {
-			$payment_method = ucfirst((string) ($payment['payment_method'] ?? 'cash'));
-			$detail_parts = array(t('Payment Method') . ': ' . t($payment_method));
-
-			if (!empty($payment['reference_number'])) {
-				$detail_parts[] = t('Reference Number') . ': ' . $payment['reference_number'];
-			}
-
-			if (!empty($payment['notes'])) {
-				$detail_parts[] = $payment['notes'];
-			}
-
-			$timeline[] = array(
-				'occurred_at' => to_shamsi((string) $payment['payment_date'] . ' 00:00:00', 'Y/m/d H:i'),
-				'source' => 'payment',
-				'badge' => 'primary',
-				'label' => t('direct_payment_entry'),
-				'amount' => (float) ($payment['amount'] ?? 0),
-				'detail' => implode(' | ', $detail_parts),
-			);
-		}
-
 		usort($timeline, static function ($left, $right) {
 			return strcmp((string) $right['occurred_at'], (string) $left['occurred_at']);
 		});
 
 		return $timeline;
+	}
+
+	protected function record_debt_payment($patient_id, $amount, $payment_method, $note)
+	{
+		$payment_date = date('Y-m-d');
+		$payment_data = array(
+			'patient_id' => (int) $patient_id,
+			'payment_date' => $payment_date,
+			'amount' => round((float) $amount, 2),
+			'payment_method' => (string) $payment_method,
+			'reference_number' => NULL,
+			'notes' => $note,
+		);
+
+		$this->db->insert('payments', $payment_data);
+		$payment_id = (int) $this->db->insert_id();
+
+		if ($payment_id <= 0) {
+			return FALSE;
+		}
+
+		$safe_note = trim((string) $note);
+		if ($safe_note === '') {
+			$safe_note = safe_patient_payment_note($payment_id);
+		}
+
+		return $this->Safe_model->log_transaction(
+			'in',
+			'patient_payment',
+			$payment_data['amount'],
+			$payment_id,
+			'payments',
+			$safe_note,
+			$this->session->userdata('user_id'),
+			$this->payment_datetime_from_date($payment_date)
+		) !== FALSE;
+	}
+
+	protected function payment_datetime_from_date($date)
+	{
+		$date = trim((string) $date);
+		$parsed = DateTime::createFromFormat('Y-m-d', $date);
+
+		if ($parsed && $parsed->format('Y-m-d') === $date) {
+			return $date . ' 12:00:00';
+		}
+
+		return NULL;
 	}
 }

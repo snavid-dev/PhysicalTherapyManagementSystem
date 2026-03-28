@@ -405,7 +405,6 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(2, 'manage_users', 'users'),
 	(3, 'manage_roles', 'roles'),
 	(4, 'manage_turns', 'turns'),
-	(5, 'manage_payments', 'payments'),
 	(6, 'view_reports', 'reports'),
 	(7, 'manage_leaves', 'leaves'),
 	(8, 'manage_staff', 'staff'),
@@ -417,9 +416,9 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(14, 'manage_safe', 'safe');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14),
+	(1, 1), (1, 2), (1, 3), (1, 4), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14),
 	(2, 1), (2, 4), (2, 6), (2, 7),
-	(3, 1), (3, 4), (3, 5), (3, 6);
+	(3, 1), (3, 4), (3, 6);
 
 INSERT INTO `expense_categories` (`name`, `name_fa`) VALUES
 	('Staff Salary Payment', 'پرداخت معاش کارمند'),

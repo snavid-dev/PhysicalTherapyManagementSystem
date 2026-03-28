@@ -53,7 +53,7 @@ $is_paid = $record['status'] === 'paid';
 		<div class="card mb-4">
 			<div class="card-body">
 				<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-					<h2 class="h5 mb-0"><?= t('payment_history') ?></h2>
+					<h2 class="h5 mb-0"><?= t('salary_history_payments') ?></h2>
 					<div class="text-muted"><?= t('total_paid') ?>: <strong id="totalPaidValue"><?= format_number($record['total_paid'], 2) ?></strong></div>
 				</div>
 				<div class="table-responsive">

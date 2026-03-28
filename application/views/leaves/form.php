@@ -12,7 +12,7 @@
 			<div class="row g-3">
 				<div class="col-md-6">
 					<label class="form-label"><?= t('Therapist') ?></label>
-					<select name="doctor_id" class="form-select">
+					<select name="doctor_id" class="form-select s2-select">
 						<option value=""><?= t('Select') ?></option>
 						<?php $selected_doctor = (int) set_value('doctor_id', $leave['doctor_id'] ?? 0); ?>
 						<?php foreach ($therapists as $therapist) : ?>

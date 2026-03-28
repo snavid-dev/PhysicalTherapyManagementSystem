@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
 	<div>
 		<h1 class="h3 mb-1"><?= t('Reports') ?></h1>
-		<p class="text-muted mb-0"><?= t('Simple reporting for activity and payments.') ?></p>
+		<p class="text-muted mb-0"><?= t('Simple reporting for clinic activity.') ?></p>
 	</div>
 </div>
 
@@ -34,14 +34,13 @@
 </div>
 
 <div class="row g-3 mb-4">
-	<div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Turns') ?></div><div class="stat-value"><?= (int) $summary['turns'] ?></div></div></div></div>
-	<div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Payments') ?></div><div class="stat-value">$<?= number_format((float) $summary['payments'], 2) ?></div></div></div></div>
-	<div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Doctor Leaves') ?></div><div class="stat-value"><?= (int) $summary['leaves'] ?></div></div></div></div>
-	<div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('New Patients') ?></div><div class="stat-value"><?= (int) $summary['new_patients'] ?></div></div></div></div>
+	<div class="col-md-4"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Turns') ?></div><div class="stat-value"><?= (int) $summary['turns'] ?></div></div></div></div>
+	<div class="col-md-4"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Doctor Leaves') ?></div><div class="stat-value"><?= (int) $summary['leaves'] ?></div></div></div></div>
+	<div class="col-md-4"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('New Patients') ?></div><div class="stat-value"><?= (int) $summary['new_patients'] ?></div></div></div></div>
 </div>
 
 <div class="row g-4">
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div class="card">
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Turns') ?></h2>
@@ -55,21 +54,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="col-lg-4">
-		<div class="card">
-			<div class="card-body">
-				<h2 class="h5 mb-3"><?= t('Payments') ?></h2>
-				<ul class="list-group list-group-flush">
-					<?php if ($payments) : foreach ($payments as $payment) : ?>
-						<li class="list-group-item px-0"><?= html_escape(to_shamsi($payment['payment_date'])) ?> | <?= html_escape($payment['first_name'] . ' ' . $payment['last_name']) ?> | $<?= number_format((float) $payment['amount'], 2) ?></li>
-					<?php endforeach; else : ?>
-						<li class="list-group-item px-0 text-muted"><?= t('No payments in this range.') ?></li>
-					<?php endif; ?>
-				</ul>
-			</div>
-		</div>
-	</div>
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div class="card">
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Doctor Leaves') ?></h2>

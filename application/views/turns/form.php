@@ -81,7 +81,7 @@ $staff_payload = array_map(static function ($staff_member) {
 									<input type="text" class="form-control" value="<?= html_escape($selected_patient_name) ?>" readonly>
 									<input type="hidden" name="patient_id" id="patientSelect" value="<?= $selected_patient_id ?>">
 								<?php else : ?>
-									<select name="patient_id" id="patientSelect" class="form-select">
+									<select name="patient_id" id="patientSelect" class="form-select s2-select" data-placeholder="<?= html_escape(t('search_patient')) ?>">
 										<option value=""><?= t('Select') ?></option>
 										<?php foreach ($patients as $patient) : ?>
 											<option value="<?= $patient['id'] ?>" <?= $selected_patient_id === (int) $patient['id'] ? 'selected' : '' ?>><?= html_escape($patient_display_name($patient)) ?></option>
@@ -92,7 +92,7 @@ $staff_payload = array_map(static function ($staff_member) {
 							</div>
 							<div class="col-lg-6">
 								<label class="form-label"><?= t('section') ?></label>
-								<select name="section_id" id="sectionSelect" class="form-select">
+								<select name="section_id" id="sectionSelect" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_section')) ?>">
 									<option value=""><?= t('Select') ?></option>
 									<?php foreach ($sections as $section) : ?>
 										<option value="<?= $section['id'] ?>" <?= $selected_section_id === (int) $section['id'] ? 'selected' : '' ?>><?= html_escape(t($section['name'])) ?></option>
@@ -148,7 +148,7 @@ $staff_payload = array_map(static function ($staff_member) {
 						<div class="row g-3">
 							<div class="col-lg-4">
 								<label class="form-label"><?= t('staff_member') ?></label>
-								<select name="staff_id" id="staffSelect" class="form-select">
+								<select name="staff_id" id="staffSelect" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_staff')) ?>">
 									<option value=""><?= t('Select') ?></option>
 									<?php foreach ($staff_members as $staff_member) : ?>
 										<option value="<?= $staff_member['id'] ?>" <?= $selected_staff_id === (int) $staff_member['id'] ? 'selected' : '' ?>><?= html_escape($staff_member['full_name']) ?></option>
@@ -590,6 +590,9 @@ $staff_payload = array_map(static function ($staff_member) {
 		}
 
 		staffSelect.innerHTML = options.join('');
+		if (window.jQuery) {
+			window.jQuery(staffSelect).trigger('change.select2');
+		}
 	}
 
 	function togglePanels() {

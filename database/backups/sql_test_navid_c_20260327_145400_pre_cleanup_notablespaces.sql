@@ -463,7 +463,6 @@ INSERT INTO `permissions` VALUES
 (2,'manage_users','users'),
 (3,'manage_roles','roles'),
 (4,'manage_turns','turns'),
-(5,'manage_payments','payments'),
 (6,'view_reports','reports'),
 (7,'manage_leaves','leaves'),
 (8,'manage_staff','staff'),

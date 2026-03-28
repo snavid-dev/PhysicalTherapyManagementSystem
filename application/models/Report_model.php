@@ -5,16 +5,8 @@ class Report_model extends CI_Model
 {
 	public function summary($from, $to)
 	{
-		$payments = $this->db
-			->select_sum('amount')
-			->where('payment_date >=', $from)
-			->where('payment_date <=', $to)
-			->get('payments')
-			->row_array();
-
 		return array(
 			'turns' => (int) $this->db->where('turn_date >=', $from)->where('turn_date <=', $to)->count_all_results('turns'),
-			'payments' => (float) ($payments['amount'] ?: 0),
 			'leaves' => (int) $this->db->where('start_date >=', $from)->where('start_date <=', $to)->count_all_results('doctor_leaves'),
 			'new_patients' => (int) $this->db->where('DATE(created_at) >=', $from)->where('DATE(created_at) <=', $to)->count_all_results('patients'),
 		);
@@ -31,19 +23,6 @@ class Report_model extends CI_Model
 			->where('turns.turn_date <=', $to)
 			->order_by('turns.turn_date', 'desc')
 			->order_by('turns.turn_time', 'desc')
-			->get()
-			->result_array();
-	}
-
-	public function payments($from, $to)
-	{
-		return $this->db
-			->select('payments.*, patients.first_name, patients.last_name')
-			->from('payments')
-			->join('patients', 'patients.id = payments.patient_id')
-			->where('payments.payment_date >=', $from)
-			->where('payments.payment_date <=', $to)
-			->order_by('payments.payment_date', 'desc')
 			->get()
 			->result_array();
 	}
@@ -107,7 +86,6 @@ class Report_model extends CI_Model
 			->row_array();
 
 		$manual_wallet_topups = $this->get_manual_wallet_topups_total($filters);
-		$direct_payments = $this->get_direct_patient_payments_total($filters);
 		$total_wallet_topups = round((float) ($summary_row['total_turn_topups'] ?? 0) + $manual_wallet_topups, 2);
 
 		$turn_rows = $this->daily_register_base_query($filters)
@@ -157,8 +135,7 @@ class Report_model extends CI_Model
 			'total_turn_topups' => (float) ($summary_row['total_turn_topups'] ?? 0),
 			'total_manual_wallet_topups' => $manual_wallet_topups,
 			'total_wallet_topups' => $total_wallet_topups,
-			'total_direct_payments' => $direct_payments,
-			'total_patient_income' => round((float) ($summary_row['total_cash'] ?? 0) + $total_wallet_topups + $direct_payments, 2),
+			'total_patient_income' => round((float) ($summary_row['total_cash'] ?? 0) + $total_wallet_topups, 2),
 			'total_wallet_used' => (float) ($summary_row['total_wallet_used'] ?? 0),
 			'total_discounts' => (float) ($summary_row['total_discounts'] ?? 0),
 			'total_debts' => round($total_debts, 2),
@@ -212,28 +189,6 @@ class Report_model extends CI_Model
 			'section_id' => $section_id > 0 ? $section_id : NULL,
 			'gender' => $gender,
 		);
-	}
-
-	protected function get_direct_patient_payments_total($filters)
-	{
-		if ($filters['section_id'] !== NULL || !$this->db->table_exists('payments')) {
-			return 0.00;
-		}
-
-		$query = $this->db
-			->select('COALESCE(SUM(payments.amount), 0) AS total_amount', FALSE)
-			->from('payments')
-			->join('patients', 'patients.id = payments.patient_id')
-			->where('payments.payment_date >=', $filters['date_from'])
-			->where('payments.payment_date <=', $filters['date_to']);
-
-		if ($filters['gender'] !== NULL) {
-			$query->where('patients.gender', $filters['gender']);
-		}
-
-		$row = $query->get()->row_array();
-
-		return round((float) ($row['total_amount'] ?? 0), 2);
 	}
 
 	protected function get_manual_wallet_topups_total($filters)

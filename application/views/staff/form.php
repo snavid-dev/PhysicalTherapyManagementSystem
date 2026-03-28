@@ -33,7 +33,7 @@
 				<div class="col-md-4">
 					<label class="form-label"><?= t('staff_type') ?></label>
 					<?php $selected_type = (int) set_value('staff_type_id', $staff['staff_type_id'] ?? 0); ?>
-					<select name="staff_type_id" id="staffTypeSelect" class="form-select">
+					<select name="staff_type_id" id="staffTypeSelect" class="form-select s2-select">
 						<option value=""><?= t('Select') ?></option>
 						<?php foreach ($staff_types as $staff_type) : ?>
 							<option value="<?= $staff_type['id'] ?>" data-type-name="<?= html_escape($staff_type['name']) ?>" <?= $selected_type === (int) $staff_type['id'] ? 'selected' : '' ?>><?= html_escape(t($staff_type['name'])) ?></option>
@@ -44,7 +44,7 @@
 				<div class="col-md-4" id="sectionField">
 					<label class="form-label"><?= t('section') ?></label>
 					<?php $selected_sections = set_value('section_ids[]', $selected_section_ids ?? array()); ?>
-					<select name="section_ids[]" id="sectionSelect" class="form-select" multiple size="5">
+					<select name="section_ids[]" id="sectionSelect" class="form-select s2-select-multiple" multiple size="5">
 						<?php foreach ($sections as $section) : ?>
 							<option value="<?= $section['id'] ?>" <?= in_array((string) $section['id'], array_map('strval', (array) $selected_sections), TRUE) ? 'selected' : '' ?>>
 								<?= html_escape(t($section['name'])) ?> (<?= format_amount($section['default_fee']) ?>)
@@ -75,7 +75,7 @@
 				<div class="col-md-4">
 					<label class="form-label"><?= t('linked_user') ?></label>
 					<?php $selected_user = (int) set_value('user_id', $staff['user_id'] ?? 0); ?>
-					<select name="user_id" class="form-select">
+					<select name="user_id" class="form-select s2-select">
 						<option value=""><?= t('Auto Create Inactive User') ?></option>
 						<?php foreach ($users as $user) : ?>
 							<option value="<?= $user['id'] ?>" <?= $selected_user === (int) $user['id'] ? 'selected' : '' ?>><?= html_escape($user['first_name'] . ' ' . $user['last_name'] . ' (' . $user['username'] . ')') ?></option>

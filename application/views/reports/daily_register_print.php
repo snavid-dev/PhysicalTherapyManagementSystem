@@ -231,10 +231,6 @@ foreach ($income_by_section as $section_income) {
 			<div><?= html_escape(t('Patients')) ?>: <?= format_amount($summary['total_manual_wallet_topups'] ?? 0) ?></div>
 		</div>
 		<div class="summary-box">
-			<strong><?= html_escape(t('total_direct_payments')) ?></strong>
-			<?= format_amount($summary['total_direct_payments'] ?? 0) ?>
-		</div>
-		<div class="summary-box">
 			<strong><?= html_escape(t('total_patient_income')) ?></strong>
 			<?= format_amount($summary['total_patient_income'] ?? 0) ?>
 		</div>

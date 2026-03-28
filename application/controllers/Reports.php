@@ -41,7 +41,6 @@ class Reports extends Authenticated_Controller
 			'to' => $to_input,
 			'summary' => $this->Report_model->summary($from, $to),
 			'turns' => $this->Report_model->turns($from, $to),
-			'payments' => $this->Report_model->payments($from, $to),
 			'leaves' => $this->Report_model->leaves($from, $to),
 		));
 	}

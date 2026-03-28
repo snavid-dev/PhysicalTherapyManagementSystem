@@ -16,7 +16,7 @@
 			<div class="row g-3">
 				<div class="col-md-3">
 					<label class="form-label"><?= t('expense_category') ?></label>
-					<select name="category_id" class="form-select">
+					<select name="category_id" class="form-select s2-select">
 						<option value=""><?= t('Select') ?></option>
 						<?php foreach ($categories as $category) : ?>
 							<option value="<?= $category['id'] ?>" <?= (int) $filters['category_id'] === (int) $category['id'] ? 'selected' : '' ?>>
@@ -35,7 +35,7 @@
 				</div>
 				<div class="col-md-3">
 					<label class="form-label"><?= t('staff') ?></label>
-					<select name="staff_id" class="form-select">
+					<select name="staff_id" class="form-select s2-select">
 						<option value=""><?= t('Select') ?></option>
 						<?php foreach ($staff_members as $staff_member) : ?>
 							<option value="<?= $staff_member['id'] ?>" <?= (int) $filters['staff_id'] === (int) $staff_member['id'] ? 'selected' : '' ?>>

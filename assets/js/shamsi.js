@@ -66,66 +66,99 @@
 		}
 	}
 
-	function basePickerOptions(format) {
-		return {
-			format: format,
-			autoClose: true,
-			initialValue: false,
-			observer: true,
-			autoCloseDelay: 150,
-			calendar: {
-				persian: {
-					locale: 'en'
-				}
+	/**
+	 * Jalali Datepicker global init for CANIN project.
+	 * Apply to any input with class .shamsi-date
+	 * Format: YYYY/MM/DD
+	 * Always Western digits.
+	 */
+	function initJalaliDatepicker(selector) {
+		if (!$) {
+			return;
+		}
+
+		$(selector).each(function () {
+			var $input = $(this);
+
+			if ($input.hasClass('jalali-init')) {
+				return;
 			}
-		};
+
+			$input.addClass('jalali-init');
+
+			if ($.fn.datepicker) {
+				$input.datepicker({
+					format: 'yyyy/mm/dd',
+					autoclose: true,
+					calendarType: 'jalali',
+					language: 'fa-ir-la',
+					todayHighlight: true,
+					clearBtn: true
+				});
+				return;
+			}
+
+			if ($.fn.persianDatepicker) {
+				$input.persianDatepicker({
+					format: 'YYYY/MM/DD',
+					autoClose: true,
+					initialValue: false,
+					persianDigit: false,
+					calendar: {
+						persian: { locale: 'en' }
+					},
+					navigator: {
+						enabled: true,
+						scroll: { enabled: false },
+						title: { enabled: true }
+					},
+					toolbox: {
+						enabled: true,
+						todayButton: { enabled: true },
+						submitButton: { enabled: true }
+					}
+				});
+			}
+		});
 	}
 
-	function applyPicker($elements, options, marker) {
+	function initShamsiMonthpicker(selector) {
 		if (!$ || !$.fn || typeof $.fn.persianDatepicker !== 'function') {
 			return;
 		}
 
-		$elements.each(function () {
+		$(selector).each(function () {
 			var $input = $(this);
 
-			if ($input.attr(marker) === '1') {
+			if ($input.attr('data-shamsi-month-initialized') === '1') {
 				return;
 			}
 
-			$input.attr(marker, '1');
-			$input.persianDatepicker(options);
+			$input.attr('data-shamsi-month-initialized', '1');
+			$input.persianDatepicker({
+				format: 'YYYY/MM',
+				autoClose: true,
+				initialValue: false,
+				persianDigit: false,
+				calendar: {
+					persian: {
+						locale: 'en'
+					}
+				},
+				dayPicker: {
+					enabled: false
+				},
+				monthPicker: {
+					enabled: true
+				},
+				yearPicker: {
+					enabled: true
+				}
+			});
 		});
 	}
 
-	function initShamsiDatepicker(selector) {
-		if (!$) {
-			return;
-		}
-
-		applyPicker($(selector), basePickerOptions('YYYY/MM/DD'), 'data-shamsi-initialized');
-	}
-
-	function initShamsiMonthpicker(selector) {
-		if (!$) {
-			return;
-		}
-
-		var options = basePickerOptions('YYYY/MM');
-		options.dayPicker = {
-			enabled: false
-		};
-		options.monthPicker = {
-			enabled: true
-		};
-		options.yearPicker = {
-			enabled: true
-		};
-
-		applyPicker($(selector), options, 'data-shamsi-month-initialized');
-	}
-
-	window.initShamsiDatepicker = initShamsiDatepicker;
+	window.initJalaliDatepicker = initJalaliDatepicker;
 	window.initShamsiMonthpicker = initShamsiMonthpicker;
 	window.formatShamsiDate = formatPersianDate;
 
@@ -133,13 +166,13 @@
 		return;
 	}
 
-	$(function () {
-		initShamsiDatepicker('.shamsi-date');
+	$(document).ready(function () {
+		initJalaliDatepicker('.shamsi-date');
 		initShamsiMonthpicker('.shamsi-month');
 	});
 
-	$(document).on('focus', '.shamsi-date', function () {
-		initShamsiDatepicker(this);
+	$(document).on('focus', '.shamsi-date:not(.jalali-init)', function () {
+		initJalaliDatepicker(this);
 	});
 
 	$(document).on('focus', '.shamsi-month', function () {

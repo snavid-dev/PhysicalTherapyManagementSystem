@@ -31,7 +31,7 @@ foreach ($records as $record) {
 				</div>
 				<div class="col-md-4">
 					<label class="form-label"><?= t('staff') ?></label>
-					<select name="staff_id" class="form-select">
+					<select name="staff_id" class="form-select s2-select">
 						<option value=""><?= t('Select') ?></option>
 						<?php foreach ($staff_members as $staff_member) : ?>
 							<option value="<?= $staff_member['id'] ?>" <?= (int) $filters['staff_id'] === (int) $staff_member['id'] ? 'selected' : '' ?>>
