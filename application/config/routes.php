@@ -98,6 +98,8 @@ $route['salaries/store-payment'] = 'salaries/store_payment';
 $route['salaries/get-calculation'] = 'salaries/get_calculation';
 
 $route['reports'] = 'Reports/index';
+$route['reports/daily-register'] = 'reports/daily_register';
+$route['reports/daily-register/print'] = 'reports/daily_register_print';
 
 $route['leaves'] = 'Leaves/index';
 $route['leaves/create'] = 'Leaves/create';

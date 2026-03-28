@@ -67,7 +67,35 @@ class Payment_model extends CI_Model
 
 	public function update($id, $data)
 	{
-		return $this->db->where('id', (int) $id)->update('payments', $data);
+		$id = (int) $id;
+		$note = trim((string) ($data['notes'] ?? ''));
+
+		if ($note === '') {
+			$note = safe_patient_payment_note($id);
+		}
+
+		$this->db->trans_begin();
+
+		$updated = $this->db->where('id', $id)->update('payments', $data);
+		$safe_synced = $updated ? $this->Safe_model->sync_reference_transaction(
+			'in',
+			'patient_payment',
+			$data['amount'] ?? 0,
+			$id,
+			'payments',
+			$note,
+			$this->session->userdata('user_id'),
+			$this->datetime_from_date($data['payment_date'] ?? NULL)
+		) : FALSE;
+
+		if (!$updated || $safe_synced === FALSE || $this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
+
+		$this->db->trans_commit();
+
+		return TRUE;
 	}
 
 	public function delete($id)

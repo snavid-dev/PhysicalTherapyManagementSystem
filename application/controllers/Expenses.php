@@ -117,7 +117,11 @@ class Expenses extends Authenticated_Controller
 			return redirect('expenses/edit/' . $id);
 		}
 
-		$this->Expense_model->update($id, $this->expense_payload());
+		if (!$this->Expense_model->update($id, $this->expense_payload())) {
+			$this->session->set_flashdata('error', t('Unable to update expense right now.'));
+			return redirect('expenses/edit/' . $id);
+		}
+
 		$this->session->set_flashdata('success', t('Expense updated successfully.'));
 		redirect('expenses');
 	}
