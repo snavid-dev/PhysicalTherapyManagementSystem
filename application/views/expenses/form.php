@@ -23,7 +23,7 @@ $selected_staff_id = (int) set_value('staff_id', $expense['staff_id'] ?? 0);
 			<div class="row g-3">
 				<div class="col-md-6">
 					<label class="form-label"><?= t('expense_category') ?></label>
-					<select name="category_id" id="expenseCategory" class="form-select" <?= $read_only ? 'disabled' : '' ?>>
+					<select name="category_id" id="expenseCategory" class="form-select s2-select" <?= $read_only ? 'disabled' : '' ?>>
 						<option value=""><?= t('Select') ?></option>
 						<?php foreach ($categories as $category) : ?>
 							<?php $label = $current_locale === 'farsi' && !empty($category['name_fa']) ? $category['name_fa'] : $category['name']; ?>
@@ -47,7 +47,7 @@ $selected_staff_id = (int) set_value('staff_id', $expense['staff_id'] ?? 0);
 				</div>
 				<div class="col-md-6 d-none" id="staffWrap">
 					<label class="form-label"><?= t('staff') ?></label>
-					<select name="staff_id" class="form-select" <?= $read_only ? 'disabled' : '' ?>>
+					<select name="staff_id" class="form-select s2-select" <?= $read_only ? 'disabled' : '' ?>>
 						<option value=""><?= t('Select') ?></option>
 						<?php foreach ($staff_members as $staff_member) : ?>
 							<option value="<?= $staff_member['id'] ?>" <?= $selected_staff_id === (int) $staff_member['id'] ? 'selected' : '' ?>>

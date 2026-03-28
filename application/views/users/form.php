@@ -40,7 +40,7 @@
 				</div>
 				<div class="col-md-6">
 					<label class="form-label"><?= t('Role') ?></label>
-					<select name="role_id" class="form-select">
+					<select name="role_id" class="form-select s2-select">
 						<option value=""><?= t('Select') ?></option>
 						<?php $selected_role = (int) set_value('role_id', $user['role_id'] ?? 0); ?>
 						<?php foreach ($roles as $role) : ?>

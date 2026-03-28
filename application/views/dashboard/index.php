@@ -28,14 +28,13 @@
 			</div>
 		</div>
 	<?php endif; ?>
-	<div class="col-md-6 col-xl-2"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Patients') ?></div><div class="stat-value"><?= (int) $stats['patients'] ?></div></div></div></div>
-	<div class="col-md-6 col-xl-2"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Users') ?></div><div class="stat-value"><?= (int) $stats['users'] ?></div></div></div></div>
-	<div class="col-md-6 col-xl-2"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Today Turns') ?></div><div class="stat-value"><?= (int) $stats['today_turns'] ?></div></div></div></div>
-	<div class="col-md-6 col-xl-2"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('This Month Payments') ?></div><div class="stat-value"><?= format_number((float) $stats['payments_this_month'], 2) ?></div></div></div></div>
+	<div class="col-md-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Patients') ?></div><div class="stat-value"><?= (int) $stats['patients'] ?></div></div></div></div>
+	<div class="col-md-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Users') ?></div><div class="stat-value"><?= (int) $stats['users'] ?></div></div></div></div>
+	<div class="col-md-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Today Turns') ?></div><div class="stat-value"><?= (int) $stats['today_turns'] ?></div></div></div></div>
 </div>
 
 <div class="row g-4">
-	<div class="col-lg-7">
+	<div class="col-12">
 		<div class="card">
 			<div class="card-body">
 				<div class="d-flex justify-content-between align-items-center gap-3 mb-3">
@@ -55,29 +54,6 @@
 							</tr>
 						<?php endforeach; else : ?>
 							<tr><td colspan="4" class="text-muted"><?= t('No turns for today.') ?></td></tr>
-						<?php endif; ?>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="col-lg-5">
-		<div class="card">
-			<div class="card-body">
-				<h2 class="h5 mb-3"><?= t('Recent Payments') ?></h2>
-				<div class="table-responsive">
-					<table class="table align-middle">
-						<thead><tr><th><?= t('Date') ?></th><th><?= t('Patient') ?></th><th><?= t('Amount') ?></th></tr></thead>
-						<tbody>
-						<?php if ($recent_payments) : foreach ($recent_payments as $payment) : ?>
-							<tr>
-								<td><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
-								<td><?= html_escape($payment['first_name'] . ' ' . $payment['last_name']) ?></td>
-								<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
-							</tr>
-						<?php endforeach; else : ?>
-							<tr><td colspan="3" class="text-muted"><?= t('No payments yet.') ?></td></tr>
 						<?php endif; ?>
 						</tbody>
 					</table>

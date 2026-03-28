@@ -30,7 +30,6 @@ $discounts_payload = json_encode($discounts, JSON_UNESCAPED_UNICODE | JSON_UNESC
 $timeline_source_labels = array(
 	'wallet' => t('wallet_source'),
 	'turn' => t('turn_source'),
-	'payment' => t('payment_source'),
 );
 $timeline_amount_prefix = static function ($entry) {
 	$source = (string) ($entry['source'] ?? '');
@@ -38,10 +37,6 @@ $timeline_amount_prefix = static function ($entry) {
 
 	if ($source === 'wallet') {
 		return $badge === 'warning' ? '-' : '+';
-	}
-
-	if ($source === 'payment') {
-		return '+';
 	}
 
 	return '';
@@ -121,10 +116,6 @@ $timeline_amount_prefix = static function ($entry) {
 							<div class="financial-summary-card">
 								<span class="financial-summary-card__label"><?= t('wallet_deductions') ?></span>
 								<strong id="financialWalletDeductionsValue" class="financial-summary-card__value"><?= format_amount($financial_summary['wallet_deductions'] ?? 0) ?></strong>
-							</div>
-							<div class="financial-summary-card">
-								<span class="financial-summary-card__label"><?= t('direct_payments') ?></span>
-								<strong id="financialDirectPaymentsValue" class="financial-summary-card__value"><?= format_amount($financial_summary['direct_payments'] ?? 0) ?></strong>
 							</div>
 							<div class="financial-summary-card">
 								<span class="financial-summary-card__label"><?= t('turn_cash_total') ?></span>
@@ -394,36 +385,6 @@ $timeline_amount_prefix = static function ($entry) {
 				</div>
 			</div>
 		</div>
-		<div class="card secondary-log-card">
-			<div class="card-body">
-				<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
-					<div>
-						<h2 class="h5 mb-1"><?= t('Payment History') ?></h2>
-						<p class="text-muted mb-0"><?= t('payment_history_raw_hint') ?></p>
-					</div>
-					<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#paymentHistoryCollapse" aria-expanded="false" aria-controls="paymentHistoryCollapse">
-						<?= t('view_raw_log') ?>
-					</button>
-				</div>
-				<div class="collapse<?= empty($payments) ? ' show' : '' ?>" id="paymentHistoryCollapse">
-					<div class="table-responsive">
-						<table id="patientPaymentHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true" data-col-widths='["20%","20%","16%","44%"]'>
-							<thead><tr><th class="col-date"><?= t('Date') ?></th><th><?= t('Method') ?></th><th><?= t('Amount') ?></th><th><?= t('Reference Number') ?></th></tr></thead>
-							<tbody id="paymentHistoryBody">
-							<?php if ($payments) : foreach ($payments as $payment) : ?>
-								<tr>
-									<td class="col-date"><?= html_escape(to_shamsi($payment['payment_date'])) ?></td>
-									<td><?= html_escape(t(ucfirst((string) $payment['payment_method']))) ?></td>
-									<td>$<?= number_format((float) $payment['amount'], 2) ?></td>
-									<td><?= html_escape($payment['reference_number']) ?></td>
-								</tr>
-							<?php endforeach; endif; ?>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
 	</div>
 </div>
 
@@ -439,7 +400,7 @@ $timeline_amount_prefix = static function ($entry) {
 					<div id="discountModalFeedback" class="alert d-none mb-3"></div>
 					<div class="mb-3">
 						<label class="form-label"><?= t('section') ?></label>
-						<select name="section_id" class="form-select" required>
+						<select name="section_id" class="form-select s2-select" required>
 							<option value=""><?= t('Select') ?></option>
 							<?php foreach ($all_sections as $section) : ?>
 								<option value="<?= (int) $section['id'] ?>"><?= html_escape(t($section['name'])) ?></option>
@@ -476,7 +437,6 @@ $timeline_amount_prefix = static function ($entry) {
 	const transactionsBody = document.getElementById('walletTransactionsBody');
 	const openDebtTableBody = document.getElementById('openDebtTableBody');
 	const financialTimelineBody = document.getElementById('financialTimelineBody');
-	const paymentHistoryBody = document.getElementById('paymentHistoryBody');
 	const walletCollapseElement = document.getElementById('walletTransactionsCollapse');
 	const debtCollapseElement = document.getElementById('openDebtsCollapse');
 	const quickButtons = document.querySelectorAll('.wallet-quick-amount');
@@ -486,7 +446,6 @@ $timeline_amount_prefix = static function ($entry) {
 		total_open_debt: document.getElementById('financialOpenDebtValue'),
 		wallet_topups: document.getElementById('financialWalletTopupsValue'),
 		wallet_deductions: document.getElementById('financialWalletDeductionsValue'),
-		direct_payments: document.getElementById('financialDirectPaymentsValue'),
 		turn_cash_total: document.getElementById('financialTurnCashTotalValue'),
 		turn_debt_total: document.getElementById('financialTurnDebtTotalValue')
 	};
@@ -494,13 +453,11 @@ $timeline_amount_prefix = static function ($entry) {
 		noTransactions: <?= json_encode(t('no_transactions')) ?>,
 		noOpenDebt: <?= json_encode(t('no_open_debt')) ?>,
 		noFinancialEntries: <?= json_encode(t('no_financial_entries')) ?>,
-		noPayments: <?= json_encode(t('No payments found.')) ?>,
 		topup: <?= json_encode(t('topup')) ?>,
 		deduction: <?= json_encode(t('deduction')) ?>,
 		openStatus: <?= json_encode(t('open_status')) ?>,
 		walletSource: <?= json_encode(t('wallet_source')) ?>,
 		turnSource: <?= json_encode(t('turn_source')) ?>,
-		paymentSource: <?= json_encode(t('payment_source')) ?>,
 	};
 
 	function formatAmount(value) {
@@ -584,33 +541,6 @@ $timeline_amount_prefix = static function ($entry) {
 		}
 	}
 
-	function renderPayments(payments) {
-		if (!paymentHistoryBody) {
-			return;
-		}
-
-		if (!payments.length) {
-			paymentHistoryBody.innerHTML = '';
-			if (window.CANINDataTables) {
-				window.CANINDataTables.refreshTable('#patientPaymentHistoryTable');
-			}
-			return;
-		}
-
-		paymentHistoryBody.innerHTML = payments.map(function (payment) {
-			return '<tr>'
-				+ '<td class="col-date">' + escapeHtml(payment.payment_date || '') + '</td>'
-				+ '<td>' + escapeHtml(payment.payment_method || '') + '</td>'
-				+ '<td>$' + Number(payment.amount || 0).toFixed(2) + '</td>'
-				+ '<td>' + escapeHtml(payment.reference_number || '') + '</td>'
-				+ '</tr>';
-		}).join('');
-
-		if (window.CANINDataTables) {
-			window.CANINDataTables.refreshTable('#patientPaymentHistoryTable');
-		}
-	}
-
 	function renderOpenDebts(debts) {
 		if (!openDebtTableBody) {
 			return;
@@ -650,13 +580,11 @@ $timeline_amount_prefix = static function ($entry) {
 			const badge = entry.badge || 'secondary';
 			const sourceLabel = source === 'wallet'
 				? labels.walletSource
-				: (source === 'payment' ? labels.paymentSource : labels.turnSource);
+				: labels.turnSource;
 			let amountPrefix = '';
 
 			if (source === 'wallet') {
 				amountPrefix = badge === 'warning' ? '-' : '+';
-			} else if (source === 'payment') {
-				amountPrefix = '+';
 			}
 
 			return '<tr>'
@@ -791,7 +719,6 @@ $timeline_amount_prefix = static function ($entry) {
 		function (data) {
 			updateDebtBadge(parseFloat(data.total_open_debt || 0));
 			renderOpenDebts(Array.isArray(data.open_debts) ? data.open_debts : []);
-			renderPayments(Array.isArray(data.payments) ? data.payments : []);
 			updateFinancialSummary(data.financial_summary);
 			renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);
 			document.getElementById('debtPaymentAmount').value = '';

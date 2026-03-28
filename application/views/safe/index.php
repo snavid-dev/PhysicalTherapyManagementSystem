@@ -46,11 +46,6 @@ $entry_links = static function ($entry) {
 	}
 
 	if ($entry['reference_table'] === 'payments' && !empty($entry['reference_id'])) {
-		$links[] = array(
-			'label' => t('Open Payment'),
-			'url' => base_url('payments/' . $entry['reference_id']),
-		);
-
 		if (!empty($entry['payment_patient_id'])) {
 			$links[] = array(
 				'label' => t('Open Patient'),

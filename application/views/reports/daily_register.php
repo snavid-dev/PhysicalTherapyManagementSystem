@@ -84,7 +84,7 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 			</div>
 			<div class="col-xl-3 col-md-4">
 				<label class="form-label"><?= t('section') ?></label>
-				<select name="section_id" class="form-select" onchange="this.form.submit()">
+				<select name="section_id" class="form-select s2-select" onchange="this.form.submit()">
 					<option value=""><?= t('all_sections') ?></option>
 					<?php foreach ($sections as $section) : ?>
 						<option value="<?= (int) $section['id'] ?>"<?= (int) ($filters['section_id'] ?? 0) === (int) $section['id'] ? ' selected' : '' ?>>
@@ -145,14 +145,6 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 					<?= t('Turns') ?>: <?= format_amount($summary['total_turn_topups'] ?? 0) ?> |
 					<?= t('Patients') ?>: <?= format_amount($summary['total_manual_wallet_topups'] ?? 0) ?>
 				</div>
-			</div>
-		</div>
-	</div>
-	<div class="col-xl col-md-4 col-sm-6">
-		<div class="card h-100 daily-register-summary-card daily-register-summary-card--success">
-			<div class="card-body">
-				<div class="stat-label"><?= t('total_direct_payments') ?></div>
-				<div class="stat-value"><?= format_amount($summary['total_direct_payments'] ?? 0) ?></div>
 			</div>
 		</div>
 	</div>

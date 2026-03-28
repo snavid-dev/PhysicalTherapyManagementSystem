@@ -49,7 +49,7 @@
 							</div>
 							<div class="col-lg-4 col-md-4">
 								<label class="form-label"><?= t('Referred By') ?></label>
-								<select name="referred_by" class="form-select">
+								<select name="referred_by" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_ref_doctor')) ?>">
 									<option value=""><?= t('-- None --') ?></option>
 									<?php foreach ($reference_doctors as $reference_doctor) : ?>
 										<option value="<?= $reference_doctor['id'] ?>" <?= (string) $selected_reference_doctor === (string) $reference_doctor['id'] ? 'selected' : '' ?>>
@@ -98,7 +98,7 @@
 							</div>
 							<div class="col-12">
 								<label class="form-label"><?= t('diagnoses') ?></label>
-								<select name="diagnosis_ids[]" class="form-select diagnosis-multiselect" multiple size="8">
+								<select name="diagnosis_ids[]" class="form-select diagnosis-multiselect s2-select-multiple" multiple size="8" data-placeholder="<?= html_escape(t('select_diagnoses')) ?>">
 									<?php foreach ($diagnoses as $diagnosis) : ?>
 										<?php $label = $is_rtl && !empty($diagnosis['name_fa']) ? $diagnosis['name_fa'] : $diagnosis['name']; ?>
 										<option value="<?= $diagnosis['id'] ?>" <?= in_array((int) $diagnosis['id'], $selected_diagnosis_ids, TRUE) ? 'selected' : '' ?>>

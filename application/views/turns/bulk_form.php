@@ -69,7 +69,7 @@ $initial_rows = array_map(static function ($row) {
 		<div class="row g-3 align-items-end">
 			<div class="col-lg-4">
 				<label class="form-label"><?= t('section') ?></label>
-				<select name="section_id" id="bulkSectionSelect" class="form-select" required>
+				<select name="section_id" id="bulkSectionSelect" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_section')) ?>" required>
 					<option value=""><?= t('Select') ?></option>
 					<?php foreach ($sections as $section) : ?>
 						<option value="<?= $section['id'] ?>" <?= (int) $shared_input['section_id'] === (int) $section['id'] ? 'selected' : '' ?>>
@@ -133,7 +133,7 @@ $initial_rows = array_map(static function ($row) {
 					<div class="row g-3">
 						<div class="col-12">
 							<label class="form-label"><?= t('Patient') ?></label>
-							<select class="form-select bulk-patient-select"></select>
+							<select class="form-select bulk-patient-select s2-select" data-placeholder="<?= html_escape(t('search_patient')) ?>"></select>
 						</div>
 						<div class="col-md-6">
 							<label class="form-label"><?= t('turn_number') ?></label>
@@ -142,7 +142,7 @@ $initial_rows = array_map(static function ($row) {
 						</div>
 						<div class="col-md-6">
 							<label class="form-label"><?= t('staff_member') ?></label>
-							<select class="form-select bulk-staff-select"></select>
+							<select class="form-select bulk-staff-select s2-select" data-placeholder="<?= html_escape(t('select_staff')) ?>"></select>
 						</div>
 						<div class="col-12">
 							<div class="turn-financial-strip">
@@ -388,6 +388,9 @@ $initial_rows = array_map(static function ($row) {
 			}));
 			select.innerHTML = patientSelectOptions(currentValue, excludedIds);
 			select.value = currentValue;
+			if (window.jQuery) {
+				window.jQuery(select).trigger('change.select2');
+			}
 		});
 	}
 
@@ -625,6 +628,9 @@ $initial_rows = array_map(static function ($row) {
 
 		select.innerHTML = options.join('');
 		select.value = selectedId || '';
+		if (window.jQuery) {
+			window.jQuery(select).trigger('change.select2');
+		}
 	}
 
 	function selectedPaymentType(row) {
@@ -807,6 +813,13 @@ $initial_rows = array_map(static function ($row) {
 
 	function attachRowEvents(row) {
 		row.querySelector('.bulk-remove-row').addEventListener('click', function () {
+			if (window.jQuery) {
+				window.jQuery(row).find('.s2-select, .s2-select-multiple').each(function () {
+					if (window.jQuery(this).data('select2')) {
+						window.jQuery(this).select2('destroy');
+					}
+				});
+			}
 			row.remove();
 			updateRowNames();
 		});
@@ -928,6 +941,12 @@ $initial_rows = array_map(static function ($row) {
 		refreshPaymentOptionState(row);
 		refreshRowSummary(row);
 		setRowCollapsed(row, false);
+		if (window.initSelect2) {
+			window.initSelect2(row);
+		}
+		if (window.initJalaliDatepicker) {
+			window.initJalaliDatepicker(row.querySelectorAll('.shamsi-date'));
+		}
 		updateRowNames();
 
 		if (rowData.patient_id) {

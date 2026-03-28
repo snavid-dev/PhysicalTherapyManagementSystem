@@ -8,7 +8,6 @@ class Role_model extends CI_Model
 		array('name' => 'manage_users', 'module_key' => 'users'),
 		array('name' => 'manage_roles', 'module_key' => 'roles'),
 		array('name' => 'manage_turns', 'module_key' => 'turns'),
-		array('name' => 'manage_payments', 'module_key' => 'payments'),
 		array('name' => 'view_reports', 'module_key' => 'reports'),
 		array('name' => 'manage_leaves', 'module_key' => 'leaves'),
 		array('name' => 'manage_staff', 'module_key' => 'staff'),
@@ -41,7 +40,12 @@ class Role_model extends CI_Model
 	{
 		$this->ensure_system_permissions();
 
-		return $this->db->order_by('module_key', 'asc')->order_by('name', 'asc')->get('permissions')->result_array();
+		return $this->db
+			->where('module_key !=', 'payments')
+			->order_by('module_key', 'asc')
+			->order_by('name', 'asc')
+			->get('permissions')
+			->result_array();
 	}
 
 	public function role_permission_ids($role_id)

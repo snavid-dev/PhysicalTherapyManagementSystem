@@ -1,5 +1,8 @@
 	</main>
 	<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+	<!-- Select2 JS -->
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<!-- Jalali Datepicker JS fallback -->
 	<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -14,5 +17,6 @@
 	<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 	<script src="<?= base_url('assets/js/shamsi.js') ?>"></script>
 	<script src="<?= base_url('assets/js/datatables-init.js') ?>"></script>
+	<script src="<?= base_url('assets/js/select2-init.js') ?>"></script>
 </body>
 </html>

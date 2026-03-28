@@ -141,17 +141,6 @@ class Patient_model extends CI_Model
 			->result_array();
 	}
 
-	public function payment_history($patient_id)
-	{
-		return $this->db
-			->from('payments')
-			->where('patient_id', (int) $patient_id)
-			->order_by('payment_date', 'desc')
-			->order_by('id', 'desc')
-			->get()
-			->result_array();
-	}
-
 	public function get_active_reference_doctors()
 	{
 		return $this->db

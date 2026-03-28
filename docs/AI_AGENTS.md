@@ -13,7 +13,6 @@ The active product direction is:
 - User login and user CRUD
 - Roles and permissions
 - Turn management
-- Payments
 - Reports
 - Doctor or therapist leaves
 
@@ -35,7 +34,6 @@ Important files and folders:
 - `application/views/users/`
 - `application/views/roles/`
 - `application/views/turns/`
-- `application/views/payments/`
 - `application/views/reports/`
 - `application/views/leaves/`
 - `application/language/english/app_lang.php`
@@ -77,7 +75,6 @@ Current permission keys:
 - `manage_users`
 - `manage_roles`
 - `manage_turns`
-- `manage_payments`
 - `view_reports`
 - `manage_leaves`
 

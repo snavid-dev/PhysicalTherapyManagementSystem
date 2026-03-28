@@ -141,6 +141,25 @@ dd,
 	min-height: 12rem;
 }
 
+/* Select2 RTL fix */
+[dir="rtl"] .select2-container--bootstrap-5 .select2-selection {
+	text-align: right;
+}
+
+[dir="rtl"] .select2-container--bootstrap-5 .select2-dropdown {
+	direction: rtl;
+	text-align: right;
+}
+
+[dir="rtl"] .select2-search__field {
+	direction: rtl;
+}
+
+/* Select2 full width fix */
+.select2-container {
+	width: 100% !important;
+}
+
 .patient-form-section {
 	height: 100%;
 	padding: 1.1rem;
