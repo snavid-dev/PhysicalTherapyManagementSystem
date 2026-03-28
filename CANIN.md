@@ -83,6 +83,7 @@ If you are editing this project in a future chat, assume this:
 | Frontend | Bootstrap 5 + custom CSS |
 | Languages | Persian (`farsi`) and English (`english`) |
 | RTL Support | Enabled for Persian |
+| Timezone | `Asia/Kabul` |
 | Auth | Session-based login |
 | RBAC | Roles + permissions |
 | Date System | Shamsi (Solar Hijri) display, Gregorian storage |
@@ -278,6 +279,8 @@ These are the main active routes:
 - `/expenses`
 - `/salaries`
 - `/reports`
+- `/reports/daily-register`
+- `/reports/daily-register/print`
 - `/leaves`
 - `/preferences/language/{locale}`
 - `/preferences/theme/{theme}`
@@ -518,6 +521,7 @@ This section maps each active module to the main tables it reads or writes.
 - reads: `payments`
 - reads: `doctor_leaves`
 - reads: `patients`
+- reads: `patient_debts`
 - reads: `users`
 
 ### Leaves
@@ -1256,6 +1260,7 @@ This module gives date-filtered operational reporting.
 - shows payments in range
 - shows leaves in range
 - shows new patient count
+- shows a daily register report with section and gender filters
 
 ### If you want to change this module
 

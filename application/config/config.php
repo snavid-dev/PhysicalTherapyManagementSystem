@@ -1,6 +1,8 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+date_default_timezone_set('Asia/Kabul');
+
 /*
 |--------------------------------------------------------------------------
 | Base Site URL
@@ -488,7 +490,7 @@ $config['compress_output'] = FALSE;
 | helper' page of the user guide for information regarding date handling.
 |
 */
-$config['time_reference'] = 'local';
+$config['time_reference'] = 'Asia/Kabul';
 
 /*
 |--------------------------------------------------------------------------

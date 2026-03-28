@@ -130,6 +130,94 @@ class Safe_model extends CI_Model
 		return $result;
 	}
 
+	public function sync_reference_transaction($type, $source, $amount, $reference_id, $reference_table, $note = NULL, $created_by = NULL, $created_at = NULL)
+	{
+		$this->ensure_schema(FALSE);
+
+		$reference_id = (int) $reference_id;
+		$reference_table = trim((string) $reference_table);
+		$source = trim((string) $source);
+
+		if ($reference_id <= 0 || $reference_table === '' || $source === '') {
+			return FALSE;
+		}
+
+		$payload = array(
+			'type' => trim((string) $type),
+			'source' => $source,
+			'amount' => round((float) $amount, 2),
+			'reference_id' => $reference_id,
+			'reference_table' => $reference_table,
+			'note' => $this->null_if_empty($note),
+			'created_by' => $created_by ? (int) $created_by : NULL,
+		);
+
+		if ($created_at && $this->is_valid_datetime($created_at)) {
+			$payload['created_at'] = $created_at;
+		}
+
+		$rows = $this->db
+			->select('id')
+			->from('safe_transactions')
+			->where('source', $source)
+			->where('reference_id', $reference_id)
+			->where('reference_table', $reference_table)
+			->order_by('id', 'asc')
+			->get()
+			->result_array();
+
+		$this->db->trans_begin();
+
+		if (empty($rows)) {
+			$result = $this->insert_transaction($payload);
+
+			if ($result === FALSE) {
+				$this->db->trans_rollback();
+				return FALSE;
+			}
+		} else {
+			$primary_id = (int) $rows[0]['id'];
+			$update = array(
+				'type' => $payload['type'],
+				'source' => $payload['source'],
+				'amount' => $payload['amount'],
+				'reference_id' => $payload['reference_id'],
+				'reference_table' => $payload['reference_table'],
+				'note' => $payload['note'],
+				'created_by' => $payload['created_by'],
+			);
+
+			if (array_key_exists('created_at', $payload)) {
+				$update['created_at'] = $payload['created_at'];
+			}
+
+			$this->db
+				->where('id', $primary_id)
+				->update('safe_transactions', $update);
+
+			if (count($rows) > 1) {
+				$duplicate_ids = array_map('intval', array_column(array_slice($rows, 1), 'id'));
+
+				if (!empty($duplicate_ids)) {
+					$this->db
+						->where_in('id', $duplicate_ids)
+						->delete('safe_transactions');
+				}
+			}
+		}
+
+		$this->recalculate_balances();
+
+		if ($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
+
+		$this->db->trans_commit();
+
+		return TRUE;
+	}
+
 	public function reverse_turn_transactions($turn, $created_by = NULL)
 	{
 		$this->ensure_schema(FALSE);

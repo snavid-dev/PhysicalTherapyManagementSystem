@@ -74,7 +74,11 @@ class Payments extends Authenticated_Controller
 			return $this->form($payment, 'payments/' . $id . '/update');
 		}
 
-		$this->Payment_model->update($id, $this->payment_payload());
+		if (!$this->Payment_model->update($id, $this->payment_payload())) {
+			$this->session->set_flashdata('error', t('Unable to update payment right now.'));
+			return redirect('payments/' . $id . '/edit');
+		}
+
 		$this->session->set_flashdata('success', t('Payment updated successfully.'));
 		redirect('payments');
 	}

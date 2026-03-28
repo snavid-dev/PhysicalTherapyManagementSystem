@@ -6,6 +6,16 @@
 </div>
 
 <div class="card mb-4">
+	<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+		<div>
+			<h2 class="h5 mb-1"><?= t('daily_register') ?></h2>
+			<p class="text-muted mb-0"><?= t('register_title') ?></p>
+		</div>
+		<a href="<?= base_url('reports/daily-register') ?>" class="btn btn-dark"><?= t('daily_register') ?></a>
+	</div>
+</div>
+
+<div class="card mb-4">
 	<div class="card-body">
 		<?= form_open('reports', array('method' => 'get', 'class' => 'row g-3 align-items-end')) ?>
 			<div class="col-md-4">

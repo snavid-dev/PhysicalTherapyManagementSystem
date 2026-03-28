@@ -376,6 +376,46 @@ dd,
 	line-height: 1.2;
 }
 
+.daily-register-summary-card {
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, var(--surface), var(--surface-2));
+}
+
+.daily-register-summary-card--info {
+	background: linear-gradient(180deg, rgba(59, 130, 246, 0.12), var(--surface));
+}
+
+.daily-register-summary-card--success {
+	background: linear-gradient(180deg, rgba(34, 197, 94, 0.14), var(--surface));
+}
+
+.daily-register-summary-card--danger {
+	background: linear-gradient(180deg, rgba(239, 68, 68, 0.14), var(--surface));
+}
+
+.daily-register-summary-card--warning {
+	background: linear-gradient(180deg, rgba(249, 115, 22, 0.14), var(--surface));
+}
+
+.daily-register-summary-card--muted {
+	background: linear-gradient(180deg, rgba(100, 116, 139, 0.12), var(--surface));
+}
+
+.daily-register-summary-card .stat-value {
+	font-size: 1.7rem;
+}
+
+.daily-register-filter-bar .btn {
+	width: auto;
+}
+
+.daily-register-notes {
+	max-width: 220px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 .financial-tools-head {
 	padding-inline: 0.15rem;
 }
@@ -742,6 +782,10 @@ body.rtl .navbar-nav {
 
 	.dt-top-bar .dataTables_filter,
 	.dt-top-bar .dataTables_filter label {
+		width: 100%;
+	}
+
+	.daily-register-filter-bar .btn {
 		width: 100%;
 	}
 

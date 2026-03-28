@@ -71,9 +71,33 @@ class Expense_model extends CI_Model
 	{
 		$this->ensure_schema();
 
-		return $this->db
-			->where('id', (int) $id)
+		$id = (int) $id;
+
+		$this->db->trans_begin();
+
+		$updated = $this->db
+			->where('id', $id)
 			->update('expenses', $data);
+
+		$safe_synced = $updated ? $this->Safe_model->sync_reference_transaction(
+			'out',
+			'expense',
+			$data['amount'] ?? 0,
+			$id,
+			'expenses',
+			$data['description'] ?? NULL,
+			$this->session->userdata('user_id'),
+			$this->datetime_from_date($data['expense_date'] ?? NULL)
+		) : FALSE;
+
+		if (!$updated || $safe_synced === FALSE || $this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
+
+		$this->db->trans_commit();
+
+		return TRUE;
 	}
 
 	public function delete($id)
@@ -243,5 +267,17 @@ class Expense_model extends CI_Model
 				$this->db->insert('expense_categories', $default);
 			}
 		}
+	}
+
+	protected function datetime_from_date($date)
+	{
+		$date = trim((string) $date);
+		$parsed = DateTime::createFromFormat('Y-m-d', $date);
+
+		if ($parsed && $parsed->format('Y-m-d') === $date) {
+			return $date . ' 12:00:00';
+		}
+
+		return NULL;
 	}
 }
