@@ -58,6 +58,49 @@ class Patient_model extends CI_Model
 		return $this->db->where('id', (int) $id)->update('patients', $this->normalize_patient_payload($data));
 	}
 
+	public function find_duplicate_identity($data, $exclude_id = NULL)
+	{
+		$identity = $this->normalized_identity_fields($data);
+
+		if ($identity['phone'] === NULL) {
+			return NULL;
+		}
+
+		$this->db
+			->select('id, first_name, last_name, father_name, phone')
+			->from('patients');
+
+		if ($exclude_id !== NULL) {
+			$this->db->where('id !=', (int) $exclude_id);
+		}
+
+		$candidates = $this->db->get()->result_array();
+
+		foreach ($candidates as $candidate) {
+			$candidate_identity = $this->normalized_identity_fields($candidate);
+
+			if ($candidate_identity['first_name'] !== $identity['first_name']) {
+				continue;
+			}
+
+			if ($candidate_identity['last_name'] !== $identity['last_name']) {
+				continue;
+			}
+
+			if ($candidate_identity['father_name'] !== $identity['father_name']) {
+				continue;
+			}
+
+			if ($candidate_identity['phone'] !== $identity['phone']) {
+				continue;
+			}
+
+			return $candidate;
+		}
+
+		return NULL;
+	}
+
 	public function delete($id)
 	{
 		$id = (int) $id;
@@ -172,11 +215,82 @@ class Patient_model extends CI_Model
 			return array();
 		}
 
+		if (array_key_exists('first_name', $data)) {
+			$data['first_name'] = trim((string) $data['first_name']);
+		}
+
 		if (array_key_exists('last_name', $data)) {
-			$last_name = trim((string) $data['last_name']);
-			$data['last_name'] = $last_name === '' ? NULL : $last_name;
+			$data['last_name'] = $this->normalize_nullable_string($data['last_name']);
+		}
+
+		if (array_key_exists('father_name', $data)) {
+			$data['father_name'] = $this->normalize_nullable_string($data['father_name']);
+		}
+
+		if (array_key_exists('phone', $data)) {
+			$data['phone'] = $this->normalize_nullable_string($data['phone']);
+		}
+
+		if (array_key_exists('phone2', $data)) {
+			$data['phone2'] = $this->normalize_nullable_string($data['phone2']);
 		}
 
 		return $data;
+	}
+
+	protected function normalized_identity_fields($data)
+	{
+		$data = $this->normalize_patient_payload($data);
+
+		return array(
+			'first_name' => array_key_exists('first_name', $data) ? $this->normalize_identity_string($data['first_name']) : NULL,
+			'last_name' => array_key_exists('last_name', $data) ? $this->normalize_identity_string($data['last_name']) : NULL,
+			'father_name' => array_key_exists('father_name', $data) ? $this->normalize_identity_string($data['father_name']) : NULL,
+			'phone' => array_key_exists('phone', $data) ? $this->normalize_phone_for_identity($data['phone']) : NULL,
+		);
+	}
+
+	protected function normalize_nullable_string($value)
+	{
+		$value = trim((string) $value);
+		return $value === '' ? NULL : $value;
+	}
+
+	protected function normalize_identity_string($value)
+	{
+		$value = $this->normalize_nullable_string($value);
+
+		if ($value === NULL) {
+			return NULL;
+		}
+
+		$value = preg_replace('/\s+/u', ' ', $value);
+
+		if (function_exists('mb_strtolower')) {
+			return mb_strtolower($value, 'UTF-8');
+		}
+
+		return strtolower($value);
+	}
+
+	protected function normalize_phone_for_identity($value)
+	{
+		$value = $this->normalize_nullable_string($value);
+
+		if ($value === NULL) {
+			return NULL;
+		}
+
+		$digits = preg_replace('/\D+/', '', $value);
+
+		if ($digits === '') {
+			return NULL;
+		}
+
+		if (preg_match('/^93(\d{9})$/', $digits, $matches)) {
+			return '0' . $matches[1];
+		}
+
+		return $digits;
 	}
 }

@@ -8,6 +8,15 @@
 
 <div class="card">
 	<div class="card-body">
+		<?php if (!empty($duplicate_patient)) : ?>
+			<div class="alert alert-danger d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+				<div>
+					<strong><?= t('Duplicate patient found.') ?></strong>
+					<div class="mt-1"><?= t('A patient with this first name, last name, father name, and phone number already exists.') ?></div>
+				</div>
+				<a href="<?= base_url('patients/' . (int) $duplicate_patient['id']) ?>" class="btn btn-outline-danger"><?= t('Go to patient profile') ?></a>
+			</div>
+		<?php endif; ?>
 		<?= form_open($action) ?>
 			<?php $selected_gender = set_value('gender', $patient['gender'] ?? ''); ?>
 			<?php $selected_reference_doctor = set_value('referred_by', $patient['referred_by'] ?? ''); ?>
