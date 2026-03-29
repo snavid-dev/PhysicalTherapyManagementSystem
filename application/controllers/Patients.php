@@ -39,7 +39,14 @@ class Patients extends Authenticated_Controller
 			return $this->form(NULL, 'patients/store', $this->diagnosis_ids_from_post());
 		}
 
-		$new_id = $this->Patient_model->create($this->patient_payload());
+		$payload = $this->patient_payload();
+		$duplicate_patient = $this->Patient_model->find_duplicate_identity($payload);
+
+		if ($duplicate_patient) {
+			return $this->form(NULL, 'patients/store', $this->diagnosis_ids_from_post(), $duplicate_patient);
+		}
+
+		$new_id = $this->Patient_model->create($payload);
 		$this->Patient_model->save_diagnoses($new_id, $this->diagnosis_ids_from_post());
 		$this->session->set_flashdata('success', t('Patient created successfully.'));
 		redirect('patients');
@@ -283,7 +290,14 @@ class Patients extends Authenticated_Controller
 			return $this->form($patient, 'patients/' . $id . '/update', $this->diagnosis_ids_from_post());
 		}
 
-		$this->Patient_model->update($id, $this->patient_payload());
+		$payload = $this->patient_payload();
+		$duplicate_patient = $this->Patient_model->find_duplicate_identity($payload, $id);
+
+		if ($duplicate_patient) {
+			return $this->form($patient, 'patients/' . $id . '/update', $this->diagnosis_ids_from_post(), $duplicate_patient);
+		}
+
+		$this->Patient_model->update($id, $payload);
 		$this->Patient_model->save_diagnoses($id, $this->diagnosis_ids_from_post());
 		$this->session->set_flashdata('success', t('Patient updated successfully.'));
 		redirect('patients/' . $id);
@@ -304,7 +318,7 @@ class Patients extends Authenticated_Controller
 		redirect('patients');
 	}
 
-	protected function form($patient, $action, $selected_diagnosis_ids)
+	protected function form($patient, $action, $selected_diagnosis_ids, $duplicate_patient = NULL)
 	{
 		$this->render('patients/form', array(
 			'title' => $patient ? t('Edit Patient') : t('Create Patient'),
@@ -314,6 +328,7 @@ class Patients extends Authenticated_Controller
 			'diagnoses' => $this->Patient_model->get_all_diagnoses(),
 			'reference_doctors' => $this->Patient_model->get_active_reference_doctors(),
 			'selected_diagnosis_ids' => $selected_diagnosis_ids,
+			'duplicate_patient' => $duplicate_patient,
 		));
 	}
 
