@@ -800,6 +800,8 @@ class Turns extends Authenticated_Controller
 			'title' => t('bulk_turns'),
 			'current_section' => 'turns',
 			'patients' => $this->Patient_model->all(),
+			'diagnoses' => $this->Patient_model->get_all_diagnoses(),
+			'reference_doctors' => $this->Patient_model->get_active_reference_doctors(),
 			'sections' => $this->Section_model->get_all(),
 			'shared_input' => $shared_input,
 			'submitted_turns' => array_values($submitted_turns),

@@ -33,9 +33,14 @@ class Patients extends Authenticated_Controller
 	public function store()
 	{
 		$this->require_permission('manage_patients');
+		$wants_json = $this->wants_json_response();
 		$this->validate_form();
 
 		if (!$this->form_validation->run()) {
+			if ($wants_json) {
+				return $this->json_validation_error($this->patient_validation_errors());
+			}
+
 			return $this->form(NULL, 'patients/store', $this->diagnosis_ids_from_post());
 		}
 
@@ -43,11 +48,38 @@ class Patients extends Authenticated_Controller
 		$duplicate_patient = $this->Patient_model->find_duplicate_identity($payload);
 
 		if ($duplicate_patient) {
+			if ($wants_json) {
+				return $this->output
+					->set_status_header(409)
+					->set_content_type('application/json')
+					->set_output(json_encode(array(
+						'success' => FALSE,
+						'message' => t('Duplicate patient found.'),
+						'duplicate_patient' => array(
+							'id' => (int) $duplicate_patient['id'],
+							'profile_url' => base_url('patients/' . (int) $duplicate_patient['id']),
+						),
+					)));
+			}
+
 			return $this->form(NULL, 'patients/store', $this->diagnosis_ids_from_post(), $duplicate_patient);
 		}
 
 		$new_id = $this->Patient_model->create($payload);
 		$this->Patient_model->save_diagnoses($new_id, $this->diagnosis_ids_from_post());
+
+		if ($wants_json) {
+			$patient = $this->Patient_model->get_by_id($new_id);
+
+			return $this->output
+				->set_content_type('application/json')
+				->set_output(json_encode(array(
+					'success' => TRUE,
+					'message' => t('Patient created successfully.'),
+					'patient' => $this->patient_option_payload($patient),
+				)));
+		}
+
 		$this->session->set_flashdata('success', t('Patient created successfully.'));
 		redirect('patients');
 	}
@@ -381,6 +413,74 @@ class Patients extends Authenticated_Controller
 	{
 		$value = trim((string) $value);
 		return $value === '' ? NULL : $value;
+	}
+
+	protected function patient_option_payload($patient)
+	{
+		$patient = is_array($patient) ? $patient : array();
+		$first_name = trim((string) ($patient['first_name'] ?? ''));
+		$last_name = trim((string) ($patient['last_name'] ?? ''));
+		$father_name = trim((string) ($patient['father_name'] ?? ''));
+		$name = $first_name;
+
+		if ($last_name !== '') {
+			$name = trim($first_name . ' ' . $last_name);
+		} elseif ($father_name !== '') {
+			$name = trim($first_name . ' ' . $father_name);
+		}
+
+		return array(
+			'id' => (int) ($patient['id'] ?? 0),
+			'name' => $name,
+			'first_name' => $first_name,
+			'last_name' => $last_name,
+			'father_name' => $father_name,
+			'phone' => (string) ($patient['phone'] ?? ''),
+		);
+	}
+
+	protected function patient_validation_errors()
+	{
+		$fields = array('first_name', 'last_name', 'gender', 'age', 'phone', 'phone2');
+		$errors = array();
+
+		foreach ($fields as $field) {
+			$error = trim(strip_tags(form_error($field)));
+
+			if ($error === '') {
+				continue;
+			}
+
+			$errors[$field] = $error;
+		}
+
+		return $errors;
+	}
+
+	protected function json_validation_error(array $field_errors, $status = 422)
+	{
+		$message = '';
+
+		foreach ($field_errors as $field_error) {
+			$message = trim((string) $field_error);
+
+			if ($message !== '') {
+				break;
+			}
+		}
+
+		if ($message === '') {
+			$message = t('Unable to save record right now.');
+		}
+
+		return $this->output
+			->set_status_header($status)
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'success' => FALSE,
+				'message' => $message,
+				'field_errors' => $field_errors,
+			)));
 	}
 
 	protected function json_error($message, $status = 422)
