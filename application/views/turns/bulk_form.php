@@ -10,6 +10,8 @@ $submitted_turns = isset($submitted_turns) && is_array($submitted_turns) ? array
 $shared_errors = isset($shared_errors) && is_array($shared_errors) ? $shared_errors : array();
 $row_errors = isset($row_errors) && is_array($row_errors) ? $row_errors : array();
 $can_manage_patients = $this->auth->has_permission('manage_patients');
+$reference_doctors = isset($reference_doctors) && is_array($reference_doctors) ? $reference_doctors : array();
+$diagnoses = isset($diagnoses) && is_array($diagnoses) ? $diagnoses : array();
 $patient_display_name = static function ($patient) {
 	$first_name = trim((string) ($patient['first_name'] ?? ''));
 	$last_name = trim((string) ($patient['last_name'] ?? ''));
@@ -113,66 +115,114 @@ $initial_rows = array_map(static function ($row) {
 <?= form_close() ?>
 
 <?php if ($can_manage_patients) : ?>
-	<div class="modal fade" id="bulkCreatePatientModal" tabindex="-1" aria-hidden="true">
+	<div class="modal fade bulk-create-patient-modal" id="bulkCreatePatientModal" tabindex="-1" aria-hidden="true">
 		<div class="modal-dialog modal-lg modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h2 class="modal-title h5 mb-0"><?= t('Create Patient') ?></h2>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
+					<button type="button" class="btn-close bulk-create-patient-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
 				</div>
 				<div class="modal-body">
 					<div class="alert alert-danger d-none" id="bulkCreatePatientAlert"></div>
-					<div class="row g-3">
-						<div class="col-md-6">
-							<label class="form-label"><?= t('First Name') ?></label>
-							<input type="text" class="form-control" name="first_name">
-							<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="first_name"></small>
-						</div>
-						<div class="col-md-6">
-							<label class="form-label"><?= t('Last Name') ?></label>
-							<input type="text" class="form-control" name="last_name">
-							<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="last_name"></small>
-						</div>
-						<div class="col-md-6">
-							<label class="form-label"><?= t('father_name') ?></label>
-							<input type="text" class="form-control" name="father_name">
-						</div>
-						<div class="col-md-3">
-							<label class="form-label"><?= t('Gender') ?></label>
-							<select class="form-select" name="gender">
-								<option value=""><?= t('Select') ?></option>
-								<option value="Male"><?= t('Male') ?></option>
-								<option value="Female"><?= t('Female') ?></option>
-							</select>
-							<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="gender"></small>
-						</div>
-						<div class="col-md-3">
-							<label class="form-label"><?= t('age') ?></label>
-							<input type="number" class="form-control" name="age" min="0" max="120">
-							<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="age"></small>
-						</div>
-						<div class="col-md-6">
-							<label class="form-label"><?= t('Phone 1') ?></label>
-							<input type="text" class="form-control" name="phone">
-							<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="phone"></small>
-						</div>
-						<div class="col-md-6">
-							<label class="form-label"><?= t('phone2') ?></label>
-							<input type="text" class="form-control" name="phone2">
-							<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="phone2"></small>
-						</div>
+					<div class="row g-4">
 						<div class="col-12">
-							<label class="form-label"><?= t('Address') ?></label>
-							<textarea class="form-control" name="address" rows="3"></textarea>
+							<div class="patient-form-section">
+								<div class="patient-form-section-head">
+									<h3 class="h5 mb-1"><?= t('Patient Profile') ?></h3>
+									<p class="text-muted mb-0"><?= t('Keep the patient record simple and reusable.') ?></p>
+								</div>
+								<div class="row g-3">
+									<div class="col-lg-4 col-md-6">
+										<label class="form-label"><?= t('First Name') ?></label>
+										<input type="text" class="form-control" name="first_name">
+										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="first_name"></small>
+									</div>
+									<div class="col-lg-4 col-md-6">
+										<label class="form-label"><?= t('Last Name') ?></label>
+										<input type="text" class="form-control" name="last_name">
+										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="last_name"></small>
+									</div>
+									<div class="col-lg-4 col-md-6">
+										<label class="form-label"><?= t('father_name') ?></label>
+										<input type="text" class="form-control" name="father_name">
+									</div>
+									<div class="col-lg-4 col-md-4">
+										<label class="form-label"><?= t('Gender') ?></label>
+										<select class="form-select" name="gender">
+											<option value=""><?= t('Select') ?></option>
+											<option value="Male"><?= t('Male') ?></option>
+											<option value="Female"><?= t('Female') ?></option>
+										</select>
+										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="gender"></small>
+									</div>
+									<div class="col-lg-4 col-md-4">
+										<label class="form-label"><?= t('age') ?></label>
+										<input type="number" class="form-control" name="age" min="0" max="120">
+										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="age"></small>
+									</div>
+									<div class="col-lg-4 col-md-4">
+										<label class="form-label"><?= t('Referred By') ?></label>
+										<select name="referred_by" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_ref_doctor')) ?>">
+											<option value=""><?= t('-- None --') ?></option>
+											<?php foreach ($reference_doctors as $reference_doctor) : ?>
+												<option value="<?= $reference_doctor['id'] ?>"><?= html_escape($reference_doctor['full_name']) ?></option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+							</div>
 						</div>
-						<div class="col-12">
-							<label class="form-label"><?= t('Medical Notes') ?></label>
-							<textarea class="form-control" name="medical_notes" rows="3"></textarea>
+						<div class="col-lg-5">
+							<div class="patient-form-section h-100">
+								<div class="patient-form-section-head">
+									<h3 class="h5 mb-1"><?= t('Phone') ?></h3>
+									<p class="text-muted mb-0"><?= t('Address') ?></p>
+								</div>
+								<div class="row g-3">
+									<div class="col-md-6">
+										<label class="form-label"><?= t('Phone 1') ?></label>
+										<input type="text" class="form-control" name="phone">
+										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="phone"></small>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label"><?= t('phone2') ?></label>
+										<input type="text" class="form-control" name="phone2">
+										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="phone2"></small>
+									</div>
+									<div class="col-12">
+										<label class="form-label"><?= t('Address') ?></label>
+										<textarea class="form-control" name="address" rows="5"></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-7">
+							<div class="patient-form-section h-100">
+								<div class="patient-form-section-head">
+									<h3 class="h5 mb-1"><?= t('Medical Notes') ?></h3>
+									<p class="text-muted mb-0"><?= t('diagnoses') ?></p>
+								</div>
+								<div class="row g-3">
+									<div class="col-12">
+										<label class="form-label"><?= t('Medical Notes') ?></label>
+										<textarea class="form-control patient-notes-field" name="medical_notes" rows="5"></textarea>
+									</div>
+									<div class="col-12">
+										<label class="form-label"><?= t('diagnoses') ?></label>
+										<select name="diagnosis_ids[]" class="form-select diagnosis-multiselect s2-select-multiple" multiple size="8" data-placeholder="<?= html_escape(t('select_diagnoses')) ?>">
+											<?php foreach ($diagnoses as $diagnosis) : ?>
+												<?php $label = $is_rtl && !empty($diagnosis['name_fa']) ? $diagnosis['name_fa'] : $diagnosis['name']; ?>
+												<option value="<?= $diagnosis['id'] ?>"><?= html_escape($label) ?></option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
+					<button type="button" class="btn btn-outline-secondary bulk-create-patient-close" data-bs-dismiss="modal"><?= t('Close') ?></button>
 					<button type="button" class="btn btn-dark" id="bulkCreatePatientSubmit"><?= t('Save Patient') ?></button>
 				</div>
 			</div>
@@ -365,7 +415,9 @@ $initial_rows = array_map(static function ($row) {
 	const createPatientAlert = document.getElementById('bulkCreatePatientAlert');
 	const createPatientSubmitButton = document.getElementById('bulkCreatePatientSubmit');
 	const createPatientModal = createPatientModalElement && window.bootstrap ? new window.bootstrap.Modal(createPatientModalElement) : null;
+	const createPatientCloseButtons = createPatientModalElement ? Array.from(createPatientModalElement.querySelectorAll('.bulk-create-patient-close')) : [];
 	let activePatientRow = null;
+	let fallbackModalBackdrop = null;
 	const messages = {
 		select: <?= json_encode(t('Select')) ?>,
 		noSessionNumber: <?= json_encode('—') ?>,
@@ -400,10 +452,12 @@ $initial_rows = array_map(static function ($row) {
 			father_name: createPatientModalElement.querySelector('[name="father_name"]'),
 			gender: createPatientModalElement.querySelector('[name="gender"]'),
 			age: createPatientModalElement.querySelector('[name="age"]'),
+			referred_by: createPatientModalElement.querySelector('[name="referred_by"]'),
 			phone: createPatientModalElement.querySelector('[name="phone"]'),
 			phone2: createPatientModalElement.querySelector('[name="phone2"]'),
 			address: createPatientModalElement.querySelector('[name="address"]'),
-			medical_notes: createPatientModalElement.querySelector('[name="medical_notes"]')
+			medical_notes: createPatientModalElement.querySelector('[name="medical_notes"]'),
+			diagnosis_ids: createPatientModalElement.querySelector('[name="diagnosis_ids[]"]')
 		};
 	}
 
@@ -1046,8 +1100,21 @@ $initial_rows = array_map(static function ($row) {
 
 		const fields = modalFieldElements();
 		Object.keys(fields).forEach(function (key) {
-			if (fields[key]) {
-				fields[key].value = '';
+			if (!fields[key]) {
+				return;
+			}
+
+			if (key === 'diagnosis_ids') {
+				fields[key].value = [];
+				if (window.jQuery) {
+					window.jQuery(fields[key]).val([]).trigger('change');
+				}
+				return;
+			}
+
+			fields[key].value = '';
+			if (window.jQuery && (key === 'referred_by' || key === 'gender')) {
+				window.jQuery(fields[key]).val('').trigger('change');
 			}
 		});
 
@@ -1077,14 +1144,33 @@ $initial_rows = array_map(static function ($row) {
 
 		activePatientRow = row;
 		resetCreatePatientModal();
+		if (window.initSelect2) {
+			window.initSelect2(createPatientModalElement);
+		}
 
 		if (createPatientModal) {
 			createPatientModal.show();
+			const firstNameInput = createPatientModalElement.querySelector('[name="first_name"]');
+			if (firstNameInput) {
+				window.setTimeout(function () {
+					firstNameInput.focus();
+				}, 150);
+			}
 			return;
 		}
 
 		createPatientModalElement.classList.add('show');
 		createPatientModalElement.style.display = 'block';
+		createPatientModalElement.removeAttribute('aria-hidden');
+		document.body.classList.add('modal-open');
+		fallbackModalBackdrop = document.createElement('div');
+		fallbackModalBackdrop.className = 'modal-backdrop fade show';
+		document.body.appendChild(fallbackModalBackdrop);
+
+		const firstNameInput = createPatientModalElement.querySelector('[name="first_name"]');
+		if (firstNameInput) {
+			firstNameInput.focus();
+		}
 	}
 
 	function closeCreatePatientModal() {
@@ -1099,22 +1185,41 @@ $initial_rows = array_map(static function ($row) {
 
 		createPatientModalElement.classList.remove('show');
 		createPatientModalElement.style.display = 'none';
+		createPatientModalElement.setAttribute('aria-hidden', 'true');
+		document.body.classList.remove('modal-open');
+
+		if (fallbackModalBackdrop) {
+			fallbackModalBackdrop.remove();
+			fallbackModalBackdrop = null;
+		}
+
+		activePatientRow = null;
+		resetCreatePatientModal();
 	}
 
 	function createPatientPayload() {
 		const fields = modalFieldElements();
+		const params = new URLSearchParams();
+		const diagnosisIds = fields.diagnosis_ids
+			? Array.from(fields.diagnosis_ids.selectedOptions).map(function (option) { return option.value; }).filter(Boolean)
+			: [];
 
-		return {
-			first_name: fields.first_name ? fields.first_name.value.trim() : '',
-			last_name: fields.last_name ? fields.last_name.value.trim() : '',
-			father_name: fields.father_name ? fields.father_name.value.trim() : '',
-			gender: fields.gender ? fields.gender.value : '',
-			age: fields.age ? fields.age.value : '',
-			phone: fields.phone ? fields.phone.value.trim() : '',
-			phone2: fields.phone2 ? fields.phone2.value.trim() : '',
-			address: fields.address ? fields.address.value.trim() : '',
-			medical_notes: fields.medical_notes ? fields.medical_notes.value.trim() : ''
-		};
+		params.set('first_name', fields.first_name ? fields.first_name.value.trim() : '');
+		params.set('last_name', fields.last_name ? fields.last_name.value.trim() : '');
+		params.set('father_name', fields.father_name ? fields.father_name.value.trim() : '');
+		params.set('gender', fields.gender ? fields.gender.value : '');
+		params.set('age', fields.age ? fields.age.value : '');
+		params.set('referred_by', fields.referred_by ? fields.referred_by.value : '');
+		params.set('phone', fields.phone ? fields.phone.value.trim() : '');
+		params.set('phone2', fields.phone2 ? fields.phone2.value.trim() : '');
+		params.set('address', fields.address ? fields.address.value.trim() : '');
+		params.set('medical_notes', fields.medical_notes ? fields.medical_notes.value.trim() : '');
+
+		diagnosisIds.forEach(function (diagnosisId) {
+			params.append('diagnosis_ids[]', diagnosisId);
+		});
+
+		return params;
 	}
 
 	function selectPatientForRow(row, patientId) {
@@ -1323,10 +1428,23 @@ $initial_rows = array_map(static function ($row) {
 		createPatientSubmitButton.addEventListener('click', submitCreatePatient);
 	}
 
+	createPatientCloseButtons.forEach(function (button) {
+		button.addEventListener('click', function (event) {
+			event.preventDefault();
+			closeCreatePatientModal();
+		});
+	});
+
 	if (createPatientModalElement) {
 		createPatientModalElement.addEventListener('hidden.bs.modal', function () {
 			activePatientRow = null;
 			resetCreatePatientModal();
+		});
+
+		createPatientModalElement.addEventListener('click', function (event) {
+			if (event.target === createPatientModalElement && !createPatientModal) {
+				closeCreatePatientModal();
+			}
 		});
 	}
 
