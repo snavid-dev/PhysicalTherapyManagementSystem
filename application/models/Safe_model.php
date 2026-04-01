@@ -630,7 +630,7 @@ class Safe_model extends CI_Model
 
 	protected function count_manual_wallet_topup_records()
 	{
-		$row = $this->db
+		$query = $this->db
 			->select('COUNT(DISTINCT patient_wallet_transactions.id) AS total')
 			->from('patient_wallet_transactions')
 			->join(
@@ -648,9 +648,13 @@ class Safe_model extends CI_Model
 			->group_start()
 				->where("patient_wallet_transactions.note IS NOT NULL AND patient_wallet_transactions.note != ''", NULL, FALSE)
 				->or_where('turns.id IS NULL', NULL, FALSE)
-			->group_end()
-			->get()
-			->row_array();
+			->group_end();
+
+		if ($this->wallet_fund_type_supported()) {
+			$query->where('patient_wallet_transactions.fund_type', 'cash_topup');
+		}
+
+		$row = $query->get()->row_array();
 
 		return (int) ($row['total'] ?? 0);
 	}
@@ -801,7 +805,7 @@ class Safe_model extends CI_Model
 
 	protected function legacy_manual_wallet_topup_events()
 	{
-		$rows = $this->db
+		$query = $this->db
 			->select('patient_wallet_transactions.id, patient_wallet_transactions.patient_id, patient_wallet_transactions.amount, patient_wallet_transactions.note, patient_wallet_transactions.created_at')
 			->from('patient_wallet_transactions')
 			->join(
@@ -822,9 +826,13 @@ class Safe_model extends CI_Model
 			->group_end()
 			->group_by('patient_wallet_transactions.id')
 			->order_by('patient_wallet_transactions.created_at', 'asc')
-			->order_by('patient_wallet_transactions.id', 'asc')
-			->get()
-			->result_array();
+			->order_by('patient_wallet_transactions.id', 'asc');
+
+		if ($this->wallet_fund_type_supported()) {
+			$query->where('patient_wallet_transactions.fund_type', 'cash_topup');
+		}
+
+		$rows = $query->get()->result_array();
 
 		return array_map(function ($row) {
 			$note = $this->null_if_empty($row['note']);
@@ -1105,6 +1113,12 @@ class Safe_model extends CI_Model
 	{
 		$query = $this->db->query("SHOW COLUMNS FROM `{$table}` LIKE " . $this->db->escape($column));
 		return $query ? $query->row_array() : NULL;
+	}
+
+	protected function wallet_fund_type_supported()
+	{
+		return $this->db->table_exists('patient_wallet_transactions')
+			&& $this->db->field_exists('fund_type', 'patient_wallet_transactions');
 	}
 
 	protected function normalize_start_of_day($date)

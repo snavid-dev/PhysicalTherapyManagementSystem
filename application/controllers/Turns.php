@@ -97,11 +97,15 @@ class Turns extends Authenticated_Controller
 		}
 
 		$open_debts = $this->Debt_model->get_open_debts($patient_id);
+		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
 
 		return $this->output
 			->set_content_type('application/json')
 			->set_output(json_encode(array(
 				'wallet_balance' => (float) $this->Wallet_model->get_balance($patient_id),
+				'wallet_breakdown' => $wallet_breakdown,
+				'cash_wallet_balance' => (float) ($wallet_breakdown['cash_topup'] ?? 0),
+				'historical_wallet_balance' => (float) ($wallet_breakdown['historical_credit'] ?? 0),
 				'total_open_debt' => (float) $this->Debt_model->get_total_open_debt($patient_id),
 				'open_debts' => array_map(static function ($debt) {
 					return array(
@@ -168,15 +172,15 @@ class Turns extends Authenticated_Controller
 		$payment_type = $this->input->post('payment_type', TRUE);
 		$topup_amount = $this->decimal_value($this->input->post('topup_amount'));
 		$doctor_id = (int) $staff['user_id'];
+		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
+		$wallet_split = $this->planned_wallet_deduction_split($wallet_breakdown, $topup_amount, $fee, $payment_type);
 		$wallet_deducted = 0.00;
+		$historical_wallet_deducted = 0.00;
+		$cash_wallet_deducted = 0.00;
 		$cash_collected = 0.00;
 		$remaining_fee = 0.00;
 
 		$this->db->trans_begin();
-
-		if ($topup_amount > 0) {
-			$this->Wallet_model->top_up($patient_id, $topup_amount);
-		}
 
 		switch ($payment_type) {
 			case 'free':
@@ -190,8 +194,10 @@ class Turns extends Authenticated_Controller
 				break;
 
 			case 'prepaid':
-				$wallet_deducted = $this->Wallet_model->deduct($patient_id, $fee);
-				$remaining_fee = round($fee - $wallet_deducted, 2);
+				$wallet_deducted = (float) $wallet_split['total'];
+				$historical_wallet_deducted = (float) $wallet_split['historical'];
+				$cash_wallet_deducted = (float) $wallet_split['cash'];
+				$remaining_fee = (float) $wallet_split['remaining'];
 				break;
 
 			default:
@@ -203,6 +209,8 @@ class Turns extends Authenticated_Controller
 		$turn_id = $this->Turn_model->create($this->turn_payload(array(
 			'doctor_id' => $doctor_id,
 			'wallet_deducted' => $wallet_deducted,
+			'historical_wallet_deducted' => $historical_wallet_deducted,
+			'cash_wallet_deducted' => $cash_wallet_deducted,
 			'cash_collected' => $cash_collected,
 			'topup_amount' => $topup_amount,
 		)));
@@ -214,11 +222,28 @@ class Turns extends Authenticated_Controller
 		}
 
 		if ($topup_amount > 0) {
-			$this->Wallet_model->attach_latest_transaction_to_turn($patient_id, 'topup', $topup_amount, $turn_id);
+			$new_balance = $this->Wallet_model->top_up_cash($patient_id, $topup_amount, $turn_id, 'Wallet top-up for turn #' . $turn_id);
+
+			if ($new_balance === FALSE) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+				return redirect('turns/create');
+			}
 		}
 
 		if ($wallet_deducted > 0) {
-			$this->Wallet_model->attach_latest_transaction_to_turn($patient_id, 'deduction', $wallet_deducted, $turn_id);
+			$deduction = $this->Wallet_model->deduct_prioritized($patient_id, $wallet_deducted, $turn_id, 'Wallet deduction for turn #' . $turn_id);
+
+			if (
+				$deduction === FALSE
+				|| abs((float) ($deduction['deducted_amount'] ?? 0) - $wallet_deducted) > 0.009
+				|| abs((float) ($deduction['historical_credit'] ?? 0) - $historical_wallet_deducted) > 0.009
+				|| abs((float) ($deduction['cash_topup'] ?? 0) - $cash_wallet_deducted) > 0.009
+			) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+				return redirect('turns/create');
+			}
 		}
 
 		if ($payment_type === 'cash') {
@@ -303,22 +328,12 @@ class Turns extends Authenticated_Controller
 			}
 
 			$wallet_deducted = 0.00;
+			$historical_wallet_deducted = 0.00;
+			$cash_wallet_deducted = 0.00;
 			$cash_collected = 0.00;
 			$remaining_fee = 0.00;
-
-			if ($row['topup_amount'] > 0) {
-				$new_balance = $this->Wallet_model->top_up($row['patient_id'], $row['topup_amount']);
-
-				if ($new_balance === FALSE) {
-					$this->db->trans_rollback();
-					return $this->render_bulk_form(
-						$shared_input,
-						$submitted_turns,
-						array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
-						array($index => array(t('Unable to save turn right now.')))
-					);
-				}
-			}
+			$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($row['patient_id']);
+			$wallet_split = $this->planned_wallet_deduction_split($wallet_breakdown, $row['topup_amount'], $row['fee'], $row['payment_type']);
 
 			switch ($row['payment_type']) {
 				case 'free':
@@ -332,19 +347,10 @@ class Turns extends Authenticated_Controller
 					break;
 
 				case 'prepaid':
-					$wallet_deducted = $this->Wallet_model->deduct($row['patient_id'], $row['fee']);
-
-					if ($wallet_deducted === FALSE) {
-						$this->db->trans_rollback();
-						return $this->render_bulk_form(
-							$shared_input,
-							$submitted_turns,
-							array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
-							array($index => array(t('Unable to save turn right now.')))
-						);
-					}
-
-					$remaining_fee = round($row['fee'] - $wallet_deducted, 2);
+					$wallet_deducted = (float) $wallet_split['total'];
+					$historical_wallet_deducted = (float) $wallet_split['historical'];
+					$cash_wallet_deducted = (float) $wallet_split['cash'];
+					$remaining_fee = (float) $wallet_split['remaining'];
 					break;
 
 				default:
@@ -360,6 +366,8 @@ class Turns extends Authenticated_Controller
 			$turn_id = $this->Turn_model->create($this->bulk_turn_payload($shared_input, $row, array(
 				'doctor_id' => (int) $staff['user_id'],
 				'wallet_deducted' => $wallet_deducted,
+				'historical_wallet_deducted' => $historical_wallet_deducted,
+				'cash_wallet_deducted' => $cash_wallet_deducted,
 				'cash_collected' => $cash_collected,
 			)));
 
@@ -374,11 +382,36 @@ class Turns extends Authenticated_Controller
 			}
 
 			if ($row['topup_amount'] > 0) {
-				$this->Wallet_model->attach_latest_transaction_to_turn($row['patient_id'], 'topup', $row['topup_amount'], $turn_id);
+				$new_balance = $this->Wallet_model->top_up_cash($row['patient_id'], $row['topup_amount'], $turn_id, 'Wallet top-up for turn #' . $turn_id);
+
+				if ($new_balance === FALSE) {
+					$this->db->trans_rollback();
+					return $this->render_bulk_form(
+						$shared_input,
+						$submitted_turns,
+						array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
+						array($index => array(t('Unable to save turn right now.')))
+					);
+				}
 			}
 
 			if ($wallet_deducted > 0) {
-				$this->Wallet_model->attach_latest_transaction_to_turn($row['patient_id'], 'deduction', $wallet_deducted, $turn_id);
+				$deduction = $this->Wallet_model->deduct_prioritized($row['patient_id'], $wallet_deducted, $turn_id, 'Wallet deduction for turn #' . $turn_id);
+
+				if (
+					$deduction === FALSE
+					|| abs((float) ($deduction['deducted_amount'] ?? 0) - $wallet_deducted) > 0.009
+					|| abs((float) ($deduction['historical_credit'] ?? 0) - $historical_wallet_deducted) > 0.009
+					|| abs((float) ($deduction['cash_topup'] ?? 0) - $cash_wallet_deducted) > 0.009
+				) {
+					$this->db->trans_rollback();
+					return $this->render_bulk_form(
+						$shared_input,
+						$submitted_turns,
+						array($this->bulk_row_error_message($index, t('Unable to save turn right now.'))),
+						array($index => array(t('Unable to save turn right now.')))
+					);
+				}
 			}
 
 			if ($row['payment_type'] === 'cash') {
@@ -510,6 +543,8 @@ class Turns extends Authenticated_Controller
 				'fee' => (float) $turn['fee'],
 				'payment_type' => (string) $turn['payment_type'],
 				'wallet_deducted' => (float) $turn['wallet_deducted'],
+				'historical_wallet_deducted' => (float) ($turn['historical_wallet_deducted'] ?? 0),
+				'cash_wallet_deducted' => (float) ($turn['cash_wallet_deducted'] ?? 0),
 				'cash_collected' => (float) $turn['cash_collected'],
 				'topup_amount' => (float) $turn['topup_amount'],
 				'discount_percent' => (float) $turn['discount_percent'],
@@ -526,6 +561,8 @@ class Turns extends Authenticated_Controller
 		}
 
 		$wallet_deducted = 0.00;
+		$historical_wallet_deducted = 0.00;
+		$cash_wallet_deducted = 0.00;
 		$cash_collected = 0.00;
 
 		$this->db->trans_begin();
@@ -538,8 +575,11 @@ class Turns extends Authenticated_Controller
 			return redirect('turns/' . $id . '/edit');
 		}
 
+		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
+		$wallet_split = $this->planned_wallet_deduction_split($wallet_breakdown, $topup_amount, $fee, $payment_type);
+
 		if ($topup_amount > 0) {
-			$new_balance = $this->Wallet_model->top_up($patient_id, $topup_amount, $id, 'Top-up on edit of turn #' . $id);
+			$new_balance = $this->Wallet_model->top_up_cash($patient_id, $topup_amount, $id, 'Top-up on edit of turn #' . $id);
 
 			if ($new_balance === FALSE) {
 				$this->db->trans_rollback();
@@ -574,16 +614,23 @@ class Turns extends Authenticated_Controller
 				break;
 
 			case 'prepaid':
-				$actual_deducted = $this->Wallet_model->deduct($patient_id, $fee, $id, 'Deduction on edit of turn #' . $id);
+				$wallet_deducted = (float) $wallet_split['total'];
+				$historical_wallet_deducted = (float) $wallet_split['historical'];
+				$cash_wallet_deducted = (float) $wallet_split['cash'];
+				$deduction = $this->Wallet_model->deduct_prioritized($patient_id, $wallet_deducted, $id, 'Deduction on edit of turn #' . $id);
 
-				if ($actual_deducted === FALSE) {
+				if (
+					$deduction === FALSE
+					|| abs((float) ($deduction['deducted_amount'] ?? 0) - $wallet_deducted) > 0.009
+					|| abs((float) ($deduction['historical_credit'] ?? 0) - $historical_wallet_deducted) > 0.009
+					|| abs((float) ($deduction['cash_topup'] ?? 0) - $cash_wallet_deducted) > 0.009
+				) {
 					$this->db->trans_rollback();
 					$this->session->set_flashdata('error', t('Unable to save turn right now.'));
 					return redirect('turns/' . $id . '/edit');
 				}
 
-				$wallet_deducted = $actual_deducted;
-				$remaining = round($fee - $actual_deducted, 2);
+				$remaining = round($fee - $wallet_deducted, 2);
 
 				if ($remaining > 0) {
 					$debt_id = $this->Debt_model->create($patient_id, $id, $remaining, 'Partial wallet on edit - remaining after deduction');
@@ -606,6 +653,8 @@ class Turns extends Authenticated_Controller
 			'fee' => $fee,
 			'payment_type' => $payment_type,
 			'wallet_deducted' => $wallet_deducted,
+			'historical_wallet_deducted' => $historical_wallet_deducted,
+			'cash_wallet_deducted' => $cash_wallet_deducted,
 			'cash_collected' => $cash_collected,
 			'topup_amount' => $topup_amount,
 			'discount_percent' => $discount_percent,
@@ -616,14 +665,6 @@ class Turns extends Authenticated_Controller
 			$this->db->trans_rollback();
 			$this->session->set_flashdata('error', t('Unable to save turn right now.'));
 			return redirect('turns/' . $id . '/edit');
-		}
-
-		if ($topup_amount > 0) {
-			$this->Wallet_model->attach_latest_transaction_to_turn($patient_id, 'topup', $topup_amount, $id);
-		}
-
-		if ($wallet_deducted > 0) {
-			$this->Wallet_model->attach_latest_transaction_to_turn($patient_id, 'deduction', $wallet_deducted, $id);
 		}
 
 		if ($payment_type === 'cash' && $cash_collected > 0) {
@@ -782,6 +823,7 @@ class Turns extends Authenticated_Controller
 			'sections' => $this->Section_model->get_all(),
 			'staff_members' => $selected_section_id > 0 ? $this->Turn_model->get_staff_by_section($selected_section_id) : array(),
 			'wallet_balance' => $selected_patient_id > 0 ? $this->Wallet_model->get_balance($selected_patient_id) : 0,
+			'wallet_breakdown' => $selected_patient_id > 0 ? $this->Wallet_model->get_balance_breakdown($selected_patient_id) : array('cash_topup' => 0, 'historical_credit' => 0, 'total' => 0),
 			'open_debts' => $selected_patient_id > 0 ? $this->Debt_model->get_open_debts($selected_patient_id) : array(),
 			'total_open_debt' => $selected_patient_id > 0 ? $this->Debt_model->get_total_open_debt($selected_patient_id) : 0,
 			'default_section_fee' => $selected_section_id > 0 ? $this->Turn_model->get_section_fee($selected_section_id) : 0,
@@ -863,6 +905,8 @@ class Turns extends Authenticated_Controller
 			'discount_amount' => $this->decimal_value($this->input->post('discount_amount')),
 			'payment_type' => $this->input->post('payment_type', TRUE) ?: 'cash',
 			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
+			'historical_wallet_deducted' => isset($overrides['historical_wallet_deducted']) ? round((float) $overrides['historical_wallet_deducted'], 2) : 0.00,
+			'cash_wallet_deducted' => isset($overrides['cash_wallet_deducted']) ? round((float) $overrides['cash_wallet_deducted'], 2) : 0.00,
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
 			'topup_amount' => isset($overrides['topup_amount']) ? round((float) $overrides['topup_amount'], 2) : 0.00,
 			'turn_date' => $this->gregorian_date_from_shamsi($this->input->post('turn_date', TRUE)),
@@ -884,6 +928,8 @@ class Turns extends Authenticated_Controller
 			'discount_amount' => isset($overrides['discount_amount']) ? round((float) $overrides['discount_amount'], 2) : $this->decimal_value($this->input->post('discount_amount')),
 			'payment_type' => isset($overrides['payment_type']) ? (string) $overrides['payment_type'] : ($this->input->post('payment_type', TRUE) ?: 'cash'),
 			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
+			'historical_wallet_deducted' => isset($overrides['historical_wallet_deducted']) ? round((float) $overrides['historical_wallet_deducted'], 2) : 0.00,
+			'cash_wallet_deducted' => isset($overrides['cash_wallet_deducted']) ? round((float) $overrides['cash_wallet_deducted'], 2) : 0.00,
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
 			'topup_amount' => isset($overrides['topup_amount']) ? round((float) $overrides['topup_amount'], 2) : $this->decimal_value($this->input->post('topup_amount')),
 			'turn_date' => $this->gregorian_date_from_shamsi($this->input->post('turn_date', TRUE)),
@@ -911,12 +957,34 @@ class Turns extends Authenticated_Controller
 			}
 		}
 
-		if ((float) $original_turn['wallet_deducted'] > 0) {
-			$reversed = $this->Wallet_model->reverse_deduction(
+		$historical_wallet_deducted = round((float) ($original_turn['historical_wallet_deducted'] ?? 0), 2);
+		$cash_wallet_deducted = round((float) ($original_turn['cash_wallet_deducted'] ?? 0), 2);
+
+		if ($historical_wallet_deducted <= 0 && $cash_wallet_deducted <= 0 && (float) ($original_turn['wallet_deducted'] ?? 0) > 0) {
+			$cash_wallet_deducted = round((float) $original_turn['wallet_deducted'], 2);
+		}
+
+		if ($historical_wallet_deducted > 0) {
+			$reversed = $this->Wallet_model->top_up(
 				$patient_id,
-				(float) $original_turn['wallet_deducted'],
+				$historical_wallet_deducted,
 				$turn_id,
-				'Reversal of deduction for turn #' . $turn_id
+				'REVERSAL: Reversal of deduction for turn #' . $turn_id,
+				'historical_credit'
+			);
+
+			if ($reversed === FALSE) {
+				return FALSE;
+			}
+		}
+
+		if ($cash_wallet_deducted > 0) {
+			$reversed = $this->Wallet_model->top_up(
+				$patient_id,
+				$cash_wallet_deducted,
+				$turn_id,
+				'REVERSAL: Reversal of deduction for turn #' . $turn_id,
+				'cash_topup'
 			);
 
 			if ($reversed === FALSE) {
@@ -954,6 +1022,32 @@ class Turns extends Authenticated_Controller
 	protected function decimal_value($value)
 	{
 		return round((float) $value, 2);
+	}
+
+	protected function planned_wallet_deduction_split(array $wallet_breakdown, $topup_amount, $fee, $payment_type)
+	{
+		$split = array(
+			'historical' => 0.00,
+			'cash' => 0.00,
+			'total' => 0.00,
+			'remaining' => 0.00,
+		);
+
+		if ((string) $payment_type !== 'prepaid') {
+			return $split;
+		}
+
+		$fee = round((float) $fee, 2);
+		$historical_available = round((float) ($wallet_breakdown['historical_credit'] ?? 0), 2);
+		$cash_available = round((float) ($wallet_breakdown['cash_topup'] ?? 0) + (float) $topup_amount, 2);
+
+		$split['historical'] = min($historical_available, $fee);
+		$remaining_after_historical = round($fee - $split['historical'], 2);
+		$split['cash'] = min($cash_available, $remaining_after_historical);
+		$split['total'] = round($split['historical'] + $split['cash'], 2);
+		$split['remaining'] = round($fee - $split['total'], 2);
+
+		return $split;
 	}
 
 	protected function bulk_shared_input()
@@ -1141,6 +1235,8 @@ class Turns extends Authenticated_Controller
 			'discount_amount' => round((float) ($row['discount_amount'] ?? 0), 2),
 			'payment_type' => $row['payment_type'],
 			'wallet_deducted' => isset($overrides['wallet_deducted']) ? round((float) $overrides['wallet_deducted'], 2) : 0.00,
+			'historical_wallet_deducted' => isset($overrides['historical_wallet_deducted']) ? round((float) $overrides['historical_wallet_deducted'], 2) : 0.00,
+			'cash_wallet_deducted' => isset($overrides['cash_wallet_deducted']) ? round((float) $overrides['cash_wallet_deducted'], 2) : 0.00,
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
 			'topup_amount' => round((float) $row['topup_amount'], 2),
 			'turn_date' => $this->gregorian_date_from_shamsi($shared_input['date']),
