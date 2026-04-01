@@ -62,7 +62,11 @@ class Turns extends Authenticated_Controller
 			$active_discount = $this->Discount_model->get_active_discount($patient_id, $section_id);
 
 			if ($active_discount) {
-				$calculation = $this->Discount_model->calculate_discounted_fee($fee, $active_discount['discount_percent']);
+				$calculation = $this->Discount_model->calculate_discounted_fee(
+					$fee,
+					$active_discount['discount_percent'] ?? 0,
+					$active_discount['discount_amount'] ?? 0
+				);
 				$discount_response = array(
 					'has_discount' => TRUE,
 					'discount_percent' => (float) $calculation['discount_percent'],
