@@ -157,8 +157,8 @@ class Report_model extends CI_Model
 			->where('turns.turn_date >=', $filters['date_from'])
 			->where('turns.turn_date <=', $filters['date_to']);
 
-		if ($filters['section_id'] !== NULL) {
-			$query->where('turns.section_id', $filters['section_id']);
+		if (!empty($filters['section_ids'])) {
+			$query->where_in('turns.section_id', $filters['section_ids']);
 		}
 
 		if ($filters['gender'] !== NULL) {
@@ -181,12 +181,25 @@ class Report_model extends CI_Model
 			$gender = NULL;
 		}
 
-		$section_id = isset($filters['section_id']) ? (int) $filters['section_id'] : 0;
+		$section_ids = array();
+		if (!empty($filters['section_ids']) && is_array($filters['section_ids'])) {
+			foreach ($filters['section_ids'] as $section_id) {
+				$section_id = (int) $section_id;
+				if ($section_id > 0) {
+					$section_ids[$section_id] = $section_id;
+				}
+			}
+		} elseif (isset($filters['section_id'])) {
+			$section_id = (int) $filters['section_id'];
+			if ($section_id > 0) {
+				$section_ids[$section_id] = $section_id;
+			}
+		}
 
 		return array(
 			'date_from' => trim((string) ($filters['date_from'] ?? '')),
 			'date_to' => trim((string) ($filters['date_to'] ?? '')),
-			'section_id' => $section_id > 0 ? $section_id : NULL,
+			'section_ids' => array_values($section_ids),
 			'gender' => $gender,
 		);
 	}
@@ -194,7 +207,7 @@ class Report_model extends CI_Model
 	protected function get_manual_wallet_topups_total($filters)
 	{
 		if (
-			$filters['section_id'] !== NULL
+			!empty($filters['section_ids'])
 			|| !$this->db->table_exists('patient_wallet_transactions')
 			|| !$this->db->table_exists('patients')
 		) {

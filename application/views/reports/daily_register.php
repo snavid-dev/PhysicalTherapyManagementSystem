@@ -5,6 +5,7 @@ $turns = isset($turns) && is_array($turns) ? $turns : array();
 $sections = isset($sections) && is_array($sections) ? $sections : array();
 $debts_by_turn = isset($summary['debts_by_turn']) && is_array($summary['debts_by_turn']) ? $summary['debts_by_turn'] : array();
 $income_by_section = isset($summary['income_by_section']) && is_array($summary['income_by_section']) ? $summary['income_by_section'] : array();
+$selected_section_ids = array_map('intval', (array) ($filters['section_ids'] ?? array()));
 
 $payment_badges = array(
 	'prepaid' => 'bg-primary-subtle text-primary',
@@ -26,13 +27,14 @@ $truncate_note = static function ($value, $limit) {
 	return strlen($value) > $limit ? (substr($value, 0, $limit - 1) . '...') : $value;
 };
 
-$selected_section_name = t('all_sections');
+$selected_section_names = array();
 foreach ($sections as $section) {
-	if ((int) ($section['id'] ?? 0) === (int) ($filters['section_id'] ?? 0)) {
-		$selected_section_name = !empty($section['name']) ? t($section['name']) : t('section_na');
-		break;
+	if (in_array((int) ($section['id'] ?? 0), $selected_section_ids, TRUE)) {
+		$selected_section_names[] = !empty($section['name']) ? t($section['name']) : t('section_na');
 	}
 }
+
+$selected_section_name = $selected_section_names ? implode(', ', $selected_section_names) : t('all_sections');
 
 $selected_gender_label = t('all_genders');
 if (($filters['gender'] ?? '') === 'male') {
@@ -45,8 +47,11 @@ $print_params = array(
 	'date_from' => $filters['date_from'] ?? $date_from,
 	'date_to' => $filters['date_to'] ?? $date_to,
 );
-if (!empty($filters['section_id'])) {
-	$print_params['section_id'] = (int) $filters['section_id'];
+foreach ($selected_section_ids as $selected_section_id) {
+	$print_params['section_ids'][] = $selected_section_id;
+}
+if (empty($print_params['section_ids'])) {
+	unset($print_params['section_ids']);
 }
 if (!empty($filters['gender'])) {
 	$print_params['gender'] = $filters['gender'];
@@ -84,10 +89,9 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 			</div>
 			<div class="col-xl-3 col-md-4">
 				<label class="form-label"><?= t('section') ?></label>
-				<select name="section_id" class="form-select s2-select" onchange="this.form.submit()">
-					<option value=""><?= t('all_sections') ?></option>
+				<select name="section_ids[]" class="form-select s2-select" multiple>
 					<?php foreach ($sections as $section) : ?>
-						<option value="<?= (int) $section['id'] ?>"<?= (int) ($filters['section_id'] ?? 0) === (int) $section['id'] ? ' selected' : '' ?>>
+						<option value="<?= (int) $section['id'] ?>"<?= in_array((int) $section['id'], $selected_section_ids, TRUE) ? ' selected' : '' ?>>
 							<?= html_escape(t($section['name'])) ?>
 						</option>
 					<?php endforeach; ?>

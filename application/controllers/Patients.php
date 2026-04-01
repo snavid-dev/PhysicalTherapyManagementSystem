@@ -11,6 +11,8 @@ class Patients extends Authenticated_Controller
 		$this->load->model('Wallet_model');
 		$this->load->model('Debt_model');
 		$this->load->model('Safe_model');
+		$this->load->model('Discount_model');
+		$this->load->model('Section_model');
 	}
 
 	public function index()
@@ -108,9 +110,96 @@ class Patients extends Authenticated_Controller
 			'wallet_transactions' => $wallet_transactions,
 			'open_debts' => $open_debts,
 			'total_open_debt' => $total_open_debt,
+			'discounts' => $this->normalized_discounts($id),
+			'all_sections' => $this->Section_model->get_all(),
 			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt, $wallet_breakdown),
 			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns),
 		));
+	}
+
+	public function add_discount($id)
+	{
+		$this->require_permission('manage_patients');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient = $this->Patient_model->get_by_id($id);
+		show_404_if_empty($patient);
+		$wants_json = $this->wants_json_response();
+
+		$section_id = (int) $this->input->post('section_id');
+		$discount_percent = round((float) $this->input->post('discount_percent'), 2);
+		$note = $this->null_if_empty($this->input->post('note', TRUE));
+
+		if ($section_id <= 0 || !$this->Section_model->get_by_id($section_id)) {
+			return $this->respond_discount_error($id, t('section') . ' ' . t('is required.'), 422, $wants_json);
+		}
+
+		if ($discount_percent < 0.01 || $discount_percent > 100) {
+			return $this->respond_discount_error($id, t('discount_invalid'), 422, $wants_json);
+		}
+
+		$created_id = $this->Discount_model->create(
+			$id,
+			$section_id,
+			$discount_percent,
+			$note,
+			$this->session->userdata('user_id')
+		);
+
+		if (!$created_id) {
+			$db_error = $this->db->error();
+			$message = t('unable_to_save_discount');
+			if (ENVIRONMENT !== 'production' && !empty($db_error['message'])) {
+				$message .= ' ' . $db_error['message'];
+			}
+			return $this->respond_discount_error($id, $message, 500, $wants_json);
+		}
+
+		if (!$wants_json) {
+			$this->session->set_flashdata('success', t('discount_saved'));
+			redirect('patients/' . (int) $id);
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'success' => TRUE,
+				'message' => t('discount_saved'),
+				'discounts' => $this->normalized_discounts($id),
+			)));
+	}
+
+	public function delete_discount($patient_id, $discount_id)
+	{
+		$this->require_permission('manage_patients');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient = $this->Patient_model->get_by_id($patient_id);
+		show_404_if_empty($patient);
+		$wants_json = $this->wants_json_response();
+
+		if (!$this->Discount_model->delete($discount_id, $patient_id)) {
+			return $this->respond_discount_error($patient_id, t('discount_not_found'), 404, $wants_json);
+		}
+
+		if (!$wants_json) {
+			$this->session->set_flashdata('success', t('discount_deleted'));
+			redirect('patients/' . (int) $patient_id);
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'success' => TRUE,
+				'message' => t('discount_deleted'),
+				'discounts' => $this->normalized_discounts($patient_id),
+			)));
 	}
 
 	public function wallet_topup($id)
@@ -617,6 +706,54 @@ class Patients extends Authenticated_Controller
 			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt, $wallet_breakdown),
 			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns),
 		);
+	}
+
+	protected function normalized_discounts($patient_id)
+	{
+		$discounts = $this->Discount_model->get_all_for_patient($patient_id);
+		$active_ids_by_section = array();
+
+		foreach ($discounts as $discount) {
+			$section_id = (int) ($discount['section_id'] ?? 0);
+			if ($section_id > 0 && !isset($active_ids_by_section[$section_id])) {
+				$active_ids_by_section[$section_id] = (int) $discount['id'];
+			}
+		}
+
+		return array_map(static function ($discount) use ($active_ids_by_section) {
+			$section_id = (int) ($discount['section_id'] ?? 0);
+			$section_name = trim((string) ($discount['section_name'] ?? ''));
+
+			return array(
+				'id' => (int) ($discount['id'] ?? 0),
+				'patient_id' => (int) ($discount['patient_id'] ?? 0),
+				'section_id' => $section_id,
+				'section_name' => $section_name,
+				'section_label' => $section_name !== '' ? t($section_name) : '',
+				'discount_percent' => round((float) ($discount['discount_percent'] ?? 0), 2),
+				'note' => $discount['note'] ?? NULL,
+				'created_by' => isset($discount['created_by']) ? (int) $discount['created_by'] : NULL,
+				'created_at' => (string) ($discount['created_at'] ?? ''),
+				'is_active' => isset($active_ids_by_section[$section_id]) && $active_ids_by_section[$section_id] === (int) ($discount['id'] ?? 0),
+			);
+		}, $discounts);
+	}
+
+	protected function respond_discount_error($patient_id, $message, $status, $wants_json)
+	{
+		if (!$wants_json) {
+			$this->session->set_flashdata('error', $message);
+			redirect('patients/' . (int) $patient_id);
+		}
+
+		return $this->output
+			->set_status_header((int) $status)
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'success' => FALSE,
+				'message' => $message,
+				'discounts' => $this->normalized_discounts($patient_id),
+			)));
 	}
 
 	protected function build_financial_summary(array $wallet_transactions, array $turns, $wallet_balance, $total_open_debt, array $wallet_breakdown = array())
