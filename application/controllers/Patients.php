@@ -130,14 +130,15 @@ class Patients extends Authenticated_Controller
 		$wants_json = $this->wants_json_response();
 
 		$section_id = (int) $this->input->post('section_id');
-		$discount_percent = round((float) $this->input->post('discount_percent'), 2);
+		$discount_percent = max(round((float) $this->input->post('discount_percent'), 2), 0);
+		$discount_amount = max(round((float) $this->input->post('discount_amount'), 2), 0);
 		$note = $this->null_if_empty($this->input->post('note', TRUE));
 
 		if ($section_id <= 0 || !$this->Section_model->get_by_id($section_id)) {
 			return $this->respond_discount_error($id, t('section') . ' ' . t('is required.'), 422, $wants_json);
 		}
 
-		if ($discount_percent < 0.01 || $discount_percent > 100) {
+		if (($discount_percent < 0.01 || $discount_percent > 100) && $discount_amount <= 0) {
 			return $this->respond_discount_error($id, t('discount_invalid'), 422, $wants_json);
 		}
 
@@ -145,6 +146,7 @@ class Patients extends Authenticated_Controller
 			$id,
 			$section_id,
 			$discount_percent,
+			$discount_amount,
 			$note,
 			$this->session->userdata('user_id')
 		);
@@ -731,6 +733,7 @@ class Patients extends Authenticated_Controller
 				'section_name' => $section_name,
 				'section_label' => $section_name !== '' ? t($section_name) : '',
 				'discount_percent' => round((float) ($discount['discount_percent'] ?? 0), 2),
+				'discount_amount' => round((float) ($discount['discount_amount'] ?? 0), 2),
 				'note' => $discount['note'] ?? NULL,
 				'created_by' => isset($discount['created_by']) ? (int) $discount['created_by'] : NULL,
 				'created_at' => (string) ($discount['created_at'] ?? ''),

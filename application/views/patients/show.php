@@ -489,7 +489,12 @@ $wallet_transaction_meta = static function ($transaction) {
 					</div>
 					<div class="mb-3">
 						<label class="form-label"><?= t('discount_percent') ?></label>
-						<input type="number" name="discount_percent" class="form-control" min="0.01" max="100" step="0.01" required>
+						<input type="number" name="discount_percent" id="discountPercentInput" class="form-control" min="0.01" max="100" step="0.01">
+					</div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('discount_amount') ?></label>
+						<input type="number" name="discount_amount" id="discountAmountInput" class="form-control" min="0.01" step="0.01">
+						<small class="text-muted"><?= t('discount_value_hint') ?></small>
 					</div>
 					<div class="mb-0">
 						<label class="form-label"><?= t('Notes') ?></label>
@@ -883,6 +888,8 @@ $wallet_transaction_meta = static function ($transaction) {
 	const feedback = document.getElementById('discountFeedback');
 	const modalFeedback = document.getElementById('discountModalFeedback');
 	const modalElement = document.getElementById('discountModal');
+	const discountPercentInput = document.getElementById('discountPercentInput');
+	const discountAmountInput = document.getElementById('discountAmountInput');
 	const deleteUrlBase = <?= json_encode(base_url('patients/delete-discount/' . $patient['id'] . '/')) ?>;
 	let discounts = <?= $discounts_payload ?: '[]' ?>;
 
@@ -890,6 +897,7 @@ $wallet_transaction_meta = static function ($transaction) {
 		noDiscounts: <?= json_encode(t('no_discounts')) ?>,
 		section: <?= json_encode(t('section')) ?>,
 		discountPercent: <?= json_encode(t('discount_percent')) ?>,
+		discountAmount: <?= json_encode(t('discount_amount')) ?>,
 		note: <?= json_encode(t('Notes')) ?>,
 		dateAdded: <?= json_encode(t('date_added')) ?>,
 		active: <?= json_encode(t('active_discount')) ?>,
@@ -897,6 +905,7 @@ $wallet_transaction_meta = static function ($transaction) {
 		actions: <?= json_encode(t('Actions')) ?>,
 		delete: <?= json_encode(t('Delete')) ?>,
 		deleteConfirm: <?= json_encode(t('delete_discount_confirm')) ?>,
+		discountInvalid: <?= json_encode(t('discount_invalid')) ?>,
 		fallbackError: <?= json_encode(t('unable_to_save_discount')) ?>,
 		fallbackDeleteError: <?= json_encode(t('unable_to_delete_discount')) ?>,
 	};
@@ -936,6 +945,12 @@ $wallet_transaction_meta = static function ($transaction) {
 		element.textContent = '';
 	}
 
+	function hasDiscountValue() {
+		const discountPercent = parseFloat((discountPercentInput && discountPercentInput.value) || 0);
+		const discountAmount = parseFloat((discountAmountInput && discountAmountInput.value) || 0);
+		return discountPercent > 0 || discountAmount > 0;
+	}
+
 	function handleJsonResponse(response, fallbackMessage) {
 		return response.text().then(function (text) {
 			let data = {};
@@ -958,6 +973,7 @@ $wallet_transaction_meta = static function ($transaction) {
 			+ '<thead><tr>'
 			+ '<th>' + escapeHtml(labels.section) + '</th>'
 			+ '<th>' + escapeHtml(labels.discountPercent) + '</th>'
+			+ '<th>' + escapeHtml(labels.discountAmount) + '</th>'
 			+ '<th>' + escapeHtml(labels.note) + '</th>'
 			+ '<th>' + escapeHtml(labels.dateAdded) + '</th>'
 			+ '<th>' + escapeHtml(labels.active) + '</th>'
@@ -971,6 +987,7 @@ $wallet_transaction_meta = static function ($transaction) {
 				return '<tr>'
 					+ '<td>' + escapeHtml(discount.section_label || discount.section_name || '') + '</td>'
 					+ '<td>' + escapeHtml(formatNumber(parseFloat(discount.discount_percent || 0))) + '%</td>'
+					+ '<td>' + escapeHtml(formatNumber(parseFloat(discount.discount_amount || 0))) + '</td>'
 					+ '<td>' + (discount.note ? escapeHtml(discount.note) : '&mdash;') + '</td>'
 					+ '<td>' + escapeHtml(window.formatShamsiDate ? window.formatShamsiDate(discount.created_at || '', 'YYYY/MM/DD HH:mm') : (discount.created_at || '')) + '</td>'
 					+ '<td>' + statusBadge + '</td>'
@@ -983,6 +1000,11 @@ $wallet_transaction_meta = static function ($transaction) {
 	form.addEventListener('submit', function (event) {
 		event.preventDefault();
 		clearFeedback(modalFeedback);
+
+		if (!hasDiscountValue()) {
+			showFeedback(modalFeedback, labels.discountInvalid, true);
+			return;
+		}
 
 		fetch(form.action, {
 			method: 'POST',
@@ -1053,6 +1075,20 @@ $wallet_transaction_meta = static function ($transaction) {
 	if (modalElement) {
 		modalElement.addEventListener('hidden.bs.modal', function () {
 			clearFeedback(modalFeedback);
+		});
+	}
+
+	if (discountPercentInput && discountAmountInput) {
+		discountPercentInput.addEventListener('input', function () {
+			if (parseFloat(this.value || 0) > 0) {
+				discountAmountInput.value = '';
+			}
+		});
+
+		discountAmountInput.addEventListener('input', function () {
+			if (parseFloat(this.value || 0) > 0) {
+				discountPercentInput.value = '';
+			}
 		});
 	}
 
