@@ -5,14 +5,16 @@ $turns = isset($turns) && is_array($turns) ? $turns : array();
 $sections = isset($sections) && is_array($sections) ? $sections : array();
 $debts_by_turn = isset($summary['debts_by_turn']) && is_array($summary['debts_by_turn']) ? $summary['debts_by_turn'] : array();
 $income_by_section = isset($summary['income_by_section']) && is_array($summary['income_by_section']) ? $summary['income_by_section'] : array();
+$selected_section_ids = array_map('intval', (array) ($filters['section_ids'] ?? array()));
 
-$selected_section_name = t('all_sections');
+$selected_section_names = array();
 foreach ($sections as $section) {
-	if ((int) ($section['id'] ?? 0) === (int) ($filters['section_id'] ?? 0)) {
-		$selected_section_name = !empty($section['name']) ? t($section['name']) : t('section_na');
-		break;
+	if (in_array((int) ($section['id'] ?? 0), $selected_section_ids, TRUE)) {
+		$selected_section_names[] = !empty($section['name']) ? t($section['name']) : t('section_na');
 	}
 }
+
+$selected_section_name = $selected_section_names ? implode(', ', $selected_section_names) : t('all_sections');
 
 $selected_gender_label = t('all_genders');
 if (($filters['gender'] ?? '') === 'male') {

@@ -73,7 +73,8 @@ class Reports extends Authenticated_Controller
 
 		$date_from = trim((string) $this->input->get('date_from', TRUE));
 		$date_to = trim((string) $this->input->get('date_to', TRUE));
-		$section_id = (int) $this->input->get('section_id', TRUE);
+		$section_ids = $this->input->get('section_ids');
+		$legacy_section_id = (int) $this->input->get('section_id', TRUE);
 		$gender = strtolower(trim((string) $this->input->get('gender', TRUE)));
 
 		$date_from = $date_from !== '' ? $date_from : $today_shamsi;
@@ -104,10 +105,24 @@ class Reports extends Authenticated_Controller
 			$gender = NULL;
 		}
 
+		$normalized_section_ids = array();
+		if (is_array($section_ids)) {
+			foreach ($section_ids as $section_id) {
+				$section_id = (int) $section_id;
+				if ($section_id > 0) {
+					$normalized_section_ids[$section_id] = $section_id;
+				}
+			}
+		}
+
+		if (empty($normalized_section_ids) && $legacy_section_id > 0) {
+			$normalized_section_ids[$legacy_section_id] = $legacy_section_id;
+		}
+
 		$filters = array(
 			'date_from' => $date_from_g,
 			'date_to' => $date_to_g,
-			'section_id' => $section_id > 0 ? $section_id : NULL,
+			'section_ids' => array_values($normalized_section_ids),
 			'gender' => $gender,
 		);
 
@@ -118,7 +133,7 @@ class Reports extends Authenticated_Controller
 			'filters' => array(
 				'date_from' => $date_from,
 				'date_to' => $date_to,
-				'section_id' => $filters['section_id'],
+				'section_ids' => $filters['section_ids'],
 				'gender' => $gender,
 			),
 			'date_from' => $date_from,
