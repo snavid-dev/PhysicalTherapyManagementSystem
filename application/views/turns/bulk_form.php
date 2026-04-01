@@ -275,6 +275,14 @@ $initial_rows = array_map(static function ($row) {
 									<span class="badge rounded-pill bg-secondary-subtle text-secondary bulk-wallet-badge"><?= format_amount(0) ?></span>
 								</div>
 								<div class="turn-financial-item">
+									<span class="text-muted d-block mb-1"><?= t('historical_wallet_balance') ?></span>
+									<span class="badge rounded-pill bg-secondary-subtle text-secondary bulk-historical-wallet-badge"><?= format_amount(0) ?></span>
+								</div>
+								<div class="turn-financial-item">
+									<span class="text-muted d-block mb-1"><?= t('real_wallet_balance') ?></span>
+									<span class="badge rounded-pill bg-secondary-subtle text-secondary bulk-cash-wallet-badge"><?= format_amount(0) ?></span>
+								</div>
+								<div class="turn-financial-item">
 									<span class="text-muted d-block mb-1"><?= t('total_open_debt') ?></span>
 									<span class="badge rounded-pill bg-secondary-subtle text-secondary bulk-debt-badge"><?= format_amount(0) ?></span>
 								</div>
@@ -328,7 +336,7 @@ $initial_rows = array_map(static function ($row) {
 									<label class="turn-payment-option bulk-payment-option">
 										<input type="radio" class="form-check-input bulk-payment-radio" value="prepaid">
 										<span class="turn-payment-option__title"><?= t('prepaid') ?></span>
-										<span class="turn-payment-option__text"><?= t('wallet_balance') ?></span>
+										<span class="turn-payment-option__text"><?= t('historical_wallet_spend_rule') ?></span>
 									</label>
 								</div>
 								<div class="col-sm-6 col-xxl-3">
@@ -777,12 +785,24 @@ $initial_rows = array_map(static function ($row) {
 	function updateFinancialUI(row) {
 		const stateData = row._state;
 		const walletBadge = row.querySelector('.bulk-wallet-badge');
+		const historicalWalletBadge = row.querySelector('.bulk-historical-wallet-badge');
+		const cashWalletBadge = row.querySelector('.bulk-cash-wallet-badge');
 		const debtBadge = row.querySelector('.bulk-debt-badge');
 
 		walletBadge.textContent = formatAmount(stateData.walletBalance);
 		walletBadge.className = stateData.walletBalance > 0
 			? 'badge rounded-pill bg-success-subtle text-success bulk-wallet-badge'
 			: 'badge rounded-pill bg-secondary-subtle text-secondary bulk-wallet-badge';
+
+		historicalWalletBadge.textContent = formatAmount(stateData.historicalWalletBalance);
+		historicalWalletBadge.className = stateData.historicalWalletBalance > 0
+			? 'badge rounded-pill bg-info-subtle text-info bulk-historical-wallet-badge'
+			: 'badge rounded-pill bg-secondary-subtle text-secondary bulk-historical-wallet-badge';
+
+		cashWalletBadge.textContent = formatAmount(stateData.cashWalletBalance);
+		cashWalletBadge.className = stateData.cashWalletBalance > 0
+			? 'badge rounded-pill bg-success-subtle text-success bulk-cash-wallet-badge'
+			: 'badge rounded-pill bg-secondary-subtle text-secondary bulk-cash-wallet-badge';
 
 		debtBadge.textContent = formatAmount(stateData.totalOpenDebt);
 		debtBadge.className = stateData.totalOpenDebt > 0
@@ -898,6 +918,8 @@ $initial_rows = array_map(static function ($row) {
 
 	function applyPatientFinancial(row, data) {
 		row._state.walletBalance = toNumber(data.wallet_balance);
+		row._state.historicalWalletBalance = toNumber(data.historical_wallet_balance);
+		row._state.cashWalletBalance = toNumber(data.cash_wallet_balance);
 		row._state.totalOpenDebt = toNumber(data.total_open_debt);
 		row._state.openDebts = Array.isArray(data.open_debts) ? data.open_debts : [];
 		updateFinancialUI(row);
@@ -906,6 +928,8 @@ $initial_rows = array_map(static function ($row) {
 
 	function resetPatientState(row) {
 		row._state.walletBalance = 0;
+		row._state.historicalWalletBalance = 0;
+		row._state.cashWalletBalance = 0;
 		row._state.totalOpenDebt = 0;
 		row._state.openDebts = [];
 		updateSessionNumber(row, '');
@@ -1311,6 +1335,8 @@ $initial_rows = array_map(static function ($row) {
 
 		row._state = {
 			walletBalance: 0,
+			historicalWalletBalance: 0,
+			cashWalletBalance: 0,
 			totalOpenDebt: 0,
 			openDebts: [],
 			sessionManuallyEdited: false,

@@ -236,6 +236,8 @@ CREATE TABLE `turns` (
 	`fee` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`payment_type` enum('prepaid','cash','deferred','free') NOT NULL DEFAULT 'cash',
 	`wallet_deducted` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`historical_wallet_deducted` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`cash_wallet_deducted` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`cash_collected` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`topup_amount` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`turn_date` date NOT NULL,
@@ -274,6 +276,7 @@ CREATE TABLE `patient_wallet_transactions` (
 	`patient_id` int unsigned NOT NULL,
 	`turn_id` int unsigned DEFAULT NULL,
 	`type` enum('topup','deduction') NOT NULL,
+	`fund_type` enum('cash_topup','historical_credit') NOT NULL DEFAULT 'cash_topup',
 	`amount` decimal(12,2) NOT NULL,
 	`note` varchar(255) DEFAULT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -466,8 +469,8 @@ INSERT INTO `patient_wallet` (`patient_id`, `balance`) VALUES
 	(1, 100.00),
 	(2, 0.00);
 
-INSERT INTO `patient_wallet_transactions` (`patient_id`, `turn_id`, `type`, `amount`, `note`) VALUES
-	(1, NULL, 'topup', 100.00, 'Initial wallet top up');
+INSERT INTO `patient_wallet_transactions` (`patient_id`, `turn_id`, `type`, `fund_type`, `amount`, `note`) VALUES
+	(1, NULL, 'topup', 'cash_topup', 100.00, 'Initial wallet top up');
 
 INSERT INTO `patient_debts` (`patient_id`, `turn_id`, `amount`, `status`, `note`) VALUES
 	(2, 2, 25.00, 'open', 'Outstanding follow-up fee');

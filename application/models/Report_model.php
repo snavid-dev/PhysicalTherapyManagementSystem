@@ -201,7 +201,7 @@ class Report_model extends CI_Model
 			return 0.00;
 		}
 
-		$rows = $this->db
+		$query = $this->db
 			->select('patient_wallet_transactions.id, patient_wallet_transactions.amount')
 			->from('patient_wallet_transactions')
 			->join('patients', 'patients.id = patient_wallet_transactions.patient_id')
@@ -226,11 +226,15 @@ class Report_model extends CI_Model
 			->group_by('patient_wallet_transactions.id')
 			->order_by('patient_wallet_transactions.id', 'asc');
 
-		if ($filters['gender'] !== NULL) {
-			$rows->where('patients.gender', $filters['gender']);
+		if ($this->db->field_exists('fund_type', 'patient_wallet_transactions')) {
+			$query->where('patient_wallet_transactions.fund_type', 'cash_topup');
 		}
 
-		$result = $rows->get()->result_array();
+		if ($filters['gender'] !== NULL) {
+			$query->where('patients.gender', $filters['gender']);
+		}
+
+		$result = $query->get()->result_array();
 		$total = 0.00;
 
 		foreach ($result as $row) {

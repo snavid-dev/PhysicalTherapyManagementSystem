@@ -30,6 +30,7 @@ $route['patients/add-discount/(:num)'] = 'patients/add_discount/$1';
 $route['patients/delete-discount/(:num)/(:num)'] = 'patients/delete_discount/$1/$2';
 $route['patients/(:num)'] = 'Patients/show/$1';
 $route['patients/(:num)/wallet-topup'] = 'Patients/wallet_topup/$1';
+$route['patients/(:num)/wallet-historical-credit'] = 'Patients/wallet_historical_credit/$1';
 $route['patients/(:num)/wallet-deduct'] = 'Patients/wallet_deduct/$1';
 $route['patients/(:num)/debt-payment'] = 'Patients/debt_payment/$1';
 $route['patients/(:num)/edit'] = 'Patients/edit/$1';

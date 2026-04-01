@@ -24,6 +24,7 @@ $display_time = static function ($time_value) {
 };
 $financial_summary = is_array($financial_summary ?? NULL) ? $financial_summary : array();
 $financial_timeline = is_array($financial_timeline ?? NULL) ? $financial_timeline : array();
+$wallet_breakdown = is_array($wallet_breakdown ?? NULL) ? $wallet_breakdown : array();
 $discounts = is_array($discounts ?? NULL) ? $discounts : array();
 $all_sections = is_array($all_sections ?? NULL) ? $all_sections : array();
 $discounts_payload = json_encode($discounts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -40,6 +41,40 @@ $timeline_amount_prefix = static function ($entry) {
 	}
 
 	return '';
+};
+$wallet_transaction_meta = static function ($transaction) {
+	$type = (string) ($transaction['type'] ?? '');
+	$fund_type = (string) ($transaction['fund_type'] ?? 'cash_topup');
+
+	if ($type === 'topup' && $fund_type === 'historical_credit') {
+		return array(
+			'class' => 'bg-info-subtle text-info',
+			'label' => t('historical_wallet_credit'),
+			'prefix' => '+',
+		);
+	}
+
+	if ($type === 'topup') {
+		return array(
+			'class' => 'bg-success-subtle text-success',
+			'label' => t('cash_wallet_topup'),
+			'prefix' => '+',
+		);
+	}
+
+	if ($fund_type === 'historical_credit') {
+		return array(
+			'class' => 'bg-warning-subtle text-warning',
+			'label' => t('historical_wallet_deduction'),
+			'prefix' => '-',
+		);
+	}
+
+	return array(
+		'class' => 'bg-warning-subtle text-warning',
+		'label' => t('cash_wallet_deduction'),
+		'prefix' => '-',
+	);
 };
 ?>
 
@@ -105,13 +140,25 @@ $timeline_amount_prefix = static function ($entry) {
 								<span class="financial-summary-card__label"><?= t('wallet_balance') ?></span>
 								<strong id="financialWalletBalanceValue" class="financial-summary-card__value"><?= format_amount($financial_summary['wallet_balance'] ?? 0) ?></strong>
 							</div>
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('historical_wallet_balance') ?></span>
+								<strong id="financialHistoricalWalletBalanceValue" class="financial-summary-card__value"><?= format_amount($financial_summary['historical_wallet_balance'] ?? 0) ?></strong>
+							</div>
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('real_wallet_balance') ?></span>
+								<strong id="financialCashWalletBalanceValue" class="financial-summary-card__value"><?= format_amount($financial_summary['cash_wallet_balance'] ?? 0) ?></strong>
+							</div>
 							<div class="financial-summary-card financial-summary-card--danger">
 								<span class="financial-summary-card__label"><?= t('total_open_debt') ?></span>
 								<strong id="financialOpenDebtValue" class="financial-summary-card__value"><?= format_amount($financial_summary['total_open_debt'] ?? 0) ?></strong>
 							</div>
 							<div class="financial-summary-card">
-								<span class="financial-summary-card__label"><?= t('wallet_topups') ?></span>
-								<strong id="financialWalletTopupsValue" class="financial-summary-card__value"><?= format_amount($financial_summary['wallet_topups'] ?? 0) ?></strong>
+								<span class="financial-summary-card__label"><?= t('historical_wallet_credits') ?></span>
+								<strong id="financialHistoricalWalletCreditsValue" class="financial-summary-card__value"><?= format_amount($financial_summary['historical_wallet_credits'] ?? 0) ?></strong>
+							</div>
+							<div class="financial-summary-card">
+								<span class="financial-summary-card__label"><?= t('real_wallet_topups') ?></span>
+								<strong id="financialCashWalletTopupsValue" class="financial-summary-card__value"><?= format_amount($financial_summary['cash_wallet_topups'] ?? 0) ?></strong>
 							</div>
 							<div class="financial-summary-card">
 								<span class="financial-summary-card__label"><?= t('wallet_deductions') ?></span>
@@ -183,15 +230,23 @@ $timeline_amount_prefix = static function ($entry) {
 						<span id="walletBalanceProfileBadge" class="badge rounded-pill <?= $wallet_balance > 0 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?> mb-3">
 							<?= format_amount($wallet_balance) ?>
 						</span>
+						<div class="d-flex flex-wrap gap-2 mb-3">
+							<span id="historicalWalletProfileBadge" class="badge rounded-pill <?= ($wallet_breakdown['historical_credit'] ?? 0) > 0 ? 'bg-info-subtle text-info' : 'bg-secondary-subtle text-secondary' ?>">
+								<?= t('historical_wallet_balance') ?>: <?= format_amount($wallet_breakdown['historical_credit'] ?? 0) ?>
+							</span>
+							<span id="cashWalletProfileBadge" class="badge rounded-pill <?= ($wallet_breakdown['cash_topup'] ?? 0) > 0 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?>">
+								<?= t('real_wallet_balance') ?>: <?= format_amount($wallet_breakdown['cash_topup'] ?? 0) ?>
+							</span>
+						</div>
 						<div class="wallet-profile-stack">
 							<form id="walletTopupForm" class="wallet-profile-form" action="<?= base_url('patients/' . $patient['id'] . '/wallet-topup') ?>" method="post">
 								<div class="wallet-profile-form__head">
-									<h3 class="h6 mb-0"><?= t('top_up_wallet') ?></h3>
+									<h3 class="h6 mb-0"><?= t('real_wallet_deposit') ?></h3>
 									<span class="text-muted small"><?= t('wallet_action_hint') ?></span>
 								</div>
 								<div class="row g-2">
 									<div class="col-sm-5">
-										<label class="form-label mb-1"><?= t('top_up_amount') ?></label>
+										<label class="form-label mb-1"><?= t('real_wallet_deposit_amount') ?></label>
 										<input type="number" name="amount" id="walletTopupAmount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
 									</div>
 									<div class="col-sm-7">
@@ -205,9 +260,34 @@ $timeline_amount_prefix = static function ($entry) {
 									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletTopupAmount" data-amount="500">+<?= format_amount(500) ?></button>
 								</div>
 								<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
-									<button type="submit" class="btn btn-dark btn-sm"><?= t('top_up_wallet') ?></button>
+									<button type="submit" class="btn btn-dark btn-sm"><?= t('real_wallet_deposit') ?></button>
 								</div>
 								<div id="walletTopupFeedback" class="alert d-none mt-3 mb-0"></div>
+							</form>
+							<form id="walletHistoricalCreditForm" class="wallet-profile-form" action="<?= base_url('patients/' . $patient['id'] . '/wallet-historical-credit') ?>" method="post">
+								<div class="wallet-profile-form__head">
+									<h3 class="h6 mb-0"><?= t('historical_wallet_credit') ?></h3>
+									<span class="text-muted small"><?= t('historical_wallet_credit_hint') ?></span>
+								</div>
+								<div class="row g-2">
+									<div class="col-sm-5">
+										<label class="form-label mb-1"><?= t('historical_wallet_credit_amount') ?></label>
+										<input type="number" name="amount" id="walletHistoricalCreditAmount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+									</div>
+									<div class="col-sm-7">
+										<label class="form-label mb-1"><?= t('wallet_note') ?></label>
+										<input type="text" name="note" id="walletHistoricalCreditNote" class="form-control" placeholder="<?= t('historical_wallet_note_placeholder') ?>">
+									</div>
+								</div>
+								<div class="wallet-quick-actions mt-2">
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletHistoricalCreditAmount" data-amount="100">+<?= format_amount(100) ?></button>
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletHistoricalCreditAmount" data-amount="250">+<?= format_amount(250) ?></button>
+									<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="walletHistoricalCreditAmount" data-amount="500">+<?= format_amount(500) ?></button>
+								</div>
+								<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+									<button type="submit" class="btn btn-outline-info btn-sm"><?= t('historical_wallet_credit') ?></button>
+								</div>
+								<div id="walletHistoricalCreditFeedback" class="alert d-none mt-3 mb-0"></div>
 							</form>
 							<form id="walletDeductForm" class="wallet-profile-form" action="<?= base_url('patients/' . $patient['id'] . '/wallet-deduct') ?>" method="post">
 								<div class="wallet-profile-form__head">
@@ -248,11 +328,11 @@ $timeline_amount_prefix = static function ($entry) {
 									</thead>
 									<tbody id="walletTransactionsBody">
 									<?php if ($wallet_transactions) : foreach ($wallet_transactions as $transaction) : ?>
-										<?php $amount_prefix = $transaction['type'] === 'topup' ? '+' : '-'; ?>
+										<?php $meta = $wallet_transaction_meta($transaction); ?>
 										<tr>
 											<td class="col-date"><?= html_escape(to_shamsi($transaction['created_at'], 'Y/m/d H:i')) ?></td>
-											<td><span class="badge rounded-pill <?= $transaction['type'] === 'topup' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' ?>"><?= html_escape(t($transaction['type'])) ?></span></td>
-											<td><?= html_escape($amount_prefix) . format_amount($transaction['amount']) ?></td>
+											<td><span class="badge rounded-pill <?= $meta['class'] ?>"><?= html_escape($meta['label']) ?></span></td>
+											<td><?= html_escape($meta['prefix']) . format_amount($transaction['amount']) ?></td>
 											<td class="col-text"><?= !empty($transaction['note']) ? html_escape($transaction['note']) : (!empty($transaction['turn_id']) ? '#' . (int) $transaction['turn_id'] : '&mdash;') ?></td>
 										</tr>
 									<?php endforeach; endif; ?>
@@ -433,6 +513,8 @@ $timeline_amount_prefix = static function ($entry) {
 	}
 
 	const balanceBadge = document.getElementById('walletBalanceProfileBadge');
+	const historicalBalanceBadge = document.getElementById('historicalWalletProfileBadge');
+	const cashBalanceBadge = document.getElementById('cashWalletProfileBadge');
 	const openDebtBadge = document.getElementById('openDebtProfileBadge');
 	const transactionsBody = document.getElementById('walletTransactionsBody');
 	const openDebtTableBody = document.getElementById('openDebtTableBody');
@@ -443,8 +525,11 @@ $timeline_amount_prefix = static function ($entry) {
 	const fullDebtButton = document.querySelector('.wallet-quick-fill-debt');
 	const financialSummaryFields = {
 		wallet_balance: document.getElementById('financialWalletBalanceValue'),
+		historical_wallet_balance: document.getElementById('financialHistoricalWalletBalanceValue'),
+		cash_wallet_balance: document.getElementById('financialCashWalletBalanceValue'),
 		total_open_debt: document.getElementById('financialOpenDebtValue'),
-		wallet_topups: document.getElementById('financialWalletTopupsValue'),
+		historical_wallet_credits: document.getElementById('financialHistoricalWalletCreditsValue'),
+		cash_wallet_topups: document.getElementById('financialCashWalletTopupsValue'),
 		wallet_deductions: document.getElementById('financialWalletDeductionsValue'),
 		turn_cash_total: document.getElementById('financialTurnCashTotalValue'),
 		turn_debt_total: document.getElementById('financialTurnDebtTotalValue')
@@ -453,8 +538,10 @@ $timeline_amount_prefix = static function ($entry) {
 		noTransactions: <?= json_encode(t('no_transactions')) ?>,
 		noOpenDebt: <?= json_encode(t('no_open_debt')) ?>,
 		noFinancialEntries: <?= json_encode(t('no_financial_entries')) ?>,
-		topup: <?= json_encode(t('topup')) ?>,
-		deduction: <?= json_encode(t('deduction')) ?>,
+		cashTopup: <?= json_encode(t('cash_wallet_topup')) ?>,
+		historicalCredit: <?= json_encode(t('historical_wallet_credit')) ?>,
+		cashDeduction: <?= json_encode(t('cash_wallet_deduction')) ?>,
+		historicalDeduction: <?= json_encode(t('historical_wallet_deduction')) ?>,
 		openStatus: <?= json_encode(t('open_status')) ?>,
 		walletSource: <?= json_encode(t('wallet_source')) ?>,
 		turnSource: <?= json_encode(t('turn_source')) ?>,
@@ -481,6 +568,25 @@ $timeline_amount_prefix = static function ($entry) {
 		balanceBadge.className = balance > 0
 			? 'badge rounded-pill bg-success-subtle text-success mb-3'
 			: 'badge rounded-pill bg-secondary-subtle text-secondary mb-3';
+	}
+
+	function updateWalletBreakdownBadges(walletBreakdown) {
+		const historicalBalance = parseFloat((walletBreakdown && walletBreakdown.historical_credit) || 0);
+		const cashBalance = parseFloat((walletBreakdown && walletBreakdown.cash_topup) || 0);
+
+		if (historicalBalanceBadge) {
+			historicalBalanceBadge.textContent = <?= json_encode(t('historical_wallet_balance')) ?> + ': ' + formatAmount(historicalBalance);
+			historicalBalanceBadge.className = historicalBalance > 0
+				? 'badge rounded-pill bg-info-subtle text-info'
+				: 'badge rounded-pill bg-secondary-subtle text-secondary';
+		}
+
+		if (cashBalanceBadge) {
+			cashBalanceBadge.textContent = <?= json_encode(t('real_wallet_balance')) ?> + ': ' + formatAmount(cashBalance);
+			cashBalanceBadge.className = cashBalance > 0
+				? 'badge rounded-pill bg-success-subtle text-success'
+				: 'badge rounded-pill bg-secondary-subtle text-secondary';
+		}
 	}
 
 	function updateDebtBadge(totalDebt) {
@@ -527,10 +633,22 @@ $timeline_amount_prefix = static function ($entry) {
 
 		transactionsBody.innerHTML = transactions.map(function (transaction) {
 			const isTopup = transaction.type === 'topup';
+			const fundType = transaction.fund_type || 'cash_topup';
+			let badgeClass = 'bg-warning-subtle text-warning';
+			let label = fundType === 'historical_credit' ? labels.historicalDeduction : labels.cashDeduction;
+
+			if (isTopup && fundType === 'historical_credit') {
+				badgeClass = 'bg-info-subtle text-info';
+				label = labels.historicalCredit;
+			} else if (isTopup) {
+				badgeClass = 'bg-success-subtle text-success';
+				label = labels.cashTopup;
+			}
+
 			const note = transaction.note ? escapeHtml(transaction.note) : (transaction.turn_id ? ('#' + transaction.turn_id) : '&mdash;');
 			return '<tr>'
 				+ '<td class="col-date">' + escapeHtml(transaction.created_at || '') + '</td>'
-				+ '<td><span class="badge rounded-pill ' + (isTopup ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning') + '">' + escapeHtml(isTopup ? labels.topup : labels.deduction) + '</span></td>'
+				+ '<td><span class="badge rounded-pill ' + badgeClass + '">' + escapeHtml(label) + '</span></td>'
 				+ '<td>' + (isTopup ? '+' : '-') + formatAmount(parseFloat(transaction.amount || 0)) + '</td>'
 				+ '<td class="col-text">' + note + '</td>'
 				+ '</tr>';
@@ -682,6 +800,7 @@ $timeline_amount_prefix = static function ($entry) {
 		document.getElementById('walletTopupFeedback'),
 		function (data) {
 			updateBalanceBadge(parseFloat(data.wallet_balance || 0));
+			updateWalletBreakdownBadges(data.wallet_breakdown || {});
 			renderTransactions(Array.isArray(data.wallet_transactions) ? data.wallet_transactions : []);
 			updateFinancialSummary(data.financial_summary);
 			renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);
@@ -696,10 +815,30 @@ $timeline_amount_prefix = static function ($entry) {
 	);
 
 	submitProfileForm(
+		document.getElementById('walletHistoricalCreditForm'),
+		document.getElementById('walletHistoricalCreditFeedback'),
+		function (data) {
+			updateBalanceBadge(parseFloat(data.wallet_balance || 0));
+			updateWalletBreakdownBadges(data.wallet_breakdown || {});
+			renderTransactions(Array.isArray(data.wallet_transactions) ? data.wallet_transactions : []);
+			updateFinancialSummary(data.financial_summary);
+			renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);
+			document.getElementById('walletHistoricalCreditAmount').value = '';
+			document.getElementById('walletHistoricalCreditNote').value = '';
+
+			if (walletCollapseElement && window.bootstrap && window.bootstrap.Collapse) {
+				window.bootstrap.Collapse.getOrCreateInstance(walletCollapseElement).show();
+			}
+		},
+		<?= json_encode(t('Unable to update wallet right now.')) ?>
+	);
+
+	submitProfileForm(
 		document.getElementById('walletDeductForm'),
 		document.getElementById('walletDeductFeedback'),
 		function (data) {
 			updateBalanceBadge(parseFloat(data.wallet_balance || 0));
+			updateWalletBreakdownBadges(data.wallet_breakdown || {});
 			renderTransactions(Array.isArray(data.wallet_transactions) ? data.wallet_transactions : []);
 			updateFinancialSummary(data.financial_summary);
 			renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);

@@ -91,6 +91,7 @@ class Patients extends Authenticated_Controller
 		$patient_diagnoses = $this->Patient_model->get_diagnoses_for_patient($id);
 		$turns = $this->Turn_model->get_turns_for_patient($id);
 		$wallet_balance = $this->Wallet_model->get_balance($id);
+		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($id);
 		$wallet_transactions = $this->Wallet_model->get_transactions($id);
 		$open_debts = $this->Debt_model->get_open_debts($id);
 		$total_open_debt = $this->Debt_model->get_total_open_debt($id);
@@ -103,10 +104,11 @@ class Patients extends Authenticated_Controller
 			'patient_diagnoses' => $patient_diagnoses,
 			'turns' => $turns,
 			'wallet_balance' => $wallet_balance,
+			'wallet_breakdown' => $wallet_breakdown,
 			'wallet_transactions' => $wallet_transactions,
 			'open_debts' => $open_debts,
 			'total_open_debt' => $total_open_debt,
-			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt),
+			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt, $wallet_breakdown),
 			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns),
 		));
 	}
@@ -130,7 +132,7 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($id, t('Invalid wallet amount.'), 422, $wants_json);
 		}
 
-		$new_balance = $this->Wallet_model->top_up($id, $amount, NULL, $note);
+		$new_balance = $this->Wallet_model->top_up_cash($id, $amount, NULL, $note);
 
 		if ($new_balance === FALSE) {
 			$db_error = $this->db->error();
@@ -170,6 +172,52 @@ class Patients extends Authenticated_Controller
 			))));
 	}
 
+	public function wallet_historical_credit($id)
+	{
+		$this->require_permission('manage_patients');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient = $this->Patient_model->get_by_id($id);
+		show_404_if_empty($patient);
+		$wants_json = $this->wants_json_response();
+
+		$amount = round((float) $this->input->post('amount'), 2);
+		$note = $this->null_if_empty($this->input->post('note', TRUE));
+
+		if ($amount <= 0) {
+			return $this->respond_wallet_topup_error($id, t('Invalid wallet amount.'), 422, $wants_json);
+		}
+
+		$new_balance = $this->Wallet_model->top_up_historical($id, $amount, NULL, $note);
+
+		if ($new_balance === FALSE) {
+			$db_error = $this->db->error();
+			$message = t('Unable to update wallet right now.');
+			if (ENVIRONMENT !== 'production' && !empty($db_error['message'])) {
+				$message .= ' ' . $db_error['message'];
+			}
+			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
+		}
+
+		if (!$wants_json) {
+			$this->session->set_flashdata('success', t('Historical wallet credit recorded successfully.'));
+			redirect('patients/' . $id);
+		}
+
+		$financial_payload = $this->financial_profile_payload($id);
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array_merge($financial_payload, array(
+				'success' => TRUE,
+				'message' => t('Historical wallet credit recorded successfully.'),
+				'wallet_balance' => (float) $new_balance,
+			))));
+	}
+
 	public function wallet_deduct($id)
 	{
 		$this->require_permission('manage_patients');
@@ -189,9 +237,9 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($id, t('Invalid wallet amount.'), 422, $wants_json);
 		}
 
-		$actual_deducted = $this->Wallet_model->deduct($id, $amount, NULL, $note);
+		$deduction = $this->Wallet_model->deduct_prioritized($id, $amount, NULL, $note);
 
-		if ($actual_deducted === FALSE) {
+		if ($deduction === FALSE) {
 			$db_error = $this->db->error();
 			$message = t('Unable to update wallet right now.');
 			if (ENVIRONMENT !== 'production' && !empty($db_error['message'])) {
@@ -199,6 +247,8 @@ class Patients extends Authenticated_Controller
 			}
 			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
 		}
+
+		$actual_deducted = round((float) ($deduction['deducted_amount'] ?? 0), 2);
 
 		if ((float) $actual_deducted <= 0) {
 			return $this->respond_wallet_topup_error($id, t('No wallet balance available to deduct.'), 422, $wants_json);
@@ -523,6 +573,7 @@ class Patients extends Authenticated_Controller
 				'patient_id' => (int) $transaction['patient_id'],
 				'turn_id' => $transaction['turn_id'] === NULL ? NULL : (int) $transaction['turn_id'],
 				'type' => (string) $transaction['type'],
+				'fund_type' => (string) ($transaction['fund_type'] ?? 'cash_topup'),
 				'amount' => (float) $transaction['amount'],
 				'note' => $transaction['note'],
 				'created_at' => to_shamsi((string) $transaction['created_at'], 'Y/m/d H:i'),
@@ -553,22 +604,26 @@ class Patients extends Authenticated_Controller
 		$wallet_transactions = $this->Wallet_model->get_transactions($patient_id);
 		$turns = $this->Turn_model->get_turns_for_patient($patient_id);
 		$wallet_balance = (float) $this->Wallet_model->get_balance($patient_id);
+		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
 		$open_debts = $this->Debt_model->get_open_debts($patient_id);
 		$total_open_debt = (float) $this->Debt_model->get_total_open_debt($patient_id);
 
 		return array(
 			'wallet_balance' => $wallet_balance,
+			'wallet_breakdown' => $wallet_breakdown,
 			'wallet_transactions' => $this->normalize_wallet_transactions_rows($wallet_transactions),
 			'open_debts' => $this->normalize_open_debts_rows($open_debts),
 			'total_open_debt' => $total_open_debt,
-			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt),
+			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt, $wallet_breakdown),
 			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns),
 		);
 	}
 
-	protected function build_financial_summary(array $wallet_transactions, array $turns, $wallet_balance, $total_open_debt)
+	protected function build_financial_summary(array $wallet_transactions, array $turns, $wallet_balance, $total_open_debt, array $wallet_breakdown = array())
 	{
 		$wallet_topups = 0.00;
+		$cash_wallet_topups = 0.00;
+		$historical_wallet_credits = 0.00;
 		$wallet_deductions = 0.00;
 		$turn_cash_total = 0.00;
 		$turn_debt_total = 0.00;
@@ -576,6 +631,11 @@ class Patients extends Authenticated_Controller
 		foreach ($wallet_transactions as $transaction) {
 			if (($transaction['type'] ?? '') === 'topup') {
 				$wallet_topups += (float) $transaction['amount'];
+				if (($transaction['fund_type'] ?? 'cash_topup') === 'historical_credit') {
+					$historical_wallet_credits += (float) $transaction['amount'];
+				} else {
+					$cash_wallet_topups += (float) $transaction['amount'];
+				}
 				continue;
 			}
 
@@ -591,8 +651,12 @@ class Patients extends Authenticated_Controller
 
 		return array(
 			'wallet_balance' => (float) $wallet_balance,
+			'cash_wallet_balance' => (float) ($wallet_breakdown['cash_topup'] ?? 0),
+			'historical_wallet_balance' => (float) ($wallet_breakdown['historical_credit'] ?? 0),
 			'total_open_debt' => (float) $total_open_debt,
 			'wallet_topups' => $wallet_topups,
+			'cash_wallet_topups' => $cash_wallet_topups,
+			'historical_wallet_credits' => $historical_wallet_credits,
 			'wallet_deductions' => $wallet_deductions,
 			'turn_cash_total' => $turn_cash_total,
 			'turn_debt_total' => $turn_debt_total,
@@ -604,11 +668,17 @@ class Patients extends Authenticated_Controller
 		$timeline = array();
 
 		foreach ($wallet_transactions as $transaction) {
+			$fund_type = (string) ($transaction['fund_type'] ?? 'cash_topup');
+			$is_topup = ($transaction['type'] ?? '') === 'topup';
+			$label_key = $is_topup
+				? ($fund_type === 'historical_credit' ? 'historical_wallet_credit' : 'cash_wallet_topup')
+				: ($fund_type === 'historical_credit' ? 'historical_wallet_deduction' : 'cash_wallet_deduction');
+
 			$timeline[] = array(
 				'occurred_at' => to_shamsi((string) $transaction['created_at'], 'Y/m/d H:i'),
 				'source' => 'wallet',
 				'badge' => ($transaction['type'] ?? '') === 'topup' ? 'success' : 'warning',
-				'label' => t($transaction['type'] ?? 'wallet'),
+				'label' => t($label_key),
 				'amount' => (float) ($transaction['amount'] ?? 0),
 				'detail' => !empty($transaction['note']) ? $transaction['note'] : (!empty($transaction['turn_id']) ? '#' . (int) $transaction['turn_id'] : t('wallet_balance')),
 			);

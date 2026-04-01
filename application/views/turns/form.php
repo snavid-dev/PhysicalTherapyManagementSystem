@@ -41,8 +41,12 @@ foreach ($patients as $patient_item) {
 }
 
 $selected_patient_name = isset($patient_lookup[$selected_patient_id]) ? $patient_lookup[$selected_patient_id] : '';
+$wallet_breakdown = is_array($wallet_breakdown ?? NULL) ? $wallet_breakdown : array();
 $financial_payload = array(
 	'wallet_balance' => (float) $wallet_balance,
+	'wallet_breakdown' => $wallet_breakdown,
+	'historical_wallet_balance' => (float) ($wallet_breakdown['historical_credit'] ?? 0),
+	'cash_wallet_balance' => (float) ($wallet_breakdown['cash_topup'] ?? 0),
 	'total_open_debt' => (float) $total_open_debt,
 	'open_debts' => array_map(static function ($debt) {
 		return array(
@@ -105,6 +109,14 @@ $staff_payload = array_map(static function ($staff_member) {
 							<div class="turn-financial-item">
 								<span class="text-muted d-block mb-1"><?= t('wallet_balance') ?></span>
 								<span id="walletBalanceBadge" class="badge rounded-pill bg-secondary-subtle text-secondary"><?= format_amount($wallet_balance) ?></span>
+							</div>
+							<div class="turn-financial-item">
+								<span class="text-muted d-block mb-1"><?= t('historical_wallet_balance') ?></span>
+								<span id="historicalWalletBalanceBadge" class="badge rounded-pill bg-secondary-subtle text-secondary"><?= format_amount($wallet_breakdown['historical_credit'] ?? 0) ?></span>
+							</div>
+							<div class="turn-financial-item">
+								<span class="text-muted d-block mb-1"><?= t('real_wallet_balance') ?></span>
+								<span id="cashWalletBalanceBadge" class="badge rounded-pill bg-secondary-subtle text-secondary"><?= format_amount($wallet_breakdown['cash_topup'] ?? 0) ?></span>
 							</div>
 							<div class="turn-financial-item">
 								<span class="text-muted d-block mb-1"><?= t('total_open_debt') ?></span>
@@ -238,7 +250,7 @@ $staff_payload = array_map(static function ($staff_member) {
 										<label class="turn-payment-option">
 											<input type="radio" class="form-check-input" name="payment_type" value="prepaid" <?= $selected_payment_type === 'prepaid' ? 'checked' : '' ?>>
 											<span class="turn-payment-option__title"><?= t('prepaid') ?></span>
-											<span class="turn-payment-option__text"><?= t('wallet_balance') ?></span>
+											<span class="turn-payment-option__text"><?= t('historical_wallet_spend_rule') ?></span>
 										</label>
 									</div>
 									<div class="col-md-6 col-xl-3">
@@ -330,6 +342,8 @@ $staff_payload = array_map(static function ($staff_member) {
 	const cashAmountPreview = document.getElementById('cashAmountPreview');
 	const warningsBox = document.getElementById('paymentWarnings');
 	const walletBalanceBadge = document.getElementById('walletBalanceBadge');
+	const historicalWalletBalanceBadge = document.getElementById('historicalWalletBalanceBadge');
+	const cashWalletBalanceBadge = document.getElementById('cashWalletBalanceBadge');
 	const topupWalletBalanceText = document.getElementById('topupWalletBalanceText');
 	const openDebtBadge = document.getElementById('openDebtBadge');
 	const openDebtToggleWrap = document.getElementById('openDebtToggleWrap');
@@ -348,6 +362,8 @@ $staff_payload = array_map(static function ($staff_member) {
 	const state = {
 		currentWalletBalance: <?= json_encode((float) $wallet_balance) ?>,
 		walletBalance: <?= json_encode((float) $wallet_balance) ?>,
+		historicalWalletBalance: <?= json_encode((float) ($wallet_breakdown['historical_credit'] ?? 0)) ?>,
+		cashWalletBalance: <?= json_encode((float) ($wallet_breakdown['cash_topup'] ?? 0)) ?>,
 		totalOpenDebt: <?= json_encode((float) $total_open_debt) ?>,
 		openDebts: <?= json_encode($financial_payload['open_debts'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
 		staff: <?= json_encode($staff_payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
@@ -560,6 +576,20 @@ $staff_payload = array_map(static function ($staff_member) {
 			topupWalletBalanceText.textContent = formatAmount(state.walletBalance);
 		}
 
+		if (historicalWalletBalanceBadge) {
+			historicalWalletBalanceBadge.textContent = formatAmount(state.historicalWalletBalance);
+			historicalWalletBalanceBadge.className = state.historicalWalletBalance > 0
+				? 'badge rounded-pill bg-info-subtle text-info'
+				: 'badge rounded-pill bg-secondary-subtle text-secondary';
+		}
+
+		if (cashWalletBalanceBadge) {
+			cashWalletBalanceBadge.textContent = formatAmount(state.cashWalletBalance);
+			cashWalletBalanceBadge.className = state.cashWalletBalance > 0
+				? 'badge rounded-pill bg-success-subtle text-success'
+				: 'badge rounded-pill bg-secondary-subtle text-secondary';
+		}
+
 		if (openDebtBadge) {
 			if (state.totalOpenDebt > 0) {
 				openDebtBadge.style.display = '';
@@ -769,6 +799,8 @@ $staff_payload = array_map(static function ($staff_member) {
 			const patientId = this.value;
 			if (!patientId) {
 				state.walletBalance = 0;
+				state.historicalWalletBalance = 0;
+				state.cashWalletBalance = 0;
 				state.totalOpenDebt = 0;
 				state.openDebts = [];
 				clearSessionNumber();
@@ -787,6 +819,8 @@ $staff_payload = array_map(static function ($staff_member) {
 
 			fetchJson(<?= json_encode(base_url('turns/get_patient_financial')) ?>, { patient_id: patientId }, function (data) {
 				state.walletBalance = toNumber(data.wallet_balance);
+				state.historicalWalletBalance = toNumber(data.historical_wallet_balance);
+				state.cashWalletBalance = toNumber(data.cash_wallet_balance);
 				state.totalOpenDebt = toNumber(data.total_open_debt);
 				state.openDebts = Array.isArray(data.open_debts) ? data.open_debts : [];
 				updateFinancialBadges();
