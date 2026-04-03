@@ -1,7 +1,28 @@
 <?php
-$display_time = static function ($time_value) {
-	$time_value = (string) $time_value;
-	return ($time_value === '' || $time_value === '00:00:00') ? '&mdash;' : html_escape(substr($time_value, 0, 5));
+$patient_name = static function ($turn) {
+	$first_name = trim((string) ($turn['patient_first_name'] ?? ''));
+	$last_name = trim((string) ($turn['patient_last_name'] ?? ''));
+
+	if ($last_name !== '' && $last_name !== '-') {
+		return trim($first_name . ' ' . $last_name);
+	}
+
+	return $first_name;
+};
+
+$patient_family_name = static function ($turn) {
+	$last_name = trim((string) ($turn['patient_last_name'] ?? ''));
+	$father_name = trim((string) ($turn['patient_father_name'] ?? ''));
+
+	if ($last_name !== '' && $last_name !== '-') {
+		return $last_name;
+	}
+
+	if ($father_name !== '' && $father_name !== '-') {
+		return $father_name;
+	}
+
+	return NULL;
 };
 ?>
 
@@ -19,13 +40,14 @@ $display_time = static function ($time_value) {
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="9" data-col-widths='["5%","12%","10%","17%","11%","13%","8%","11%","8%","10%"]'>
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="9" data-col-widths='["5%","11%","9%","16%","12%","10%","12%","7%","8%","10%"]'>
 				<thead>
 					<tr>
 						<th><?= t('turn_id') ?></th>
 						<th class="col-date"><?= t('Date') ?></th>
-						<th><?= t('Time') ?></th>
+						<th><?= t('turn_number') ?></th>
 						<th><?= t('Patient') ?></th>
+						<th><?= t('father_name') ?> / <?= t('Last Name') ?></th>
 						<th><?= t('section') ?></th>
 						<th><?= t('staff_member') ?></th>
 						<th><?= t('fee') ?></th>
@@ -40,8 +62,9 @@ $display_time = static function ($time_value) {
 					<tr>
 						<td><?= '#' . (int) $turn['id'] ?></td>
 						<td class="col-date"><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
-						<td><?= $display_time($turn['turn_time']) ?></td>
-						<td><?= html_escape($turn['patient_first_name'] . ' ' . $turn['patient_last_name']) ?></td>
+						<td><?= !empty($turn['turn_number']) ? format_number($turn['turn_number']) : '&mdash;' ?></td>
+						<td><?= html_escape($patient_name($turn)) ?></td>
+						<td><?= ($family_name = $patient_family_name($turn)) !== NULL ? html_escape($family_name) : '&mdash;' ?></td>
 						<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>
 						<td><?= $staff_name !== '' ? html_escape($staff_name) : '&mdash;' ?></td>
 						<td><?= format_amount($turn['fee'] ?? 0) ?></td>

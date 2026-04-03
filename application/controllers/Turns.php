@@ -866,7 +866,6 @@ class Turns extends Authenticated_Controller
 		$this->form_validation->set_rules('payment_type', 'Payment type', 'required|in_list[prepaid,cash,deferred,free]');
 		$this->form_validation->set_rules('topup_amount', 'Top up amount', 'trim|numeric|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('turn_date', 'Date', 'required|callback__valid_turn_date');
-		$this->form_validation->set_rules('turn_time', 'Time', 'trim');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[accepted,scheduled,completed,cancelled]');
 	}
 
@@ -882,7 +881,6 @@ class Turns extends Authenticated_Controller
 		$this->form_validation->set_rules('discount_percent', 'Discount percent', 'trim|numeric|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('discount_amount', 'Discount amount', 'trim|numeric|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('turn_date', 'Date', 'required|callback__valid_turn_date');
-		$this->form_validation->set_rules('turn_time', 'Time', 'trim');
 		$this->form_validation->set_rules('status', 'Status', 'required|in_list[accepted,scheduled,completed,cancelled]');
 	}
 
@@ -914,7 +912,7 @@ class Turns extends Authenticated_Controller
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
 			'topup_amount' => isset($overrides['topup_amount']) ? round((float) $overrides['topup_amount'], 2) : 0.00,
 			'turn_date' => $this->gregorian_date_from_shamsi($this->input->post('turn_date', TRUE)),
-			'turn_time' => $this->normalize_time($this->input->post('turn_time', TRUE)),
+			'turn_time' => NULL,
 			'status' => $this->input->post('status', TRUE) ?: 'accepted',
 			'notes' => $this->null_if_empty($this->input->post('notes', TRUE)),
 		);
@@ -937,7 +935,7 @@ class Turns extends Authenticated_Controller
 			'cash_collected' => isset($overrides['cash_collected']) ? round((float) $overrides['cash_collected'], 2) : 0.00,
 			'topup_amount' => isset($overrides['topup_amount']) ? round((float) $overrides['topup_amount'], 2) : $this->decimal_value($this->input->post('topup_amount')),
 			'turn_date' => $this->gregorian_date_from_shamsi($this->input->post('turn_date', TRUE)),
-			'turn_time' => $this->normalize_time($this->input->post('turn_time', TRUE)),
+			'turn_time' => NULL,
 			'status' => $this->input->post('status', TRUE) ?: 'accepted',
 			'notes' => $this->null_if_empty($this->input->post('notes', TRUE)),
 		);
