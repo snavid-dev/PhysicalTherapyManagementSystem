@@ -10,14 +10,13 @@ class Turn_model extends CI_Model
 		$this->ensure_schema();
 
 		return $this->db
-			->select("turns.*, patients.first_name AS patient_first_name, patients.last_name AS patient_last_name, sections.name AS section_name, CONCAT(staff.first_name, ' ', staff.last_name) AS staff_full_name, CONCAT(users.first_name, ' ', users.last_name) AS doctor_full_name", FALSE)
+			->select("turns.*, patients.first_name AS patient_first_name, patients.last_name AS patient_last_name, patients.father_name AS patient_father_name, sections.name AS section_name, CONCAT(staff.first_name, ' ', staff.last_name) AS staff_full_name, CONCAT(users.first_name, ' ', users.last_name) AS doctor_full_name", FALSE)
 			->from('turns')
 			->join('patients', 'patients.id = turns.patient_id')
 			->join('sections', 'sections.id = turns.section_id', 'left')
 			->join('staff', 'staff.id = turns.staff_id', 'left')
 			->join('users', 'users.id = turns.doctor_id', 'left')
 			->order_by('turns.turn_date', 'desc')
-			->order_by('turns.turn_time', 'desc')
 			->order_by('turns.id', 'desc')
 			->get()
 			->result_array();
@@ -134,7 +133,6 @@ class Turn_model extends CI_Model
 			->join('users', 'users.id = turns.doctor_id', 'left')
 			->where('turns.patient_id', (int) $patient_id)
 			->order_by('turns.turn_date', 'desc')
-			->order_by('turns.turn_time', 'desc')
 			->order_by('turns.id', 'desc')
 			->get()
 			->result_array();

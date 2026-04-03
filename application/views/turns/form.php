@@ -11,7 +11,6 @@ $selected_topup = set_value('topup_amount', isset($turn['topup_amount']) ? numbe
 $selected_wallet_deducted = number_format((float) ($turn['wallet_deducted'] ?? 0), 2, '.', '');
 $selected_cash_collected = number_format((float) ($turn['cash_collected'] ?? 0), 2, '.', '');
 $selected_date = set_value('turn_date', isset($turn['turn_date']) ? to_shamsi($turn['turn_date']) : shamsi_today());
-$selected_time = set_value('turn_time', (!empty($turn['turn_time']) && $turn['turn_time'] !== '00:00:00') ? substr($turn['turn_time'], 0, 5) : '');
 $selected_status = set_value('status', $turn['status'] ?? 'accepted');
 $selected_notes = set_value('notes', $turn['notes'] ?? '');
 $stored_discounted_fee = round((float) ($turn['fee'] ?? $selected_fee), 2);
@@ -198,11 +197,6 @@ $staff_payload = array_map(static function ($staff_member) {
 								<label class="form-label"><?= t('Date') ?></label>
 								<input type="text" name="turn_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($selected_date) ?>">
 								<small class="text-danger"><?= form_error('turn_date') ?></small>
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><?= t('Time') ?></label>
-								<input type="time" name="turn_time" class="form-control" value="<?= html_escape($selected_time) ?>">
-								<small class="text-danger"><?= form_error('turn_time') ?></small>
 							</div>
 							<div class="col-md-4">
 								<label class="form-label"><?= t('Status') ?></label>
