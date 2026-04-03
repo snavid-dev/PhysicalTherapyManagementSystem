@@ -95,6 +95,7 @@ class Patients extends Authenticated_Controller
 		$wallet_balance = $this->Wallet_model->get_balance($id);
 		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($id);
 		$wallet_transactions = $this->Wallet_model->get_transactions($id);
+		$wallet_transactions_for_display = $this->filter_wallet_transactions_for_display($wallet_transactions);
 		$open_debts = $this->Debt_model->get_open_debts($id);
 		$total_open_debt = $this->Debt_model->get_total_open_debt($id);
 		show_404_if_empty($patient);
@@ -107,7 +108,7 @@ class Patients extends Authenticated_Controller
 			'turns' => $turns,
 			'wallet_balance' => $wallet_balance,
 			'wallet_breakdown' => $wallet_breakdown,
-			'wallet_transactions' => $wallet_transactions,
+			'wallet_transactions' => $wallet_transactions_for_display,
 			'open_debts' => $open_debts,
 			'total_open_debt' => $total_open_debt,
 			'discounts' => $this->normalized_discounts($id),
@@ -653,7 +654,9 @@ class Patients extends Authenticated_Controller
 
 	protected function normalized_wallet_transactions($patient_id)
 	{
-		return $this->normalize_wallet_transactions_rows($this->Wallet_model->get_transactions($patient_id));
+		return $this->normalize_wallet_transactions_rows(
+			$this->filter_wallet_transactions_for_display($this->Wallet_model->get_transactions($patient_id))
+		);
 	}
 
 	protected function normalize_wallet_transactions_rows(array $transactions)
@@ -693,6 +696,7 @@ class Patients extends Authenticated_Controller
 	protected function financial_profile_payload($patient_id)
 	{
 		$wallet_transactions = $this->Wallet_model->get_transactions($patient_id);
+		$wallet_transactions_for_display = $this->filter_wallet_transactions_for_display($wallet_transactions);
 		$turns = $this->Turn_model->get_turns_for_patient($patient_id);
 		$wallet_balance = (float) $this->Wallet_model->get_balance($patient_id);
 		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
@@ -702,7 +706,7 @@ class Patients extends Authenticated_Controller
 		return array(
 			'wallet_balance' => $wallet_balance,
 			'wallet_breakdown' => $wallet_breakdown,
-			'wallet_transactions' => $this->normalize_wallet_transactions_rows($wallet_transactions),
+			'wallet_transactions' => $this->normalize_wallet_transactions_rows($wallet_transactions_for_display),
 			'open_debts' => $this->normalize_open_debts_rows($open_debts),
 			'total_open_debt' => $total_open_debt,
 			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt, $wallet_breakdown),
@@ -808,6 +812,10 @@ class Patients extends Authenticated_Controller
 		$timeline = array();
 
 		foreach ($wallet_transactions as $transaction) {
+			if (!$this->should_show_wallet_transaction_in_timeline($transaction)) {
+				continue;
+			}
+
 			$fund_type = (string) ($transaction['fund_type'] ?? 'cash_topup');
 			$is_topup = ($transaction['type'] ?? '') === 'topup';
 			$label_key = $is_topup
@@ -867,6 +875,29 @@ class Patients extends Authenticated_Controller
 		});
 
 		return $timeline;
+	}
+
+	protected function should_show_wallet_transaction_in_timeline(array $transaction)
+	{
+		$note = trim((string) ($transaction['note'] ?? ''));
+		$turn_id = isset($transaction['turn_id']) ? (int) $transaction['turn_id'] : 0;
+
+		if ($note !== '' && stripos($note, 'REVERSAL:') === 0) {
+			return FALSE;
+		}
+
+		if ($turn_id > 0) {
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+	protected function filter_wallet_transactions_for_display(array $transactions)
+	{
+		return array_values(array_filter($transactions, function ($transaction) {
+			return $this->should_show_wallet_transaction_in_timeline((array) $transaction);
+		}));
 	}
 
 	protected function record_debt_payment($patient_id, $amount, $payment_method, $note)

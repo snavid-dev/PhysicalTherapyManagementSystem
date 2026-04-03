@@ -947,20 +947,6 @@ class Turns extends Authenticated_Controller
 	{
 		$patient_id = (int) $original_turn['patient_id'];
 		$turn_id = (int) $original_turn['id'];
-
-		if ((float) $original_turn['topup_amount'] > 0) {
-			$reversed = $this->Wallet_model->reverse_topup(
-				$patient_id,
-				(float) $original_turn['topup_amount'],
-				$turn_id,
-				'Reversal of top-up for turn #' . $turn_id
-			);
-
-			if ($reversed === FALSE) {
-				return FALSE;
-			}
-		}
-
 		$historical_wallet_deducted = round((float) ($original_turn['historical_wallet_deducted'] ?? 0), 2);
 		$cash_wallet_deducted = round((float) ($original_turn['cash_wallet_deducted'] ?? 0), 2);
 
@@ -989,6 +975,21 @@ class Turns extends Authenticated_Controller
 				$turn_id,
 				'REVERSAL: Reversal of deduction for turn #' . $turn_id,
 				'cash_topup'
+			);
+
+			if ($reversed === FALSE) {
+				return FALSE;
+			}
+		}
+
+		if ((float) $original_turn['topup_amount'] > 0) {
+			// Reverse the turn's wallet spend before removing its top-up so the
+			// full bucket created by this turn is available to be removed.
+			$reversed = $this->Wallet_model->reverse_topup(
+				$patient_id,
+				(float) $original_turn['topup_amount'],
+				$turn_id,
+				'Reversal of top-up for turn #' . $turn_id
 			);
 
 			if ($reversed === FALSE) {

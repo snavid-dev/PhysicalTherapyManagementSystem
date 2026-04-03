@@ -637,7 +637,7 @@ $staff_payload = array_map(static function ($staff_member) {
 			return state.walletBalance;
 		}
 
-		return roundAmount(Math.max(0, state.currentWalletBalance - state.originalTurnTopup) + state.originalTurnWalletDeducted);
+		return roundAmount(Math.max(0, state.currentWalletBalance - state.originalTurnTopup + state.originalTurnWalletDeducted));
 	}
 
 	function showPaymentSection(type) {
