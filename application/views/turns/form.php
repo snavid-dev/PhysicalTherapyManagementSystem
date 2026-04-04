@@ -364,8 +364,7 @@ $staff_payload = array_map(static function ($staff_member) {
 		sessionManuallyEdited: false,
 		originalFee: <?= json_encode($initial_original_fee) ?>,
 		storedDiscountedFee: <?= json_encode($stored_discounted_fee) ?>,
-		originalTurnTopup: <?= json_encode((float) ($turn['topup_amount'] ?? 0)) ?>,
-		originalTurnWalletDeducted: <?= json_encode((float) ($turn['wallet_deducted'] ?? 0)) ?>,
+		originalTurnNetWalletEffect: <?= json_encode((float) ($turn_wallet_effect['total'] ?? 0)) ?>,
 		hasDiscount: <?= (float) $selected_discount_percent > 0 ? 'true' : 'false' ?>,
 		discountPercent: <?= json_encode((float) $selected_discount_percent) ?>,
 		discountAmount: <?= json_encode((float) $selected_discount_amount) ?>,
@@ -631,7 +630,7 @@ $staff_payload = array_map(static function ($staff_member) {
 			return state.walletBalance;
 		}
 
-		return roundAmount(Math.max(0, state.currentWalletBalance - state.originalTurnTopup) + state.originalTurnWalletDeducted);
+		return Math.max(0, roundAmount(state.currentWalletBalance - state.originalTurnNetWalletEffect));
 	}
 
 	function showPaymentSection(type) {
