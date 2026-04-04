@@ -816,6 +816,11 @@ class Turns extends Authenticated_Controller
 	{
 		$selected_patient_id = (int) set_value('patient_id', $turn['patient_id'] ?? 0);
 		$selected_section_id = (int) set_value('section_id', $turn['section_id'] ?? 0);
+		$turn_wallet_effect = $turn ? $this->Wallet_model->get_turn_balance_effect((int) $turn['id']) : array(
+			'cash_topup' => 0.00,
+			'historical_credit' => 0.00,
+			'total' => 0.00,
+		);
 
 		$this->render('turns/form', array(
 			'title' => $turn ? t('Edit Turn') : t('Create Turn'),
@@ -828,6 +833,7 @@ class Turns extends Authenticated_Controller
 			'staff_members' => $selected_section_id > 0 ? $this->Turn_model->get_staff_by_section($selected_section_id) : array(),
 			'wallet_balance' => $selected_patient_id > 0 ? $this->Wallet_model->get_balance($selected_patient_id) : 0,
 			'wallet_breakdown' => $selected_patient_id > 0 ? $this->Wallet_model->get_balance_breakdown($selected_patient_id) : array('cash_topup' => 0, 'historical_credit' => 0, 'total' => 0),
+			'turn_wallet_effect' => $turn_wallet_effect,
 			'open_debts' => $selected_patient_id > 0 ? $this->Debt_model->get_open_debts($selected_patient_id) : array(),
 			'total_open_debt' => $selected_patient_id > 0 ? $this->Debt_model->get_total_open_debt($selected_patient_id) : 0,
 			'default_section_fee' => $selected_section_id > 0 ? $this->Turn_model->get_section_fee($selected_section_id) : 0,
@@ -946,52 +952,14 @@ class Turns extends Authenticated_Controller
 		$patient_id = (int) $original_turn['patient_id'];
 		$turn_id = (int) $original_turn['id'];
 
-		if ((float) $original_turn['topup_amount'] > 0) {
-			$reversed = $this->Wallet_model->reverse_topup(
-				$patient_id,
-				(float) $original_turn['topup_amount'],
-				$turn_id,
-				'Reversal of top-up for turn #' . $turn_id
-			);
+		$reversed = $this->Wallet_model->reverse_turn_balance_effect(
+			$patient_id,
+			$turn_id,
+			'Reversal of wallet effect for turn #' . $turn_id
+		);
 
-			if ($reversed === FALSE) {
-				return FALSE;
-			}
-		}
-
-		$historical_wallet_deducted = round((float) ($original_turn['historical_wallet_deducted'] ?? 0), 2);
-		$cash_wallet_deducted = round((float) ($original_turn['cash_wallet_deducted'] ?? 0), 2);
-
-		if ($historical_wallet_deducted <= 0 && $cash_wallet_deducted <= 0 && (float) ($original_turn['wallet_deducted'] ?? 0) > 0) {
-			$cash_wallet_deducted = round((float) $original_turn['wallet_deducted'], 2);
-		}
-
-		if ($historical_wallet_deducted > 0) {
-			$reversed = $this->Wallet_model->top_up(
-				$patient_id,
-				$historical_wallet_deducted,
-				$turn_id,
-				'REVERSAL: Reversal of deduction for turn #' . $turn_id,
-				'historical_credit'
-			);
-
-			if ($reversed === FALSE) {
-				return FALSE;
-			}
-		}
-
-		if ($cash_wallet_deducted > 0) {
-			$reversed = $this->Wallet_model->top_up(
-				$patient_id,
-				$cash_wallet_deducted,
-				$turn_id,
-				'REVERSAL: Reversal of deduction for turn #' . $turn_id,
-				'cash_topup'
-			);
-
-			if ($reversed === FALSE) {
-				return FALSE;
-			}
+		if ($reversed === FALSE) {
+			return FALSE;
 		}
 
 		$debt_reversed = $this->Debt_model->reverse_turn_debts($turn_id);

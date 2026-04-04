@@ -394,6 +394,95 @@ class Wallet_model extends CI_Model
 			->result_array();
 	}
 
+	public function get_turn_balance_effect($turn_id)
+	{
+		$this->ensure_schema();
+
+		$turn_id = (int) $turn_id;
+		$effects = array(
+			'cash_topup' => 0.00,
+			'historical_credit' => 0.00,
+			'total' => 0.00,
+		);
+
+		if ($turn_id <= 0) {
+			return $effects;
+		}
+
+		$rows = $this->db
+			->select('fund_type, COALESCE(SUM(CASE WHEN type = "topup" THEN amount ELSE -amount END), 0) AS net_amount', FALSE)
+			->from('patient_wallet_transactions')
+			->where('turn_id', $turn_id)
+			->group_by('fund_type')
+			->get()
+			->result_array();
+
+		foreach ($rows as $row) {
+			$fund_type = $this->normalize_fund_type($row['fund_type'] ?? NULL);
+			$effects[$fund_type] = round((float) ($row['net_amount'] ?? 0), 2);
+		}
+
+		$effects['total'] = round((float) $effects['cash_topup'] + (float) $effects['historical_credit'], 2);
+
+		return $effects;
+	}
+
+	public function reverse_turn_balance_effect($patient_id, $turn_id, $note = NULL)
+	{
+		$this->ensure_schema();
+
+		$patient_id = (int) $patient_id;
+		$turn_id = (int) $turn_id;
+
+		if ($patient_id <= 0 || $turn_id <= 0) {
+			return 0.00;
+		}
+
+		$effects = $this->get_turn_balance_effect($turn_id);
+		$total_reversed = 0.00;
+
+		foreach (array('historical_credit', 'cash_topup') as $fund_type) {
+			$net_amount = round((float) ($effects[$fund_type] ?? 0), 2);
+
+			if (abs($net_amount) < 0.01) {
+				continue;
+			}
+
+			if ($net_amount > 0) {
+				$deducted = $this->deduct(
+					$patient_id,
+					$net_amount,
+					$turn_id,
+					$this->reversal_note($note),
+					$fund_type
+				);
+
+				if ($deducted === FALSE || abs((float) $deducted - $net_amount) > 0.009) {
+					return FALSE;
+				}
+
+				$total_reversed = round($total_reversed + $net_amount, 2);
+				continue;
+			}
+
+			$balance = $this->top_up(
+				$patient_id,
+				abs($net_amount),
+				$turn_id,
+				$this->reversal_note($note),
+				$fund_type
+			);
+
+			if ($balance === FALSE) {
+				return FALSE;
+			}
+
+			$total_reversed = round($total_reversed + abs($net_amount), 2);
+		}
+
+		return $total_reversed;
+	}
+
 	protected function ensure_schema()
 	{
 		if ($this->schema_ready) {
