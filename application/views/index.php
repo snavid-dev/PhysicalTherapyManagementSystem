@@ -249,7 +249,6 @@ $balance_permission = $ci->auth->has_permission('Read Today Balance');
 							<th scope="col"><?= $ci->lang('patient name') ?></th>
 							<th scope="col"><?= $ci->lang('reference doctor') ?></th>
 							<th scope="col"><?= $ci->lang('date') ?></th>
-							<th scope="col"><?= $ci->lang('hour') ?></th>
 							<th scope="col"><?= $ci->lang('actions') ?></th>
 						</tr>
 						</thead>
@@ -261,7 +260,6 @@ $balance_permission = $ci->auth->has_permission('Read Today Balance');
 								<td><?= $ci->mylibrary->get_patient_name($turn['name'], $turn['lname'], '', $turn['gender']) ?></td>
 								<td><?= $turn['doctor_name'] ?></td>
 								<td><bdo dir="ltr"><?= $turn['date'] ?></bdo></td>
-								<td><?= $turn['from_time'] . ' - ' . $turn['to_time'] ?></td>
 								<td>
 									<div class="g-2">
 										<?php if ($ci->auth->has_permission('Read Patient Profile')): ?>

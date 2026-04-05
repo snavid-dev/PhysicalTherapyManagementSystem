@@ -425,6 +425,7 @@ $lang = array(
 	'payment_summary' => 'خلاصه پرداخت',
 	'view_transactions' => 'مشاهده تراکنش‌ها',
 	'wallet_transactions' => 'تراکنش‌های کیف پول',
+	'wallet_details' => 'جزئیات کیف پول',
 	'no_transactions' => 'هنوز تراکنشی در کیف پول ثبت نشده است',
 	'topup' => 'شارژ',
 	'remaining_after_deduction' => 'باقی‌مانده پس از کسر',

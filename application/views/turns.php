@@ -227,9 +227,6 @@
 								<?= $ci->lang('date') ?>
 							</th>
 							<th class="border-bottom-0">
-								<?= $ci->lang('hour') ?>
-							</th>
-							<th class="border-bottom-0">
 								<?= $ci->lang('actions') ?>
 							</th>
 						</tr>
@@ -249,9 +246,6 @@
 								</td>
 								<td class="english">
 									<?= $receipt['date'] ?>
-								</td>
-								<td>
-									<bdo dir="ltr"><?= $receipt['from_time'] ?> - <?= $receipt['to_time'] ?></bdo>
 								</td>
 								<td>
 									<div class="g-2">

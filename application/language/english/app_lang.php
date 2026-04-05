@@ -425,6 +425,7 @@ $lang = array(
 	'payment_summary' => 'Payment Summary',
 	'view_transactions' => 'View Transactions',
 	'wallet_transactions' => 'Wallet Transactions',
+	'wallet_details' => 'Wallet Details',
 	'no_transactions' => 'No wallet transactions yet',
 	'topup' => 'Top Up',
 	'remaining_after_deduction' => 'Remaining After Deduction',

@@ -76,6 +76,25 @@ $wallet_transaction_meta = static function ($transaction) {
 		'prefix' => '-',
 	);
 };
+$turns = is_array($turns ?? NULL) ? $turns : array();
+$turn_history = $turns;
+usort($turn_history, static function ($left, $right) {
+	$left_number = isset($left['turn_number']) && $left['turn_number'] !== NULL ? (int) $left['turn_number'] : PHP_INT_MAX;
+	$right_number = isset($right['turn_number']) && $right['turn_number'] !== NULL ? (int) $right['turn_number'] : PHP_INT_MAX;
+
+	if ($left_number !== $right_number) {
+		return $left_number <=> $right_number;
+	}
+
+	$left_date = (string) ($left['turn_date'] ?? '');
+	$right_date = (string) ($right['turn_date'] ?? '');
+	if ($left_date !== $right_date) {
+		return strcmp($left_date, $right_date);
+	}
+
+	return ((int) ($left['id'] ?? 0)) <=> ((int) ($right['id'] ?? 0));
+});
+$can_edit_turn = $this->auth->has_permission('manage_turns');
 ?>
 
 <div class="row g-4">
@@ -445,19 +464,39 @@ $wallet_transaction_meta = static function ($transaction) {
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Turn History') ?></h2>
 				<div class="table-responsive">
-					<table id="patientTurnHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="desc" data-no-export="true" data-col-widths='["15%","10%","16%","20%","13%","11%","15%"]'>
-						<thead><tr><th class="col-date"><?= t('Date') ?></th><th><?= t('Time') ?></th><th><?= t('section') ?></th><th><?= t('staff_member') ?></th><th><?= t('payment_type') ?></th><th><?= t('fee') ?></th><th><?= t('Status') ?></th></tr></thead>
+					<table id="patientTurnHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="asc" data-no-export="true" data-col-widths='["9%","13%","16%","18%","11%","14%","9%","10%"]'>
+						<thead><tr><th><?= t('turn_number') ?></th><th class="col-date"><?= t('Date') ?></th><th><?= t('section') ?></th><th><?= t('staff_member') ?></th><th><?= t('payment_type') ?></th><th><?= t('wallet_details') ?></th><th><?= t('fee') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
 						<tbody>
-						<?php if ($turns) : foreach ($turns as $turn) : ?>
+						<?php if ($turn_history) : foreach ($turn_history as $turn) : ?>
 							<?php $staff_name = !empty($turn['staff_full_name']) ? $turn['staff_full_name'] : ($turn['doctor_full_name'] ?? ''); ?>
+							<?php $topup_amount = (float) ($turn['topup_amount'] ?? 0); ?>
+							<?php $wallet_used = (float) ($turn['wallet_deducted'] ?? 0); ?>
 							<tr>
+								<td><?= !empty($turn['turn_number']) ? format_number($turn['turn_number']) : '&mdash;' ?></td>
 								<td class="col-date"><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
-								<td><?= $display_time($turn['turn_time']) ?></td>
 								<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>
 								<td><?= $staff_name !== '' ? html_escape($staff_name) : '&mdash;' ?></td>
 								<td><?= html_escape(t($turn['payment_type'] ?? 'cash')) ?></td>
+								<td>
+									<?php if ($topup_amount > 0 || $wallet_used > 0) : ?>
+										<?php if ($topup_amount > 0) : ?>
+											<div><?= t('top_up_amount') ?>: <?= format_amount($topup_amount) ?></div>
+										<?php endif; ?>
+										<?php if ($wallet_used > 0) : ?>
+											<div><?= t('wallet_used') ?>: <?= format_amount($wallet_used) ?></div>
+										<?php endif; ?>
+									<?php else : ?>
+										&mdash;
+									<?php endif; ?>
+								</td>
 								<td><?= format_amount($turn['fee'] ?? 0) ?></td>
-								<td><?= t(ucfirst($turn['status'])) ?></td>
+								<td class="no-export text-end">
+									<?php if ($can_edit_turn) : ?>
+										<a href="<?= base_url('turns/' . $turn['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
+									<?php else : ?>
+										&mdash;
+									<?php endif; ?>
+								</td>
 							</tr>
 						<?php endforeach; endif; ?>
 						</tbody>

@@ -299,7 +299,6 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 							<td>
 								<?php if ($patient_url) : ?>
 									<a href="<?= $patient_url ?>" class="fw-semibold text-decoration-none"><?= html_escape($turn['patient_name']) ?></a>
-									<div class="mt-2"><a href="<?= $patient_url ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a></div>
 								<?php else : ?>
 									<?= html_escape($turn['patient_name']) ?>
 								<?php endif; ?>
