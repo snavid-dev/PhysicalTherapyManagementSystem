@@ -464,8 +464,8 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('Turn History') ?></h2>
 				<div class="table-responsive">
-					<table id="patientTurnHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="asc" data-no-export="true" data-col-widths='["8%","12%","9%","14%","16%","10%","13%","8%","10%"]'>
-						<thead><tr><th><?= t('turn_number') ?></th><th class="col-date"><?= t('Date') ?></th><th><?= t('Time') ?></th><th><?= t('section') ?></th><th><?= t('staff_member') ?></th><th><?= t('payment_type') ?></th><th><?= t('wallet_details') ?></th><th><?= t('fee') ?></th><th><?= t('Status') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
+					<table id="patientTurnHistoryTable" class="table dt-table" data-order-col="0" data-order-dir="asc" data-no-export="true" data-col-widths='["9%","13%","16%","18%","11%","14%","9%","10%"]'>
+						<thead><tr><th><?= t('turn_number') ?></th><th class="col-date"><?= t('Date') ?></th><th><?= t('section') ?></th><th><?= t('staff_member') ?></th><th><?= t('payment_type') ?></th><th><?= t('wallet_details') ?></th><th><?= t('fee') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
 						<tbody>
 						<?php if ($turn_history) : foreach ($turn_history as $turn) : ?>
 							<?php $staff_name = !empty($turn['staff_full_name']) ? $turn['staff_full_name'] : ($turn['doctor_full_name'] ?? ''); ?>
@@ -474,7 +474,6 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 							<tr>
 								<td><?= !empty($turn['turn_number']) ? format_number($turn['turn_number']) : '&mdash;' ?></td>
 								<td class="col-date"><?= html_escape(to_shamsi($turn['turn_date'])) ?></td>
-								<td><?= $display_time($turn['turn_time']) ?></td>
 								<td><?= !empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;' ?></td>
 								<td><?= $staff_name !== '' ? html_escape($staff_name) : '&mdash;' ?></td>
 								<td><?= html_escape(t($turn['payment_type'] ?? 'cash')) ?></td>
@@ -491,7 +490,6 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 									<?php endif; ?>
 								</td>
 								<td><?= format_amount($turn['fee'] ?? 0) ?></td>
-								<td><?= t(ucfirst($turn['status'])) ?></td>
 								<td class="no-export text-end">
 									<?php if ($can_edit_turn) : ?>
 										<a href="<?= base_url('turns/' . $turn['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>

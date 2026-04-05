@@ -251,7 +251,6 @@
 								<td>${index++}</td>
 								<td>${turn.doctor_name}</td>
 								<td>${turn.date}</td>
-								<td><bdo dir="ltr">${turn.from_time} - ${turn.to_time}</bdo></td>
 								<td>${turn.cr}</td>
 								<td>${paidUser}</td>
 								<td>
@@ -267,11 +266,11 @@
 							$tbody.append(row);
 						});
 					} else {
-						$tbody.append(`<tr><td colspan="7" class="text-center">No turns found.</td></tr>`);
+						$tbody.append(`<tr><td colspan="6" class="text-center">No turns found.</td></tr>`);
 					}
 				},
 				error: function () {
-					$tbody.append(`<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>`);
+					$tbody.append(`<tr><td colspan="6" class="text-center text-danger">Error loading data</td></tr>`);
 				}
 			});
 			update_process_completion();

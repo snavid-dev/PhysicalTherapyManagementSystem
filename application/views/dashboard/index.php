@@ -43,17 +43,15 @@
 				</div>
 				<div class="table-responsive">
 					<table class="table align-middle">
-						<thead><tr><th><?= t('Time') ?></th><th><?= t('Patient') ?></th><th><?= t('Therapist') ?></th><th><?= t('Status') ?></th></tr></thead>
+						<thead><tr><th><?= t('Patient') ?></th><th><?= t('Therapist') ?></th></tr></thead>
 						<tbody>
 						<?php if ($today_turns) : foreach ($today_turns as $turn) : ?>
 							<tr>
-								<td><?= html_escape($turn['turn_time']) ?></td>
 								<td><?= html_escape($turn['patient_first_name'] . ' ' . $turn['patient_last_name']) ?></td>
 								<td><?= html_escape($turn['therapist_first_name'] . ' ' . $turn['therapist_last_name']) ?></td>
-								<td><span class="badge text-bg-light"><?= t(ucfirst($turn['status'])) ?></span></td>
 							</tr>
 						<?php endforeach; else : ?>
-							<tr><td colspan="4" class="text-muted"><?= t('No turns for today.') ?></td></tr>
+							<tr><td colspan="2" class="text-muted"><?= t('No turns for today.') ?></td></tr>
 						<?php endif; ?>
 						</tbody>
 					</table>

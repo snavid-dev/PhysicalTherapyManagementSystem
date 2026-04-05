@@ -10,7 +10,6 @@
 			<th scope="col">#</th>
 			<th scope="col"><?= $ci->lang('reference doctor') ?></th>
 			<th scope="col"><?= $ci->lang('date') ?></th>
-			<th scope="col"><?= $ci->lang('hour') ?></th>
 			<th scope="col"><?= $ci->lang('paid amount') ?></th>
 			<th scope="col"><?= $ci->lang('received by') ?></th>
 			<th scope="col"><?= $ci->lang('actions') ?></th>
@@ -23,7 +22,6 @@
 				<td scope="row"><?= $i ?></td>
 				<td><?= $turn['doctor_name'] ?></td>
 				<td><?= $turn['date'] ?></td>
-				<td><bdo dir="ltr"><?= $turn['from_time'] ?> - <?= $turn['to_time'] ?></bdo></td>
 				<td><?= $turn['cr'] ?></td>
 				<td><?= ($turn['paid_user_name'] != null) ? $turn['paid_user_name'] : $ci->lang('not paid') ?></td>
 				<td>

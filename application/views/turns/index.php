@@ -40,7 +40,7 @@ $patient_family_name = static function ($turn) {
 <div class="card">
 	<div class="card-body">
 		<div class="table-responsive">
-			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="9" data-col-widths='["5%","11%","9%","16%","12%","10%","12%","7%","8%","10%"]'>
+			<table class="table align-middle dt-table" data-order-col="0" data-order-dir="desc" data-no-sort-cols="8" data-col-widths='["5%","12%","9%","18%","13%","11%","13%","8%","11%"]'>
 				<thead>
 					<tr>
 						<th><?= t('turn_id') ?></th>
@@ -52,7 +52,6 @@ $patient_family_name = static function ($turn) {
 						<th><?= t('staff_member') ?></th>
 						<th><?= t('fee') ?></th>
 						<th><?= t('payment_type') ?></th>
-						<th><?= t('Status') ?></th>
 						<th class="no-export text-end"><?= t('Actions') ?></th>
 					</tr>
 				</thead>
@@ -69,7 +68,6 @@ $patient_family_name = static function ($turn) {
 						<td><?= $staff_name !== '' ? html_escape($staff_name) : '&mdash;' ?></td>
 						<td><?= format_amount($turn['fee'] ?? 0) ?></td>
 						<td><?= html_escape(t($turn['payment_type'] ?? 'cash')) ?></td>
-						<td><?= t(ucfirst($turn['status'])) ?></td>
 						<td class="no-export text-end">
 							<a href="<?= base_url('turns/' . $turn['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
 							<a href="<?= base_url('turns/' . $turn['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this turn?') ?>')"><?= t('Delete') ?></a>
