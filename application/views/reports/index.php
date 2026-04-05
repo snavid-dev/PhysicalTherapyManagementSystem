@@ -1,3 +1,5 @@
+<?php $can_edit_turn = $this->auth->has_permission('manage_turns'); ?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
 	<div>
 		<h1 class="h3 mb-1"><?= t('Reports') ?></h1>
@@ -46,7 +48,12 @@
 				<h2 class="h5 mb-3"><?= t('Turns') ?></h2>
 				<ul class="list-group list-group-flush">
 					<?php if ($turns) : foreach ($turns as $turn) : ?>
-						<li class="list-group-item px-0"><?= html_escape(to_shamsi($turn['turn_date'])) ?> | <?= html_escape($turn['patient_first_name'] . ' ' . $turn['patient_last_name']) ?></li>
+						<li class="list-group-item px-0 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+							<span><?= html_escape(to_shamsi($turn['turn_date'])) ?> | <?= html_escape($turn['patient_first_name'] . ' ' . $turn['patient_last_name']) ?></span>
+							<?php if ($can_edit_turn && !empty($turn['id'])) : ?>
+								<a href="<?= base_url('turns/' . (int) $turn['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
+							<?php endif; ?>
+						</li>
 					<?php endforeach; else : ?>
 						<li class="list-group-item px-0 text-muted"><?= t('No turns in this range.') ?></li>
 					<?php endif; ?>
