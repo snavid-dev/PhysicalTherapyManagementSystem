@@ -60,8 +60,9 @@ $print_url = base_url('reports/daily-register/print?' . http_build_query($print_
 
 $income_total = 0.00;
 foreach ($income_by_section as $section_income) {
-	$income_total += (float) ($section_income['total_cash'] ?? 0);
+	$income_total += (float) ($section_income['total_received'] ?? 0);
 }
+$income_total += (float) ($summary['total_manual_wallet_topups'] ?? 0);
 
 $can_open_turn = $this->auth->has_permission('manage_turns');
 $can_open_patient = $this->auth->has_permission('manage_patients');
@@ -192,7 +193,7 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 				<thead>
 					<tr>
 						<th><?= t('section') ?></th>
-						<th class="text-end"><?= t('cash_paid') ?></th>
+						<th class="text-end"><?= t('total_patient_income') ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -200,9 +201,15 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 					<?php foreach ($income_by_section as $section_income) : ?>
 						<tr>
 							<td><?= !empty($section_income['section_name']) ? html_escape(t($section_income['section_name'])) : t('section_na') ?></td>
-							<td class="text-end"><?= format_amount($section_income['total_cash'] ?? 0) ?></td>
+							<td class="text-end"><?= format_amount($section_income['total_received'] ?? 0) ?></td>
 						</tr>
 					<?php endforeach; ?>
+					<?php if ((float) ($summary['total_manual_wallet_topups'] ?? 0) > 0 && empty($selected_section_ids)) : ?>
+						<tr>
+							<td><?= t('Patients') ?> / <?= t('total_wallet_topups') ?></td>
+							<td class="text-end"><?= format_amount($summary['total_manual_wallet_topups'] ?? 0) ?></td>
+						</tr>
+					<?php endif; ?>
 				<?php else : ?>
 					<tr>
 						<td colspan="2" class="text-center text-muted"><?= t('No data available.') ?></td>
@@ -237,7 +244,9 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 						<th><?= t('discount') ?></th>
 						<th><?= t('payment_type') ?></th>
 						<th><?= t('cash_paid') ?></th>
+						<th><?= t('top_up_amount') ?></th>
 						<th><?= t('wallet_used') ?></th>
+						<th><?= t('received_amount') ?></th>
 						<th><?= t('debt_amount') ?></th>
 						<th><?= t('Notes') ?></th>
 					</tr>
@@ -250,7 +259,9 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 						$patient_id = (int) ($turn['patient_id'] ?? 0);
 						$payment_type = (string) ($turn['payment_type'] ?? 'cash');
 						$fee = (float) ($turn['fee'] ?? 0);
+						$topup_amount = (float) ($turn['topup_amount'] ?? 0);
 						$wallet_used = (float) ($turn['wallet_deducted'] ?? 0);
+						$row_received_total = (float) ($turn['cash_collected'] ?? 0) + $topup_amount;
 						$calculated_prepaid_debt = max(0, $fee - $wallet_used);
 						$open_debt = isset($debts_by_turn[$turn_id]) ? (float) $debts_by_turn[$turn_id] : NULL;
 						$debt_value = $open_debt;
@@ -311,7 +322,17 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 							<td><?= (float) ($turn['discount_amount'] ?? 0) > 0 ? format_amount($turn['discount_amount']) : '&mdash;' ?></td>
 							<td><span class="badge rounded-pill <?= $badge_class ?>"><?= html_escape(t($payment_type)) ?></span></td>
 							<td><?= format_amount($turn['cash_collected'] ?? 0) ?></td>
+							<td>
+								<?php if ($topup_amount > 0) : ?>
+									<?= format_amount($topup_amount) ?>
+								<?php elseif ($wallet_used > 0) : ?>
+									<span class="text-muted"><?= t('No') ?></span>
+								<?php else : ?>
+									&mdash;
+								<?php endif; ?>
+							</td>
 							<td><?= $wallet_used > 0 ? format_amount($wallet_used) : '&mdash;' ?></td>
+							<td><?= format_amount($row_received_total) ?></td>
 							<td>
 								<?php if ($debt_value !== NULL && (float) $debt_value > 0) : ?>
 									<span class="fw-semibold <?= $debt_class ?>"><?= format_amount($debt_value) ?></span>
@@ -330,7 +351,7 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 					<?php endforeach; ?>
 				<?php else : ?>
 					<tr>
-						<td colspan="14" class="text-center text-muted"><?= t('No turns in this range.') ?></td>
+						<td colspan="16" class="text-center text-muted"><?= t('No turns in this range.') ?></td>
 					</tr>
 				<?php endif; ?>
 				</tbody>
@@ -351,8 +372,16 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 							<?= format_amount($summary['total_cash'] ?? 0) ?>
 						</td>
 						<td class="fw-semibold">
+							<span class="d-block small text-muted"><?= t('top_up_amount') ?></span>
+							<?= format_amount($summary['total_turn_topups'] ?? 0) ?>
+						</td>
+						<td class="fw-semibold">
 							<span class="d-block small text-muted"><?= t('wallet_used') ?></span>
 							<?= format_amount($summary['total_wallet_used'] ?? 0) ?>
+						</td>
+						<td class="fw-semibold">
+							<span class="d-block small text-muted"><?= t('received_amount') ?></span>
+							<?= format_amount(((float) ($summary['total_cash'] ?? 0) + (float) ($summary['total_turn_topups'] ?? 0))) ?>
 						</td>
 						<td class="fw-semibold">
 							<span class="d-block small text-muted"><?= t('debt_amount') ?></span>

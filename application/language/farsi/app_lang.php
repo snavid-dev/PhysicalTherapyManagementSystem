@@ -646,6 +646,7 @@ $lang = array(
 	'total_discounts' => 'مجموع تخفیف‌ها',
 	'income_by_section' => 'درآمد به تفکیک بخش',
 	'cash_paid' => 'نقد پرداخت‌شده',
+	'received_amount' => 'مبلغ دریافتی',
 	'wallet_used' => 'مصرف کیف پول',
 	'debt_amount' => 'بدهی',
 	'print_register' => 'چاپ دفتر ثبت',

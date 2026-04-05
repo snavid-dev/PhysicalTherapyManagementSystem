@@ -56,6 +56,7 @@ class Report_model extends CI_Model
 				turns.fee,
 				turns.payment_type,
 				turns.cash_collected,
+				turns.topup_amount,
 				turns.wallet_deducted,
 				turns.discount_amount,
 				turns.turn_date,
@@ -120,7 +121,9 @@ class Report_model extends CI_Model
 				turns.section_id,
 				sections.name AS section_name,
 				COUNT(turns.id) AS total_turns,
-				COALESCE(SUM(turns.cash_collected), 0) AS total_cash
+				COALESCE(SUM(turns.cash_collected), 0) AS total_cash,
+				COALESCE(SUM(turns.topup_amount), 0) AS total_wallet_topups,
+				COALESCE(SUM(turns.cash_collected + turns.topup_amount), 0) AS total_received
 			", FALSE)
 			->group_by('turns.section_id')
 			->group_by('sections.name')

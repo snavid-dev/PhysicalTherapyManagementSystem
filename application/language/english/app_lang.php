@@ -646,6 +646,7 @@ $lang = array(
 	'total_discounts' => 'Total Discounts',
 	'income_by_section' => 'Income by Section',
 	'cash_paid' => 'Cash Paid',
+	'received_amount' => 'Received Amount',
 	'wallet_used' => 'Wallet Used',
 	'debt_amount' => 'Debt',
 	'print_register' => 'Print Register',
