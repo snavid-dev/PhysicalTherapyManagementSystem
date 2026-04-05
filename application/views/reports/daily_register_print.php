@@ -26,8 +26,9 @@ if (($filters['gender'] ?? '') === 'male') {
 $date_range_label = $date_from === $date_to ? $date_from : ($date_from . ' - ' . $date_to);
 $income_total = 0.00;
 foreach ($income_by_section as $section_income) {
-	$income_total += (float) ($section_income['total_cash'] ?? 0);
+	$income_total += (float) ($section_income['total_received'] ?? 0);
 }
+$income_total += (float) ($summary['total_manual_wallet_topups'] ?? 0);
 ?>
 <!DOCTYPE html>
 <html dir="<?= is_rtl_locale() ? 'rtl' : 'ltr' ?>" lang="<?= app_locale() === 'farsi' ? 'fa' : 'en' ?>">
@@ -140,7 +141,9 @@ foreach ($income_by_section as $section_income) {
 				<th><?= t('discount') ?></th>
 				<th><?= t('payment_type') ?></th>
 				<th><?= t('cash_paid') ?></th>
+				<th><?= t('top_up_amount') ?></th>
 				<th><?= t('wallet_used') ?></th>
+				<th><?= t('received_amount') ?></th>
 				<th><?= t('debt_amount') ?></th>
 				<th><?= t('Notes') ?></th>
 			</tr>
@@ -152,7 +155,9 @@ foreach ($income_by_section as $section_income) {
 				$turn_id = (int) ($turn['id'] ?? 0);
 				$payment_type = (string) ($turn['payment_type'] ?? 'cash');
 				$fee = (float) ($turn['fee'] ?? 0);
+				$topup_amount = (float) ($turn['topup_amount'] ?? 0);
 				$wallet_used = (float) ($turn['wallet_deducted'] ?? 0);
+				$row_received_total = (float) ($turn['cash_collected'] ?? 0) + $topup_amount;
 				$open_debt = isset($debts_by_turn[$turn_id]) ? (float) $debts_by_turn[$turn_id] : NULL;
 				$calculated_prepaid_debt = max(0, $fee - $wallet_used);
 				$debt_value = $open_debt;
@@ -182,7 +187,17 @@ foreach ($income_by_section as $section_income) {
 					<td><?= (float) ($turn['discount_amount'] ?? 0) > 0 ? format_amount($turn['discount_amount']) : '-' ?></td>
 					<td><?= html_escape(t($payment_type)) ?></td>
 					<td><?= format_amount($turn['cash_collected'] ?? 0) ?></td>
+					<td>
+						<?php if ($topup_amount > 0) : ?>
+							<?= format_amount($topup_amount) ?>
+						<?php elseif ($wallet_used > 0) : ?>
+							<?= html_escape(t('No')) ?>
+						<?php else : ?>
+							-
+						<?php endif; ?>
+					</td>
 					<td><?= $wallet_used > 0 ? format_amount($wallet_used) : '-' ?></td>
+					<td><?= format_amount($row_received_total) ?></td>
 					<td>
 						<?php if ($debt_value !== NULL && (float) $debt_value > 0) : ?>
 							<span class="<?= $debt_class ?>"><?= format_amount($debt_value) ?></span>
@@ -195,7 +210,7 @@ foreach ($income_by_section as $section_income) {
 			<?php endforeach; ?>
 		<?php else : ?>
 			<tr>
-				<td colspan="14"><?= t('No turns in this range.') ?></td>
+				<td colspan="16"><?= t('No turns in this range.') ?></td>
 			</tr>
 		<?php endif; ?>
 		</tbody>
@@ -206,7 +221,9 @@ foreach ($income_by_section as $section_income) {
 				<td><span class="tfoot-label"><?= t('discount') ?></span><?= format_amount($summary['total_discounts'] ?? 0) ?></td>
 				<td></td>
 				<td><span class="tfoot-label"><?= t('cash_paid') ?></span><?= format_amount($summary['total_cash'] ?? 0) ?></td>
+				<td><span class="tfoot-label"><?= t('top_up_amount') ?></span><?= format_amount($summary['total_turn_topups'] ?? 0) ?></td>
 				<td><span class="tfoot-label"><?= t('wallet_used') ?></span><?= format_amount($summary['total_wallet_used'] ?? 0) ?></td>
+				<td><span class="tfoot-label"><?= t('received_amount') ?></span><?= format_amount(((float) ($summary['total_cash'] ?? 0) + (float) ($summary['total_turn_topups'] ?? 0))) ?></td>
 				<td><span class="tfoot-label"><?= t('debt_amount') ?></span><?= format_amount($summary['total_debts'] ?? 0) ?></td>
 				<td></td>
 			</tr>
@@ -246,7 +263,7 @@ foreach ($income_by_section as $section_income) {
 		<thead>
 			<tr>
 				<th><?= t('section') ?></th>
-				<th><?= t('cash_paid') ?></th>
+				<th><?= t('total_patient_income') ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -254,9 +271,15 @@ foreach ($income_by_section as $section_income) {
 			<?php foreach ($income_by_section as $section_income) : ?>
 				<tr>
 					<td><?= !empty($section_income['section_name']) ? html_escape(t($section_income['section_name'])) : t('section_na') ?></td>
-					<td><?= format_amount($section_income['total_cash'] ?? 0) ?></td>
+					<td><?= format_amount($section_income['total_received'] ?? 0) ?></td>
 				</tr>
 			<?php endforeach; ?>
+			<?php if ((float) ($summary['total_manual_wallet_topups'] ?? 0) > 0 && empty($selected_section_ids)) : ?>
+				<tr>
+					<td><?= t('Patients') ?> / <?= t('total_wallet_topups') ?></td>
+					<td><?= format_amount($summary['total_manual_wallet_topups'] ?? 0) ?></td>
+				</tr>
+			<?php endif; ?>
 		<?php else : ?>
 			<tr>
 				<td colspan="2"><?= t('No data available.') ?></td>
