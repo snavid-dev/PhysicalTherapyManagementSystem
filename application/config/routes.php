@@ -93,6 +93,8 @@ $route['salaries/get-calculation'] = 'salaries/get_calculation';
 $route['reports'] = 'Reports/index';
 $route['reports/daily-register'] = 'reports/daily_register';
 $route['reports/daily-register/print'] = 'reports/daily_register_print';
+$route['reports/outstanding-balances'] = 'Reports/outstanding_balances';
+$route['reports/patient-financial-summary'] = 'Reports/patient_financial_summary';
 
 $route['leaves'] = 'Leaves/index';
 $route['leaves/create'] = 'Leaves/create';

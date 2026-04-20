@@ -66,6 +66,75 @@ class Reports extends Authenticated_Controller
 		$this->load->view('reports/daily_register_print', $data);
 	}
 
+	public function outstanding_balances()
+	{
+		$this->require_permission('view_reports');
+
+		$status_filter = strtolower(trim((string) $this->input->get('status', TRUE)));
+		$search = trim((string) $this->input->get('search', TRUE));
+
+		if (!in_array($status_filter, array('all', 'negative_wallet', 'debt', 'both'), TRUE)) {
+			$status_filter = 'all';
+		}
+
+		$this->render('reports/outstanding_balances', array(
+			'title' => t('Outstanding Balances'),
+			'current_section' => 'reports',
+			'filters' => array(
+				'status' => $status_filter,
+				'search' => $search,
+			),
+			'rows' => $this->Report_model->get_outstanding_balances(array(
+				'status' => $status_filter,
+				'search' => $search,
+			)),
+		));
+	}
+
+	public function patient_financial_summary()
+	{
+		$this->require_permission('view_reports');
+
+		$search = trim((string) $this->input->get('search', TRUE));
+		$from_input = trim((string) $this->input->get('from', TRUE));
+		$to_input = trim((string) $this->input->get('to', TRUE));
+		$from = $from_input !== '' ? $this->gregorian_date_from_shamsi($from_input) : '';
+		$to = $to_input !== '' ? $this->gregorian_date_from_shamsi($to_input) : '';
+
+		if ($from_input !== '' && $from === '') {
+			$from_input = '';
+		}
+
+		if ($to_input !== '' && $to === '') {
+			$to_input = '';
+		}
+
+		if ($from !== '' && $to !== '' && $from > $to) {
+			$temp = $from;
+			$from = $to;
+			$to = $temp;
+
+			$temp_input = $from_input;
+			$from_input = $to_input;
+			$to_input = $temp_input;
+		}
+
+		$this->render('reports/patient_financial_summary', array(
+			'title' => t('Patient Financial Summary'),
+			'current_section' => 'reports',
+			'filters' => array(
+				'search' => $search,
+				'from' => $from_input,
+				'to' => $to_input,
+			),
+			'rows' => $this->Report_model->get_patient_financial_summary(array(
+				'search' => $search,
+				'from' => $from,
+				'to' => $to,
+			)),
+		));
+	}
+
 	protected function daily_register_view_data()
 	{
 		$today_shamsi = shamsi_today();
