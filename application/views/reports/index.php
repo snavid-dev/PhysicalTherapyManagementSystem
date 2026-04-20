@@ -18,6 +18,26 @@
 </div>
 
 <div class="card mb-4">
+	<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+		<div>
+			<h2 class="h5 mb-1"><?= t('Outstanding Balances') ?></h2>
+			<p class="text-muted mb-0"><?= t('Review patients with negative wallet balances or open debt.') ?></p>
+		</div>
+		<a href="<?= base_url('reports/outstanding-balances') ?>" class="btn btn-dark"><?= t('Open Report') ?></a>
+	</div>
+</div>
+
+<div class="card mb-4">
+	<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+		<div>
+			<h2 class="h5 mb-1"><?= t('Patient Financial Summary') ?></h2>
+			<p class="text-muted mb-0"><?= t('Review each patient balance, visit count, and total turn fees.') ?></p>
+		</div>
+		<a href="<?= base_url('reports/patient-financial-summary') ?>" class="btn btn-dark"><?= t('Open Report') ?></a>
+	</div>
+</div>
+
+<div class="card mb-4">
 	<div class="card-body">
 		<?= form_open('reports', array('method' => 'get', 'class' => 'row g-3 align-items-end')) ?>
 			<div class="col-md-4">

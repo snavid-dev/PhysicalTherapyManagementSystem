@@ -3,6 +3,139 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Report_model extends CI_Model
 {
+	public function get_outstanding_balances($filters = array())
+	{
+		$filters = $this->normalize_patient_report_filters($filters);
+		$wallet_table = $this->db->table_exists('patient_wallet');
+		$debt_table = $this->db->table_exists('patient_debts');
+
+		$this->db
+			->select("
+				patients.id,
+				patients.first_name,
+				patients.last_name,
+				patients.phone,
+				patients.phone2,
+				COALESCE(wallet.balance, 0) AS wallet_balance,
+				COALESCE(debts.open_debt, 0) AS open_debt,
+				last_turn.last_turn_date
+			", FALSE)
+			->from('patients');
+
+		if ($wallet_table) {
+			$this->db->join('(SELECT patient_id, balance FROM patient_wallet) AS wallet', 'wallet.patient_id = patients.id', 'left', FALSE);
+		} else {
+			$this->db->join('(SELECT NULL AS patient_id, 0 AS balance) AS wallet', '1 = 0', 'left', FALSE);
+		}
+
+		if ($debt_table) {
+			$this->db->join("
+				(
+					SELECT patient_id, COALESCE(SUM(amount), 0) AS open_debt
+					FROM patient_debts
+					WHERE status = 'open'
+					GROUP BY patient_id
+				) AS debts
+			", 'debts.patient_id = patients.id', 'left', FALSE);
+		} else {
+			$this->db->join('(SELECT NULL AS patient_id, 0 AS open_debt) AS debts', '1 = 0', 'left', FALSE);
+		}
+
+		$this->db->join("
+			(
+				SELECT patient_id, MAX(turn_date) AS last_turn_date
+				FROM turns
+				GROUP BY patient_id
+			) AS last_turn
+		", 'last_turn.patient_id = patients.id', 'left', FALSE);
+
+		$this->apply_patient_search_filter($filters['search']);
+
+		switch ($filters['status']) {
+			case 'negative_wallet':
+				$this->db->where('COALESCE(wallet.balance, 0) <', 0, FALSE);
+				break;
+
+			case 'debt':
+				$this->db->where('COALESCE(debts.open_debt, 0) >', 0, FALSE);
+				break;
+
+			case 'both':
+				$this->db->where('COALESCE(wallet.balance, 0) <', 0, FALSE);
+				$this->db->where('COALESCE(debts.open_debt, 0) >', 0, FALSE);
+				break;
+
+			default:
+				$this->db->group_start()
+					->where('COALESCE(wallet.balance, 0) <', 0, FALSE)
+					->or_where('COALESCE(debts.open_debt, 0) >', 0, FALSE)
+				->group_end();
+				break;
+		}
+
+		return $this->db
+			->order_by('COALESCE(debts.open_debt, 0)', 'desc', FALSE)
+			->order_by('COALESCE(wallet.balance, 0)', 'asc', FALSE)
+			->order_by('patients.first_name', 'asc')
+			->order_by('patients.last_name', 'asc')
+			->get()
+			->result_array();
+	}
+
+	public function get_patient_financial_summary($filters = array())
+	{
+		$filters = $this->normalize_patient_report_filters($filters);
+		$wallet_table = $this->db->table_exists('patient_wallet');
+		$debt_table = $this->db->table_exists('patient_debts');
+		$turn_summary_sql = $this->patient_turn_summary_subquery($filters['from'], $filters['to']);
+
+		$this->db
+			->select("
+				patients.id,
+				patients.first_name,
+				patients.last_name,
+				patients.phone,
+				patients.phone2,
+				COALESCE(wallet.balance, 0) AS wallet_balance,
+				COALESCE(debts.open_debt, 0) AS open_debt,
+				COALESCE(turn_summary.total_turns, 0) AS total_turns,
+				COALESCE(turn_summary.total_turn_fees, 0) AS total_turn_fees,
+				turn_summary.last_turn_date
+			", FALSE)
+			->from('patients');
+
+		if ($wallet_table) {
+			$this->db->join('(SELECT patient_id, balance FROM patient_wallet) AS wallet', 'wallet.patient_id = patients.id', 'left', FALSE);
+		} else {
+			$this->db->join('(SELECT NULL AS patient_id, 0 AS balance) AS wallet', '1 = 0', 'left', FALSE);
+		}
+
+		if ($debt_table) {
+			$this->db->join("
+				(
+					SELECT patient_id, COALESCE(SUM(amount), 0) AS open_debt
+					FROM patient_debts
+					WHERE status = 'open'
+					GROUP BY patient_id
+				) AS debts
+			", 'debts.patient_id = patients.id', 'left', FALSE);
+		} else {
+			$this->db->join('(SELECT NULL AS patient_id, 0 AS open_debt) AS debts', '1 = 0', 'left', FALSE);
+		}
+
+		$this->db->join('(' . $turn_summary_sql . ') AS turn_summary', 'turn_summary.patient_id = patients.id', 'left', FALSE);
+
+		$this->apply_patient_search_filter($filters['search']);
+
+		return $this->db
+			->order_by('COALESCE(turn_summary.total_turns, 0)', 'desc', FALSE)
+			->order_by('turn_summary.last_turn_date', 'desc')
+			->order_by('patients.first_name', 'asc')
+			->order_by('patients.last_name', 'asc')
+			->get()
+			->result_array();
+	}
+
 	public function summary($from, $to)
 	{
 		return array(
@@ -258,5 +391,71 @@ class Report_model extends CI_Model
 		}
 
 		return round($total, 2);
+	}
+
+	protected function normalize_patient_report_filters($filters)
+	{
+		$filters = is_array($filters) ? $filters : array();
+		$status = strtolower(trim((string) ($filters['status'] ?? 'all')));
+
+		if (!in_array($status, array('all', 'negative_wallet', 'debt', 'both'), TRUE)) {
+			$status = 'all';
+		}
+
+		return array(
+			'status' => $status,
+			'search' => trim((string) ($filters['search'] ?? '')),
+			'from' => trim((string) ($filters['from'] ?? '')),
+			'to' => trim((string) ($filters['to'] ?? '')),
+		);
+	}
+
+	protected function apply_patient_search_filter($search)
+	{
+		$search = trim((string) $search);
+
+		if ($search === '') {
+			return;
+		}
+
+		$this->db->group_start()
+			->like('patients.first_name', $search)
+			->or_like('patients.last_name', $search)
+			->or_like("TRIM(CONCAT(patients.first_name, ' ', COALESCE(patients.last_name, '')))", $search, 'both', FALSE)
+			->or_like('patients.phone', $search)
+			->or_like('patients.phone2', $search)
+		->group_end();
+	}
+
+	protected function patient_turn_summary_subquery($from, $to)
+	{
+		$from = trim((string) $from);
+		$to = trim((string) $to);
+		$where = array();
+
+		if ($from !== '') {
+			$where[] = "turn_date >= " . $this->db->escape($from);
+		}
+
+		if ($to !== '') {
+			$where[] = "turn_date <= " . $this->db->escape($to);
+		}
+
+		$sql = "
+			SELECT
+				patient_id,
+				COUNT(id) AS total_turns,
+				COALESCE(SUM(fee), 0) AS total_turn_fees,
+				MAX(turn_date) AS last_turn_date
+			FROM turns
+		";
+
+		if (!empty($where)) {
+			$sql .= ' WHERE ' . implode(' AND ', $where);
+		}
+
+		$sql .= ' GROUP BY patient_id';
+
+		return $sql;
 	}
 }
