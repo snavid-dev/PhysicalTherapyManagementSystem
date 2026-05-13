@@ -457,11 +457,11 @@ class Wallet_model extends CI_Model
 					$fund_type
 				);
 
-				if ($deducted === FALSE || abs((float) $deducted - $net_amount) > 0.009) {
+				if ($deducted === FALSE) {
 					return FALSE;
 				}
 
-				$total_reversed = round($total_reversed + $net_amount, 2);
+				$total_reversed = round($total_reversed + (float) $deducted, 2);
 				continue;
 			}
 
