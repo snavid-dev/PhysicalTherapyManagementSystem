@@ -383,7 +383,9 @@ This is the practical dependency map of the active system.
 ### Leaves dependencies
 
 - `Leaves` depends on `Leave_model`
-- `Leaves` depends on `User_model`
+- `Leaves` depends on `Staff_model`
+- leaves are tied to `staff` (any employee), not to user/login accounts
+- salary deduction depends on leave records via `doctor_leaves.staff_id`
 - reports depend on leave records
 - future scheduling rules may depend on leaves if turn blocking is introduced
 
@@ -518,8 +520,8 @@ This section maps each active module to the main tables it reads or writes.
 
 ### Leaves
 
-- writes: `doctor_leaves`
-- reads: `users`
+- writes: `doctor_leaves` (keyed by `staff_id`)
+- reads: `staff`
 
 ### Preferences
 
@@ -1079,7 +1081,7 @@ Pass these steps:
 4. Update `salaries/index.php` and `salaries/pay.php` for payroll UI changes.
 5. Update both language files for any new labels or states.
 6. If schema changes, update `database/physical_therapy_clinic.sql`.
-7. Verify the join path between `staff.user_id` and `doctor_leaves.doctor_id` still matches the live schema.
+7. Verify the join path between `staff.id` and `doctor_leaves.staff_id` still matches the live schema.
 8. Verify partial payment, final payment, and overpayment-blocking behavior.
 
 ### AI prompt example for this module
@@ -1218,7 +1220,10 @@ Pass these steps:
 
 ### Purpose
 
-This module tracks therapist or doctor leave periods.
+This module tracks leave periods for any employee. Leaves are tied to the
+`staff` record (via `doctor_leaves.staff_id`), not to login accounts, so every
+employee — including staff with no user account — can have leaves recorded, and
+each approved leave day reduces that employee's salary at the daily rate.
 
 ### Main files
 
@@ -1226,8 +1231,8 @@ This module tracks therapist or doctor leave periods.
 - `application/models/Leave_model.php`
 - `application/views/leaves/index.php`
 - `application/views/leaves/form.php`
-- `application/models/User_model.php`
-- `application/models/Turn_model.php`
+- `application/models/Staff_model.php`
+- `application/models/Salary_model.php`
 - `database/physical_therapy_clinic.sql`
 
 ### What it currently does
@@ -1236,7 +1241,8 @@ This module tracks therapist or doctor leave periods.
 - creates leave records
 - edits leave records
 - deletes leave records
-- links leave records to therapists
+- links leave records to any employee (`staff`)
+- feeds the salary deduction (every approved leave day is deducted)
 - stores leave status and reason
 
 ### Current leave statuses

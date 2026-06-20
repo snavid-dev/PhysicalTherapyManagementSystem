@@ -218,6 +218,125 @@ class Safe_model extends CI_Model
 		return TRUE;
 	}
 
+	/**
+	 * Sync the safe ledger rows that mirror a turn's collected cash and wallet top-up.
+	 * Existing rows for this turn are updated in place; missing rows are inserted;
+	 * obsolete rows (amount becomes zero) are deleted. Running `balance_after` is then
+	 * recomputed across the whole ledger so chronology stays consistent.
+	 *
+	 * Use this on Turns::update (in-place adjustment); do NOT use on Turns::delete
+	 * (use reverse_turn_transactions or full deletion there).
+	 */
+	public function sync_turn_safe_entries($turn_id, $cash_collected, $topup_amount, $user_id = NULL, $cash_note = NULL, $topup_note = NULL, $in_outer_transaction = FALSE)
+	{
+		$this->ensure_schema(FALSE);
+
+		$turn_id = (int) $turn_id;
+
+		if ($turn_id <= 0) {
+			return FALSE;
+		}
+
+		$cash_collected = round((float) $cash_collected, 2);
+		$topup_amount = round((float) $topup_amount, 2);
+		$user_id = $user_id ? (int) $user_id : NULL;
+
+		if (!$in_outer_transaction) {
+			$this->db->trans_begin();
+		}
+
+		$this->upsert_turn_safe_row($turn_id, 'turn_cash', $cash_collected, $user_id, $cash_note);
+		$this->upsert_turn_safe_row($turn_id, 'wallet_topup', $topup_amount, $user_id, $topup_note);
+
+		$this->recalculate_balances();
+
+		if (!$in_outer_transaction) {
+			if ($this->db->trans_status() === FALSE) {
+				$this->db->trans_rollback();
+				return FALSE;
+			}
+			$this->db->trans_commit();
+		}
+
+		return TRUE;
+	}
+
+	/**
+	 * Adjust the net safe contribution of a turn's source (turn_cash or wallet_topup) to
+	 * $target_amount by appending COMPENSATING rows instead of mutating history.
+	 *
+	 * Fixes:
+	 *  - A5 (retroactive balance_after rewrite): we no longer modify the existing row's
+	 *    amount, so balance_after for rows up to the original timestamp stays stable.
+	 *  - B6 (audit-trail loss): we attribute each adjustment to its actual editor via
+	 *    created_by and use NOW() so audit timestamps reflect when the edit happened.
+	 *  - B7 (history erased on cash→prepaid switch): instead of deleting rows when the
+	 *    new amount is 0, we insert an offsetting 'out' row that brings the net to 0.
+	 *
+	 * Existing pre-M2 duplicate rows (created via skip_duplicate_check) are still
+	 * consolidated by net-sum logic rather than DELETE-on-zero.
+	 */
+	protected function upsert_turn_safe_row($turn_id, $source, $amount, $user_id, $note)
+	{
+		$existing = $this->db
+			->select("id, type, amount")
+			->from('safe_transactions')
+			->where('source', $source)
+			->where('reference_id', (int) $turn_id)
+			->where('reference_table', 'turns')
+			->order_by('id', 'asc')
+			->get()
+			->result_array();
+
+		// Compute the current net contribution of this turn+source to the safe.
+		$current_net = 0.0;
+		foreach ($existing as $row) {
+			$row_amount = round((float) $row['amount'], 2);
+			if (($row['type'] ?? '') === 'in') {
+				$current_net += $row_amount;
+			} elseif (($row['type'] ?? '') === 'out') {
+				$current_net -= $row_amount;
+			}
+		}
+		$current_net = round($current_net, 2);
+
+		$target = round((float) $amount, 2);
+		$delta = round($target - $current_net, 2);
+
+		if (abs($delta) < 0.005) {
+			return;
+		}
+
+		if (empty($existing) && $target > 0) {
+			// Original creation path: no history yet, just insert the first row at NOW.
+			$this->db->insert('safe_transactions', array(
+				'type' => 'in',
+				'source' => $source,
+				'amount' => $target,
+				'balance_after' => 0.00,
+				'reference_id' => (int) $turn_id,
+				'reference_table' => 'turns',
+				'note' => $this->null_if_empty($note),
+				'created_by' => $user_id,
+			));
+			return;
+		}
+
+		// History exists. Append a compensating row to bring the net to $target.
+		$row = array(
+			'type' => $delta > 0 ? 'in' : 'out',
+			'source' => $source,
+			'amount' => abs($delta),
+			'balance_after' => 0.00,
+			'reference_id' => (int) $turn_id,
+			'reference_table' => 'turns',
+			'note' => $this->null_if_empty($note),
+			'created_by' => $user_id,
+		);
+
+		$this->db->insert('safe_transactions', $row);
+	}
+
 	public function reverse_turn_transactions($turn, $created_by = NULL)
 	{
 		$this->ensure_schema(FALSE);
@@ -454,6 +573,8 @@ class Safe_model extends CI_Model
 			'turn_cash',
 			'wallet_topup',
 			'patient_payment',
+			'patient_debt_payment',
+			'patient_refund',
 			'other_income',
 			'expense',
 			'salary_payment',
@@ -486,7 +607,7 @@ class Safe_model extends CI_Model
 					CREATE TABLE IF NOT EXISTS `safe_transactions` (
 						`id` int unsigned NOT NULL AUTO_INCREMENT,
 						`type` enum('in','out','adjustment') NOT NULL,
-						`source` enum('turn_cash','wallet_topup','patient_payment','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL,
+						`source` enum('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL,
 						`amount` decimal(12,2) NOT NULL,
 						`balance_after` decimal(12,2) NOT NULL,
 						`reference_id` int unsigned DEFAULT NULL,
@@ -543,7 +664,7 @@ class Safe_model extends CI_Model
 			return;
 		}
 
-		$expected = "enum('turn_cash','wallet_topup','patient_payment','other_income','expense','salary_payment','wallet_refund','adjustment')";
+		$expected = "enum('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment')";
 
 		if (strtolower((string) $column['Type']) === $expected) {
 			return;
@@ -551,7 +672,7 @@ class Safe_model extends CI_Model
 
 		$this->db->query("
 			ALTER TABLE `safe_transactions`
-			MODIFY COLUMN `source` ENUM('turn_cash','wallet_topup','patient_payment','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL
+			MODIFY COLUMN `source` ENUM('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL
 		");
 	}
 
@@ -599,10 +720,18 @@ class Safe_model extends CI_Model
 
 	protected function needs_historical_sync()
 	{
+		// Standalone debt payments use source='patient_debt_payment'; legacy/cash payments
+		// use source='patient_payment'. Count BOTH so the sync doesn't think payments are
+		// missing and duplicate-insert them on next deploy.
+		$payment_safe_count = (int) $this->db
+			->where_in('source', array('patient_payment', 'patient_debt_payment'))
+			->where('reference_table', 'payments')
+			->count_all_results('safe_transactions');
+
 		return $this->count_turn_cash_records() > $this->count_safe_records('turn_cash', 'turns')
 			|| $this->count_turn_wallet_topup_records() > $this->count_safe_records('wallet_topup', 'turns')
 			|| $this->count_manual_wallet_topup_records() > $this->count_safe_records('wallet_topup', 'patient_wallet_transactions')
-			|| $this->count_payment_records() > $this->count_safe_records('patient_payment', 'payments')
+			|| $this->count_payment_records() > $payment_safe_count
 			|| $this->count_expense_records() > $this->count_safe_records('expense', 'expenses')
 			|| $this->count_salary_payment_records() > $this->count_safe_records('salary_payment', 'staff_salary_payments');
 	}
@@ -773,10 +902,31 @@ class Safe_model extends CI_Model
 
 	protected function legacy_payment_events()
 	{
-		$rows = $this->db
+		// Exclude payments that already have a safe row under EITHER source
+		// (patient_payment OR patient_debt_payment) — the standard transaction_exists
+		// dedupe in insert_transaction only checks one source at a time, which would
+		// re-insert standalone debt payments as duplicates.
+		$existing_payment_ids = array_map('intval', array_column(
+			$this->db
+				->select('DISTINCT reference_id')
+				->from('safe_transactions')
+				->where_in('source', array('patient_payment', 'patient_debt_payment'))
+				->where('reference_table', 'payments')
+				->get()
+				->result_array(),
+			'reference_id'
+		));
+
+		$query = $this->db
 			->select('id, patient_id, amount, payment_date, notes')
 			->from('payments')
-			->where('amount >', 0)
+			->where('amount >', 0);
+
+		if (!empty($existing_payment_ids)) {
+			$query->where_not_in('id', $existing_payment_ids);
+		}
+
+		$rows = $query
 			->order_by('payment_date', 'asc')
 			->order_by('id', 'asc')
 			->get()

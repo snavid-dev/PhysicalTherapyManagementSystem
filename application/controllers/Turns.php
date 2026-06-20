@@ -255,11 +255,11 @@ class Turns extends Authenticated_Controller
 		}
 
 		if ($payment_type === 'deferred') {
-			$this->Debt_model->create($patient_id, $turn_id, $fee);
+			$this->Debt_model->create($patient_id, $turn_id, $fee, NULL, Debt_model::DEBT_TYPE_MANUAL_ONLY);
 		}
 
 		if ($payment_type === 'prepaid' && $remaining_fee > 0) {
-			$this->Debt_model->create($patient_id, $turn_id, $remaining_fee, 'Partial wallet - remaining after deduction');
+			$this->Debt_model->create($patient_id, $turn_id, $remaining_fee, 'Partial wallet - remaining after deduction', Debt_model::DEBT_TYPE_AUTO_SETTLEABLE);
 		}
 
 		if ($this->db->trans_status() === FALSE) {
@@ -293,6 +293,8 @@ class Turns extends Authenticated_Controller
 				$this->session->userdata('user_id')
 			);
 		}
+
+		$this->Wallet_model->recalculate_for_patient($patient_id);
 
 		$this->session->set_flashdata('success', t('Turn created successfully.'));
 		redirect('turns');
@@ -423,7 +425,7 @@ class Turns extends Authenticated_Controller
 			}
 
 			if ($row['payment_type'] === 'deferred') {
-				$debt_id = $this->Debt_model->create($row['patient_id'], $turn_id, $row['fee']);
+				$debt_id = $this->Debt_model->create($row['patient_id'], $turn_id, $row['fee'], NULL, Debt_model::DEBT_TYPE_MANUAL_ONLY);
 
 				if (!$debt_id) {
 					$this->db->trans_rollback();
@@ -437,7 +439,7 @@ class Turns extends Authenticated_Controller
 			}
 
 			if ($row['payment_type'] === 'prepaid' && $remaining_fee > 0) {
-				$debt_id = $this->Debt_model->create($row['patient_id'], $turn_id, $remaining_fee, 'Partial wallet - remaining after deduction');
+				$debt_id = $this->Debt_model->create($row['patient_id'], $turn_id, $remaining_fee, 'Partial wallet - remaining after deduction', Debt_model::DEBT_TYPE_AUTO_SETTLEABLE);
 
 				if (!$debt_id) {
 					$this->db->trans_rollback();
@@ -497,6 +499,12 @@ class Turns extends Authenticated_Controller
 			);
 		}
 
+		$affected_patient_ids = array_values(array_unique(array_filter(array_map('intval', array_column($validated_rows, 'patient_id')))));
+
+		foreach ($affected_patient_ids as $affected_patient_id) {
+			$this->Wallet_model->recalculate_for_patient($affected_patient_id);
+		}
+
 		$this->session->set_flashdata('success', count($validated_rows) . ' ' . t('bulk_success'));
 		redirect('turns');
 	}
@@ -526,12 +534,24 @@ class Turns extends Authenticated_Controller
 			return redirect('turns/' . $id . '/edit');
 		}
 
+		$can_edit_payments = (bool) $this->auth->has_permission('edit_processed_payments');
 		$patient_id = (int) $turn['patient_id'];
-		$fee = $this->decimal_value($this->input->post('fee'));
-		$payment_type = $this->input->post('payment_type', TRUE);
-		$topup_amount = $this->decimal_value($this->input->post('topup_amount'));
-		$discount_percent = $this->decimal_value($this->input->post('discount_percent'));
-		$discount_amount = $this->decimal_value($this->input->post('discount_amount'));
+
+		if ($can_edit_payments) {
+			$fee = $this->decimal_value($this->input->post('fee'));
+			$payment_type = $this->input->post('payment_type', TRUE);
+			$topup_amount = $this->decimal_value($this->input->post('topup_amount'));
+			$discount_percent = $this->decimal_value($this->input->post('discount_percent'));
+			$discount_amount = $this->decimal_value($this->input->post('discount_amount'));
+		} else {
+			// User lacks edit_processed_payments — server-side enforcement:
+			// ignore any altered payment fields and reuse the stored values.
+			$fee = round((float) $turn['fee'], 2);
+			$payment_type = (string) $turn['payment_type'];
+			$topup_amount = round((float) $turn['topup_amount'], 2);
+			$discount_percent = round((float) $turn['discount_percent'], 2);
+			$discount_amount = round((float) $turn['discount_amount'], 2);
+		}
 		$doctor_id = (int) $staff['user_id'];
 		$user_id = (int) $this->session->userdata('user_id');
 		$financials_changed = $this->turn_financials_changed($turn, array(
@@ -571,7 +591,9 @@ class Turns extends Authenticated_Controller
 
 		$this->db->trans_begin();
 
-		$reversed = $this->reverse_turn_financials($turn);
+		// Safe rows are adjusted in place after the new amounts are computed
+		// (M2 task 2.3). Reverse only wallet + debt effects here.
+		$reversed = $this->reverse_turn_financials($turn, FALSE);
 
 		if ($reversed === FALSE) {
 			$this->db->trans_rollback();
@@ -608,7 +630,7 @@ class Turns extends Authenticated_Controller
 				break;
 
 			case 'deferred':
-				$debt_id = $this->Debt_model->create($patient_id, $id, $fee);
+				$debt_id = $this->Debt_model->create($patient_id, $id, $fee, NULL, Debt_model::DEBT_TYPE_MANUAL_ONLY);
 
 				if (!$debt_id) {
 					$this->db->trans_rollback();
@@ -637,7 +659,7 @@ class Turns extends Authenticated_Controller
 				$remaining = round($fee - $wallet_deducted, 2);
 
 				if ($remaining > 0) {
-					$debt_id = $this->Debt_model->create($patient_id, $id, $remaining, 'Partial wallet on edit - remaining after deduction');
+					$debt_id = $this->Debt_model->create($patient_id, $id, $remaining, 'Partial wallet on edit - remaining after deduction', Debt_model::DEBT_TYPE_AUTO_SETTLEABLE);
 
 					if (!$debt_id) {
 						$this->db->trans_rollback();
@@ -671,44 +693,23 @@ class Turns extends Authenticated_Controller
 			return redirect('turns/' . $id . '/edit');
 		}
 
-		if ($payment_type === 'cash' && $cash_collected > 0) {
-			$logged = $this->Safe_model->log_transaction(
-				'in',
-				'turn_cash',
-				$cash_collected,
-				$id,
-				'turns',
-				'Cash on edit of turn #' . $id,
-				$user_id,
-				NULL,
-				array('skip_duplicate_check' => TRUE)
-			);
+		// M2 task 2.3: update existing safe rows in place (no reversal+re-insert) and
+		// recompute balance_after across the entire ledger to keep chronology consistent.
+		// $in_outer_transaction=TRUE — we're inside the outer trans_begin at line ~592.
+		$synced = $this->Safe_model->sync_turn_safe_entries(
+			$id,
+			($payment_type === 'cash' ? $cash_collected : 0),
+			$topup_amount,
+			$user_id,
+			'Cash on edit of turn #' . $id,
+			'Top-up on edit of turn #' . $id,
+			TRUE
+		);
 
-			if ($logged === FALSE) {
-				$this->db->trans_rollback();
-				$this->session->set_flashdata('error', t('Unable to save turn right now.'));
-				return redirect('turns/' . $id . '/edit');
-			}
-		}
-
-		if ($topup_amount > 0) {
-			$logged = $this->Safe_model->log_transaction(
-				'in',
-				'wallet_topup',
-				$topup_amount,
-				$id,
-				'turns',
-				'Top-up on edit of turn #' . $id,
-				$user_id,
-				NULL,
-				array('skip_duplicate_check' => TRUE)
-			);
-
-			if ($logged === FALSE) {
-				$this->db->trans_rollback();
-				$this->session->set_flashdata('error', t('Unable to save turn right now.'));
-				return redirect('turns/' . $id . '/edit');
-			}
+		if ($synced === FALSE) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('Unable to save turn right now.'));
+			return redirect('turns/' . $id . '/edit');
 		}
 
 		if ($this->db->trans_status() === FALSE) {
@@ -718,6 +719,7 @@ class Turns extends Authenticated_Controller
 		}
 
 		$this->db->trans_commit();
+		$this->Wallet_model->recalculate_for_patient($patient_id);
 		$this->session->set_flashdata('success', t('Turn updated successfully.'));
 		redirect('turns');
 	}
@@ -750,6 +752,8 @@ class Turns extends Authenticated_Controller
 		}
 
 		$this->db->trans_commit();
+
+		$this->Wallet_model->recalculate_for_patient((int) $turn['patient_id']);
 
 		$this->session->set_flashdata('success', t('turn_delete_success'));
 		redirect('turns');
@@ -828,6 +832,7 @@ class Turns extends Authenticated_Controller
 			'turn' => $turn,
 			'action' => $action,
 			'is_edit' => (bool) $turn,
+			'can_edit_processed_payments' => (bool) $this->auth->has_permission('edit_processed_payments'),
 			'patients' => $this->Patient_model->all(),
 			'sections' => $this->Section_model->get_all(),
 			'staff_members' => $selected_section_id > 0 ? $this->Turn_model->get_staff_by_section($selected_section_id) : array(),
@@ -947,7 +952,7 @@ class Turns extends Authenticated_Controller
 		);
 	}
 
-	private function reverse_turn_financials($original_turn)
+	private function reverse_turn_financials($original_turn, $reverse_safe = TRUE)
 	{
 		$patient_id = (int) $original_turn['patient_id'];
 		$turn_id = (int) $original_turn['id'];
@@ -966,6 +971,10 @@ class Turns extends Authenticated_Controller
 
 		if ($debt_reversed === FALSE) {
 			return FALSE;
+		}
+
+		if (!$reverse_safe) {
+			return TRUE;
 		}
 
 		$safe_reversed = $this->Safe_model->reverse_turn_transactions(

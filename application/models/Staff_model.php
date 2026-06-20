@@ -76,6 +76,22 @@ class Staff_model extends CI_Model
 		return $rows;
 	}
 
+	public function get_active_therapists()
+	{
+		$this->ensure_schema();
+
+		return $this->db
+			->select("staff.id, staff_types.name AS staff_type_name, CONCAT_WS(' ', staff.first_name, NULLIF(staff.last_name, '')) AS full_name", FALSE)
+			->from('staff')
+			->join('staff_types', 'staff_types.id = staff.staff_type_id')
+			->where('staff.status', 'active')
+			->where_in('staff_types.name', array('Doctor', 'Physiotherapist'))
+			->order_by('staff.first_name', 'asc')
+			->order_by('staff.last_name', 'asc')
+			->get()
+			->result_array();
+	}
+
 	public function create($data)
 	{
 		$this->ensure_schema();

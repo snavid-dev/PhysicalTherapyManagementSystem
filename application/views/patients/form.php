@@ -120,8 +120,13 @@
 					</div>
 				</div>
 			</div>
-			<div class="mt-4 d-flex justify-content-end">
-				<button type="submit" class="btn btn-dark"><?= t('Save Patient') ?></button>
+			<div class="mt-4 d-flex flex-wrap justify-content-end gap-2">
+				<?php if (empty($patient)) : ?>
+					<button type="submit" name="submit_action" value="save_and_open" class="btn btn-outline-dark"><?= t('Save and Open Profile') ?></button>
+					<button type="submit" name="submit_action" value="save" class="btn btn-dark"><?= t('Save Patient') ?></button>
+				<?php else : ?>
+					<button type="submit" class="btn btn-dark"><?= t('Save Patient') ?></button>
+				<?php endif; ?>
 			</div>
 		<?= form_close() ?>
 	</div>

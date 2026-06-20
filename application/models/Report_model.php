@@ -3,6 +3,88 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Report_model extends CI_Model
 {
+	public function get_new_patients_in_range($from, $to)
+	{
+		$from = trim((string) $from);
+		$to = trim((string) $to);
+
+		if ($from === '' || $to === '') {
+			return array();
+		}
+
+		return $this->db
+			->select("patients.id, patients.first_name, patients.last_name, patients.father_name, patients.gender, patients.phone, patients.phone2, patients.created_at,
+				TRIM(CONCAT(reference_doctors.first_name, ' ', COALESCE(reference_doctors.last_name, ''))) AS referred_by_name", FALSE)
+			->from('patients')
+			->join('reference_doctors', 'reference_doctors.id = patients.referred_by', 'left')
+			->where('DATE(patients.created_at) >=', $from)
+			->where('DATE(patients.created_at) <=', $to)
+			->order_by('patients.created_at', 'desc')
+			->order_by('patients.id', 'desc')
+			->get()
+			->result_array();
+	}
+
+	public function get_debtors()
+	{
+		$wallet_table = $this->db->table_exists('patient_wallet');
+		$debt_table = $this->db->table_exists('patient_debts');
+
+		$this->db
+			->select("
+				patients.id,
+				patients.first_name,
+				patients.last_name,
+				patients.father_name,
+				patients.phone,
+				COALESCE(wallet.balance, 0) AS wallet_balance,
+				COALESCE(debts.open_debt, 0) AS open_debt,
+				last_turn.last_turn_date
+			", FALSE)
+			->from('patients');
+
+		if ($wallet_table) {
+			$this->db->join('(SELECT patient_id, balance FROM patient_wallet) AS wallet', 'wallet.patient_id = patients.id', 'left', FALSE);
+		} else {
+			$this->db->join('(SELECT NULL AS patient_id, 0 AS balance) AS wallet', '1 = 0', 'left', FALSE);
+		}
+
+		if ($debt_table) {
+			$this->db->join("
+				(
+					SELECT patient_id, COALESCE(SUM(amount), 0) AS open_debt
+					FROM patient_debts
+					WHERE status = 'open'
+					GROUP BY patient_id
+				) AS debts
+			", 'debts.patient_id = patients.id', 'left', FALSE);
+		} else {
+			$this->db->join('(SELECT NULL AS patient_id, 0 AS open_debt) AS debts', '1 = 0', 'left', FALSE);
+		}
+
+		$this->db->join("
+			(
+				SELECT patient_id, MAX(turn_date) AS last_turn_date
+				FROM turns
+				GROUP BY patient_id
+			) AS last_turn
+		", 'last_turn.patient_id = patients.id', 'left', FALSE);
+
+		// Real debtors only: wallet < 0 OR open debt > 0 after M1 reconciliation.
+		$this->db->group_start()
+			->where('COALESCE(wallet.balance, 0) <', 0, FALSE)
+			->or_where('COALESCE(debts.open_debt, 0) >', 0, FALSE)
+		->group_end();
+
+		return $this->db
+			->order_by('COALESCE(debts.open_debt, 0)', 'desc', FALSE)
+			->order_by('COALESCE(wallet.balance, 0)', 'asc', FALSE)
+			->order_by('patients.first_name', 'asc')
+			->order_by('patients.last_name', 'asc')
+			->get()
+			->result_array();
+	}
+
 	public function get_outstanding_balances($filters = array())
 	{
 		$filters = $this->normalize_patient_report_filters($filters);
@@ -162,10 +244,15 @@ class Report_model extends CI_Model
 
 	public function leaves($from, $to)
 	{
+		// Ensure the leave table has been migrated to its staff-based shape before
+		// we join it on staff_id (Leave_model owns that one-time migration).
+		$this->load->model('Leave_model');
+		$this->Leave_model->ensure_schema();
+
 		return $this->db
-			->select('doctor_leaves.*, users.first_name, users.last_name')
+			->select('doctor_leaves.*, staff.first_name, staff.last_name')
 			->from('doctor_leaves')
-			->join('users', 'users.id = doctor_leaves.doctor_id')
+			->join('staff', 'staff.id = doctor_leaves.staff_id')
 			->where('doctor_leaves.start_date >=', $from)
 			->where('doctor_leaves.start_date <=', $to)
 			->order_by('doctor_leaves.start_date', 'desc')
@@ -264,20 +351,63 @@ class Report_model extends CI_Model
 			->get()
 			->result_array();
 
+		$safe_in_out = $this->get_safe_in_out_totals($filters);
+		$total_debt_payments = (float) $safe_in_out['debt_payments'];
+		$total_refunds = (float) $safe_in_out['refunds'];
+		$cash_in = round((float) ($summary_row['total_cash'] ?? 0), 2);
+		$net_patient_income = round($cash_in + $total_wallet_topups + $total_debt_payments - $total_refunds, 2);
+
 		return array(
 			'total_turns' => (int) ($summary_row['total_turns'] ?? 0),
 			'total_fees' => (float) ($summary_row['total_fees'] ?? 0),
-			'total_cash' => (float) ($summary_row['total_cash'] ?? 0),
+			'total_cash' => $cash_in,
 			'total_turn_topups' => (float) ($summary_row['total_turn_topups'] ?? 0),
 			'total_manual_wallet_topups' => $manual_wallet_topups,
 			'total_wallet_topups' => $total_wallet_topups,
-			'total_patient_income' => round((float) ($summary_row['total_cash'] ?? 0) + $total_wallet_topups, 2),
+			'total_debt_payments' => round($total_debt_payments, 2),
+			'total_refunds' => round($total_refunds, 2),
+			'total_patient_income' => $net_patient_income,
 			'total_wallet_used' => (float) ($summary_row['total_wallet_used'] ?? 0),
 			'total_discounts' => (float) ($summary_row['total_discounts'] ?? 0),
 			'total_debts' => round($total_debts, 2),
 			'debts_by_turn' => $debts_by_turn,
 			'income_by_section' => $income_by_section,
 		);
+	}
+
+	protected function get_safe_in_out_totals($filters)
+	{
+		$filters = $this->normalize_daily_register_filters($filters);
+		$result = array('debt_payments' => 0.00, 'refunds' => 0.00);
+
+		if (
+			!$this->db->table_exists('safe_transactions')
+			|| !empty($filters['section_ids'])
+			|| !empty($filters['staff_ids'])
+			|| $filters['gender'] !== NULL
+			|| $filters['date_from'] === ''
+			|| $filters['date_to'] === ''
+		) {
+			return $result;
+		}
+
+		$row = $this->db
+			->select("
+				COALESCE(SUM(CASE WHEN source = 'patient_debt_payment' AND type = 'in' THEN amount ELSE 0 END), 0) AS debt_payments,
+				COALESCE(SUM(CASE WHEN source = 'patient_refund' AND type = 'out' THEN amount ELSE 0 END), 0) AS refunds
+			", FALSE)
+			->from('safe_transactions')
+			->where('DATE(safe_transactions.created_at) >=', $filters['date_from'])
+			->where('DATE(safe_transactions.created_at) <=', $filters['date_to'])
+			->get()
+			->row_array();
+
+		if ($row) {
+			$result['debt_payments'] = round((float) $row['debt_payments'], 2);
+			$result['refunds'] = round((float) $row['refunds'], 2);
+		}
+
+		return $result;
 	}
 
 	protected function daily_register_base_query($filters)
@@ -295,6 +425,10 @@ class Report_model extends CI_Model
 
 		if (!empty($filters['section_ids'])) {
 			$query->where_in('turns.section_id', $filters['section_ids']);
+		}
+
+		if (!empty($filters['staff_ids'])) {
+			$query->where_in('turns.staff_id', $filters['staff_ids']);
 		}
 
 		if ($filters['gender'] !== NULL) {
@@ -332,10 +466,21 @@ class Report_model extends CI_Model
 			}
 		}
 
+		$staff_ids = array();
+		if (!empty($filters['staff_ids']) && is_array($filters['staff_ids'])) {
+			foreach ($filters['staff_ids'] as $staff_id) {
+				$staff_id = (int) $staff_id;
+				if ($staff_id > 0) {
+					$staff_ids[$staff_id] = $staff_id;
+				}
+			}
+		}
+
 		return array(
 			'date_from' => trim((string) ($filters['date_from'] ?? '')),
 			'date_to' => trim((string) ($filters['date_to'] ?? '')),
 			'section_ids' => array_values($section_ids),
+			'staff_ids' => array_values($staff_ids),
 			'gender' => $gender,
 		);
 	}
@@ -344,6 +489,7 @@ class Report_model extends CI_Model
 	{
 		if (
 			!empty($filters['section_ids'])
+			|| !empty($filters['staff_ids'])
 			|| !$this->db->table_exists('patient_wallet_transactions')
 			|| !$this->db->table_exists('patients')
 		) {

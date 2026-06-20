@@ -68,8 +68,46 @@ class Salaries extends Authenticated_Controller
 			'calculation' => $calculation,
 			'record' => $record,
 			'payments' => $payments,
-			'remaining_amount' => max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)),
+			'remaining_amount' => $this->Salary_model->remaining_for($record),
 		));
+	}
+
+	public function settle($staff_id)
+	{
+		$this->require_permission('manage_salaries');
+		$staff = $this->Staff_model->get_by_id($staff_id);
+		show_404_if_empty($staff);
+
+		$month_input = trim((string) $this->input->post('month', TRUE));
+		$month = $this->gregorian_month_from_shamsi($month_input);
+
+		if ($month === '') {
+			$this->session->set_flashdata('error', t('Please choose valid salary payment details.'));
+			return redirect('salaries/pay/' . $staff_id);
+		}
+
+		$this->Salary_model->settle_record($staff_id, $month);
+		$this->session->set_flashdata('success', t('salary_settled_success'));
+		redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month_input));
+	}
+
+	public function reopen($staff_id)
+	{
+		$this->require_permission('manage_salaries');
+		$staff = $this->Staff_model->get_by_id($staff_id);
+		show_404_if_empty($staff);
+
+		$month_input = trim((string) $this->input->post('month', TRUE));
+		$month = $this->gregorian_month_from_shamsi($month_input);
+
+		if ($month === '') {
+			$this->session->set_flashdata('error', t('Please choose valid salary payment details.'));
+			return redirect('salaries/pay/' . $staff_id);
+		}
+
+		$this->Salary_model->reopen_record($staff_id, $month);
+		$this->session->set_flashdata('success', t('salary_reopened_success'));
+		redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month_input));
 	}
 
 	public function store_payment()
@@ -93,11 +131,9 @@ class Salaries extends Authenticated_Controller
 		}
 
 		$this->Salary_model->sync_month_records($month, $staff_id);
-		$record = $this->Salary_model->get_or_create_record($staff_id, $month);
-		$remaining = max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2));
 
-		if ($amount <= 0 || $amount > $remaining) {
-			$this->session->set_flashdata('error', t('Salary payment amount exceeds the remaining unpaid amount.'));
+		if ($amount <= 0) {
+			$this->session->set_flashdata('error', t('Please enter a valid salary payment amount.'));
 			return redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month_input));
 		}
 
@@ -158,7 +194,7 @@ class Salaries extends Authenticated_Controller
 				'month' => $month_input !== '' ? $month_input : gregorian_month_to_shamsi($month),
 				'month_gregorian' => $month,
 				'payments' => $payments,
-				'remaining_amount' => max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)),
+				'remaining_amount' => $this->Salary_model->remaining_for($record),
 			)));
 	}
 }

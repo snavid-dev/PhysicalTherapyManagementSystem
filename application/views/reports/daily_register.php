@@ -6,6 +6,8 @@ $sections = isset($sections) && is_array($sections) ? $sections : array();
 $debts_by_turn = isset($summary['debts_by_turn']) && is_array($summary['debts_by_turn']) ? $summary['debts_by_turn'] : array();
 $income_by_section = isset($summary['income_by_section']) && is_array($summary['income_by_section']) ? $summary['income_by_section'] : array();
 $selected_section_ids = array_map('intval', (array) ($filters['section_ids'] ?? array()));
+$selected_staff_ids = array_map('intval', (array) ($filters['staff_ids'] ?? array()));
+$staff_options = is_array($staff_options ?? NULL) ? $staff_options : array();
 
 $payment_badges = array(
 	'prepaid' => 'bg-primary-subtle text-primary',
@@ -53,6 +55,12 @@ foreach ($selected_section_ids as $selected_section_id) {
 if (empty($print_params['section_ids'])) {
 	unset($print_params['section_ids']);
 }
+foreach ($selected_staff_ids as $selected_staff_id) {
+	$print_params['staff_ids'][] = $selected_staff_id;
+}
+if (empty($print_params['staff_ids'])) {
+	unset($print_params['staff_ids']);
+}
 if (!empty($filters['gender'])) {
 	$print_params['gender'] = $filters['gender'];
 }
@@ -94,6 +102,16 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 					<?php foreach ($sections as $section) : ?>
 						<option value="<?= (int) $section['id'] ?>"<?= in_array((int) $section['id'], $selected_section_ids, TRUE) ? ' selected' : '' ?>>
 							<?= html_escape(t($section['name'])) ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+			<div class="col-xl-3 col-md-4">
+				<label class="form-label"><?= t('Doctor') ?></label>
+				<select name="staff_ids[]" class="form-select s2-select" multiple>
+					<?php foreach ($staff_options as $staff_option) : ?>
+						<option value="<?= (int) $staff_option['id'] ?>"<?= in_array((int) $staff_option['id'], $selected_staff_ids, TRUE) ? ' selected' : '' ?>>
+							<?= html_escape($staff_option['full_name']) ?>
 						</option>
 					<?php endforeach; ?>
 				</select>
@@ -156,8 +174,27 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 	<div class="col-xl col-md-4 col-sm-6">
 		<div class="card h-100 daily-register-summary-card daily-register-summary-card--success">
 			<div class="card-body">
+				<div class="stat-label"><?= t('total_debt_payments') ?></div>
+				<div class="stat-value"><?= format_amount($summary['total_debt_payments'] ?? 0) ?></div>
+				<div class="small text-muted mt-2"><?= t('total_debt_payments_hint') ?></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xl col-md-4 col-sm-6">
+		<div class="card h-100 daily-register-summary-card <?= (float) ($summary['total_refunds'] ?? 0) > 0 ? 'daily-register-summary-card--danger' : 'daily-register-summary-card--muted' ?>">
+			<div class="card-body">
+				<div class="stat-label"><?= t('total_refunds') ?></div>
+				<div class="stat-value<?= (float) ($summary['total_refunds'] ?? 0) > 0 ? ' text-danger' : ' text-muted' ?>">-<?= format_amount($summary['total_refunds'] ?? 0) ?></div>
+				<div class="small text-muted mt-2"><?= t('total_refunds_hint') ?></div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xl col-md-4 col-sm-6">
+		<div class="card h-100 daily-register-summary-card daily-register-summary-card--success">
+			<div class="card-body">
 				<div class="stat-label"><?= t('total_patient_income') ?></div>
 				<div class="stat-value"><?= format_amount($summary['total_patient_income'] ?? 0) ?></div>
+				<div class="small text-muted mt-2"><?= t('net_income_formula_hint') ?></div>
 			</div>
 		</div>
 	</div>

@@ -38,6 +38,26 @@
 </div>
 
 <div class="card mb-4">
+	<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+		<div>
+			<h2 class="h5 mb-1"><?= t('debtors_list') ?></h2>
+			<p class="text-muted mb-0"><?= t('debtors_list_hint') ?></p>
+		</div>
+		<a href="<?= base_url('reports/debtors') ?>" class="btn btn-dark"><?= t('Open Report') ?></a>
+	</div>
+</div>
+
+<div class="card mb-4">
+	<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+		<div>
+			<h2 class="h5 mb-1"><?= t('new_patients_report') ?></h2>
+			<p class="text-muted mb-0"><?= t('new_patients_report_hint') ?></p>
+		</div>
+		<a href="<?= base_url('reports/new-patients') ?>" class="btn btn-dark"><?= t('Open Report') ?></a>
+	</div>
+</div>
+
+<div class="card mb-4">
 	<div class="card-body">
 		<?= form_open('reports', array('method' => 'get', 'class' => 'row g-3 align-items-end')) ?>
 			<div class="col-md-4">
@@ -57,7 +77,7 @@
 
 <div class="row g-3 mb-4">
 	<div class="col-md-4"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Turns') ?></div><div class="stat-value"><?= (int) $summary['turns'] ?></div></div></div></div>
-	<div class="col-md-4"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Doctor Leaves') ?></div><div class="stat-value"><?= (int) $summary['leaves'] ?></div></div></div></div>
+	<div class="col-md-4"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('Employee Leaves') ?></div><div class="stat-value"><?= (int) $summary['leaves'] ?></div></div></div></div>
 	<div class="col-md-4"><div class="card h-100"><div class="card-body"><div class="stat-label"><?= t('New Patients') ?></div><div class="stat-value"><?= (int) $summary['new_patients'] ?></div></div></div></div>
 </div>
 

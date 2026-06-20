@@ -13,10 +13,49 @@ if (!function_exists('show_404_if_empty')) {
 
 class Base_Controller extends CI_Controller
 {
+	protected static $schema_bootstrapped = FALSE;
+
 	public function __construct()
 	{
 		parent::__construct();
 		$this->boot_preferences();
+		$this->bootstrap_schema_once();
+	}
+
+	/**
+	 * Runs schema migrations that MUST execute outside any controller transaction.
+	 * DDL implicitly commits, so doing this in lazy ensure_schema() inside a
+	 * controller's trans_begin would silently end the outer transaction.
+	 */
+	protected function bootstrap_schema_once()
+	{
+		if (self::$schema_bootstrapped) {
+			return;
+		}
+		self::$schema_bootstrapped = TRUE;
+
+		if (!isset($this->db) || !$this->db) {
+			return;
+		}
+
+		$this->load->model('Debt_model');
+		$this->Debt_model->bootstrap_debt_type_migration();
+
+		// Add staff_salary_records.daily_rate column outside any controller transaction,
+		// then backfill so legacy records don't re-drift on the next calc.
+		if ($this->db->table_exists('staff_salary_records') && !$this->db->field_exists('daily_rate', 'staff_salary_records')) {
+			$this->db->query("ALTER TABLE `staff_salary_records` ADD COLUMN `daily_rate` decimal(12,4) NOT NULL DEFAULT 0.0000 AFTER `final_salary`");
+
+			// Backfill: pin the daily_rate of every existing record to base_salary / days_in_month(month).
+			// Same formula calculate_salary() uses, so subsequent reads return identical numbers.
+			$this->db->query("
+				UPDATE `staff_salary_records`
+				SET `daily_rate` = `base_salary` / DAY(LAST_DAY(CONCAT(`month`, '-01')))
+				WHERE `daily_rate` = 0
+					AND `base_salary` > 0
+					AND `month` REGEXP '^[0-9]{4}-[0-9]{2}$'
+			");
+		}
 	}
 
 	protected function boot_preferences()

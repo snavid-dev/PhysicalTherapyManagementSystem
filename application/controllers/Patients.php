@@ -83,6 +83,11 @@ class Patients extends Authenticated_Controller
 		}
 
 		$this->session->set_flashdata('success', t('Patient created successfully.'));
+
+		if ($this->input->post('submit_action', TRUE) === 'save_and_open') {
+			redirect('patients/' . (int) $new_id);
+		}
+
 		redirect('patients');
 	}
 
@@ -223,9 +228,14 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($id, t('Invalid wallet amount.'), 422, $wants_json);
 		}
 
+		$this->db->trans_begin();
+		$this->Wallet_model->ensure_wallet_exists($id);
+		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $id));
+
 		$new_balance = $this->Wallet_model->top_up_cash($id, $amount, NULL, $note);
 
 		if ($new_balance === FALSE) {
+			$this->db->trans_rollback();
 			$db_error = $this->db->error();
 			$message = t('Unable to update wallet right now.');
 			if (ENVIRONMENT !== 'production' && !empty($db_error['message'])) {
@@ -237,7 +247,7 @@ class Patients extends Authenticated_Controller
 		$latest_wallet_transaction = $this->Wallet_model->get_transactions($id, 1);
 		$wallet_reference = !empty($latest_wallet_transaction[0]['id']) ? (int) $latest_wallet_transaction[0]['id'] : NULL;
 
-		$this->Safe_model->log_transaction(
+		$safe_logged = $this->Safe_model->log_transaction(
 			'in',
 			'wallet_topup',
 			$amount,
@@ -246,6 +256,15 @@ class Patients extends Authenticated_Controller
 			$note ?: safe_patient_wallet_topup_note($id),
 			$this->session->userdata('user_id')
 		);
+
+		if ($safe_logged === FALSE || $this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return $this->respond_wallet_topup_error($id, t('Unable to update wallet right now.'), 500, $wants_json);
+		}
+
+		$this->db->trans_commit();
+
+		$this->Wallet_model->recalculate_for_patient($id);
 
 		if (!$wants_json) {
 			$this->session->set_flashdata('success', t('Wallet updated successfully.'));
@@ -259,7 +278,7 @@ class Patients extends Authenticated_Controller
 			->set_output(json_encode(array_merge($financial_payload, array(
 				'success' => TRUE,
 				'message' => t('Wallet updated successfully.'),
-				'wallet_balance' => (float) $new_balance,
+				'wallet_balance' => (float) $financial_payload['wallet_balance'],
 			))));
 	}
 
@@ -293,6 +312,8 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
 		}
 
+		$this->Wallet_model->recalculate_for_patient($id);
+
 		if (!$wants_json) {
 			$this->session->set_flashdata('success', t('Historical wallet credit recorded successfully.'));
 			redirect('patients/' . $id);
@@ -305,7 +326,7 @@ class Patients extends Authenticated_Controller
 			->set_output(json_encode(array_merge($financial_payload, array(
 				'success' => TRUE,
 				'message' => t('Historical wallet credit recorded successfully.'),
-				'wallet_balance' => (float) $new_balance,
+				'wallet_balance' => (float) $financial_payload['wallet_balance'],
 			))));
 	}
 
@@ -345,6 +366,8 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($id, t('No wallet balance available to deduct.'), 422, $wants_json);
 		}
 
+		$this->Wallet_model->recalculate_for_patient($id);
+
 		if (!$wants_json) {
 			$this->session->set_flashdata('success', t('Wallet deducted successfully.'));
 			redirect('patients/' . $id);
@@ -363,7 +386,7 @@ class Patients extends Authenticated_Controller
 
 	public function debt_payment($id)
 	{
-		$this->require_permission('manage_patients');
+		$this->require_permission('manage_turns');
 
 		if (strtolower($this->input->method()) !== 'post') {
 			show_error('Method Not Allowed', 405);
@@ -375,35 +398,37 @@ class Patients extends Authenticated_Controller
 
 		$amount = round((float) $this->input->post('amount'), 2);
 		$note = $this->null_if_empty($this->input->post('note', TRUE));
-		$payment_method = $this->input->post('payment_method', TRUE) ?: 'cash';
-		$allowed_methods = array('cash', 'card', 'transfer');
+		$payment_date_input = trim((string) $this->input->post('payment_date', TRUE));
+		$payment_date = $payment_date_input === '' ? date('Y-m-d') : $this->gregorian_date_from_shamsi($payment_date_input);
 
 		if ($amount <= 0) {
 			return $this->respond_wallet_topup_error($id, t('Invalid debt payment amount.'), 422, $wants_json);
 		}
 
-		if (!in_array($payment_method, $allowed_methods, TRUE)) {
-			return $this->respond_wallet_topup_error($id, t('Invalid payment method selected.'), 422, $wants_json);
-		}
-
-		$total_open_debt = $this->Debt_model->get_total_open_debt($id);
-
-		if ($total_open_debt <= 0) {
-			return $this->respond_wallet_topup_error($id, t('No open debt available to clear.'), 422, $wants_json);
-		}
-
-		$this->db->trans_begin();
-		$remaining_amount = $this->Debt_model->clear_debts($id, $amount, NULL);
-		$applied_amount = round($amount - $remaining_amount, 2);
-
-		if ($applied_amount <= 0) {
-			$this->db->trans_rollback();
-			return $this->respond_wallet_topup_error($id, t('No open debt available to clear.'), 422, $wants_json);
+		if ($payment_date_input !== '' && $payment_date === '') {
+			return $this->respond_wallet_topup_error($id, t('Please choose a valid date.'), 422, $wants_json);
 		}
 
 		$payment_note = trim(t('Debt payment from patient profile') . ($note ? ' - ' . $note : ''));
 
-		if (!$this->record_debt_payment($id, $applied_amount, $payment_method, $payment_note)) {
+		$this->db->trans_begin();
+
+		// Lock the patient's wallet row first so concurrent debt-payment submits for
+		// the same patient serialize. THEN re-read total_open_debt under the lock so
+		// we don't apply against a stale snapshot.
+		$this->Wallet_model->ensure_wallet_exists($id);
+		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $id));
+
+		$total_open_debt = (float) $this->Debt_model->get_total_open_debt($id);
+
+		if ($total_open_debt <= 0) {
+			$this->db->trans_rollback();
+			return $this->respond_wallet_topup_error($id, t('No open debt available to clear.'), 422, $wants_json);
+		}
+
+		$payment_id = $this->record_standalone_debt_payment($id, $amount, $payment_date, $payment_note);
+
+		if (!$payment_id) {
 			$this->db->trans_rollback();
 			$db_error = $this->db->error();
 			$message = t('Unable to record debt payment right now.');
@@ -425,8 +450,125 @@ class Patients extends Authenticated_Controller
 
 		$this->db->trans_commit();
 
+		$this->Wallet_model->recalculate_for_patient($id);
+
 		if (!$wants_json) {
 			$this->session->set_flashdata('success', t('Debt payment recorded successfully.'));
+			redirect('patients/' . $id);
+		}
+
+		$financial_payload = $this->financial_profile_payload($id);
+		$applied_amount = round(min($amount, $total_open_debt), 2);
+		$overflow_amount = round(max(0, $amount - $total_open_debt), 2);
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array_merge($financial_payload, array(
+				'success' => TRUE,
+				'message' => t('Debt payment recorded successfully.'),
+				'applied_amount' => (float) $applied_amount,
+				'overflow_amount' => (float) $overflow_amount,
+			))));
+	}
+
+	public function refund($id)
+	{
+		$this->require_permission('manage_turns');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient = $this->Patient_model->get_by_id($id);
+		show_404_if_empty($patient);
+		$wants_json = $this->wants_json_response();
+
+		$amount = round((float) $this->input->post('amount'), 2);
+		$note = $this->null_if_empty($this->input->post('note', TRUE));
+		$refund_date_input = trim((string) $this->input->post('refund_date', TRUE));
+		$refund_date = $refund_date_input === '' ? date('Y-m-d') : $this->gregorian_date_from_shamsi($refund_date_input);
+
+		if ($amount <= 0) {
+			return $this->respond_wallet_topup_error($id, t('Invalid refund amount.'), 422, $wants_json);
+		}
+
+		if ($refund_date_input !== '' && $refund_date === '') {
+			return $this->respond_wallet_topup_error($id, t('Please choose a valid date.'), 422, $wants_json);
+		}
+
+		// Only the cash_topup bucket is refundable — historical_credit represents
+		// non-cash credit (carryover from older bookkeeping) and cannot be returned
+		// as cash. (Fix A2.)
+		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($id);
+		$refundable_balance = round((float) ($wallet_breakdown['cash_topup'] ?? 0), 2);
+
+		if ($refundable_balance <= 0) {
+			return $this->respond_wallet_topup_error($id, t('No wallet balance available to refund.'), 422, $wants_json);
+		}
+
+		if ($amount > $refundable_balance + 0.001) {
+			return $this->respond_wallet_topup_error($id, t('Refund amount exceeds wallet balance.'), 422, $wants_json);
+		}
+
+		$this->db->trans_begin();
+
+		// Serialize concurrent refunds for the same patient — without the lock,
+		// two duplicate-click submits both read balance=X and both decrement
+		// without seeing each other.
+		$this->Wallet_model->ensure_wallet_exists($id);
+		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $id));
+
+		$refund_datetime = $refund_date . ' 12:00:00';
+		$refund_transaction_id = $this->Wallet_model->record_refund($id, $amount, $note, $refund_datetime);
+
+		if (!$refund_transaction_id) {
+			$this->db->trans_rollback();
+			$db_error = $this->db->error();
+			$message = t('Unable to record refund right now.');
+			if (ENVIRONMENT !== 'production' && !empty($db_error['message'])) {
+				$message .= ' ' . $db_error['message'];
+			}
+			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
+		}
+
+		$safe_note = $note ?: t('Refund issued from patient profile');
+		$safe_logged = $this->Safe_model->log_transaction(
+			'out',
+			'patient_refund',
+			$amount,
+			$refund_transaction_id,
+			'patient_wallet_transactions',
+			$safe_note,
+			$this->session->userdata('user_id'),
+			$refund_datetime
+		);
+
+		if ($safe_logged === FALSE) {
+			$this->db->trans_rollback();
+			$db_error = $this->db->error();
+			$message = t('Unable to record refund right now.');
+			if (ENVIRONMENT !== 'production' && !empty($db_error['message'])) {
+				$message .= ' ' . $db_error['message'];
+			}
+			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
+		}
+
+		if ($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			$db_error = $this->db->error();
+			$message = t('Unable to record refund right now.');
+			if (ENVIRONMENT !== 'production' && !empty($db_error['message'])) {
+				$message .= ' ' . $db_error['message'];
+			}
+			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
+		}
+
+		$this->db->trans_commit();
+
+		$this->Wallet_model->recalculate_for_patient($id);
+
+		if (!$wants_json) {
+			$this->session->set_flashdata('success', t('Refund recorded successfully.'));
 			redirect('patients/' . $id);
 		}
 
@@ -436,9 +578,8 @@ class Patients extends Authenticated_Controller
 			->set_content_type('application/json')
 			->set_output(json_encode(array_merge($financial_payload, array(
 				'success' => TRUE,
-				'message' => t('Debt payment recorded successfully.'),
-				'applied_amount' => (float) $applied_amount,
-				'ignored_amount' => (float) $remaining_amount,
+				'message' => t('Refund recorded successfully.'),
+				'refunded_amount' => (float) $amount,
 			))));
 	}
 
@@ -686,6 +827,7 @@ class Patients extends Authenticated_Controller
 				'amount' => (float) $debt['amount'],
 				'debt_date' => to_shamsi((string) $debt['debt_date']),
 				'section_name' => !empty($debt['section_name']) ? t($debt['section_name']) : '',
+				'debt_type' => (string) ($debt['debt_type'] ?? 'auto_settleable'),
 			);
 		}, $debts);
 	}
@@ -769,7 +911,9 @@ class Patients extends Authenticated_Controller
 		$turn_debt_total = 0.00;
 
 		foreach ($wallet_transactions as $transaction) {
-			if (($transaction['type'] ?? '') === 'topup') {
+			$type = (string) ($transaction['type'] ?? '');
+
+			if ($type === 'topup') {
 				$wallet_topups += (float) $transaction['amount'];
 				if (($transaction['fund_type'] ?? 'cash_topup') === 'historical_credit') {
 					$historical_wallet_credits += (float) $transaction['amount'];
@@ -779,7 +923,7 @@ class Patients extends Authenticated_Controller
 				continue;
 			}
 
-			if (($transaction['type'] ?? '') === 'deduction') {
+			if (in_array($type, array('deduction', 'auto_debt_settlement', 'refund'), TRUE)) {
 				$wallet_deductions += (float) $transaction['amount'];
 			}
 		}
@@ -808,16 +952,27 @@ class Patients extends Authenticated_Controller
 		$timeline = array();
 
 		foreach ($wallet_transactions as $transaction) {
+			$type = (string) ($transaction['type'] ?? '');
 			$fund_type = (string) ($transaction['fund_type'] ?? 'cash_topup');
-			$is_topup = ($transaction['type'] ?? '') === 'topup';
-			$label_key = $is_topup
-				? ($fund_type === 'historical_credit' ? 'historical_wallet_credit' : 'cash_wallet_topup')
-				: ($fund_type === 'historical_credit' ? 'historical_wallet_deduction' : 'cash_wallet_deduction');
+			$is_topup = $type === 'topup';
+
+			if ($type === 'auto_debt_settlement') {
+				$label_key = 'auto_debt_settlement';
+				$badge = 'primary';
+			} elseif ($type === 'refund') {
+				$label_key = 'refund';
+				$badge = 'danger';
+			} else {
+				$label_key = $is_topup
+					? ($fund_type === 'historical_credit' ? 'historical_wallet_credit' : 'cash_wallet_topup')
+					: ($fund_type === 'historical_credit' ? 'historical_wallet_deduction' : 'cash_wallet_deduction');
+				$badge = $is_topup ? 'success' : 'warning';
+			}
 
 			$timeline[] = array(
 				'occurred_at' => to_shamsi((string) $transaction['created_at'], 'Y/m/d H:i'),
 				'source' => 'wallet',
-				'badge' => ($transaction['type'] ?? '') === 'topup' ? 'success' : 'warning',
+				'badge' => $badge,
 				'label' => t($label_key),
 				'amount' => (float) ($transaction['amount'] ?? 0),
 				'detail' => !empty($transaction['note']) ? $transaction['note'] : (!empty($transaction['turn_id']) ? '#' . (int) $transaction['turn_id'] : t('wallet_balance')),
@@ -869,14 +1024,15 @@ class Patients extends Authenticated_Controller
 		return $timeline;
 	}
 
-	protected function record_debt_payment($patient_id, $amount, $payment_method, $note)
+	protected function record_standalone_debt_payment($patient_id, $amount, $payment_date, $note)
 	{
-		$payment_date = date('Y-m-d');
+		$amount = round((float) $amount, 2);
+
 		$payment_data = array(
 			'patient_id' => (int) $patient_id,
-			'payment_date' => $payment_date,
-			'amount' => round((float) $amount, 2),
-			'payment_method' => (string) $payment_method,
+			'payment_date' => (string) $payment_date,
+			'amount' => $amount,
+			'payment_method' => 'cash',
 			'reference_number' => NULL,
 			'notes' => $note,
 		);
@@ -888,21 +1044,77 @@ class Patients extends Authenticated_Controller
 			return FALSE;
 		}
 
+		// Explicit user-initiated payment must clear ALL open debts (manual_only AND auto_settleable),
+		// oldest first. Any leftover after debts are paid becomes a wallet top-up.
+		$leftover = $this->Debt_model->clear_debts((int) $patient_id, $amount, NULL);
+		$leftover = round((float) $leftover, 2);
+		$applied_to_debt = round($amount - $leftover, 2);
+
+		$payment_datetime = $this->payment_datetime_from_date($payment_date);
+
+		if ($leftover > 0) {
+			$top_up_result = $this->Wallet_model->top_up_cash(
+				$patient_id,
+				$leftover,
+				NULL,
+				$note ?: ('Debt payment overflow #' . $payment_id),
+				$payment_datetime
+			);
+
+			if ($top_up_result === FALSE) {
+				return FALSE;
+			}
+		}
+
 		$safe_note = trim((string) $note);
 		if ($safe_note === '') {
 			$safe_note = safe_patient_payment_note($payment_id);
 		}
+		$user_id = $this->session->userdata('user_id');
 
-		return $this->Safe_model->log_transaction(
-			'in',
-			'patient_payment',
-			$payment_data['amount'],
-			$payment_id,
-			'payments',
-			$safe_note,
-			$this->session->userdata('user_id'),
-			$this->payment_datetime_from_date($payment_date)
-		) !== FALSE;
+		// Split the safe ledger entries so the daily-register report doesn't double-count
+		// the overflow portion (which is ALSO logged as a manual wallet topup by top_up_cash).
+		// Applied-to-debt portion → patient_debt_payment.
+		// Overflow portion → wallet_topup (matches the patient_wallet_transactions topup row).
+		if ($applied_to_debt > 0) {
+			$safe_logged = $this->Safe_model->log_transaction(
+				'in',
+				'patient_debt_payment',
+				$applied_to_debt,
+				$payment_id,
+				'payments',
+				$safe_note,
+				$user_id,
+				$payment_datetime
+			);
+
+			if ($safe_logged === FALSE) {
+				return FALSE;
+			}
+		}
+
+		if ($leftover > 0) {
+			$latest_wallet_tx = $this->Wallet_model->get_transactions((int) $patient_id, 1);
+			$wallet_ref = !empty($latest_wallet_tx[0]['id']) ? (int) $latest_wallet_tx[0]['id'] : $payment_id;
+			$wallet_ref_table = !empty($latest_wallet_tx[0]['id']) ? 'patient_wallet_transactions' : 'payments';
+
+			$safe_logged = $this->Safe_model->log_transaction(
+				'in',
+				'wallet_topup',
+				$leftover,
+				$wallet_ref,
+				$wallet_ref_table,
+				$safe_note,
+				$user_id,
+				$payment_datetime
+			);
+
+			if ($safe_logged === FALSE) {
+				return FALSE;
+			}
+		}
+
+		return $payment_id;
 	}
 
 	protected function payment_datetime_from_date($date)

@@ -1,4 +1,8 @@
 <?php
+$can_edit_processed_payments = !empty($can_edit_processed_payments);
+$payment_fields_locked = $is_edit && !$can_edit_processed_payments;
+$payment_lock_attr = $payment_fields_locked ? ' readonly' : '';
+$payment_lock_radio_attr = $payment_fields_locked ? ' disabled' : '';
 $selected_patient_id = (int) set_value('patient_id', $turn['patient_id'] ?? 0);
 $selected_section_id = (int) set_value('section_id', $turn['section_id'] ?? 0);
 $selected_staff_id = (int) set_value('staff_id', $turn['staff_id'] ?? 0);
@@ -175,7 +179,7 @@ $staff_payload = array_map(static function ($staff_member) {
 							</div>
 							<div class="col-lg-4">
 								<label class="form-label"><?= t('fee') ?></label>
-								<input type="number" name="fee" id="feeInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_fee) ?>">
+								<input type="number" name="fee" id="feeInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_fee) ?>"<?= $payment_lock_attr ?>>
 								<div id="discountInfoWrap" class="alert alert-info py-2 px-3 mt-2<?= (float) $selected_discount_percent > 0 ? '' : ' d-none' ?>">
 									<div id="discountInfoText" class="small fw-semibold"></div>
 									<div id="feeOverrideWarning" class="small text-warning-emphasis mt-2 d-none"><?= t('fee_overridden') ?></div>
@@ -185,12 +189,12 @@ $staff_payload = array_map(static function ($staff_member) {
 							</div>
 							<div class="col-lg-4">
 								<label class="form-label"><?= t('discount_percent') ?></label>
-								<input type="number" name="discount_percent" id="discountPercentInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_discount_percent) ?>"<?= $is_edit ? '' : ' readonly' ?>>
+								<input type="number" name="discount_percent" id="discountPercentInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_discount_percent) ?>"<?= $is_edit ? ($payment_lock_attr ?: '') : ' readonly' ?>>
 								<small class="text-danger"><?= form_error('discount_percent') ?></small>
 							</div>
 							<div class="col-lg-4">
 								<label class="form-label"><?= t('discount_amount') ?></label>
-								<input type="number" name="discount_amount" id="discountAmountInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_discount_amount) ?>"<?= $is_edit ? '' : ' readonly' ?>>
+								<input type="number" name="discount_amount" id="discountAmountInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_discount_amount) ?>"<?= $is_edit ? ($payment_lock_attr ?: '') : ' readonly' ?>>
 								<small class="text-danger"><?= form_error('discount_amount') ?></small>
 							</div>
 							<div class="col-md-4">
@@ -221,7 +225,26 @@ $staff_payload = array_map(static function ($staff_member) {
 						<div class="row g-3">
 							<?php if ($is_edit) : ?>
 								<div class="col-12">
-									<div class="alert alert-info mb-0"><?= t('edit_financial_warning') ?></div>
+									<?php if ($payment_fields_locked) : ?>
+										<div class="alert alert-secondary mb-0"><?= t('payment_fields_locked_hint') ?></div>
+										<?php
+										// Disabled inputs are not POSTed by the browser, so emit
+										// hidden fallbacks so validate_update_form's required+in_list
+										// rules still see the stored values. The controller ignores
+										// these for users without edit_processed_payments and falls
+										// back to the stored turn anyway — these exist purely to
+										// keep form validation from rejecting the save.
+										?>
+										<input type="hidden" name="payment_type" value="<?= html_escape($selected_payment_type) ?>">
+										<input type="hidden" name="fee" value="<?= html_escape($selected_fee) ?>">
+										<input type="hidden" name="topup_amount" value="<?= html_escape($selected_topup) ?>">
+										<input type="hidden" name="discount_percent" value="<?= html_escape($selected_discount_percent) ?>">
+										<input type="hidden" name="discount_amount" value="<?= html_escape($selected_discount_amount) ?>">
+									<?php elseif ($can_edit_processed_payments) : ?>
+										<div class="alert alert-warning mb-0"><?= t('edit_processed_payments_hint') ?></div>
+									<?php else : ?>
+										<div class="alert alert-info mb-0"><?= t('edit_financial_warning') ?></div>
+									<?php endif; ?>
 								</div>
 							<?php endif; ?>
 							<div class="col-12" id="topupRow">
@@ -231,7 +254,7 @@ $staff_payload = array_map(static function ($staff_member) {
 										<p class="text-muted mb-0"><?= t('wallet_balance') ?>: <strong id="topupWalletBalanceText"><?= format_amount($wallet_balance) ?></strong></p>
 									</div>
 									<div class="turn-topup-input">
-										<input type="number" name="topup_amount" id="topupInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_topup) ?>">
+										<input type="number" name="topup_amount" id="topupInput" class="form-control" min="0" step="0.01" value="<?= html_escape($selected_topup) ?>"<?= $payment_lock_attr ?>>
 										<small class="text-muted d-block mt-2"><?= t('topup_applies_before_payment') ?></small>
 										<small class="text-danger"><?= form_error('topup_amount') ?></small>
 									</div>
@@ -242,28 +265,28 @@ $staff_payload = array_map(static function ($staff_member) {
 								<div class="row g-3">
 									<div class="col-md-6 col-xl-3">
 										<label class="turn-payment-option">
-											<input type="radio" class="form-check-input" name="payment_type" value="prepaid" <?= $selected_payment_type === 'prepaid' ? 'checked' : '' ?>>
+											<input type="radio" class="form-check-input" name="payment_type" value="prepaid" <?= $selected_payment_type === 'prepaid' ? 'checked' : '' ?><?= $payment_lock_radio_attr ?>>
 											<span class="turn-payment-option__title"><?= t('prepaid') ?></span>
 											<span class="turn-payment-option__text"><?= t('historical_wallet_spend_rule') ?></span>
 										</label>
 									</div>
 									<div class="col-md-6 col-xl-3">
 										<label class="turn-payment-option">
-											<input type="radio" class="form-check-input" name="payment_type" value="cash" <?= $selected_payment_type === 'cash' ? 'checked' : '' ?>>
+											<input type="radio" class="form-check-input" name="payment_type" value="cash" <?= $selected_payment_type === 'cash' ? 'checked' : '' ?><?= $payment_lock_radio_attr ?>>
 											<span class="turn-payment-option__title"><?= t('cash') ?></span>
 											<span class="turn-payment-option__text"><?= t('cash_collected') ?></span>
 										</label>
 									</div>
 									<div class="col-md-6 col-xl-3">
 										<label class="turn-payment-option">
-											<input type="radio" class="form-check-input" name="payment_type" value="deferred" <?= $selected_payment_type === 'deferred' ? 'checked' : '' ?>>
+											<input type="radio" class="form-check-input" name="payment_type" value="deferred" <?= $selected_payment_type === 'deferred' ? 'checked' : '' ?><?= $payment_lock_radio_attr ?>>
 											<span class="turn-payment-option__title"><?= t('deferred') ?></span>
 											<span class="turn-payment-option__text"><?= t('amount_becoming_debt') ?></span>
 										</label>
 									</div>
 									<div class="col-md-6 col-xl-3">
 										<label class="turn-payment-option">
-											<input type="radio" class="form-check-input" name="payment_type" value="free" <?= $selected_payment_type === 'free' ? 'checked' : '' ?>>
+											<input type="radio" class="form-check-input" name="payment_type" value="free" <?= $selected_payment_type === 'free' ? 'checked' : '' ?><?= $payment_lock_radio_attr ?>>
 											<span class="turn-payment-option__title"><?= t('free') ?></span>
 											<span class="turn-payment-option__text"><?= t('fee') ?></span>
 										</label>

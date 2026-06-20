@@ -8,6 +8,7 @@ class Reports extends Authenticated_Controller
 		parent::__construct();
 		$this->load->model('Report_model');
 		$this->load->model('Section_model');
+		$this->load->model('Staff_model');
 	}
 
 	public function index()
@@ -64,6 +65,58 @@ class Reports extends Authenticated_Controller
 		$data['title'] = t('daily_register');
 
 		$this->load->view('reports/daily_register_print', $data);
+	}
+
+	public function debtors()
+	{
+		$this->require_permission('view_reports');
+
+		$this->render('reports/debtors', array(
+			'title' => t('debtors_list'),
+			'current_section' => 'reports',
+			'debtors' => $this->Report_model->get_debtors(),
+		));
+	}
+
+	public function debtors_print()
+	{
+		$this->require_permission('view_reports');
+
+		$this->load->view('reports/debtors_print', array(
+			'title' => t('debtors_list'),
+			'debtors' => $this->Report_model->get_debtors(),
+		));
+	}
+
+	public function new_patients()
+	{
+		$this->require_permission('view_reports');
+
+		$today_shamsi = shamsi_today();
+		$today_gregorian = date('Y-m-d');
+		$default_from = date('Y-m-d', strtotime('-30 days'));
+		$default_from_shamsi = to_shamsi($default_from);
+
+		$from_input = trim((string) $this->input->get('from', TRUE));
+		$to_input = trim((string) $this->input->get('to', TRUE));
+		$from = $from_input !== '' ? $this->gregorian_date_from_shamsi($from_input) : $default_from;
+		$to = $to_input !== '' ? $this->gregorian_date_from_shamsi($to_input) : $today_gregorian;
+
+		if ($from === '' || $to === '' || $from > $to) {
+			$from = $default_from;
+			$to = $today_gregorian;
+		}
+
+		$from_input = $from_input !== '' && to_gregorian($from_input) !== '' ? $from_input : $default_from_shamsi;
+		$to_input = $to_input !== '' && to_gregorian($to_input) !== '' ? $to_input : $today_shamsi;
+
+		$this->render('reports/new_patients', array(
+			'title' => t('new_patients_report'),
+			'current_section' => 'reports',
+			'from' => $from_input,
+			'to' => $to_input,
+			'patients' => $this->Report_model->get_new_patients_in_range($from, $to),
+		));
 	}
 
 	public function outstanding_balances()
@@ -144,6 +197,7 @@ class Reports extends Authenticated_Controller
 		$date_to = trim((string) $this->input->get('date_to', TRUE));
 		$section_ids = $this->input->get('section_ids');
 		$legacy_section_id = (int) $this->input->get('section_id', TRUE);
+		$staff_ids_input = $this->input->get('staff_ids');
 		$gender = strtolower(trim((string) $this->input->get('gender', TRUE)));
 
 		$date_from = $date_from !== '' ? $date_from : $today_shamsi;
@@ -188,10 +242,21 @@ class Reports extends Authenticated_Controller
 			$normalized_section_ids[$legacy_section_id] = $legacy_section_id;
 		}
 
+		$normalized_staff_ids = array();
+		if (is_array($staff_ids_input)) {
+			foreach ($staff_ids_input as $staff_id) {
+				$staff_id = (int) $staff_id;
+				if ($staff_id > 0) {
+					$normalized_staff_ids[$staff_id] = $staff_id;
+				}
+			}
+		}
+
 		$filters = array(
 			'date_from' => $date_from_g,
 			'date_to' => $date_to_g,
 			'section_ids' => array_values($normalized_section_ids),
+			'staff_ids' => array_values($normalized_staff_ids),
 			'gender' => $gender,
 		);
 
@@ -199,10 +264,12 @@ class Reports extends Authenticated_Controller
 			'turns' => $this->Report_model->get_daily_register($filters),
 			'summary' => $this->Report_model->get_daily_register_summary($filters),
 			'sections' => $this->Section_model->get_all(),
+			'staff_options' => $this->Staff_model->get_active_therapists(),
 			'filters' => array(
 				'date_from' => $date_from,
 				'date_to' => $date_to,
 				'section_ids' => $filters['section_ids'],
+				'staff_ids' => $filters['staff_ids'],
 				'gender' => $gender,
 			),
 			'date_from' => $date_from,
