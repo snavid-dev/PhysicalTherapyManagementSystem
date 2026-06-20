@@ -250,8 +250,17 @@ $income_total += (float) ($summary['total_manual_wallet_topups'] ?? 0);
 			<div><?= html_escape(t('Patients')) ?>: <?= format_amount($summary['total_manual_wallet_topups'] ?? 0) ?></div>
 		</div>
 		<div class="summary-box">
+			<strong><?= html_escape(t('total_debt_payments')) ?></strong>
+			<?= format_amount($summary['total_debt_payments'] ?? 0) ?>
+		</div>
+		<div class="summary-box">
+			<strong><?= html_escape(t('total_refunds')) ?></strong>
+			-<?= format_amount($summary['total_refunds'] ?? 0) ?>
+		</div>
+		<div class="summary-box">
 			<strong><?= html_escape(t('total_patient_income')) ?></strong>
 			<?= format_amount($summary['total_patient_income'] ?? 0) ?>
+			<div style="font-size:9px"><?= html_escape(t('net_income_formula_hint')) ?></div>
 		</div>
 		<div class="summary-box">
 			<strong><?= html_escape(t('total_debts_created')) ?></strong>

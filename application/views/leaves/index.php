@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
 	<div>
-		<h1 class="h3 mb-1"><?= t('Doctor Leaves') ?></h1>
-		<p class="text-muted mb-0"><?= t('Track therapist or doctor leave periods.') ?></p>
+		<h1 class="h3 mb-1"><?= t('Employee Leaves') ?></h1>
+		<p class="text-muted mb-0"><?= t('Track leave periods for any employee.') ?></p>
 	</div>
 	<a href="<?= base_url('leaves/create') ?>" class="btn btn-dark"><?= t('Add Leave') ?></a>
 </div>
@@ -10,7 +10,7 @@
 	<div class="card-body">
 		<div class="table-responsive">
 			<table class="table align-middle dt-table" data-order-col="1" data-order-dir="desc" data-no-sort-cols="4" data-col-widths='["30%","16%","16%","12%","26%"]'>
-				<thead><tr><th><?= t('Therapist') ?></th><th class="col-date"><?= t('From') ?></th><th class="col-date"><?= t('To') ?></th><th><?= t('Status') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
+				<thead><tr><th><?= t('Employee') ?></th><th class="col-date"><?= t('From') ?></th><th class="col-date"><?= t('To') ?></th><th><?= t('Status') ?></th><th class="no-export text-end"><?= t('Actions') ?></th></tr></thead>
 				<tbody>
 				<?php if ($leaves) : foreach ($leaves as $leave) : ?>
 					<tr>

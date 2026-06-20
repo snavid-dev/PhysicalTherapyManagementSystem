@@ -1,5 +1,6 @@
 <?php
 $staff_name = trim($staff['first_name'] . ' ' . $staff['last_name']);
+$is_settled = !empty($record['settled']);
 $is_paid = $record['status'] === 'paid';
 ?>
 
@@ -32,13 +33,21 @@ $is_paid = $record['status'] === 'paid';
 				<h2 class="h5 mb-3"><?= t('Salary Calculation') ?></h2>
 				<div id="salaryCalculationCard">
 					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('base_salary') ?></span><strong><?= format_number($calculation['base_salary'], 2) ?></strong></div>
-					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('monthly_leave_quota') ?></span><strong><?= format_number($calculation['leave_quota'], 0) ?></strong></div>
-					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('approved_leaves_in_range') ?></span><strong><?= format_number($calculation['approved_leaves'], 0) ?></strong></div>
-					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('paid_leaves') ?></span><strong><?= format_number($calculation['paid_leaves'], 0) ?></strong></div>
-					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('excess_leaves') ?></span><strong><?= format_number($calculation['excess_leaves'], 0) ?></strong></div>
+					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('leave_days') ?></span><strong><?= format_number($calculation['approved_leaves'], 0) ?></strong></div>
+					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('days_in_month') ?></span><strong><?= format_number($calculation['days_in_month'] ?? 0, 0) ?></strong></div>
+					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('daily_rate') ?></span><strong><?= format_number($calculation['daily_rate'] ?? 0, 2) ?></strong></div>
 					<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted"><?= t('deduction') ?></span><strong><?= format_number($calculation['deduction'], 2) ?></strong></div>
 					<div class="d-flex justify-content-between align-items-center border rounded p-3 gap-3"><span class="text-muted"><?= t('final_salary') ?></span><strong><?= format_number($calculation['final_salary'], 2) ?></strong></div>
 				</div>
+				<p class="text-muted small mt-2 mb-0"><?= t('suggested_salary_note') ?></p>
+				<?php if (!empty($calculation['leave_dates'])) : ?>
+					<div class="alert alert-info mt-3 mb-0">
+						<strong><?= t('leave_impact') ?>:</strong>
+						<div class="mt-1 small">
+							<?= html_escape(implode(', ', array_map('to_shamsi', $calculation['leave_dates']))) ?>
+						</div>
+					</div>
+				<?php endif; ?>
 				<?php if ($calculation['salary_type'] === 'hourly') : ?>
 					<div class="alert alert-warning mt-3 mb-0" id="hourlyManualNote"><?= t('hourly_manual_note') ?></div>
 				<?php else : ?>
@@ -91,36 +100,50 @@ $is_paid = $record['status'] === 'paid';
 
 		<div class="card" id="paymentFormCard">
 			<div class="card-body">
-				<?php if ($is_paid) : ?>
-					<div class="alert alert-success mb-0" id="salaryPaidMessage"><?= t('salary_fully_paid') ?></div>
-				<?php else : ?>
-					<div class="alert alert-success d-none" id="salaryPaidMessage"><?= t('salary_fully_paid') ?></div>
+				<?php if ($is_settled) : ?>
+					<div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2">
+						<span><?= t('salary_settled_badge') ?></span>
+						<?= form_open('salaries/reopen/' . (int) $staff['id'], 'class="m-0"') ?>
+							<input type="hidden" name="month" value="<?= html_escape($month_display) ?>">
+							<button type="submit" class="btn btn-sm btn-outline-dark"><?= t('reopen_salary') ?></button>
+						<?= form_close() ?>
+					</div>
+				<?php elseif ($is_paid) : ?>
+					<div class="alert alert-success" id="salaryPaidMessage"><?= t('salary_fully_paid') ?></div>
 				<?php endif; ?>
 
-				<div id="salaryPaymentFormWrap" class="<?= $is_paid ? 'd-none' : '' ?>">
-					<h2 class="h5 mb-3"><?= t('record_payment') ?></h2>
-					<?= form_open('salaries/store-payment') ?>
-						<input type="hidden" name="staff_id" value="<?= (int) $staff['id'] ?>">
-						<input type="hidden" name="month" id="paymentMonthInput" value="<?= html_escape($month_display) ?>">
-						<div class="row g-3">
-							<div class="col-md-4">
-								<label class="form-label"><?= t('Amount') ?></label>
-								<input type="number" step="0.01" min="0.01" name="amount" id="paymentAmountInput" class="form-control" value="<?= html_escape(number_format($remaining_amount, 2, '.', '')) ?>">
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><?= t('Payment Date') ?></label>
-								<input type="text" name="payment_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(shamsi_today()) ?>">
-							</div>
-							<div class="col-md-4">
-								<label class="form-label"><?= t('Notes') ?></label>
-								<input type="text" name="note" class="form-control" value="">
-							</div>
+				<h2 class="h5 mb-2"><?= t('record_payment') ?></h2>
+				<p class="text-muted small"><?= t('salary_flexible_hint') ?></p>
+				<?= form_open('salaries/store-payment') ?>
+					<input type="hidden" name="staff_id" value="<?= (int) $staff['id'] ?>">
+					<input type="hidden" name="month" id="paymentMonthInput" value="<?= html_escape($month_display) ?>">
+					<div class="row g-3">
+						<div class="col-md-4">
+							<label class="form-label"><?= t('Amount') ?></label>
+							<input type="number" step="0.01" min="0.01" name="amount" id="paymentAmountInput" class="form-control" value="<?= $remaining_amount > 0 ? html_escape(number_format($remaining_amount, 2, '.', '')) : '' ?>">
 						</div>
-						<div class="mt-4">
-							<button type="submit" class="btn btn-dark"><?= t('record_payment') ?></button>
+						<div class="col-md-4">
+							<label class="form-label"><?= t('Payment Date') ?></label>
+							<input type="text" name="payment_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(shamsi_today()) ?>">
 						</div>
+						<div class="col-md-4">
+							<label class="form-label"><?= t('Notes') ?></label>
+							<input type="text" name="note" class="form-control" value="">
+						</div>
+					</div>
+					<div class="mt-4">
+						<button type="submit" class="btn btn-dark"><?= t('record_payment') ?></button>
+					</div>
+				<?= form_close() ?>
+
+				<?php if (!$is_settled) : ?>
+					<hr>
+					<?= form_open('salaries/settle/' . (int) $staff['id'], 'class="d-flex align-items-center flex-wrap gap-2 mb-0"') ?>
+						<input type="hidden" name="month" value="<?= html_escape($month_display) ?>">
+						<button type="submit" class="btn btn-outline-secondary btn-sm"><?= t('mark_salary_settled') ?></button>
+						<span class="text-muted small"><?= t('mark_salary_settled_hint') ?></span>
 					<?= form_close() ?>
-				</div>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
@@ -128,139 +151,20 @@ $is_paid = $record['status'] === 'paid';
 
 <script>
 (function () {
+	// Changing the month reloads the page so the server renders the correct
+	// calculation, payment history, and settle/paid state for that month.
 	const monthInput = document.getElementById('salaryPayMonth');
-	const salaryCard = document.getElementById('salaryCalculationCard');
-	const hourlyNote = document.getElementById('hourlyManualNote');
-	const errorBox = document.getElementById('salaryAjaxError');
-	const paymentHistoryBody = document.getElementById('paymentHistoryBody');
-	const totalPaidValue = document.getElementById('totalPaidValue');
-	const remainingValue = document.getElementById('remainingValue');
-	const paymentAmountInput = document.getElementById('paymentAmountInput');
-	const paymentMonthInput = document.getElementById('paymentMonthInput');
-	const paidMessage = document.getElementById('salaryPaidMessage');
-	const formWrap = document.getElementById('salaryPaymentFormWrap');
-	const locale = <?= json_encode($current_locale === 'farsi' ? 'fa-IR' : 'en-US') ?>;
-	const labels = {
-		base_salary: <?= json_encode(t('base_salary')) ?>,
-		monthly_leave_quota: <?= json_encode(t('monthly_leave_quota')) ?>,
-		approved_leaves: <?= json_encode(t('approved_leaves_in_range')) ?>,
-		paid_leaves: <?= json_encode(t('paid_leaves')) ?>,
-		excess_leaves: <?= json_encode(t('excess_leaves')) ?>,
-		deduction: <?= json_encode(t('deduction')) ?>,
-		final_salary: <?= json_encode(t('final_salary')) ?>,
-		no_payments: <?= json_encode(t('No salary payments recorded yet.')) ?>,
-		unknown_user: '--'
-	};
-
-	function formatNumber(value, decimals) {
-		return new Intl.NumberFormat(locale, {
-			minimumFractionDigits: decimals,
-			maximumFractionDigits: decimals
-		}).format(Number(value || 0));
+	if (!monthInput) {
+		return;
 	}
 
-	function escapeHtml(value) {
-		return String(value === null || value === undefined ? '' : value)
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#039;');
-	}
+	const base = <?= json_encode(base_url('salaries/pay/' . (int) $staff['id'])) ?>;
 
-	function renderCalculation(calculation) {
-		const rows = [
-			[labels.base_salary, formatNumber(calculation.base_salary, 2)],
-			[labels.monthly_leave_quota, formatNumber(calculation.leave_quota || calculation.monthly_leave_quota, 0)],
-			[labels.approved_leaves, formatNumber(calculation.approved_leaves, 0)],
-			[labels.paid_leaves, formatNumber(calculation.paid_leaves, 0)],
-			[labels.excess_leaves, formatNumber(calculation.excess_leaves, 0)],
-			[labels.deduction, formatNumber(calculation.deduction, 2)],
-			[labels.final_salary, formatNumber(calculation.final_salary, 2)]
-		];
-
-		salaryCard.innerHTML = rows.map(function (row) {
-			return '<div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2 gap-3"><span class="text-muted">' + row[0] + '</span><strong>' + row[1] + '</strong></div>';
-		}).join('');
-		hourlyNote.classList.toggle('d-none', calculation.salary_type !== 'hourly');
-	}
-
-	function renderPayments(payments) {
-		if (!payments.length) {
-			paymentHistoryBody.innerHTML = '<tr><td colspan="4" class="text-muted">' + labels.no_payments + '</td></tr>';
-			return;
+	monthInput.addEventListener('change', function () {
+		const value = monthInput.value.trim();
+		if (value) {
+			window.location = base + '?month=' + encodeURIComponent(value);
 		}
-
-		paymentHistoryBody.innerHTML = payments.map(function (payment) {
-			const recordedBy = payment.created_by_first_name || payment.created_by_last_name
-				? (payment.created_by_first_name + ' ' + payment.created_by_last_name).trim()
-				: labels.unknown_user;
-			const note = payment.note ? payment.note : labels.unknown_user;
-
-			return '<tr>'
-				+ '<td>' + escapeHtml(payment.payment_date_shamsi || payment.payment_date) + '</td>'
-				+ '<td>' + formatNumber(payment.amount, 2) + '</td>'
-				+ '<td>' + escapeHtml(note) + '</td>'
-				+ '<td>' + escapeHtml(recordedBy) + '</td>'
-				+ '</tr>';
-		}).join('');
-	}
-
-	function updateStatus(record, remainingAmount) {
-		totalPaidValue.textContent = formatNumber(record.total_paid, 2);
-		remainingValue.textContent = formatNumber(remainingAmount, 2);
-		remainingValue.classList.toggle('text-danger', Number(remainingAmount) > 0);
-		remainingValue.classList.toggle('text-success', Number(remainingAmount) <= 0);
-		paymentMonthInput.value = monthInput.value;
-
-		if (paymentAmountInput) {
-			paymentAmountInput.value = Number(remainingAmount).toFixed(2);
-		}
-
-		const isPaid = record.status === 'paid';
-		paidMessage.classList.toggle('d-none', !isPaid);
-		formWrap.classList.toggle('d-none', isPaid);
-	}
-
-	function refreshMonth() {
-		const payload = new URLSearchParams();
-		payload.set('staff_id', <?= (int) $staff['id'] ?>);
-		payload.set('month', monthInput.value);
-		errorBox.classList.add('d-none');
-
-		fetch(<?= json_encode(base_url('salaries/get-calculation')) ?>, {
-			method: 'POST',
-			headers: {
-				'X-Requested-With': 'XMLHttpRequest',
-				'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-			},
-			body: payload.toString()
-		})
-			.then(function (response) {
-				return response.json();
-			})
-			.then(function (data) {
-				if (data.error) {
-					throw new Error(data.error);
-				}
-
-				if (data.month) {
-					monthInput.value = data.month;
-				}
-
-				renderCalculation(data.calculation);
-				renderPayments(data.payments || []);
-				updateStatus(data.record, data.remaining_amount);
-				window.history.replaceState({}, '', <?= json_encode(base_url('salaries/pay/' . $staff['id'])) ?> + '?month=' + encodeURIComponent(monthInput.value));
-			})
-			.catch(function (error) {
-				errorBox.textContent = error && error.message ? error.message : <?= json_encode(t('Unable to load salary calculation right now.')) ?>;
-				errorBox.classList.remove('d-none');
-			});
-	}
-
-	if (monthInput) {
-		monthInput.addEventListener('change', refreshMonth);
-	}
+	});
 })();
 </script>

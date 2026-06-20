@@ -3,7 +3,12 @@
 		<h1 class="h3 mb-1"><?= html_escape($patient['first_name'] . ' ' . $patient['last_name']) ?></h1>
 		<p class="text-muted mb-0"><?= t('Patient Profile') ?></p>
 	</div>
-	<div class="d-flex gap-2">
+<?php $can_record_payment = $this->auth->has_permission('manage_turns'); ?>
+	<div class="d-flex flex-wrap gap-2">
+		<?php if ($can_record_payment) : ?>
+			<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#recordPaymentModal"><?= t('record_payment') ?></button>
+			<button id="openRefundModalBtn" type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#refundModal" <?= ((float) $wallet_balance) <= 0 ? 'disabled' : '' ?>><?= t('refund') ?></button>
+		<?php endif; ?>
 		<a href="<?= base_url('patients/' . $patient['id'] . '/edit') ?>" class="btn btn-outline-secondary"><?= t('Edit') ?></a>
 		<a href="<?= base_url('patients') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
 	</div>
@@ -45,6 +50,22 @@ $timeline_amount_prefix = static function ($entry) {
 $wallet_transaction_meta = static function ($transaction) {
 	$type = (string) ($transaction['type'] ?? '');
 	$fund_type = (string) ($transaction['fund_type'] ?? 'cash_topup');
+
+	if ($type === 'auto_debt_settlement') {
+		return array(
+			'class' => 'bg-primary-subtle text-primary',
+			'label' => t('auto_debt_settlement'),
+			'prefix' => '-',
+		);
+	}
+
+	if ($type === 'refund') {
+		return array(
+			'class' => 'bg-danger-subtle text-danger',
+			'label' => t('refund'),
+			'prefix' => '-',
+		);
+	}
 
 	if ($type === 'topup' && $fund_type === 'historical_credit') {
 		return array(
@@ -378,40 +399,13 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 						<?php else : ?>
 							<span id="openDebtProfileBadge" class="badge rounded-pill bg-success-subtle text-success mb-3"><?= t('no_open_debt') ?></span>
 						<?php endif; ?>
-						<form id="debtPaymentForm" class="wallet-profile-form mb-3" action="<?= base_url('patients/' . $patient['id'] . '/debt-payment') ?>" method="post">
-							<div class="wallet-profile-form__head">
-								<h3 class="h6 mb-0"><?= t('pay_debt') ?></h3>
-								<span class="text-muted small"><?= t('debt_payment_hint') ?></span>
+						<?php if ($can_record_payment) : ?>
+							<div class="d-flex flex-wrap gap-2 mb-3">
+								<button id="openRecordPaymentModalBtnInline" type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#recordPaymentModal"><?= t('record_payment') ?></button>
 							</div>
-							<div class="row g-2">
-								<div class="col-sm-4">
-									<label class="form-label mb-1"><?= t('debt_payment_amount') ?></label>
-									<input type="number" name="amount" id="debtPaymentAmount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
-								</div>
-								<div class="col-sm-4">
-									<label class="form-label mb-1"><?= t('Payment Method') ?></label>
-									<select name="payment_method" class="form-select">
-										<option value="cash"><?= t('Cash') ?></option>
-										<option value="card"><?= t('Card') ?></option>
-										<option value="transfer"><?= t('Transfer') ?></option>
-									</select>
-								</div>
-								<div class="col-sm-4">
-									<label class="form-label mb-1"><?= t('wallet_note') ?></label>
-									<input type="text" name="note" id="debtPaymentNote" class="form-control" placeholder="<?= t('debt_note_placeholder') ?>">
-								</div>
-							</div>
-							<div class="wallet-quick-actions mt-2">
-								<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="debtPaymentAmount" data-amount="100"><?= format_amount(100) ?></button>
-								<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="debtPaymentAmount" data-amount="250"><?= format_amount(250) ?></button>
-								<button type="button" class="btn btn-sm btn-outline-secondary wallet-quick-amount" data-target="debtPaymentAmount" data-amount="500"><?= format_amount(500) ?></button>
-								<button type="button" class="btn btn-sm btn-outline-danger wallet-quick-fill-debt" data-amount="<?= html_escape(number_format((float) $total_open_debt, 2, '.', '')) ?>"><?= t('pay_full_debt') ?></button>
-							</div>
-							<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
-								<button type="submit" class="btn btn-danger btn-sm"><?= t('pay_debt') ?></button>
-							</div>
-							<div id="debtPaymentFeedback" class="alert d-none mt-3 mb-0"></div>
-						</form>
+						<?php endif; ?>
+						<p class="text-muted small mb-3"><?= t('debt_payment_hint') ?></p>
+						<div id="debtPaymentFeedback" class="alert d-none mb-3"></div>
 						<div class="collapse<?= $open_debts ? '' : ' show' ?>" id="openDebtsCollapse">
 							<div class="table-responsive">
 								<table class="table table-sm align-middle mb-0">
@@ -420,7 +414,7 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 											<th><?= t('Date') ?></th>
 											<th><?= t('Turns') ?></th>
 											<th><?= t('Amount') ?></th>
-											<th><?= t('Status') ?></th>
+											<th><?= t('debt_type') ?></th>
 										</tr>
 									</thead>
 									<tbody id="openDebtTableBody">
@@ -430,12 +424,15 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 										if (!empty($debt['section_name'])) {
 											$turn_label_parts[] = t($debt['section_name']);
 										}
+										$debt_type_value = (string) ($debt['debt_type'] ?? 'auto_settleable');
+										$debt_type_class = $debt_type_value === 'manual_only' ? 'bg-warning-subtle text-warning' : 'bg-info-subtle text-info';
+										$debt_type_label = $debt_type_value === 'manual_only' ? t('debt_type_manual_only') : t('debt_type_auto_settleable');
 										?>
 										<tr>
 											<td><?= html_escape(to_shamsi($debt['debt_date'])) ?></td>
 											<td><?= html_escape(implode(' - ', $turn_label_parts)) ?></td>
 											<td><?= format_amount($debt['amount']) ?></td>
-											<td><?= t('open_status') ?></td>
+											<td><span class="badge rounded-pill <?= $debt_type_class ?>"><?= html_escape($debt_type_label) ?></span></td>
 										</tr>
 									<?php endforeach; else : ?>
 										<tr><td colspan="4" class="text-muted"><?= t('no_open_debt') ?></td></tr>
@@ -507,6 +504,74 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 	</div>
 </div>
 
+<div class="modal fade" id="recordPaymentModal" tabindex="-1" aria-labelledby="recordPaymentModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2 class="modal-title h5 mb-0" id="recordPaymentModalLabel"><?= t('record_payment') ?></h2>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
+			</div>
+			<form id="recordPaymentForm" action="<?= base_url('patients/' . $patient['id'] . '/debt-payment') ?>" method="post">
+				<div class="modal-body">
+					<div id="recordPaymentModalFeedback" class="alert d-none mb-3"></div>
+					<p class="text-muted small mb-3"><?= t('record_payment_hint') ?></p>
+					<div class="mb-3">
+						<label class="form-label"><?= t('debt_payment_amount') ?></label>
+						<input type="number" name="amount" id="recordPaymentAmount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+						<small class="text-muted"><?= t('total_open_debt') ?>: <span id="recordPaymentOpenDebt"><?= format_amount($total_open_debt) ?></span></small>
+					</div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('payment_date') ?></label>
+						<input type="text" name="payment_date" class="form-control shamsi-date" value="<?= html_escape(shamsi_today()) ?>" placeholder="<?= t('month_format_hint') ?>">
+					</div>
+					<div class="mb-0">
+						<label class="form-label"><?= t('wallet_note') ?></label>
+						<input type="text" name="note" class="form-control" maxlength="255" placeholder="<?= t('debt_note_placeholder') ?>">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
+					<button type="submit" class="btn btn-success"><?= t('record_payment') ?></button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="refundModal" tabindex="-1" aria-labelledby="refundModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2 class="modal-title h5 mb-0" id="refundModalLabel"><?= t('refund') ?></h2>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
+			</div>
+			<form id="refundForm" action="<?= base_url('patients/' . $patient['id'] . '/refund') ?>" method="post">
+				<div class="modal-body">
+					<div id="refundModalFeedback" class="alert d-none mb-3"></div>
+					<p class="text-muted small mb-3"><?= t('refund_hint') ?></p>
+					<div class="mb-3">
+						<label class="form-label"><?= t('refund_amount') ?></label>
+						<input type="number" name="amount" id="refundAmount" class="form-control" min="0.01" step="0.01" placeholder="0.00" required>
+						<small class="text-muted"><?= t('wallet_balance') ?>: <span id="refundMaxAmount"><?= format_amount($wallet_balance) ?></span></small>
+					</div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('refund_date') ?></label>
+						<input type="text" name="refund_date" class="form-control shamsi-date" value="<?= html_escape(shamsi_today()) ?>" placeholder="<?= t('month_format_hint') ?>">
+					</div>
+					<div class="mb-0">
+						<label class="form-label"><?= t('wallet_note') ?></label>
+						<input type="text" name="note" class="form-control" maxlength="255" placeholder="<?= t('refund_note_placeholder') ?>">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
+					<button type="submit" class="btn btn-warning"><?= t('refund') ?></button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
 <div class="modal fade" id="discountModal" tabindex="-1" aria-labelledby="discountModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -566,7 +631,6 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 	const walletCollapseElement = document.getElementById('walletTransactionsCollapse');
 	const debtCollapseElement = document.getElementById('openDebtsCollapse');
 	const quickButtons = document.querySelectorAll('.wallet-quick-amount');
-	const fullDebtButton = document.querySelector('.wallet-quick-fill-debt');
 	const financialSummaryFields = {
 		wallet_balance: document.getElementById('financialWalletBalanceValue'),
 		historical_wallet_balance: document.getElementById('financialHistoricalWalletBalanceValue'),
@@ -586,9 +650,13 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 		historicalCredit: <?= json_encode(t('historical_wallet_credit')) ?>,
 		cashDeduction: <?= json_encode(t('cash_wallet_deduction')) ?>,
 		historicalDeduction: <?= json_encode(t('historical_wallet_deduction')) ?>,
+		autoDebtSettlement: <?= json_encode(t('auto_debt_settlement')) ?>,
+		refund: <?= json_encode(t('refund')) ?>,
 		openStatus: <?= json_encode(t('open_status')) ?>,
 		walletSource: <?= json_encode(t('wallet_source')) ?>,
 		turnSource: <?= json_encode(t('turn_source')) ?>,
+		debtTypeAutoSettleable: <?= json_encode(t('debt_type_auto_settleable')) ?>,
+		debtTypeManualOnly: <?= json_encode(t('debt_type_manual_only')) ?>,
 	};
 
 	function formatAmount(value) {
@@ -634,10 +702,6 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 	}
 
 	function updateDebtBadge(totalDebt) {
-		if (fullDebtButton) {
-			fullDebtButton.dataset.amount = Number(totalDebt || 0).toFixed(2);
-		}
-
 		if (totalDebt > 0) {
 			openDebtBadge.textContent = formatAmount(totalDebt);
 			openDebtBadge.className = 'badge rounded-pill bg-danger-subtle text-danger mb-3';
@@ -676,12 +740,22 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 		}
 
 		transactionsBody.innerHTML = transactions.map(function (transaction) {
-			const isTopup = transaction.type === 'topup';
+			const type = transaction.type;
+			const isTopup = type === 'topup';
 			const fundType = transaction.fund_type || 'cash_topup';
 			let badgeClass = 'bg-warning-subtle text-warning';
 			let label = fundType === 'historical_credit' ? labels.historicalDeduction : labels.cashDeduction;
+			let prefix = isTopup ? '+' : '-';
 
-			if (isTopup && fundType === 'historical_credit') {
+			if (type === 'auto_debt_settlement') {
+				badgeClass = 'bg-primary-subtle text-primary';
+				label = labels.autoDebtSettlement;
+				prefix = '-';
+			} else if (type === 'refund') {
+				badgeClass = 'bg-danger-subtle text-danger';
+				label = labels.refund;
+				prefix = '-';
+			} else if (isTopup && fundType === 'historical_credit') {
 				badgeClass = 'bg-info-subtle text-info';
 				label = labels.historicalCredit;
 			} else if (isTopup) {
@@ -693,7 +767,7 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 			return '<tr>'
 				+ '<td class="col-date">' + escapeHtml(transaction.created_at || '') + '</td>'
 				+ '<td><span class="badge rounded-pill ' + badgeClass + '">' + escapeHtml(label) + '</span></td>'
-				+ '<td>' + (isTopup ? '+' : '-') + formatAmount(parseFloat(transaction.amount || 0)) + '</td>'
+				+ '<td>' + prefix + formatAmount(parseFloat(transaction.amount || 0)) + '</td>'
 				+ '<td class="col-text">' + note + '</td>'
 				+ '</tr>';
 		}).join('');
@@ -718,11 +792,14 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 			if (debt.section_name) {
 				parts.push(debt.section_name);
 			}
+			const debtType = String(debt.debt_type || 'auto_settleable');
+			const debtTypeClass = debtType === 'manual_only' ? 'bg-warning-subtle text-warning' : 'bg-info-subtle text-info';
+			const debtTypeLabel = debtType === 'manual_only' ? labels.debtTypeManualOnly : labels.debtTypeAutoSettleable;
 			return '<tr>'
 				+ '<td>' + escapeHtml(debt.debt_date || '') + '</td>'
 				+ '<td>' + escapeHtml(parts.join(' - ')) + '</td>'
 				+ '<td>' + formatAmount(parseFloat(debt.amount || 0)) + '</td>'
-				+ '<td>' + escapeHtml(labels.openStatus) + '</td>'
+				+ '<td><span class="badge rounded-pill ' + debtTypeClass + '">' + escapeHtml(debtTypeLabel) + '</span></td>'
 				+ '</tr>';
 		}).join('');
 	}
@@ -828,17 +905,6 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 		});
 	});
 
-	if (fullDebtButton) {
-		fullDebtButton.addEventListener('click', function () {
-			const target = document.getElementById('debtPaymentAmount');
-			if (!target) {
-				return;
-			}
-			target.value = this.dataset.amount;
-			target.focus();
-		});
-	}
-
 	submitProfileForm(
 		document.getElementById('walletTopupForm'),
 		document.getElementById('walletTopupFeedback'),
@@ -896,16 +962,78 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 		<?= json_encode(t('Unable to update wallet right now.')) ?>
 	);
 
+	const recordPaymentModalEl = document.getElementById('recordPaymentModal');
+	const refundModalEl = document.getElementById('refundModal');
+	const refundOpenButton = document.getElementById('openRefundModalBtn');
+	const recordPaymentOpenDebtEl = document.getElementById('recordPaymentOpenDebt');
+	const refundMaxAmountEl = document.getElementById('refundMaxAmount');
+	const recordPaymentAmount = document.getElementById('recordPaymentAmount');
+	const refundAmount = document.getElementById('refundAmount');
+
+	function refreshFinancialBadges(data) {
+		updateDebtBadge(parseFloat(data.total_open_debt || 0));
+		renderOpenDebts(Array.isArray(data.open_debts) ? data.open_debts : []);
+		updateBalanceBadge(parseFloat(data.wallet_balance || 0));
+		updateWalletBreakdownBadges(data.wallet_breakdown || {});
+		renderTransactions(Array.isArray(data.wallet_transactions) ? data.wallet_transactions : []);
+		updateFinancialSummary(data.financial_summary);
+		renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);
+
+		if (recordPaymentOpenDebtEl) {
+			recordPaymentOpenDebtEl.textContent = formatAmount(parseFloat(data.total_open_debt || 0));
+		}
+
+		if (refundMaxAmountEl) {
+			refundMaxAmountEl.textContent = formatAmount(parseFloat(data.wallet_balance || 0));
+		}
+
+		if (refundAmount) {
+			refundAmount.max = String(Math.max(0, parseFloat(data.wallet_balance || 0)));
+		}
+
+		if (refundOpenButton) {
+			const walletBalance = parseFloat(data.wallet_balance || 0);
+			if (walletBalance > 0) {
+				refundOpenButton.disabled = false;
+				refundOpenButton.removeAttribute('disabled');
+			} else {
+				refundOpenButton.disabled = true;
+				refundOpenButton.setAttribute('disabled', 'disabled');
+			}
+		}
+	}
+
+	function closeModal(modalEl) {
+		if (!modalEl || !window.bootstrap || !window.bootstrap.Modal) {
+			return;
+		}
+		// getOrCreateInstance handles the case where Bootstrap never promoted the
+		// data-toggle button (e.g., after a previous modal close left state behind).
+		const instance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+		instance.hide();
+		// Defensive: scrub any leftover backdrop / modal-open class that can block
+		// further clicks if Bootstrap's hide animation was interrupted.
+		setTimeout(function () {
+			document.querySelectorAll('.modal-backdrop').forEach(function (b) {
+				if (!document.querySelector('.modal.show')) {
+					b.remove();
+				}
+			});
+			if (!document.querySelector('.modal.show')) {
+				document.body.classList.remove('modal-open');
+				document.body.style.removeProperty('padding-right');
+				document.body.style.removeProperty('overflow');
+			}
+		}, 350);
+	}
+
 	submitProfileForm(
-		document.getElementById('debtPaymentForm'),
-		document.getElementById('debtPaymentFeedback'),
+		document.getElementById('recordPaymentForm'),
+		document.getElementById('recordPaymentModalFeedback'),
 		function (data) {
-			updateDebtBadge(parseFloat(data.total_open_debt || 0));
-			renderOpenDebts(Array.isArray(data.open_debts) ? data.open_debts : []);
-			updateFinancialSummary(data.financial_summary);
-			renderFinancialTimeline(Array.isArray(data.financial_timeline) ? data.financial_timeline : []);
-			document.getElementById('debtPaymentAmount').value = '';
-			document.getElementById('debtPaymentNote').value = '';
+			refreshFinancialBadges(data);
+			document.getElementById('recordPaymentForm').reset();
+			closeModal(recordPaymentModalEl);
 
 			if (debtCollapseElement && window.bootstrap && window.bootstrap.Collapse) {
 				window.bootstrap.Collapse.getOrCreateInstance(debtCollapseElement).show();
@@ -913,6 +1041,28 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 		},
 		<?= json_encode(t('Unable to record debt payment right now.')) ?>
 	);
+
+	submitProfileForm(
+		document.getElementById('refundForm'),
+		document.getElementById('refundModalFeedback'),
+		function (data) {
+			refreshFinancialBadges(data);
+			document.getElementById('refundForm').reset();
+			closeModal(refundModalEl);
+
+			if (walletCollapseElement && window.bootstrap && window.bootstrap.Collapse) {
+				window.bootstrap.Collapse.getOrCreateInstance(walletCollapseElement).show();
+			}
+		},
+		<?= json_encode(t('Unable to record refund right now.')) ?>
+	);
+
+	if (recordPaymentAmount) {
+		recordPaymentAmount.addEventListener('focus', function () {
+			recordPaymentAmount.select();
+		});
+	}
+
 })();
 </script>
 

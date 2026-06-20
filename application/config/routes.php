@@ -33,6 +33,7 @@ $route['patients/(:num)/wallet-topup'] = 'Patients/wallet_topup/$1';
 $route['patients/(:num)/wallet-historical-credit'] = 'Patients/wallet_historical_credit/$1';
 $route['patients/(:num)/wallet-deduct'] = 'Patients/wallet_deduct/$1';
 $route['patients/(:num)/debt-payment'] = 'Patients/debt_payment/$1';
+$route['patients/(:num)/refund'] = 'Patients/refund/$1';
 $route['patients/(:num)/edit'] = 'Patients/edit/$1';
 $route['patients/(:num)/update'] = 'Patients/update/$1';
 $route['patients/(:num)/delete'] = 'Patients/delete/$1';
@@ -88,6 +89,8 @@ $route['expenses/delete/(:num)'] = 'expenses/delete/$1';
 $route['salaries'] = 'salaries/index';
 $route['salaries/pay/(:num)'] = 'salaries/pay/$1';
 $route['salaries/store-payment'] = 'salaries/store_payment';
+$route['salaries/settle/(:num)'] = 'salaries/settle/$1';
+$route['salaries/reopen/(:num)'] = 'salaries/reopen/$1';
 $route['salaries/get-calculation'] = 'salaries/get_calculation';
 
 $route['reports'] = 'Reports/index';
@@ -95,6 +98,9 @@ $route['reports/daily-register'] = 'reports/daily_register';
 $route['reports/daily-register/print'] = 'reports/daily_register_print';
 $route['reports/outstanding-balances'] = 'Reports/outstanding_balances';
 $route['reports/patient-financial-summary'] = 'Reports/patient_financial_summary';
+$route['reports/debtors'] = 'Reports/debtors';
+$route['reports/debtors/print'] = 'Reports/debtors_print';
+$route['reports/new-patients'] = 'Reports/new_patients';
 
 $route['leaves'] = 'Leaves/index';
 $route['leaves/create'] = 'Leaves/create';

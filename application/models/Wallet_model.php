@@ -5,6 +5,7 @@ class Wallet_model extends CI_Model
 {
 	protected $schema_ready = FALSE;
 	protected $allowed_fund_types = array('cash_topup', 'historical_credit');
+	protected $allowed_transaction_types = array('topup', 'deduction', 'auto_debt_settlement', 'refund');
 
 	public function attach_latest_transaction_to_turn($patient_id, $type, $amount, $turn_id)
 	{
@@ -85,13 +86,14 @@ class Wallet_model extends CI_Model
 			}
 
 			$amount = round((float) ($row['total_amount'] ?? 0), 2);
+			$type = (string) ($row['type'] ?? '');
 
-			if (($row['type'] ?? '') === 'topup') {
+			if ($type === 'topup') {
 				$balances[$fund_type] = round($balances[$fund_type] + $amount, 2);
 				continue;
 			}
 
-			if (($row['type'] ?? '') === 'deduction') {
+			if (in_array($type, array('deduction', 'auto_debt_settlement', 'refund'), TRUE)) {
 				$balances[$fund_type] = round($balances[$fund_type] - $amount, 2);
 			}
 		}
@@ -131,17 +133,17 @@ class Wallet_model extends CI_Model
 		));
 	}
 
-	public function top_up_cash($patient_id, $amount, $turn_id = NULL, $note = NULL)
+	public function top_up_cash($patient_id, $amount, $turn_id = NULL, $note = NULL, $created_at = NULL)
 	{
-		return $this->top_up($patient_id, $amount, $turn_id, $note, 'cash_topup');
+		return $this->top_up($patient_id, $amount, $turn_id, $note, 'cash_topup', $created_at);
 	}
 
-	public function top_up_historical($patient_id, $amount, $turn_id = NULL, $note = NULL)
+	public function top_up_historical($patient_id, $amount, $turn_id = NULL, $note = NULL, $created_at = NULL)
 	{
-		return $this->top_up($patient_id, $amount, $turn_id, $note, 'historical_credit');
+		return $this->top_up($patient_id, $amount, $turn_id, $note, 'historical_credit', $created_at);
 	}
 
-	public function top_up($patient_id, $amount, $turn_id = NULL, $note = NULL, $fund_type = 'cash_topup')
+	public function top_up($patient_id, $amount, $turn_id = NULL, $note = NULL, $fund_type = 'cash_topup', $created_at = NULL)
 	{
 		$this->ensure_schema();
 
@@ -166,20 +168,32 @@ class Wallet_model extends CI_Model
 			return FALSE;
 		}
 
-		$inserted = $this->db->insert('patient_wallet_transactions', array(
+		$row = array(
 			'patient_id' => $patient_id,
 			'turn_id' => $turn_id ? (int) $turn_id : NULL,
 			'type' => 'topup',
 			'fund_type' => $fund_type,
 			'amount' => $amount,
 			'note' => $note,
-		));
+		);
+
+		if ($created_at !== NULL && $this->is_valid_datetime((string) $created_at)) {
+			$row['created_at'] = $created_at;
+		}
+
+		$inserted = $this->db->insert('patient_wallet_transactions', $row);
 
 		if (!$inserted) {
 			return FALSE;
 		}
 
 		return $new_balance;
+	}
+
+	protected function is_valid_datetime($value)
+	{
+		$d = DateTime::createFromFormat('Y-m-d H:i:s', (string) $value);
+		return $d && $d->format('Y-m-d H:i:s') === $value;
 	}
 
 	public function deduct_prioritized($patient_id, $amount, $turn_id = NULL, $note = NULL)
@@ -394,6 +408,180 @@ class Wallet_model extends CI_Model
 			->result_array();
 	}
 
+	/**
+	 * Recompute a patient's wallet balance from the underlying transaction log
+	 * and auto-reconcile any open debts against positive wallet credit.
+	 *
+	 * Authoritative single source of truth for patient_wallet.balance. Idempotent:
+	 * calling it again after it settles produces no further state change.
+	 *
+	 * Pass $in_outer_transaction=TRUE when the caller already opened a trans_begin —
+	 * we then skip our own trans wrapper to avoid CI3 nested-transaction semantics
+	 * (inner rollback aborts the whole outer; inner commit is a no-op).
+	 *
+	 * Acquires a row-level lock on patient_wallet so two concurrent callers
+	 * cannot both observe the same balance and double-settle the same debt.
+	 */
+	public function recalculate_for_patient($patient_id, $in_outer_transaction = FALSE)
+	{
+		$this->ensure_schema();
+
+		$patient_id = (int) $patient_id;
+
+		if ($patient_id <= 0) {
+			return FALSE;
+		}
+
+		$this->load->model('Debt_model');
+		$this->ensure_wallet_exists($patient_id);
+
+		if (!$in_outer_transaction) {
+			$this->db->trans_begin();
+		}
+
+		// Row lock: serializes concurrent recalcs against the same patient (Fix A6).
+		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array($patient_id));
+
+		$balance = $this->compute_raw_balance($patient_id);
+
+		if ($balance > 0) {
+			// Only debts that originated from prepayment exhaustion are eligible for auto-settlement
+			// against new wallet credit. "manual_only" debts (deferred turns / pay-at-end agreements)
+			// must remain open until cleared explicitly through Record Payment.
+			$debts = $this->Debt_model->get_auto_settleable_open_debts($patient_id);
+
+			foreach ($debts as $debt) {
+				if ($balance <= 0) {
+					break;
+				}
+
+				$debt_amount = round((float) ($debt['amount'] ?? 0), 2);
+
+				if ($debt_amount <= 0) {
+					continue;
+				}
+
+				$apply = round(min($balance, $debt_amount), 2);
+
+				if ($apply <= 0) {
+					continue;
+				}
+
+				$debt_id = (int) ($debt['id'] ?? 0);
+				$turn_id = isset($debt['turn_id']) && $debt['turn_id'] !== NULL ? (int) $debt['turn_id'] : NULL;
+
+				if ($apply >= $debt_amount - 0.001) {
+					$this->db
+						->where('id', $debt_id)
+						->update('patient_debts', array(
+							'amount' => $debt_amount,
+							'status' => 'cleared',
+							'cleared_at' => date('Y-m-d H:i:s'),
+						));
+				} else {
+					$this->db
+						->where('id', $debt_id)
+						->update('patient_debts', array(
+							'amount' => round($debt_amount - $apply, 2),
+						));
+				}
+
+				$this->db->insert('patient_wallet_transactions', array(
+					'patient_id' => $patient_id,
+					'turn_id' => $turn_id,
+					'type' => 'auto_debt_settlement',
+					'fund_type' => 'cash_topup',
+					'amount' => $apply,
+					'note' => 'Auto debt settlement against debt #' . $debt_id,
+				));
+
+				$balance = round($balance - $apply, 2);
+			}
+		}
+
+		$balance = round(max(0, $balance), 2);
+
+		$this->db
+			->where('patient_id', $patient_id)
+			->update('patient_wallet', array('balance' => $balance));
+
+		if (!$in_outer_transaction) {
+			if ($this->db->trans_status() === FALSE) {
+				$this->db->trans_rollback();
+				return FALSE;
+			}
+			$this->db->trans_commit();
+		}
+
+		return $balance;
+	}
+
+	/**
+	 * Compute the raw wallet balance from patient_wallet_transactions:
+	 * topup increases balance; deduction, refund, and auto_debt_settlement decrease it.
+	 */
+	public function compute_raw_balance($patient_id)
+	{
+		$this->ensure_schema();
+
+		$row = $this->db
+			->select("COALESCE(SUM(CASE WHEN type = 'topup' THEN amount ELSE -amount END), 0) AS net", FALSE)
+			->from('patient_wallet_transactions')
+			->where('patient_id', (int) $patient_id)
+			->get()
+			->row_array();
+
+		return $row ? round((float) $row['net'], 2) : 0.00;
+	}
+
+	public function record_refund($patient_id, $amount, $note = NULL, $created_at = NULL)
+	{
+		$this->ensure_schema();
+
+		$patient_id = (int) $patient_id;
+		$amount = round((float) $amount, 2);
+
+		if ($patient_id <= 0 || $amount <= 0) {
+			return FALSE;
+		}
+
+		$this->ensure_wallet_exists($patient_id);
+
+		// Update patient_wallet.balance directly so the persisted balance stays consistent
+		// even if the caller's downstream recalculate_for_patient call fails after commit.
+		$current_balance = $this->get_balance($patient_id);
+		$new_balance = round(max(0, $current_balance - $amount), 2);
+
+		$updated = $this->db
+			->where('patient_id', $patient_id)
+			->update('patient_wallet', array('balance' => $new_balance));
+
+		if (!$updated) {
+			return FALSE;
+		}
+
+		$row = array(
+			'patient_id' => $patient_id,
+			'turn_id' => NULL,
+			'type' => 'refund',
+			'fund_type' => 'cash_topup',
+			'amount' => $amount,
+			'note' => $note,
+		);
+
+		if ($created_at !== NULL && $this->is_valid_datetime((string) $created_at)) {
+			$row['created_at'] = $created_at;
+		}
+
+		$inserted = $this->db->insert('patient_wallet_transactions', $row);
+
+		if (!$inserted) {
+			return FALSE;
+		}
+
+		return (int) $this->db->insert_id();
+	}
+
 	public function get_turn_balance_effect($turn_id)
 	{
 		$this->ensure_schema();
@@ -410,7 +598,7 @@ class Wallet_model extends CI_Model
 		}
 
 		$rows = $this->db
-			->select('fund_type, COALESCE(SUM(CASE WHEN type = "topup" THEN amount ELSE -amount END), 0) AS net_amount', FALSE)
+			->select("fund_type, COALESCE(SUM(CASE WHEN type = 'topup' THEN amount ELSE -amount END), 0) AS net_amount", FALSE)
 			->from('patient_wallet_transactions')
 			->where('turn_id', $turn_id)
 			->group_by('fund_type')
@@ -509,7 +697,7 @@ class Wallet_model extends CI_Model
 					`id` int unsigned NOT NULL AUTO_INCREMENT,
 					`patient_id` int unsigned NOT NULL,
 					`turn_id` int unsigned DEFAULT NULL,
-					`type` enum('topup','deduction') NOT NULL,
+					`type` enum('topup','deduction','auto_debt_settlement','refund') NOT NULL,
 					`fund_type` enum('cash_topup','historical_credit') NOT NULL DEFAULT 'cash_topup',
 					`amount` decimal(12,2) NOT NULL,
 					`note` varchar(255) DEFAULT NULL,
@@ -524,8 +712,26 @@ class Wallet_model extends CI_Model
 		}
 
 		$this->ensure_fund_type_column();
+		$this->ensure_type_enum();
 
 		$this->schema_ready = TRUE;
+	}
+
+	protected function ensure_type_enum()
+	{
+		$column = $this->column_definition('patient_wallet_transactions', 'type');
+
+		if (!$column) {
+			return;
+		}
+
+		$expected = "enum('topup','deduction','auto_debt_settlement','refund')";
+
+		if (strtolower((string) $column['Type']) === $expected) {
+			return;
+		}
+
+		$this->db->query("ALTER TABLE `patient_wallet_transactions` MODIFY COLUMN `type` ENUM('topup','deduction','auto_debt_settlement','refund') NOT NULL");
 	}
 
 	protected function ensure_fund_type_column()

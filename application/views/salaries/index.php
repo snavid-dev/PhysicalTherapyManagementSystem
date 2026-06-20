@@ -70,7 +70,7 @@ foreach ($records as $record) {
 				<tbody>
 				<?php if ($records) : ?>
 					<?php foreach ($records as $record) : ?>
-						<?php $remaining = max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)); ?>
+						<?php $remaining = !empty($record['settled']) ? 0 : max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2)); ?>
 						<tr>
 							<td class="col-date"><?= html_escape(gregorian_month_to_shamsi($record['month'])) ?></td>
 							<td><?= html_escape(trim($record['first_name'] . ' ' . $record['last_name'])) ?></td>
@@ -81,7 +81,9 @@ foreach ($records as $record) {
 							<td><?= format_number($record['total_paid'], 2) ?></td>
 							<td><?= format_number($remaining, 2) ?></td>
 							<td>
-								<?php if ($record['status'] === 'paid') : ?>
+								<?php if (!empty($record['settled'])) : ?>
+									<span class="badge text-bg-success"><?= t('salary_settled') ?></span>
+								<?php elseif ($record['status'] === 'paid') : ?>
 									<span class="badge text-bg-success"><?= t('Paid') ?></span>
 								<?php elseif ($record['status'] === 'partial') : ?>
 									<span class="badge text-bg-warning"><?= t('salary_partial') ?></span>

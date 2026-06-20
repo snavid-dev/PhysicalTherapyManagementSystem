@@ -8,6 +8,7 @@ class Role_model extends CI_Model
 		array('name' => 'manage_users', 'module_key' => 'users'),
 		array('name' => 'manage_roles', 'module_key' => 'roles'),
 		array('name' => 'manage_turns', 'module_key' => 'turns'),
+		array('name' => 'edit_processed_payments', 'module_key' => 'turns'),
 		array('name' => 'view_reports', 'module_key' => 'reports'),
 		array('name' => 'manage_leaves', 'module_key' => 'leaves'),
 		array('name' => 'manage_staff', 'module_key' => 'staff'),
@@ -18,6 +19,9 @@ class Role_model extends CI_Model
 		array('name' => 'view_safe', 'module_key' => 'safe'),
 		array('name' => 'manage_safe', 'module_key' => 'safe'),
 	);
+
+	protected $manager_seed_permissions = array('edit_processed_payments');
+	protected $manager_role_slug = 'administrator';
 
 	public function all()
 	{
@@ -100,6 +104,7 @@ class Role_model extends CI_Model
 			->result_array();
 
 		$existing_names = array_column($existing, 'name');
+		$newly_added = array();
 
 		foreach ($this->system_permissions as $permission) {
 			if (in_array($permission['name'], $existing_names, TRUE)) {
@@ -108,6 +113,53 @@ class Role_model extends CI_Model
 
 			$this->db->insert('permissions', $permission);
 			$existing_names[] = $permission['name'];
+			$newly_added[] = $permission['name'];
+		}
+
+		$this->seed_manager_permissions($newly_added);
+	}
+
+	protected function seed_manager_permissions($newly_added)
+	{
+		$to_seed = array_values(array_intersect($this->manager_seed_permissions, $newly_added));
+
+		if (empty($to_seed)) {
+			return;
+		}
+
+		$manager_role = $this->db
+			->select('id')
+			->from('roles')
+			->where('slug', $this->manager_role_slug)
+			->limit(1)
+			->get()
+			->row_array();
+
+		if (!$manager_role) {
+			return;
+		}
+
+		$permission_rows = $this->db
+			->select('id, name')
+			->from('permissions')
+			->where_in('name', $to_seed)
+			->get()
+			->result_array();
+
+		foreach ($permission_rows as $permission) {
+			$already_linked = (int) $this->db
+				->where('role_id', (int) $manager_role['id'])
+				->where('permission_id', (int) $permission['id'])
+				->count_all_results('role_permissions');
+
+			if ($already_linked > 0) {
+				continue;
+			}
+
+			$this->db->insert('role_permissions', array(
+				'role_id' => (int) $manager_role['id'],
+				'permission_id' => (int) $permission['id'],
+			));
 		}
 	}
 }

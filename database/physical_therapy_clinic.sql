@@ -72,7 +72,7 @@ CREATE TABLE `users` (
 CREATE TABLE `safe_transactions` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`type` enum('in','out','adjustment') NOT NULL,
-	`source` enum('turn_cash','wallet_topup','patient_payment','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL,
+	`source` enum('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL,
 	`amount` decimal(12,2) NOT NULL,
 	`balance_after` decimal(12,2) NOT NULL,
 	`reference_id` int unsigned DEFAULT NULL,
@@ -276,7 +276,7 @@ CREATE TABLE `patient_wallet_transactions` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`patient_id` int unsigned NOT NULL,
 	`turn_id` int unsigned DEFAULT NULL,
-	`type` enum('topup','deduction') NOT NULL,
+	`type` enum('topup','deduction','auto_debt_settlement','refund') NOT NULL,
 	`fund_type` enum('cash_topup','historical_credit') NOT NULL DEFAULT 'cash_topup',
 	`amount` decimal(12,2) NOT NULL,
 	`note` varchar(255) DEFAULT NULL,
@@ -294,6 +294,7 @@ CREATE TABLE `patient_debts` (
 	`turn_id` int unsigned NOT NULL,
 	`amount` decimal(12,2) NOT NULL,
 	`status` enum('open','cleared') NOT NULL DEFAULT 'open',
+	`debt_type` enum('auto_settleable','manual_only') NOT NULL DEFAULT 'auto_settleable',
 	`cleared_at` timestamp NULL DEFAULT NULL,
 	`cleared_by_turn_id` int unsigned DEFAULT NULL,
 	`note` varchar(255) DEFAULT NULL,
@@ -324,7 +325,7 @@ CREATE TABLE `payments` (
 
 CREATE TABLE `doctor_leaves` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
-	`doctor_id` int unsigned NOT NULL,
+	`staff_id` int unsigned NOT NULL,
 	`start_date` date NOT NULL,
 	`end_date` date NOT NULL,
 	`status` varchar(30) NOT NULL DEFAULT 'approved',
@@ -332,8 +333,8 @@ CREATE TABLE `doctor_leaves` (
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`),
-	KEY `doctor_leaves_doctor_id_index` (`doctor_id`),
-	CONSTRAINT `doctor_leaves_doctor_fk` FOREIGN KEY (`doctor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+	KEY `doctor_leaves_staff_id_index` (`staff_id`),
+	CONSTRAINT `doctor_leaves_staff_fk` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `expense_categories` (
@@ -369,8 +370,10 @@ CREATE TABLE `staff_salary_records` (
 	`base_salary` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`calculated_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`final_salary` decimal(12,2) NOT NULL DEFAULT 0.00,
+	`daily_rate` decimal(12,4) NOT NULL DEFAULT 0.0000,
 	`total_paid` decimal(12,2) NOT NULL DEFAULT 0.00,
 	`status` enum('unpaid','partial','paid') NOT NULL DEFAULT 'unpaid',
+	`settled` tinyint(1) NOT NULL DEFAULT 0,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`),
@@ -417,10 +420,11 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(11, 'manage_expenses', 'expenses'),
 	(12, 'manage_salaries', 'salaries'),
 	(13, 'view_safe', 'safe'),
-	(14, 'manage_safe', 'safe');
+	(14, 'manage_safe', 'safe'),
+	(15, 'edit_processed_payments', 'turns');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14),
+	(1, 1), (1, 2), (1, 3), (1, 4), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14), (1, 15),
 	(2, 1), (2, 4), (2, 6), (2, 7),
 	(3, 1), (3, 4), (3, 6);
 

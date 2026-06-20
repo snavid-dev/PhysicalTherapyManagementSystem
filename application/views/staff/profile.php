@@ -118,10 +118,9 @@
 					<?php $salary_rows = array(
 						array(t('month'), $current_month_shamsi),
 						array(t('base_salary'), format_number($salary_calculation['base_salary'], 2)),
-						array(t('monthly_leave_quota'), format_number($salary_calculation['leave_quota'] ?? $salary_calculation['monthly_leave_quota'], 0)),
-						array(t('approved_leaves_in_range'), format_number($salary_calculation['approved_leaves'], 0)),
-						array(t('paid_leaves'), format_number($salary_calculation['paid_leaves'], 0)),
-						array(t('excess_leaves'), format_number($salary_calculation['excess_leaves'], 0)),
+						array(t('days_in_month'), format_number($salary_calculation['days_in_month'] ?? 0, 0)),
+						array(t('daily_rate'), format_number($salary_calculation['daily_rate'] ?? 0, 2)),
+						array(t('leave_days'), format_number($salary_calculation['approved_leaves'], 0)),
 						array(t('deduction'), format_number($salary_calculation['deduction'], 2)),
 						array(t('final_salary'), format_number($salary_calculation['final_salary'], 2)),
 					); ?>
@@ -131,8 +130,16 @@
 							<strong><?= html_escape($salary_row[1]) ?></strong>
 						</div>
 					<?php endforeach; ?>
+					<?php if (!empty($salary_calculation['leave_dates'])) : ?>
+						<div class="alert alert-info mb-0">
+							<strong><?= t('leave_impact') ?>:</strong>
+							<div class="mt-1 small">
+								<?= html_escape(implode(', ', array_map('to_shamsi', $salary_calculation['leave_dates']))) ?>
+							</div>
+						</div>
+					<?php endif; ?>
 					<?php if (($salary_calculation['salary_type'] ?? 'fixed') === 'hourly') : ?>
-						<div class="alert alert-warning mb-0"><?= t('hourly_manual_note') ?></div>
+						<div class="alert alert-warning mt-3 mb-0"><?= t('hourly_manual_note') ?></div>
 					<?php endif; ?>
 				</div>
 			</div>
@@ -150,10 +157,7 @@
 	const labels = {
 		month: <?= json_encode(t('month')) ?>,
 		base_salary: <?= json_encode(t('base_salary')) ?>,
-		monthly_leave_quota: <?= json_encode(t('monthly_leave_quota')) ?>,
-		approved_leaves: <?= json_encode(t('approved_leaves_in_range')) ?>,
-		paid_leaves: <?= json_encode(t('paid_leaves')) ?>,
-		excess_leaves: <?= json_encode(t('excess_leaves')) ?>,
+		leave_days: <?= json_encode(t('leave_days')) ?>,
 		deduction: <?= json_encode(t('deduction')) ?>,
 		final_salary: <?= json_encode(t('final_salary')) ?>,
 		hourly_manual_note: <?= json_encode(t('hourly_manual_note')) ?>
@@ -174,10 +178,7 @@
 		const rows = [
 			[labels.month, data.month],
 			[labels.base_salary, formatNumber(data.base_salary, 2)],
-			[labels.monthly_leave_quota, formatNumber(data.leave_quota || data.monthly_leave_quota, 0)],
-			[labels.approved_leaves, formatNumber(data.approved_leaves, 0)],
-			[labels.paid_leaves, formatNumber(data.paid_leaves, 0)],
-			[labels.excess_leaves, formatNumber(data.excess_leaves, 0)],
+			[labels.leave_days, formatNumber(data.approved_leaves, 0)],
 			[labels.deduction, formatNumber(data.deduction, 2)],
 			[labels.final_salary, formatNumber(data.final_salary, 2)]
 		];

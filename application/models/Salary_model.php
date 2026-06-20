@@ -7,6 +7,7 @@ class Salary_model extends CI_Model
 	{
 		parent::__construct();
 		$this->load->model('Staff_model');
+		$this->load->model('Leave_model');
 	}
 
 	public function get_or_create_record($staff_id, $month)
@@ -35,6 +36,9 @@ class Salary_model extends CI_Model
 	public function calculate_salary($staff_id, $month)
 	{
 		$this->ensure_schema();
+		// The leave table is migrated from user-based to staff-based by Leave_model;
+		// make sure that has run before we query it by staff_id here.
+		$this->Leave_model->ensure_schema();
 
 		$staff = $this->Staff_model->get_by_id($staff_id);
 
@@ -44,17 +48,39 @@ class Salary_model extends CI_Model
 
 		$month_start = $month . '-01';
 		$month_end = date('Y-m-t', strtotime($month_start));
-		$approved_leaves = $this->count_approved_leave_days($staff, $month_start, $month_end);
+		$leave_detail = $this->approved_leave_days_detail($staff, $month_start, $month_end);
+		$approved_leaves = (int) $leave_detail['count'];
 		$leave_quota = (int) $staff['monthly_leave_quota'];
-		$paid_leaves = min($approved_leaves, $leave_quota);
-		$excess_leaves = max(0, $approved_leaves - $leave_quota);
+		// Every approved leave day reduces the salary at the daily rate; there is
+		// no free quota, so all approved days are "excess" (deductible).
+		$paid_leaves = 0;
+		$excess_leaves = $approved_leaves;
 		$base_salary = round((float) $staff['salary'], 2);
 		$salary_type = (string) $staff['salary_type'];
+		$days_in_month = (int) date('t', strtotime($month_start));
 		$deduction = 0.00;
 		$final_salary = $base_salary;
+		$daily_rate = 0.00;
 
-		if ($salary_type === 'fixed') {
-			$daily_rate = $base_salary / 30;
+		// Fix B8: if a record already exists with stored daily_rate, REUSE it so
+		// already-paid months don't drift when the denominator formula changes.
+		$existing_record = $this->db
+			->get_where('staff_salary_records', array(
+				'staff_id' => (int) $staff_id,
+				'month' => $month,
+			))
+			->row_array();
+
+		$stored_daily_rate = $existing_record && isset($existing_record['daily_rate'])
+			? round((float) $existing_record['daily_rate'], 4)
+			: 0.0;
+
+		if ($salary_type === 'fixed' && $days_in_month > 0) {
+			if ($stored_daily_rate > 0) {
+				$daily_rate = $stored_daily_rate;
+			} else {
+				$daily_rate = round($base_salary / $days_in_month, 4);
+			}
 			$deduction = round($excess_leaves * $daily_rate, 2);
 			$final_salary = round($base_salary - $deduction, 2);
 		}
@@ -66,8 +92,11 @@ class Salary_model extends CI_Model
 			'leave_quota' => $leave_quota,
 			'monthly_leave_quota' => $leave_quota,
 			'approved_leaves' => $approved_leaves,
+			'leave_dates' => $leave_detail['dates'],
 			'paid_leaves' => $paid_leaves,
 			'excess_leaves' => $excess_leaves,
+			'days_in_month' => $days_in_month,
+			'daily_rate' => $daily_rate,
 			'deduction' => $deduction,
 			'final_salary' => $final_salary,
 		);
@@ -83,21 +112,18 @@ class Salary_model extends CI_Model
 		$record = $this->sync_record_if_empty($record, $month);
 
 		$amount = round((float) $amount, 2);
-		$remaining = max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2));
 
-		if ($amount <= 0 || $amount > $remaining) {
+		// Flexible salary: the calculated final_salary is only a suggestion. The
+		// manager may pay more (bonus / correction) or less than the suggested
+		// amount, so the payment is no longer capped at the remaining balance.
+		// Only a non-positive amount is rejected.
+		if ($amount <= 0) {
 			$this->db->trans_rollback();
 			return FALSE;
 		}
 
 		$new_total_paid = round((float) $record['total_paid'] + $amount, 2);
-		$status = 'unpaid';
-
-		if ($new_total_paid >= (float) $record['final_salary']) {
-			$status = 'paid';
-		} elseif ($new_total_paid > 0) {
-			$status = 'partial';
-		}
+		$status = $this->derive_status($new_total_paid, $record['final_salary'], isset($record['settled']) ? $record['settled'] : 0);
 
 		$this->db
 			->where('id', (int) $record['id'])
@@ -142,6 +168,82 @@ class Salary_model extends CI_Model
 
 		$this->db->trans_commit();
 		return $this->get_record_by_id($record['id']);
+	}
+
+	/**
+	 * Remaining suggested amount still due for a record. A settled month (closed
+	 * by the manager) and any fully/over-paid month both return 0.
+	 */
+	public function remaining_for($record)
+	{
+		if (!$record) {
+			return 0.0;
+		}
+
+		if ((int) (isset($record['settled']) ? $record['settled'] : 0) === 1) {
+			return 0.0;
+		}
+
+		return max(0, round((float) $record['final_salary'] - (float) $record['total_paid'], 2));
+	}
+
+	/**
+	 * Close a salary month even if it was paid for less (or more) than the
+	 * suggested amount. The suggestion is never a hard limit.
+	 */
+	public function settle_record($staff_id, $month)
+	{
+		$this->ensure_schema();
+
+		$record = $this->get_or_create_record($staff_id, $month);
+		$record = $this->sync_record_if_empty($record, $month);
+
+		$this->db
+			->where('id', (int) $record['id'])
+			->update('staff_salary_records', array(
+				'settled' => 1,
+				'status' => 'paid',
+			));
+
+		return $this->get_record_by_id($record['id']);
+	}
+
+	/**
+	 * Re-open a settled month so it accepts more payments and shows its real
+	 * paid/partial/unpaid status again.
+	 */
+	public function reopen_record($staff_id, $month)
+	{
+		$this->ensure_schema();
+
+		$record = $this->get_or_create_record($staff_id, $month);
+		$status = $this->derive_status($record['total_paid'], $record['final_salary'], 0);
+
+		$this->db
+			->where('id', (int) $record['id'])
+			->update('staff_salary_records', array(
+				'settled' => 0,
+				'status' => $status,
+			));
+
+		return $this->get_record_by_id($record['id']);
+	}
+
+	protected function derive_status($total_paid, $final_salary, $settled = 0)
+	{
+		if ((int) $settled === 1) {
+			return 'paid';
+		}
+
+		if ((float) $total_paid <= 0) {
+			return 'unpaid';
+		}
+
+		if ((float) $total_paid >= (float) $final_salary) {
+			return 'paid';
+		}
+
+		return 'partial';
 	}
 
 	public function get_payments_for_record($salary_record_id)
@@ -229,6 +331,7 @@ class Salary_model extends CI_Model
 				'base_salary' => $calculation['base_salary'],
 				'calculated_deduction' => $calculation['deduction'],
 				'final_salary' => $calculation['final_salary'],
+				'daily_rate' => $calculation['daily_rate'],
 			));
 
 		return $this->get_record_by_id($record['id']);
@@ -236,30 +339,44 @@ class Salary_model extends CI_Model
 
 	protected function record_needs_initial_calculation($record)
 	{
+		// Keep the stored suggestion in sync with the staff salary and approved
+		// leaves while the month is still unpaid and nothing has been paid yet.
+		// Once a payment lands (or the month is settled) the figures are pinned.
 		return $record['status'] === 'unpaid'
-			&& (float) $record['base_salary'] == 0.0
-			&& (float) $record['calculated_deduction'] == 0.0
-			&& (float) $record['final_salary'] == 0.0
+			&& (int) (isset($record['settled']) ? $record['settled'] : 0) === 0
 			&& (float) $record['total_paid'] == 0.0;
 	}
 
 	protected function count_approved_leave_days($staff, $from_date, $to_date)
 	{
-		if (empty($staff['user_id'])) {
-			return 0;
+		$detail = $this->approved_leave_days_detail($staff, $from_date, $to_date);
+		return (int) $detail['count'];
+	}
+
+	/**
+	 * Returns the deduplicated set of dates a staff member was on approved leave
+	 * within [from, to]. Overlapping leave rows are merged so a single calendar day
+	 * is never counted twice.
+	 */
+	protected function approved_leave_days_detail($staff, $from_date, $to_date)
+	{
+		$empty = array('count' => 0, 'dates' => array());
+
+		if (empty($staff['id'])) {
+			return $empty;
 		}
 
 		$rows = $this->db
 			->select('start_date, end_date')
 			->from('doctor_leaves')
-			->where('doctor_id', (int) $staff['user_id'])
+			->where('staff_id', (int) $staff['id'])
 			->where('status', 'approved')
 			->where('start_date <=', $to_date)
 			->where('end_date >=', $from_date)
 			->get()
 			->result_array();
 
-		$total_days = 0;
+		$date_set = array();
 
 		foreach ($rows as $row) {
 			$effective_start = max($row['start_date'], $from_date);
@@ -269,12 +386,24 @@ class Salary_model extends CI_Model
 				continue;
 			}
 
-			$start = new DateTime($effective_start);
-			$end = new DateTime($effective_end);
-			$total_days += ((int) $start->diff($end)->days) + 1;
+			$period = new DatePeriod(
+				new DateTime($effective_start),
+				new DateInterval('P1D'),
+				(new DateTime($effective_end))->modify('+1 day')
+			);
+
+			foreach ($period as $date) {
+				$date_set[$date->format('Y-m-d')] = TRUE;
+			}
 		}
 
-		return $total_days;
+		$dates = array_keys($date_set);
+		sort($dates);
+
+		return array(
+			'count' => count($dates),
+			'dates' => $dates,
+		);
 	}
 
 	protected function create_salary_expense($staff_id, $month, $amount, $payment_date, $note, $created_by)
@@ -362,8 +491,10 @@ class Salary_model extends CI_Model
 					`base_salary` decimal(12,2) NOT NULL DEFAULT 0.00,
 					`calculated_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
 					`final_salary` decimal(12,2) NOT NULL DEFAULT 0.00,
+					`daily_rate` decimal(12,4) NOT NULL DEFAULT 0.0000,
 					`total_paid` decimal(12,2) NOT NULL DEFAULT 0.00,
 					`status` enum('unpaid','partial','paid') NOT NULL DEFAULT 'unpaid',
+					`settled` tinyint(1) NOT NULL DEFAULT 0,
 					`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 					`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 					PRIMARY KEY (`id`),
@@ -371,6 +502,16 @@ class Salary_model extends CI_Model
 					CONSTRAINT `staff_salary_records_staff_fk` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 			");
+		} else {
+			if (!$this->db->field_exists('daily_rate', 'staff_salary_records')) {
+				// One-time migration to add daily_rate so already-stored records pin their rate.
+				$this->db->query("ALTER TABLE `staff_salary_records` ADD COLUMN `daily_rate` decimal(12,4) NOT NULL DEFAULT 0.0000 AFTER `final_salary`");
+			}
+
+			if (!$this->db->field_exists('settled', 'staff_salary_records')) {
+				// One-time migration to add the manager-controlled "settled" flag.
+				$this->db->query("ALTER TABLE `staff_salary_records` ADD COLUMN `settled` tinyint(1) NOT NULL DEFAULT 0 AFTER `status`");
+			}
 		}
 
 		if (!$this->db->table_exists('staff_salary_payments')) {

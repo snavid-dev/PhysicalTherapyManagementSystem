@@ -7,7 +7,7 @@ class Leaves extends Authenticated_Controller
 	{
 		parent::__construct();
 		$this->load->model('Leave_model');
-		$this->load->model('User_model');
+		$this->load->model('Staff_model');
 	}
 
 	public function index()
@@ -15,7 +15,7 @@ class Leaves extends Authenticated_Controller
 		$this->require_permission('manage_leaves');
 
 		$this->render('leaves/index', array(
-			'title' => t('Doctor Leaves'),
+			'title' => t('Employee Leaves'),
 			'current_section' => 'leaves',
 			'leaves' => $this->Leave_model->all(),
 		));
@@ -83,13 +83,13 @@ class Leaves extends Authenticated_Controller
 			'current_section' => 'leaves',
 			'leave' => $leave,
 			'action' => $action,
-			'therapists' => $this->User_model->therapists(),
+			'staff_members' => $this->Staff_model->get_active(),
 		));
 	}
 
 	protected function validate_form()
 	{
-		$this->form_validation->set_rules('doctor_id', 'Therapist', 'required|integer');
+		$this->form_validation->set_rules('staff_id', 'Employee', 'required|integer');
 		$this->form_validation->set_rules('start_date', 'Start date', 'required|callback__valid_leave_start_date');
 		$this->form_validation->set_rules('end_date', 'End date', 'required|callback__valid_leave_end_date');
 		$this->form_validation->set_rules('status', 'Status', 'required');
@@ -121,7 +121,7 @@ class Leaves extends Authenticated_Controller
 	protected function leave_payload()
 	{
 		return array(
-			'doctor_id' => (int) $this->input->post('doctor_id'),
+			'staff_id' => (int) $this->input->post('staff_id'),
 			'start_date' => $this->gregorian_date_from_shamsi($this->input->post('start_date', TRUE)),
 			'end_date' => $this->gregorian_date_from_shamsi($this->input->post('end_date', TRUE)),
 			'status' => $this->input->post('status', TRUE),

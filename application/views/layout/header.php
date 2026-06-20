@@ -65,7 +65,7 @@
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'reports' ? 'active' : '' ?>" href="<?= base_url('reports') ?>"><?= t('Reports') ?></a></li>
 				<?php endif; ?>
 				<?php if ($this->auth->has_permission('manage_leaves')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'leaves' ? 'active' : '' ?>" href="<?= base_url('leaves') ?>"><?= t('Doctor Leaves') ?></a></li>
+					<li class="nav-item"><a class="nav-link <?= $current_section === 'leaves' ? 'active' : '' ?>" href="<?= base_url('leaves') ?>"><?= t('Employee Leaves') ?></a></li>
 				<?php endif; ?>
 				<?php if ($this->auth->has_permission('manage_staff')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'staff' ? 'active' : '' ?>" href="<?= base_url('staff') ?>"><?= t('Staff') ?></a></li>
