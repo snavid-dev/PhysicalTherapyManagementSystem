@@ -134,6 +134,8 @@
 		var noSortCols = parseNoSortColumns($table);
 		var columns = parseColumnWidths($table);
 		var columnDefs = [];
+		var serverUrl = $table.data('dt-server');
+		var isServer = !!serverUrl;
 		var api;
 		var tableKey;
 
@@ -153,8 +155,10 @@
 		}
 
 		api = $table.DataTable({
-			processing: false,
-			serverSide: false,
+			processing: isServer,
+			serverSide: isServer,
+			ajax: isServer ? { url: serverUrl, type: 'GET' } : undefined,
+			deferRender: isServer,
 			order: [[parseOrderColumn($table), $table.data('order-dir') || 'desc']],
 			pageLength: 25,
 			lengthMenu: [10, 25, 50, 100],

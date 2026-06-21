@@ -100,27 +100,19 @@ class Shamsi
 			return '';
 		}
 
-		$days_in_month = (int) date('t', strtotime(sprintf('%04d-%02d-01', $year, $month)));
+		// Map to the Shamsi month that DOMINATES this Gregorian month by sampling
+		// the 15th (mid-month). Keying off the 1st-of-a-Shamsi-month that merely
+		// begins inside the Gregorian month was wrong: e.g. June mostly falls in
+		// Khordad (month 3) yet Tir (month 4) begins on ~June 22, so the old logic
+		// reported month 4. Mid-month sampling reports Khordad as expected and stays
+		// consistent with shamsi_month_to_gregorian (which also samples the 15th).
+		$shamsi = $this->to_shamsi(sprintf('%04d-%02d-15', $year, $month));
 
-		for ($day = 1; $day <= $days_in_month; $day++) {
-			$shamsi = $this->to_shamsi(sprintf('%04d-%02d-%02d', $year, $month, $day));
-			if ($shamsi === '') {
-				continue;
-			}
-
-			$parts = explode('/', $shamsi);
-			if (count($parts) === 3 && $parts[2] === '01') {
-				return $parts[0] . '/' . $parts[1];
-			}
-		}
-
-		$fallback = $this->to_shamsi(sprintf('%04d-%02d-01', $year, $month));
-
-		if ($fallback === '') {
+		if ($shamsi === '') {
 			return '';
 		}
 
-		$parts = explode('/', $fallback);
+		$parts = explode('/', $shamsi);
 		return count($parts) === 3 ? ($parts[0] . '/' . $parts[1]) : '';
 	}
 
@@ -132,7 +124,10 @@ class Shamsi
 			return '';
 		}
 
-		$gregorian = $this->to_gregorian(sprintf('%04d/%02d/01', (int) $matches[1], (int) $matches[2]));
+		// Sample the 15th (mid-month) so a Shamsi month maps to the Gregorian month
+		// it mostly overlaps, keeping the round-trip with gregorian_month_to_shamsi
+		// stable (both directions sample mid-month).
+		$gregorian = $this->to_gregorian(sprintf('%04d/%02d/15', (int) $matches[1], (int) $matches[2]));
 
 		return $gregorian === '' ? '' : substr($gregorian, 0, 7);
 	}

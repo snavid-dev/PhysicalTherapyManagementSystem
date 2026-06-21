@@ -63,6 +63,7 @@ $route['roles/(:num)/update'] = 'Roles/update/$1';
 $route['roles/(:num)/delete'] = 'Roles/delete/$1';
 
 $route['turns'] = 'Turns/index';
+$route['turns/datatable'] = 'Turns/datatable';
 $route['turns/create'] = 'Turns/create';
 $route['turns/bulk'] = 'Turns/bulk_create';
 $route['turns/bulk/store'] = 'Turns/bulk_store';
@@ -89,6 +90,7 @@ $route['expenses/delete/(:num)'] = 'expenses/delete/$1';
 $route['salaries'] = 'salaries/index';
 $route['salaries/pay/(:num)'] = 'salaries/pay/$1';
 $route['salaries/store-payment'] = 'salaries/store_payment';
+$route['salaries/payment/(:num)/delete'] = 'salaries/delete_payment/$1';
 $route['salaries/settle/(:num)'] = 'salaries/settle/$1';
 $route['salaries/reopen/(:num)'] = 'salaries/reopen/$1';
 $route['salaries/get-calculation'] = 'salaries/get_calculation';

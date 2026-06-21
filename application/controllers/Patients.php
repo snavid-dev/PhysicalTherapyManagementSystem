@@ -419,12 +419,11 @@ class Patients extends Authenticated_Controller
 		$this->Wallet_model->ensure_wallet_exists($id);
 		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $id));
 
+		// A patient can pay money even with no open debt: prepayment (no treatment
+		// yet) or a debt that was mis-zeroed. record_standalone_debt_payment applies
+		// the amount to any open debts oldest-first and routes the remainder to the
+		// wallet, logging it to the safe so it still shows in the daily report.
 		$total_open_debt = (float) $this->Debt_model->get_total_open_debt($id);
-
-		if ($total_open_debt <= 0) {
-			$this->db->trans_rollback();
-			return $this->respond_wallet_topup_error($id, t('No open debt available to clear.'), 422, $wants_json);
-		}
 
 		$payment_id = $this->record_standalone_debt_payment($id, $amount, $payment_date, $payment_note);
 

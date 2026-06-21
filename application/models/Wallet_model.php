@@ -637,7 +637,13 @@ class Wallet_model extends CI_Model
 			}
 
 			if ($net_amount > 0) {
-				$deducted = $this->deduct(
+				// FORCED reversal: remove the turn's full positive contribution even
+				// when the live balance is lower. The credit was already spent by
+				// later turns, so a normal capped deduct() would under-reverse and
+				// fail. This is an internal bookkeeping step inside an edit/delete:
+				// the re-apply restores the balance and recalculate_for_patient
+				// reconciles the final figure (clamped to >= 0) at the end.
+				$reversed = $this->force_reverse_credit(
 					$patient_id,
 					$net_amount,
 					$turn_id,
@@ -645,7 +651,7 @@ class Wallet_model extends CI_Model
 					$fund_type
 				);
 
-				if ($deducted === FALSE || abs((float) $deducted - $net_amount) > 0.009) {
+				if ($reversed === FALSE) {
 					return FALSE;
 				}
 
@@ -669,6 +675,52 @@ class Wallet_model extends CI_Model
 		}
 
 		return $total_reversed;
+	}
+
+	/**
+	 * Insert an exact reversing deduction for a turn's spent credit, bypassing the
+	 * normal balance cap in deduct(). Used only by reverse_turn_balance_effect when
+	 * unwinding a turn whose topup credit was already consumed by later turns. The
+	 * persisted balance may dip negative here; recalculate_for_patient recomputes it
+	 * from the raw transaction log (clamped to >= 0) once the edit/delete completes.
+	 */
+	protected function force_reverse_credit($patient_id, $amount, $turn_id, $note, $fund_type)
+	{
+		$patient_id = (int) $patient_id;
+		$amount = round((float) $amount, 2);
+		$fund_type = $this->normalize_fund_type($fund_type);
+
+		$this->ensure_wallet_exists($patient_id);
+
+		if ($amount <= 0) {
+			return 0.00;
+		}
+
+		$current_balance = $this->get_balance($patient_id);
+		$new_balance = round($current_balance - $amount, 2);
+
+		$updated = $this->db
+			->where('patient_id', $patient_id)
+			->update('patient_wallet', array('balance' => $new_balance));
+
+		if (!$updated) {
+			return FALSE;
+		}
+
+		$inserted = $this->db->insert('patient_wallet_transactions', array(
+			'patient_id' => $patient_id,
+			'turn_id' => $turn_id ? (int) $turn_id : NULL,
+			'type' => 'deduction',
+			'fund_type' => $fund_type,
+			'amount' => $amount,
+			'note' => $note,
+		));
+
+		if (!$inserted) {
+			return FALSE;
+		}
+
+		return $amount;
 	}
 
 	protected function ensure_schema()
