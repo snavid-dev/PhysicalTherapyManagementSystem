@@ -420,10 +420,62 @@ class Patients extends Authenticated_Controller
 		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $id));
 
 		// A patient can pay money even with no open debt: prepayment (no treatment
-		// yet) or a debt that was mis-zeroed. record_standalone_debt_payment applies
-		// the amount to any open debts oldest-first and routes the remainder to the
-		// wallet, logging it to the safe so it still shows in the daily report.
+		// yet). With an open debt, record_standalone_debt_payment applies the amount
+		// oldest-first and routes any remainder to the wallet.
 		$total_open_debt = (float) $this->Debt_model->get_total_open_debt($id);
+
+		if ($total_open_debt <= 0) {
+			// No open debt — record the money as wallet credit (prepayment). It still
+			// appears in the daily report as income, and unlike a standalone payment
+			// row it does not desync the safe ledger's payment reconciliation (which
+			// expects every payments row to have a patient_(debt_)payment safe entry).
+			$payment_datetime = $this->payment_datetime_from_date($payment_date);
+			$topped = $this->Wallet_model->top_up_cash($id, $amount, NULL, $payment_note, $payment_datetime);
+
+			if ($topped === FALSE) {
+				$this->db->trans_rollback();
+				return $this->respond_wallet_topup_error($id, t('Unable to record debt payment right now.'), 500, $wants_json);
+			}
+
+			$latest_wallet_tx = $this->Wallet_model->get_transactions($id, 1);
+			$wallet_ref = !empty($latest_wallet_tx[0]['id']) ? (int) $latest_wallet_tx[0]['id'] : (int) $id;
+			$wallet_ref_table = !empty($latest_wallet_tx[0]['id']) ? 'patient_wallet_transactions' : 'patients';
+
+			$safe_logged = $this->Safe_model->log_transaction(
+				'in',
+				'wallet_topup',
+				$amount,
+				$wallet_ref,
+				$wallet_ref_table,
+				$payment_note,
+				$this->session->userdata('user_id'),
+				$payment_datetime
+			);
+
+			if ($safe_logged === FALSE || $this->db->trans_status() === FALSE) {
+				$this->db->trans_rollback();
+				return $this->respond_wallet_topup_error($id, t('Unable to record debt payment right now.'), 500, $wants_json);
+			}
+
+			$this->db->trans_commit();
+			$this->Wallet_model->recalculate_for_patient($id);
+
+			if (!$wants_json) {
+				$this->session->set_flashdata('success', t('Debt payment recorded successfully.'));
+				redirect('patients/' . $id);
+			}
+
+			$financial_payload = $this->financial_profile_payload($id);
+
+			return $this->output
+				->set_content_type('application/json')
+				->set_output(json_encode(array_merge($financial_payload, array(
+					'success' => TRUE,
+					'message' => t('Debt payment recorded successfully.'),
+					'applied_amount' => 0.0,
+					'overflow_amount' => (float) $amount,
+				))));
+		}
 
 		$payment_id = $this->record_standalone_debt_payment($id, $amount, $payment_date, $payment_note);
 

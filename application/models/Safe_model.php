@@ -908,7 +908,8 @@ class Safe_model extends CI_Model
 		// re-insert standalone debt payments as duplicates.
 		$existing_payment_ids = array_map('intval', array_column(
 			$this->db
-				->select('DISTINCT reference_id')
+				->distinct()
+				->select('reference_id')
 				->from('safe_transactions')
 				->where_in('source', array('patient_payment', 'patient_debt_payment'))
 				->where('reference_table', 'payments')
