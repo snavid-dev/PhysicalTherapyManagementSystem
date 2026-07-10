@@ -11,7 +11,7 @@
 	</div>
 
 	<?php if ($msg = $this->session->flashdata('success')): ?>
-		<div class="alert alert-success"><?= h($msg) ?></div>
+		<div class="alert alert-success"><?= html_escape($msg) ?></div>
 	<?php endif; ?>
 
 	<?php if (empty($suppliers)): ?>
@@ -21,18 +21,18 @@
 			<table class="table table-hover">
 				<thead class="table-light">
 					<tr>
-						<th><?= t('name') ?></th>
+						<th><?= t('Name') ?></th>
 						<th><?= t('contact') ?></th>
-						<th><?= t('actions') ?></th>
+						<th><?= t('Actions') ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach ($suppliers as $s): ?>
 						<tr>
-							<td><?= h($s['name']) ?></td>
-							<td><?= h($s['contact'] ?: '—') ?></td>
+							<td><?= html_escape($s['name']) ?></td>
+							<td><?= html_escape($s['contact'] ?: '—') ?></td>
 							<td>
-								<a href="<?= site_url('store/edit_supplier/' . $s['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('edit') ?></a>
+								<a href="<?= site_url('store/edit_supplier/' . $s['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('Edit') ?></a>
 							</td>
 						</tr>
 					<?php endforeach; ?>

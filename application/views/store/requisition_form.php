@@ -12,7 +12,7 @@
 						<option value="">— <?= t('select_location') ?> —</option>
 						<?php foreach ($locations as $loc): ?>
 							<?php if ($loc['type'] !== 'warehouse'): ?>
-								<option value="<?= $loc['id'] ?>"><?= h($loc['name']) ?></option>
+								<option value="<?= $loc['id'] ?>"><?= html_escape($loc['name']) ?></option>
 							<?php endif; ?>
 						<?php endforeach; ?>
 					</select>
@@ -28,27 +28,12 @@
 								<thead>
 									<tr>
 										<th><?= t('product_variant') ?></th>
-										<th><?= t('quantity') ?></th>
-										<th><?= t('warehouse_available') ?></th>
-										<th><?= t('action') ?></th>
+										<th style="width:120px"><?= t('quantity') ?></th>
+										<th style="width:120px"><?= t('warehouse_available') ?></th>
+										<th></th>
 									</tr>
 								</thead>
-								<tbody id="items-tbody">
-									<tr class="item-row" data-row="0">
-										<td>
-											<select name="variant_id[]" class="form-select select2 variant-select" required>
-												<option value="">— <?= t('select_variant') ?> —</option>
-											</select>
-										</td>
-										<td>
-											<input type="number" name="qty[]" class="form-control qty-input" min="1" value="1" required>
-										</td>
-										<td class="available-qty">0</td>
-										<td>
-											<button type="button" class="btn btn-sm btn-outline-danger remove-row" style="display: none;"><?= t('remove') ?></button>
-										</td>
-									</tr>
-								</tbody>
+								<tbody id="items-tbody"></tbody>
 							</table>
 						</div>
 						<button type="button" class="btn btn-sm btn-outline-success mt-2" id="add-row"><?= t('add_line') ?></button>
@@ -64,37 +49,49 @@
 	</div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-	const products = <?= json_encode($this->Store_model->get_all_products()) ?>;
+<template id="row-template">
+	<tr class="item-row">
+		<td>
+			<select name="variant_id[]" class="form-select s2-select variant-select" data-placeholder="<?= html_escape(t('select_variant')) ?>" required>
+				<option value=""></option>
+				<?php foreach ($products as $product): ?>
+					<?php foreach ($product['variants'] as $variant): ?>
+						<option value="<?= (int) $variant['id'] ?>" data-available="<?= (int) $variant['warehouse_available'] ?>">
+							<?= html_escape($product['name'] . ' — ' . $variant['variant_label']) ?>
+						</option>
+					<?php endforeach; ?>
+				<?php endforeach; ?>
+			</select>
+		</td>
+		<td><input type="number" name="qty[]" class="form-control qty-input" min="1" value="1" required></td>
+		<td class="available-qty text-muted">—</td>
+		<td><button type="button" class="btn btn-sm btn-outline-danger remove-row"><?= t('remove') ?></button></td>
+	</tr>
+</template>
 
-	function buildVariantOptions() {
-		let options = '<option value="">— <?= t("select_variant") ?> —</option>';
-		products.forEach(p => {
-			const variants = <?= json_encode($this->Store_model->get_variants_by_product(0)) ?>;
-			// Need to fetch variants dynamically - simplified approach
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	const tbody = document.getElementById('items-tbody');
+	const template = document.getElementById('row-template');
+
+	function addRow() {
+		const row = template.content.firstElementChild.cloneNode(true);
+		tbody.appendChild(row);
+
+		const select = row.querySelector('.variant-select');
+		if (window.initSelect2) initSelect2(row);
+
+		jQuery(select).on('select2:select select2:clear', function () {
+			const opt = select.options[select.selectedIndex];
+			row.querySelector('.available-qty').textContent = opt && opt.value ? (opt.dataset.available || '0') : '—';
 		});
-		return options;
+
+		row.querySelector('.remove-row').addEventListener('click', function () {
+			row.remove();
+		});
 	}
 
-	jQuery('.select2').select2();
-
-	document.getElementById('add-row').addEventListener('click', function() {
-		const tbody = document.getElementById('items-tbody');
-		const newRow = tbody.rows[0].cloneNode(true);
-		const rowNum = tbody.rows.length;
-		newRow.dataset.row = rowNum;
-		newRow.querySelector('.remove-row').style.display = 'inline-block';
-		newRow.querySelector('select').value = '';
-		newRow.querySelector('input').value = '1';
-		tbody.appendChild(newRow);
-		jQuery(newRow.querySelector('.select2')).select2();
-	});
-
-	document.addEventListener('click', function(e) {
-		if (e.target.classList.contains('remove-row')) {
-			e.target.closest('tr').remove();
-		}
-	});
+	document.getElementById('add-row').addEventListener('click', addRow);
+	addRow();
 });
 </script>

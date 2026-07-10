@@ -4,8 +4,8 @@
 	<div class="row">
 		<div class="col-md-10 offset-md-1">
 			<h2><?= t('approve_requisition') ?></h2>
-			<p><?= t('from') ?>: <strong><?= h($requisition['from_location']) ?></strong> → <strong><?= h($requisition['to_location']) ?></strong></p>
-			<p><?= t('requested_by') ?>: <?= h($requisition['first_name'] . ' ' . $requisition['last_name']) ?></p>
+			<p><?= t('from') ?>: <strong><?= html_escape($requisition['from_location']) ?></strong> → <strong><?= html_escape($requisition['to_location']) ?></strong></p>
+			<p><?= t('requested_by') ?>: <?= html_escape($requisition['first_name'] . ' ' . $requisition['last_name']) ?></p>
 
 			<form method="post" class="card">
 				<div class="card-header">
@@ -14,7 +14,7 @@
 				<div class="card-body">
 					<?php if ($msg = $this->session->flashdata('error')): ?>
 						<div class="alert alert-danger alert-dismissible fade show" role="alert">
-							<?= h($msg) ?>
+							<?= html_escape($msg) ?>
 							<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 						</div>
 					<?php endif; ?>
@@ -37,8 +37,8 @@
 										$avail_qty = $available ? $available['qty_on_hand'] : 0;
 									?>
 									<tr>
-										<td><?= h($item['product_name']) ?></td>
-										<td><?= h($item['variant_label']) ?></td>
+										<td><?= html_escape($item['product_name']) ?></td>
+										<td><?= html_escape($item['variant_label']) ?></td>
 										<td><?= (int) $item['qty_requested'] ?></td>
 										<td><?= (int) $avail_qty ?></td>
 										<td>

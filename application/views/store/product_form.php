@@ -12,7 +12,7 @@
 						<option value="">— <?= t('select_category') ?> —</option>
 						<?php foreach ($categories as $cat): ?>
 							<option value="<?= $cat['id'] ?>" <?= isset($product) && $product['category_id'] == $cat['id'] ? 'selected' : '' ?>>
-								<?= h($cat['name']) ?>
+								<?= html_escape($cat['name']) ?>
 							</option>
 						<?php endforeach; ?>
 					</select>
@@ -20,17 +20,17 @@
 
 				<div class="mb-3">
 					<label class="form-label"><?= t('product_name') ?></label>
-					<input type="text" name="product_name" class="form-control" value="<?= isset($product) ? h($product['name']) : '' ?>" required>
+					<input type="text" name="product_name" class="form-control" value="<?= isset($product) ? html_escape($product['name']) : '' ?>" required>
 				</div>
 
 				<div class="mb-3">
 					<label class="form-label"><?= t('brand') ?></label>
-					<input type="text" name="brand" class="form-control" value="<?= isset($product) ? h($product['brand'] ?: '') : '' ?>">
+					<input type="text" name="brand" class="form-control" value="<?= isset($product) ? html_escape($product['brand'] ?: '') : '' ?>">
 				</div>
 
 				<div class="mb-3">
 					<label class="form-label"><?= t('unit') ?></label>
-					<input type="text" name="unit" class="form-control" value="<?= isset($product) ? h($product['unit']) : 'piece' ?>">
+					<input type="text" name="unit" class="form-control" value="<?= isset($product) ? html_escape($product['unit']) : 'piece' ?>">
 				</div>
 
 				<?php if (!isset($product)): ?>

@@ -32,9 +32,10 @@ class Inventory_model extends CI_Model
 	public function get_all_stock_levels($variant_id = NULL)
 	{
 		$this->db
-			->select('stock_levels.*, store_product_variants.variant_label, store_locations.name as location_name')
+			->select('stock_levels.*, store_product_variants.variant_label, store_products.name as product_name, store_locations.name as location_name')
 			->from('stock_levels')
 			->join('store_product_variants', 'stock_levels.variant_id = store_product_variants.id')
+			->join('store_products', 'store_product_variants.product_id = store_products.id')
 			->join('store_locations', 'stock_levels.location_id = store_locations.id');
 
 		if ($variant_id !== NULL) {

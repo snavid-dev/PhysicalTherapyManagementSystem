@@ -4,7 +4,7 @@
 	<div class="row">
 		<div class="col-md-10 offset-md-1">
 			<h2><?= t('receive_requisition') ?></h2>
-			<p><?= t('from') ?>: <strong><?= h($requisition['from_location']) ?></strong> → <strong><?= h($requisition['to_location']) ?></strong></p>
+			<p><?= t('from') ?>: <strong><?= html_escape($requisition['from_location']) ?></strong> → <strong><?= html_escape($requisition['to_location']) ?></strong></p>
 
 			<form method="post" class="card">
 				<div class="card-header">
@@ -13,7 +13,7 @@
 				<div class="card-body">
 					<?php if ($msg = $this->session->flashdata('error')): ?>
 						<div class="alert alert-danger alert-dismissible fade show" role="alert">
-							<?= h($msg) ?>
+							<?= html_escape($msg) ?>
 							<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 						</div>
 					<?php endif; ?>
@@ -26,14 +26,14 @@
 									<th><?= t('variant') ?></th>
 									<th><?= t('qty_approved') ?></th>
 									<th><?= t('qty_received') ?></th>
-									<th><?= t('status') ?></th>
+									<th><?= t('Status') ?></th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php foreach ($items as $item): ?>
 									<tr>
-										<td><?= h($item['product_name']) ?></td>
-										<td><?= h($item['variant_label']) ?></td>
+										<td><?= html_escape($item['product_name']) ?></td>
+										<td><?= html_escape($item['variant_label']) ?></td>
 										<td><?= (int) $item['qty_approved'] ?></td>
 										<td>
 											<input type="number" name="qty_received_<?= (int) $item['id'] ?>" class="form-control" min="0" max="<?= (int) $item['qty_approved'] ?>" value="<?= (int) $item['qty_approved'] ?>" required>

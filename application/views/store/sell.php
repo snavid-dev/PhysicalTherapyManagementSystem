@@ -9,135 +9,156 @@
 
 	<?php if ($msg = $this->session->flashdata('success')): ?>
 		<div class="alert alert-success alert-dismissible fade show" role="alert">
-			<?= h($msg) ?>
+			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
 	<?php endif; ?>
 	<?php if ($msg = $this->session->flashdata('error')): ?>
 		<div class="alert alert-danger alert-dismissible fade show" role="alert">
-			<?= h($msg) ?>
+			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
 	<?php endif; ?>
 
-	<div class="row">
-		<div class="col-md-8">
-			<div class="card">
-				<div class="card-header">
-					<h5 class="mb-0"><?= t('cart') ?></h5>
+	<form method="post" id="sale-form">
+		<div class="row">
+			<div class="col-lg-5 order-lg-2 mb-4 mb-lg-0">
+				<div class="card">
+					<div class="card-header">
+						<input type="search" id="product-search" class="form-control form-control-sm" placeholder="<?= html_escape(t('search_product')) ?>">
+					</div>
+					<div class="card-body d-grid gap-2" id="product-grid" style="max-height: 640px; overflow-y: auto;">
+						<?php foreach ($products as $product): ?>
+							<?php foreach ($product['variants'] as $variant): ?>
+								<button type="button"
+									class="btn btn-outline-primary text-start product-btn"
+									data-variant-id="<?= (int) $variant['id'] ?>"
+									data-search="<?= html_escape(mb_strtolower($product['name'] . ' ' . $variant['variant_label'])) ?>"
+									data-name="<?= html_escape($product['name'] . ' — ' . $variant['variant_label']) ?>"
+									data-price="<?= (float) $variant['sell_price'] ?>">
+									<div class="fw-semibold"><?= html_escape($product['name']) ?></div>
+									<div class="small text-muted d-flex justify-content-between">
+										<span><?= html_escape($variant['variant_label']) ?></span>
+										<span><?= number_format($variant['sell_price'], 2) ?> AFN</span>
+									</div>
+								</button>
+							<?php endforeach; ?>
+						<?php endforeach; ?>
+						<?php if (empty($products)): ?>
+							<div class="text-muted text-center py-4"><?= t('no_products_found') ?></div>
+						<?php endif; ?>
+					</div>
 				</div>
-				<div class="card-body">
-					<form method="post" id="sale-form">
+			</div>
+
+			<div class="col-lg-7 order-lg-1">
+				<div class="card">
+					<div class="card-header">
+						<h5 class="mb-0"><?= t('cart') ?></h5>
+					</div>
+					<div class="card-body">
 						<div class="mb-3">
 							<label class="form-label"><?= t('patient') ?></label>
-							<select name="patient_id" class="form-select select2">
-								<option value="">— <?= t('walk_in_customer') ?> —</option>
+							<select name="patient_id" class="form-select s2-select" data-placeholder="<?= html_escape(t('search_patient')) ?>">
+								<option value=""><?= t('walk_in_customer') ?></option>
+								<?php foreach ($patients as $patient): ?>
+									<?php
+										$last_or_father = $patient['last_name'] ?: ($patient['father_name'] ?? '');
+										$patient_name = trim($patient['first_name'] . ' ' . $last_or_father);
+									?>
+									<option value="<?= (int) $patient['id'] ?>"><?= html_escape($patient_name) ?></option>
+								<?php endforeach; ?>
 							</select>
 						</div>
 
 						<div class="table-responsive mb-3">
-							<table class="table mb-0" id="cart-table">
+							<table class="table mb-0 align-middle" id="cart-table">
 								<thead>
 									<tr>
 										<th><?= t('product_variant') ?></th>
-										<th><?= t('qty') ?></th>
-										<th><?= t('price') ?></th>
-										<th><?= t('total') ?></th>
-										<th><?= t('action') ?></th>
+										<th style="width:90px"><?= t('qty') ?></th>
+										<th style="width:110px"><?= t('price') ?></th>
+										<th style="width:110px"><?= t('total') ?></th>
+										<th></th>
 									</tr>
 								</thead>
 								<tbody id="cart-items">
 									<tr class="empty-row">
-										<td colspan="5" class="text-center text-muted"><?= t('no_items_in_cart') ?></td>
+										<td colspan="5" class="text-center text-muted py-4"><?= t('no_items_in_cart') ?></td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
 
-						<button type="button" class="btn btn-sm btn-outline-success mb-3" id="add-item-btn"><?= t('add_item') ?></button>
+						<details class="mb-3">
+							<summary class="text-muted small"><?= t('add_item_manually') ?></summary>
+							<div class="d-flex gap-2 mt-2">
+								<select id="manual-variant-select" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_variant')) ?>">
+									<option value=""></option>
+									<?php foreach ($products as $product): ?>
+										<?php foreach ($product['variants'] as $variant): ?>
+											<option value="<?= (int) $variant['id'] ?>" data-price="<?= (float) $variant['sell_price'] ?>" data-name="<?= html_escape($product['name'] . ' — ' . $variant['variant_label']) ?>">
+												<?= html_escape($product['name'] . ' — ' . $variant['variant_label']) ?>
+											</option>
+										<?php endforeach; ?>
+									<?php endforeach; ?>
+								</select>
+							</div>
+						</details>
 
 						<div class="row mb-3">
-							<div class="col-md-6">
-								<label><?= t('subtotal') ?></label>
-								<div class="input-group">
-									<input type="text" class="form-control" id="subtotal" readonly>
-									<span class="input-group-text">AFN</span>
-								</div>
+							<div class="col-6 col-md-3">
+								<label class="form-label small"><?= t('subtotal') ?></label>
+								<input type="text" class="form-control" id="subtotal" readonly>
 							</div>
-							<div class="col-md-6">
-								<label><?= t('discount') ?></label>
-								<div class="input-group">
-									<input type="number" name="discount" class="form-control" step="0.01" value="0" id="discount-input">
-									<span class="input-group-text">AFN</span>
-								</div>
+							<div class="col-6 col-md-3">
+								<label class="form-label small"><?= t('discount') ?></label>
+								<input type="number" name="discount" class="form-control" step="0.01" value="0" id="discount-input">
 							</div>
-						</div>
-
-						<div class="row mb-3">
-							<div class="col-md-6">
-								<label><?= t('tax') ?></label>
-								<div class="input-group">
-									<input type="number" name="tax" class="form-control" step="0.01" value="0" id="tax-input">
-									<span class="input-group-text">AFN</span>
-								</div>
+							<div class="col-6 col-md-3">
+								<label class="form-label small"><?= t('tax') ?></label>
+								<input type="number" name="tax" class="form-control" step="0.01" value="0" id="tax-input">
 							</div>
-							<div class="col-md-6">
-								<label><?= t('total') ?></label>
-								<div class="input-group">
-									<input type="text" class="form-control" id="total" readonly style="font-weight: bold;">
-									<span class="input-group-text">AFN</span>
-								</div>
+							<div class="col-6 col-md-3">
+								<label class="form-label small fw-semibold"><?= t('total') ?></label>
+								<input type="text" class="form-control fw-bold" id="total" readonly>
 							</div>
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label"><?= t('payment_method') ?></label>
-							<select name="payment_method" class="form-select" required>
-								<option value="cash"><?= t('cash') ?></option>
-								<option value="card"><?= t('card') ?></option>
-								<option value="wallet"><?= t('wallet') ?></option>
-								<option value="prepayment"><?= t('prepayment') ?></option>
-							</select>
+							<div class="btn-group w-100" role="group">
+								<input type="radio" class="btn-check" name="payment_method" id="pm-cash" value="cash" checked>
+								<label class="btn btn-outline-secondary" for="pm-cash"><?= t('cash') ?></label>
+
+								<input type="radio" class="btn-check" name="payment_method" id="pm-card" value="card">
+								<label class="btn btn-outline-secondary" for="pm-card"><?= t('card') ?></label>
+
+								<input type="radio" class="btn-check" name="payment_method" id="pm-wallet" value="wallet">
+								<label class="btn btn-outline-secondary" for="pm-wallet"><?= t('wallet') ?></label>
+
+								<input type="radio" class="btn-check" name="payment_method" id="pm-prepayment" value="prepayment">
+								<label class="btn btn-outline-secondary" for="pm-prepayment"><?= t('prepayment') ?></label>
+							</div>
 						</div>
 
-						<div class="d-flex gap-2">
-							<button type="submit" class="btn btn-primary"><?= t('complete_sale') ?></button>
-							<button type="reset" class="btn btn-secondary"><?= t('clear_cart') ?></button>
-						</div>
-					</form>
+						<button type="submit" class="btn btn-primary btn-lg w-100" id="complete-sale-btn" disabled><?= t('complete_sale') ?></button>
+					</div>
 				</div>
 			</div>
 		</div>
-
-		<div class="col-md-4">
-			<div class="card">
-				<div class="card-header">
-					<h5 class="mb-0"><?= t('quick_products') ?></h5>
-				</div>
-				<div class="card-body" style="max-height: 600px; overflow-y: auto;">
-					<?php
-						$products = $this->Store_model->get_all_products();
-						foreach ($products as $product):
-							$variants = $this->Store_model->get_variants_by_product($product['id']);
-							foreach ($variants as $variant):
-					?>
-						<button type="button" class="btn btn-sm btn-outline-primary w-100 mb-2 add-variant-btn" data-variant-id="<?= $variant['id'] ?>" data-name="<?= h($product['name'] . ' - ' . $variant['variant_label']) ?>" data-price="<?= (float) $variant['sell_price'] ?>">
-							<?= h($product['name']) ?><br><small><?= h($variant['variant_label']) ?> - <?= (float) $variant['sell_price'] ?> AFN</small>
-						</button>
-					<?php endforeach; endforeach; ?>
-				</div>
-			</div>
-		</div>
-	</div>
+	</form>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-	let itemCounter = 0;
+document.addEventListener('DOMContentLoaded', function () {
+	const cartItems = document.getElementById('cart-items');
+	const completeBtn = document.getElementById('complete-sale-btn');
+	const emptyRowHtml = '<tr class="empty-row"><td colspan="5" class="text-center text-muted py-4"><?= t("no_items_in_cart") ?></td></tr>';
 
 	function calculateTotals() {
 		let subtotal = 0;
-		document.querySelectorAll('.item-row').forEach(row => {
+		cartItems.querySelectorAll('.item-row').forEach(function (row) {
 			const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
 			const price = parseFloat(row.querySelector('.price-input').value) || 0;
 			const line = qty * price;
@@ -146,89 +167,78 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 
 		document.getElementById('subtotal').value = subtotal.toFixed(2);
-
 		const discount = parseFloat(document.getElementById('discount-input').value) || 0;
 		const tax = parseFloat(document.getElementById('tax-input').value) || 0;
-		const total = subtotal - discount + tax;
+		document.getElementById('total').value = (subtotal - discount + tax).toFixed(2);
 
-		document.getElementById('total').value = total.toFixed(2);
+		completeBtn.disabled = cartItems.querySelectorAll('.item-row').length === 0;
 	}
 
-	document.getElementById('add-item-btn').addEventListener('click', function() {
-		const tbody = document.getElementById('cart-items');
-		if (document.querySelector('.empty-row')) {
-			document.querySelector('.empty-row').remove();
+	function addToCart(variantId, name, price) {
+		const existing = cartItems.querySelector('.item-row[data-variant-id="' + variantId + '"]');
+		if (existing) {
+			const qtyInput = existing.querySelector('.qty-input');
+			qtyInput.value = parseInt(qtyInput.value, 10) + 1;
+			calculateTotals();
+			return;
 		}
 
-		const newRow = document.createElement('tr');
-		newRow.className = 'item-row';
-		newRow.innerHTML = `
-			<td>
-				<select name="variant_id[]" class="form-select form-select-sm select2" required>
-					<option value="">— <?= t("select_variant") ?> —</option>
-				</select>
-			</td>
-			<td><input type="number" name="qty[]" class="form-control form-control-sm qty-input" min="1" value="1" required></td>
-			<td><input type="number" name="price[]" class="form-control form-control-sm price-input" step="0.01" value="0" required></td>
-			<td><span class="line-total">0.00</span></td>
-			<td><button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"><?= t("remove") ?></button></td>
-		`;
+		if (cartItems.querySelector('.empty-row')) {
+			cartItems.querySelector('.empty-row').remove();
+		}
 
-		tbody.appendChild(newRow);
-		jQuery(newRow.querySelector('.select2')).select2();
+		const row = document.createElement('tr');
+		row.className = 'item-row';
+		row.dataset.variantId = variantId;
+		row.innerHTML =
+			'<td>' +
+				'<input type="hidden" name="variant_id[]" value="' + variantId + '">' +
+				name +
+			'</td>' +
+			'<td><input type="number" name="qty[]" class="form-control form-control-sm qty-input" min="1" value="1" required></td>' +
+			'<td><input type="number" name="price[]" class="form-control form-control-sm price-input" step="0.01" value="' + price.toFixed(2) + '" required></td>' +
+			'<td class="line-total">0.00</td>' +
+			'<td><button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">&times;</button></td>';
 
-		newRow.querySelector('.qty-input').addEventListener('change', calculateTotals);
-		newRow.querySelector('.price-input').addEventListener('change', calculateTotals);
-		newRow.querySelector('.remove-item-btn').addEventListener('click', function() {
-			newRow.remove();
-			if (document.querySelectorAll('.item-row').length === 0) {
-				const emptyRow = document.createElement('tr');
-				emptyRow.className = 'empty-row';
-				emptyRow.innerHTML = `<td colspan="5" class="text-center text-muted"><?= t("no_items_in_cart") ?></td>`;
-				tbody.appendChild(emptyRow);
+		cartItems.appendChild(row);
+		row.querySelector('.qty-input').addEventListener('change', calculateTotals);
+		row.querySelector('.price-input').addEventListener('change', calculateTotals);
+		row.querySelector('.remove-item-btn').addEventListener('click', function () {
+			row.remove();
+			if (!cartItems.querySelector('.item-row')) {
+				cartItems.innerHTML = emptyRowHtml;
 			}
 			calculateTotals();
 		});
+
+		calculateTotals();
+	}
+
+	document.querySelectorAll('.product-btn').forEach(function (btn) {
+		btn.addEventListener('click', function () {
+			addToCart(btn.dataset.variantId, btn.dataset.name, parseFloat(btn.dataset.price));
+		});
 	});
 
-	document.querySelectorAll('.add-variant-btn').forEach(btn => {
-		btn.addEventListener('click', function() {
-			const variantId = this.dataset.variantId;
-			const name = this.dataset.name;
-			const price = parseFloat(this.dataset.price);
-
-			const tbody = document.getElementById('cart-items');
-			if (document.querySelector('.empty-row')) {
-				document.querySelector('.empty-row').remove();
+	const manualSelect = document.getElementById('manual-variant-select');
+	if (window.jQuery) {
+		jQuery(manualSelect).on('select2:select', function () {
+			const opt = manualSelect.options[manualSelect.selectedIndex];
+			if (opt.value) {
+				addToCart(opt.value, opt.dataset.name, parseFloat(opt.dataset.price));
+				jQuery(manualSelect).val('').trigger('change');
 			}
+		});
+	}
 
-			let existingRow = null;
-			document.querySelectorAll('.item-row').forEach(row => {
-				const select = row.querySelector('select[name="variant_id[]"]');
-				if (select.value == variantId) {
-					existingRow = row;
-				}
-			});
-
-			if (existingRow) {
-				const qtyInput = existingRow.querySelector('.qty-input');
-				qtyInput.value = parseInt(qtyInput.value) + 1;
-				qtyInput.dispatchEvent(new Event('change'));
-			} else {
-				document.getElementById('add-item-btn').click();
-				const lastRow = document.querySelectorAll('.item-row')[document.querySelectorAll('.item-row').length - 1];
-				lastRow.querySelector('select').value = variantId;
-				lastRow.querySelector('.price-input').value = price.toFixed(2);
-				jQuery(lastRow.querySelector('select')).change();
-			}
-
-			calculateTotals();
+	document.getElementById('product-search').addEventListener('input', function () {
+		const term = this.value.trim().toLowerCase();
+		document.querySelectorAll('.product-btn').forEach(function (btn) {
+			btn.style.display = btn.dataset.search.includes(term) ? '' : 'none';
 		});
 	});
 
 	document.getElementById('discount-input').addEventListener('change', calculateTotals);
 	document.getElementById('tax-input').addEventListener('change', calculateTotals);
-
-	jQuery('.select2').select2();
 });
 </script>

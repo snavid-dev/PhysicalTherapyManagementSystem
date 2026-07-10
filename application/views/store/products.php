@@ -15,13 +15,13 @@
 
 	<?php if ($msg = $this->session->flashdata('success')): ?>
 		<div class="alert alert-success alert-dismissible fade show" role="alert">
-			<?= h($msg) ?>
+			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
 	<?php endif; ?>
 	<?php if ($msg = $this->session->flashdata('error')): ?>
 		<div class="alert alert-danger alert-dismissible fade show" role="alert">
-			<?= h($msg) ?>
+			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
 	<?php endif; ?>
@@ -33,21 +33,21 @@
 			<table class="table table-hover dt-table">
 				<thead class="table-light">
 					<tr>
-						<th><?= t('name') ?></th>
+						<th><?= t('Name') ?></th>
 						<th><?= t('category') ?></th>
 						<th><?= t('brand') ?></th>
 						<th><?= t('unit') ?></th>
 						<th><?= t('variants') ?></th>
-						<th><?= t('actions') ?></th>
+						<th><?= t('Actions') ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach ($products as $product): ?>
 						<tr>
-							<td><?= h($product['name']) ?></td>
-							<td><?= h($product['category_name']) ?></td>
-							<td><?= h($product['brand'] ?: '—') ?></td>
-							<td><?= h($product['unit']) ?></td>
+							<td><?= html_escape($product['name']) ?></td>
+							<td><?= html_escape($product['category_name']) ?></td>
+							<td><?= html_escape($product['brand'] ?: '—') ?></td>
+							<td><?= html_escape($product['unit']) ?></td>
 							<td>
 								<a href="<?= site_url('store/edit_product/' . $product['id']) ?>">
 									<?= count($this->Store_model->get_variants_by_product($product['id'])) ?>
@@ -55,7 +55,7 @@
 							</td>
 							<td>
 								<?php if ($this->auth->has_permission('manage_store')): ?>
-									<a href="<?= site_url('store/edit_product/' . $product['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('edit') ?></a>
+									<a href="<?= site_url('store/edit_product/' . $product['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('Edit') ?></a>
 									<a href="<?= site_url('store/create_variant/' . $product['id']) ?>" class="btn btn-sm btn-outline-success"><?= t('add_variant') ?></a>
 								<?php endif; ?>
 							</td>

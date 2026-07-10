@@ -10,7 +10,7 @@
 				<select name="supplier_id" class="form-select">
 					<option value="">— <?= t('no_supplier') ?> —</option>
 					<?php foreach ($suppliers as $s): ?>
-						<option value="<?= $s['id'] ?>"><?= h($s['name']) ?></option>
+						<option value="<?= $s['id'] ?>"><?= html_escape($s['name']) ?></option>
 					<?php endforeach; ?>
 				</select>
 			</div>
@@ -20,19 +20,12 @@
 					<thead>
 						<tr>
 							<th><?= t('variant') ?></th>
-							<th><?= t('qty') ?></th>
-							<th><?= t('unit_cost') ?></th>
-							<th><?= t('action') ?></th>
+							<th style="width:110px"><?= t('qty') ?></th>
+							<th style="width:130px"><?= t('unit_cost') ?></th>
+							<th></th>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="item-row">
-							<td><select name="variant_id[]" class="form-select select2" required></select></td>
-							<td><input type="number" name="qty[]" class="form-control" min="1" value="1" required></td>
-							<td><input type="number" name="unit_cost[]" class="form-control" step="0.01" value="0" required></td>
-							<td><button type="button" class="btn btn-sm btn-outline-danger remove-row" style="display:none;"><?= t('remove') ?></button></td>
-						</tr>
-					</tbody>
+					<tbody id="items-tbody"></tbody>
 				</table>
 			</div>
 
@@ -51,23 +44,51 @@
 	</form>
 </div>
 
+<template id="row-template">
+	<tr class="item-row">
+		<td>
+			<select name="variant_id[]" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_variant')) ?>" required>
+				<option value=""></option>
+				<?php foreach ($products as $product): ?>
+					<?php foreach ($product['variants'] as $variant): ?>
+						<option value="<?= (int) $variant['id'] ?>" data-cost="<?= (float) $variant['cost_price'] ?>">
+							<?= html_escape($product['name'] . ' — ' . $variant['variant_label']) ?>
+						</option>
+					<?php endforeach; ?>
+				<?php endforeach; ?>
+			</select>
+		</td>
+		<td><input type="number" name="qty[]" class="form-control" min="1" value="1" required></td>
+		<td><input type="number" name="unit_cost[]" class="form-control cost-input" step="0.01" value="0" required></td>
+		<td><button type="button" class="btn btn-sm btn-outline-danger remove-row"><?= t('remove') ?></button></td>
+	</tr>
+</template>
+
 <script>
-document.getElementById('add-row').addEventListener('click', function() {
-	const tbody = document.querySelector('#receipt-items tbody');
-	const newRow = tbody.rows[0].cloneNode(true);
-	newRow.querySelector('select').value = '';
-	newRow.querySelector('input[type="number"]:nth-of-type(1)').value = '1';
-	newRow.querySelector('input[type="number"]:nth-of-type(2)').value = '0';
-	newRow.querySelector('.remove-row').style.display = 'inline-block';
-	tbody.appendChild(newRow);
-	jQuery(newRow.querySelector('.select2')).select2();
-});
+document.addEventListener('DOMContentLoaded', function () {
+	const tbody = document.getElementById('items-tbody');
+	const template = document.getElementById('row-template');
 
-document.addEventListener('click', function(e) {
-	if (e.target.classList.contains('remove-row')) {
-		e.target.closest('tr').remove();
+	function addRow() {
+		const row = template.content.firstElementChild.cloneNode(true);
+		tbody.appendChild(row);
+
+		const select = row.querySelector('select');
+		if (window.initSelect2) initSelect2(row);
+
+		jQuery(select).on('select2:select', function () {
+			const opt = select.options[select.selectedIndex];
+			if (opt.dataset.cost) {
+				row.querySelector('.cost-input').value = parseFloat(opt.dataset.cost).toFixed(2);
+			}
+		});
+
+		row.querySelector('.remove-row').addEventListener('click', function () {
+			row.remove();
+		});
 	}
-});
 
-jQuery('.select2').select2();
+	document.getElementById('add-row').addEventListener('click', addRow);
+	addRow();
+});
 </script>

@@ -11,22 +11,22 @@
 					<select name="location_id" class="form-select" required>
 						<option value="">— <?= t('select_location') ?> —</option>
 						<?php foreach ($locations as $loc): ?>
-							<option value="<?= $loc['id'] ?>"><?= h($loc['name']) ?></option>
+							<option value="<?= $loc['id'] ?>"><?= html_escape($loc['name']) ?></option>
 						<?php endforeach; ?>
 					</select>
 				</div>
 
 				<div class="mb-3">
 					<label class="form-label"><?= t('product_variant') ?></label>
-					<select name="variant_id" class="form-select select2" required>
-						<option value="">— <?= t('select_variant') ?> —</option>
+					<select name="variant_id" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_variant')) ?>" required>
+						<option value=""></option>
 						<?php
 							$products = $this->Store_model->get_all_products();
 							foreach ($products as $p):
 								$variants = $this->Store_model->get_variants_by_product($p['id']);
 								foreach ($variants as $v):
 						?>
-							<option value="<?= $v['id'] ?>"><?= h($p['name'] . ' - ' . $v['variant_label']) ?></option>
+							<option value="<?= $v['id'] ?>"><?= html_escape($p['name'] . ' - ' . $v['variant_label']) ?></option>
 						<?php endforeach; endforeach; ?>
 					</select>
 				</div>
@@ -44,9 +44,3 @@
 		</div>
 	</div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-	jQuery('.select2').select2();
-});
-</script>

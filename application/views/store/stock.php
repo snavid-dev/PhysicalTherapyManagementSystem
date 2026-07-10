@@ -3,7 +3,7 @@
 <div class="container-lg my-5">
 	<div class="row mb-4">
 		<div class="col">
-			<h1><?= t('stock_view') ?> — <?= h($location['name']) ?></h1>
+			<h1><?= t('stock_view') ?> — <?= html_escape($location['name']) ?></h1>
 		</div>
 		<?php if ($this->auth->has_permission('manage_store')): ?>
 		<div class="col-auto">
@@ -17,7 +17,7 @@
 			<div class="btn-group" role="group">
 				<?php foreach ($locations as $loc): ?>
 					<a href="<?= site_url('store/stock/' . $loc['id']) ?>" class="btn btn-outline-secondary <?= $loc['id'] == $location['id'] ? 'active' : '' ?>">
-						<?= h($loc['name']) ?>
+						<?= html_escape($loc['name']) ?>
 					</a>
 				<?php endforeach; ?>
 			</div>
@@ -26,13 +26,13 @@
 
 	<?php if ($msg = $this->session->flashdata('success')): ?>
 		<div class="alert alert-success alert-dismissible fade show" role="alert">
-			<?= h($msg) ?>
+			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
 	<?php endif; ?>
 	<?php if ($msg = $this->session->flashdata('error')): ?>
 		<div class="alert alert-danger alert-dismissible fade show" role="alert">
-			<?= h($msg) ?>
+			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
 	<?php endif; ?>
@@ -61,8 +61,8 @@
 				<tbody>
 					<?php foreach ($location_stock as $stock): ?>
 						<tr>
-							<td><?= h($stock['product_name'] ?? '—') ?></td>
-							<td><?= h($stock['variant_label']) ?></td>
+							<td><?= html_escape($stock['product_name'] ?? '—') ?></td>
+							<td><?= html_escape($stock['variant_label']) ?></td>
 							<td><?= (int) $stock['qty_on_hand'] ?></td>
 							<?php if ($location['type'] === 'front_desk'): ?>
 								<td>

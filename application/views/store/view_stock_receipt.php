@@ -9,11 +9,11 @@
 
 	<div class="row mb-3">
 		<div class="col-md-6">
-			<p><strong><?= t('supplier') ?>:</strong> <?= h($receipt['supplier_name'] ?: t('no_supplier')) ?></p>
-			<p><strong><?= t('received_by') ?>:</strong> <?= h($receipt['first_name'] . ' ' . $receipt['last_name']) ?></p>
+			<p><strong><?= t('supplier') ?>:</strong> <?= html_escape($receipt['supplier_name'] ?: t('no_supplier')) ?></p>
+			<p><strong><?= t('received_by') ?>:</strong> <?= html_escape($receipt['first_name'] . ' ' . $receipt['last_name']) ?></p>
 		</div>
 		<div class="col-md-6">
-			<p><strong><?= t('date') ?>:</strong> <?= h(to_shamsi($receipt['created_at'])) ?></p>
+			<p><strong><?= t('date') ?>:</strong> <?= html_escape(to_shamsi($receipt['created_at'])) ?></p>
 			<p><strong><?= t('receipt_number') ?>:</strong> #<?= (int) $receipt['id'] ?></p>
 		</div>
 	</div>
@@ -32,8 +32,8 @@
 			<tbody>
 				<?php $total = 0; foreach ($items as $item): $line = (int) $item['qty'] * round((float) $item['unit_cost'], 2); $total += $line; ?>
 					<tr>
-						<td><?= h($item['product_name']) ?></td>
-						<td><?= h($item['variant_label']) ?></td>
+						<td><?= html_escape($item['product_name']) ?></td>
+						<td><?= html_escape($item['variant_label']) ?></td>
 						<td><?= (int) $item['qty'] ?></td>
 						<td><?= number_format($item['unit_cost'], 2) ?> AFN</td>
 						<td><?= number_format($line, 2) ?> AFN</td>
@@ -48,6 +48,6 @@
 	</div>
 
 	<div class="d-flex gap-2">
-		<a href="<?= site_url('store/stock_receipts') ?>" class="btn btn-secondary"><?= t('back') ?></a>
+		<a href="<?= site_url('store/stock_receipts') ?>" class="btn btn-secondary"><?= t('Back') ?></a>
 	</div>
 </div>

@@ -398,7 +398,7 @@ class Store_model extends CI_Model
 		$expense_data = array(
 			'category_id' => $this->get_inventory_purchase_category_id(),
 			'amount' => $total_cost,
-			'note' => 'Stock receipt #' . $receipt_id . ($supplier_id ? ' from supplier' : ''),
+			'description' => 'Stock receipt #' . $receipt_id . ($supplier_id ? ' from supplier' : ''),
 			'created_by' => (int) $received_by,
 			'expense_date' => date('Y-m-d')
 		);

@@ -664,7 +664,7 @@ class Safe_model extends CI_Model
 			return;
 		}
 
-		$expected = "enum('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment')";
+		$expected = "enum('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment','store_sale','store_refund')";
 
 		if (strtolower((string) $column['Type']) === $expected) {
 			return;
@@ -672,7 +672,7 @@ class Safe_model extends CI_Model
 
 		$this->db->query("
 			ALTER TABLE `safe_transactions`
-			MODIFY COLUMN `source` ENUM('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment') NOT NULL
+			MODIFY COLUMN `source` ENUM('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment','store_sale','store_refund') NOT NULL
 		");
 	}
 

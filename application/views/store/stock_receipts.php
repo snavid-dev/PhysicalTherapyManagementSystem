@@ -28,9 +28,9 @@
 					<?php foreach ($receipts as $r): ?>
 						<tr>
 							<td>#<?= (int) $r['id'] ?></td>
-							<td><?= h($r['supplier_name'] ?: t('no_supplier')) ?></td>
-							<td><?= h($r['first_name'] . ' ' . $r['last_name']) ?></td>
-							<td><?= h(to_shamsi($r['created_at'])) ?></td>
+							<td><?= html_escape($r['supplier_name'] ?: t('no_supplier')) ?></td>
+							<td><?= html_escape($r['first_name'] . ' ' . $r['last_name']) ?></td>
+							<td><?= html_escape(to_shamsi($r['created_at'])) ?></td>
 							<td>
 								<a href="<?= site_url('store/view_stock_receipt/' . $r['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('view') ?></a>
 							</td>

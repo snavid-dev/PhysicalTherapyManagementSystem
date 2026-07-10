@@ -62,7 +62,14 @@
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'salaries' ? 'active' : '' ?>" href="<?= base_url('salaries') ?>"><?= t('salaries') ?></a></li>
 				<?php endif; ?>
 				<?php if ($this->auth->has_permission('view_store')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'store' ? 'active' : '' ?>" href="<?= base_url('store') ?>"><?= t('Store') ?></a></li>
+					<li class="nav-item">
+						<a class="nav-link <?= $current_section === 'store' ? 'active' : '' ?>" href="<?= base_url('store') ?>">
+							<?= t('Store') ?>
+							<?php if (!empty($pending_requisitions_count)) : ?>
+								<span class="badge bg-warning text-dark rounded-pill"><?= (int) $pending_requisitions_count ?></span>
+							<?php endif; ?>
+						</a>
+					</li>
 				<?php endif; ?>
 				<?php if ($this->auth->has_permission('view_reports')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'reports' ? 'active' : '' ?>" href="<?= base_url('reports') ?>"><?= t('Reports') ?></a></li>

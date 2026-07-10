@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Expense_model extends CI_Model
 {
+	protected $schema_ready = FALSE;
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -204,6 +206,11 @@ class Expense_model extends CI_Model
 
 	protected function ensure_schema()
 	{
+		if ($this->schema_ready) {
+			return;
+		}
+		$this->schema_ready = TRUE;
+
 		if (!$this->db->table_exists('expense_categories')) {
 			$this->db->query("
 				CREATE TABLE IF NOT EXISTS `expense_categories` (

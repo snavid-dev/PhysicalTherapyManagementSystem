@@ -13,8 +13,6 @@ class Store extends Authenticated_Controller
 
 	public function index()
 	{
-		$this->require_permission('manage_store');
-		$data['products'] = $this->Store_model->get_all_products();
 		$data['current_section'] = 'store';
 		$this->render('store/index', $data);
 	}
@@ -294,6 +292,17 @@ class Store extends Authenticated_Controller
 		$this->require_permission('manage_store');
 
 		$data['locations'] = $this->Inventory_model->get_locations();
+		$data['products'] = $this->Store_model->get_all_products();
+		$warehouse_id = 2;
+		foreach ($data['products'] as &$product) {
+			$product['variants'] = $this->Store_model->get_variants_by_product($product['id']);
+			foreach ($product['variants'] as &$variant) {
+				$stock = $this->Inventory_model->get_stock_level($variant['id'], $warehouse_id);
+				$variant['warehouse_available'] = $stock ? (int) $stock['qty_on_hand'] : 0;
+			}
+			unset($variant);
+		}
+		unset($product);
 		$data['current_section'] = 'store';
 
 		if ($this->input->method() === 'post') {
@@ -505,7 +514,13 @@ class Store extends Authenticated_Controller
 	{
 		$this->require_permission('manage_store');
 
-		$data['patients'] = array();
+		$this->load->model('Patient_model');
+		$data['patients'] = $this->Patient_model->all();
+		$data['products'] = $this->Store_model->get_all_products();
+		foreach ($data['products'] as &$product) {
+			$product['variants'] = $this->Store_model->get_variants_by_product($product['id']);
+		}
+		unset($product);
 		$data['current_section'] = 'store';
 
 		if ($this->input->method() === 'post') {
@@ -606,7 +621,14 @@ class Store extends Authenticated_Controller
 						$this->auth->user_id()
 					);
 
-					redirect('store/receipt/' . $sale_id);
+					$this->db->trans_complete();
+
+					if ($this->db->trans_status()) {
+						redirect('store/receipt/' . $sale_id);
+					} else {
+						$this->session->set_flashdata('error', t('error_creating_sale'));
+						redirect('store/sell');
+					}
 				} else {
 					$this->db->trans_rollback();
 					$this->session->set_flashdata('error', t('error_creating_sale'));
@@ -652,7 +674,14 @@ class Store extends Authenticated_Controller
 					$this->Wallet_model->deduct($patient_id, $total, NULL, 'Store purchase');
 					$this->Wallet_model->recalculate_for_patient($patient_id);
 
-					redirect('store/receipt/' . $sale_id);
+					$this->db->trans_complete();
+
+					if ($this->db->trans_status()) {
+						redirect('store/receipt/' . $sale_id);
+					} else {
+						$this->session->set_flashdata('error', t('error_creating_sale'));
+						redirect('store/sell');
+					}
 				} else {
 					$this->db->trans_rollback();
 					$this->session->set_flashdata('error', t('error_creating_sale'));
@@ -750,6 +779,11 @@ class Store extends Authenticated_Controller
 		$this->require_permission('manage_store');
 
 		$data['suppliers'] = $this->Store_model->get_all_suppliers();
+		$data['products'] = $this->Store_model->get_all_products();
+		foreach ($data['products'] as &$product) {
+			$product['variants'] = $this->Store_model->get_variants_by_product($product['id']);
+		}
+		unset($product);
 		$data['current_section'] = 'store';
 
 		if ($this->input->method() === 'post') {

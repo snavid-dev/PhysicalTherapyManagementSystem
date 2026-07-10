@@ -5,13 +5,13 @@
 		<div class="col-md-6 offset-md-3">
 			<h2><?= isset($variant) ? t('edit_variant') : t('create_variant') ?></h2>
 			<?php if (isset($product)): ?>
-				<p class="text-muted"><?= t('product') ?>: <?= h($product['name']) ?></p>
+				<p class="text-muted"><?= t('product') ?>: <?= html_escape($product['name']) ?></p>
 			<?php endif; ?>
 
 			<form method="post">
 				<div class="mb-3">
 					<label class="form-label"><?= t('variant_label') ?></label>
-					<input type="text" name="variant_label" class="form-control" value="<?= isset($variant) ? h($variant['variant_label']) : '' ?>" placeholder="e.g., 0.25 × 40mm" required>
+					<input type="text" name="variant_label" class="form-control" value="<?= isset($variant) ? html_escape($variant['variant_label']) : '' ?>" placeholder="e.g., 0.25 × 40mm" required>
 				</div>
 
 				<div class="mb-3">

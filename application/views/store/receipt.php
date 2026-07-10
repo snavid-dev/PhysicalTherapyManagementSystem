@@ -10,8 +10,8 @@
 
 			<div class="mb-3">
 				<p class="mb-1"><small><strong><?= t('receipt_number') ?>:</strong> #<?= (int) $sale['id'] ?></small></p>
-				<p class="mb-1"><small><strong><?= t('date') ?>:</strong> <?= h(to_shamsi($sale['created_at'])) ?></small></p>
-				<p class="mb-0"><small><strong><?= t('time') ?>:</strong> <?= h(substr($sale['created_at'], 11, 5)) ?></small></p>
+				<p class="mb-1"><small><strong><?= t('date') ?>:</strong> <?= html_escape(to_shamsi($sale['created_at'])) ?></small></p>
+				<p class="mb-0"><small><strong><?= t('time') ?>:</strong> <?= html_escape(substr($sale['created_at'], 11, 5)) ?></small></p>
 			</div>
 
 			<div class="border-bottom py-3">
@@ -27,7 +27,7 @@
 					<tbody>
 						<?php foreach ($items as $item): ?>
 							<tr style="font-size: 0.75rem;">
-								<td><?= h($item['product_name'] . ' - ' . $item['variant_label']) ?></td>
+								<td><?= html_escape($item['product_name'] . ' - ' . $item['variant_label']) ?></td>
 								<td class="text-end"><?= (int) $item['qty'] ?></td>
 								<td class="text-end"><?= number_format($item['unit_price'], 2) ?></td>
 								<td class="text-end"><?= number_format($item['line_total'], 2) ?></td>
@@ -65,7 +65,7 @@
 				<p class="mb-3" style="font-size: 0.85rem;">
 					<?php
 						$methods = array('cash' => t('cash'), 'card' => t('card'), 'wallet' => t('wallet'), 'prepayment' => t('prepayment'));
-						echo h($methods[$sale['payment_method']] ?? $sale['payment_method']);
+						echo html_escape($methods[$sale['payment_method']] ?? $sale['payment_method']);
 					?>
 				</p>
 
@@ -74,7 +74,7 @@
 					<p style="font-size: 0.85rem;">
 						<?php
 							$patient = $this->db->get_where('patients', array('id' => $sale['patient_id']))->row_array();
-							echo h($patient ? ($patient['first_name'] . ' ' . ($patient['last_name'] ?? '')) : '—');
+							echo html_escape($patient ? ($patient['first_name'] . ' ' . ($patient['last_name'] ?? '')) : '—');
 						?>
 					</p>
 				<?php endif; ?>

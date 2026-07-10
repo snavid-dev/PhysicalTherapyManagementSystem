@@ -889,4 +889,22 @@ $lang = array(
 	'stock_receipt' => 'رسید موجودی',
 	'no_supplier' => 'بدون تأمین‌کننده',
 	'receipt_number' => 'شماره رسید',
+
+	// Store module — generic labels missing localization
+	'action' => 'عملیات',
+	'id' => 'شناسه',
+	'product' => 'محصول',
+	'variant' => 'نوع',
+	'supplier' => 'تأمین‌کننده',
+	'save' => 'ذخیره',
+	'cancel' => 'لغو',
+	'view' => 'مشاهده',
+	'products' => 'محصولات',
+	'physical_therapy_clinic' => 'کلینیک فیزیوتراپی کانین',
+	'qty_requested' => 'مقدار درخواستی',
+	'qty_approved' => 'مقدار تأیید شده',
+	'reject_requisition' => 'رد درخواست',
+	'confirm_delete' => 'آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟',
+	'search_product' => 'جستجوی محصولات...',
+	'add_item_manually' => 'افزودن دستی اقلام',
 );

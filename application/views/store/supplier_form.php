@@ -7,18 +7,18 @@
 
 			<form method="post">
 				<div class="mb-3">
-					<label class="form-label"><?= t('name') ?></label>
-					<input type="text" name="name" class="form-control" value="<?= isset($supplier) ? h($supplier['name']) : '' ?>" required>
+					<label class="form-label"><?= t('Name') ?></label>
+					<input type="text" name="name" class="form-control" value="<?= isset($supplier) ? html_escape($supplier['name']) : '' ?>" required>
 				</div>
 
 				<div class="mb-3">
 					<label class="form-label"><?= t('contact') ?></label>
-					<input type="text" name="contact" class="form-control" value="<?= isset($supplier) ? h($supplier['contact'] ?: '') : '' ?>">
+					<input type="text" name="contact" class="form-control" value="<?= isset($supplier) ? html_escape($supplier['contact'] ?: '') : '' ?>">
 				</div>
 
 				<div class="mb-3">
 					<label class="form-label"><?= t('note') ?></label>
-					<textarea name="note" class="form-control" rows="3"><?= isset($supplier) ? h($supplier['note'] ?: '') : '' ?></textarea>
+					<textarea name="note" class="form-control" rows="3"><?= isset($supplier) ? html_escape($supplier['note'] ?: '') : '' ?></textarea>
 				</div>
 
 				<div class="d-flex gap-2">

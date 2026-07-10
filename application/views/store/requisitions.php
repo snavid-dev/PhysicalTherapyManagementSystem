@@ -14,13 +14,13 @@
 
 	<?php if ($msg = $this->session->flashdata('success')): ?>
 		<div class="alert alert-success alert-dismissible fade show" role="alert">
-			<?= h($msg) ?>
+			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
 	<?php endif; ?>
 	<?php if ($msg = $this->session->flashdata('error')): ?>
 		<div class="alert alert-danger alert-dismissible fade show" role="alert">
-			<?= h($msg) ?>
+			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
 	<?php endif; ?>
@@ -36,24 +36,24 @@
 						<th><?= t('from_location') ?></th>
 						<th><?= t('to_location') ?></th>
 						<th><?= t('requested_by') ?></th>
-						<th><?= t('status') ?></th>
-						<th><?= t('created_at') ?></th>
-						<th><?= t('actions') ?></th>
+						<th><?= t('Status') ?></th>
+						<th><?= t('Date') ?></th>
+						<th><?= t('Actions') ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach ($requisitions as $req): ?>
 						<tr>
 							<td><?= (int) $req['id'] ?></td>
-							<td><?= h($req['from_location']) ?></td>
-							<td><?= h($req['to_location']) ?></td>
-							<td><?= h($req['first_name'] . ' ' . $req['last_name']) ?></td>
+							<td><?= html_escape($req['from_location']) ?></td>
+							<td><?= html_escape($req['to_location']) ?></td>
+							<td><?= html_escape($req['first_name'] . ' ' . $req['last_name']) ?></td>
 							<td>
 								<span class="badge bg-<?= $req['status'] === 'pending' ? 'warning' : ($req['status'] === 'approved' || $req['status'] === 'in_transit' ? 'info' : ($req['status'] === 'received' ? 'success' : 'secondary')) ?>">
-									<?= h($req['status']) ?>
+									<?= html_escape($req['status']) ?>
 								</span>
 							</td>
-							<td><?= h(to_shamsi($req['created_at'])) ?></td>
+							<td><?= html_escape(to_shamsi($req['created_at'])) ?></td>
 							<td>
 								<?php if ($req['status'] === 'pending' && $this->auth->has_permission('approve_store_requisition')): ?>
 									<a href="<?= site_url('store/approve_requisition/' . $req['id']) ?>" class="btn btn-sm btn-outline-warning"><?= t('approve') ?></a>

@@ -7,8 +7,8 @@
 
 			<form method="post">
 				<div class="mb-3">
-					<label class="form-label"><?= t('name') ?></label>
-					<input type="text" name="name" class="form-control" value="<?= isset($category) ? h($category['name']) : '' ?>" required>
+					<label class="form-label"><?= t('Name') ?></label>
+					<input type="text" name="name" class="form-control" value="<?= isset($category) ? html_escape($category['name']) : '' ?>" required>
 				</div>
 
 				<div class="d-flex gap-2">

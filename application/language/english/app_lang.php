@@ -889,4 +889,22 @@ $lang = array(
 	'stock_receipt' => 'Stock Receipt',
 	'no_supplier' => 'No supplier',
 	'receipt_number' => 'Receipt Number',
+
+	// Store module — generic labels missing localization
+	'action' => 'Action',
+	'id' => 'ID',
+	'product' => 'Product',
+	'variant' => 'Variant',
+	'supplier' => 'Supplier',
+	'save' => 'Save',
+	'cancel' => 'Cancel',
+	'view' => 'View',
+	'products' => 'Products',
+	'physical_therapy_clinic' => 'CANIN Physical Therapy Clinic',
+	'qty_requested' => 'Qty Requested',
+	'qty_approved' => 'Qty Approved',
+	'reject_requisition' => 'Reject Requisition',
+	'confirm_delete' => 'Are you sure you want to delete this?',
+	'search_product' => 'Search products...',
+	'add_item_manually' => 'Add item manually',
 );

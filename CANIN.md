@@ -25,6 +25,7 @@ The current live direction is no longer dental treatment planning, teeth charts,
 - staff salary payments
 - reports
 - doctor or therapist leaves
+- store / inventory (product catalog, stock ledger, internal requisitions, point-of-sale, supplier restocking)
 
 The old dental files still exist in the repository in places, but they should be treated as legacy unless the current routes explicitly use them.
 
@@ -127,6 +128,7 @@ If you are editing this project in a future chat, assume this:
 - `application/controllers/Safe.php`
 - `application/controllers/Reports.php`
 - `application/controllers/Leaves.php`
+- `application/controllers/Store.php`
 
 ### Models currently used by the active app
 
@@ -147,6 +149,8 @@ If you are editing this project in a future chat, assume this:
 - `application/models/Safe_model.php`
 - `application/models/Report_model.php`
 - `application/models/Leave_model.php`
+- `application/models/Store_model.php`
+- `application/models/Inventory_model.php`
 
 ### Active views
 
@@ -165,6 +169,7 @@ If you are editing this project in a future chat, assume this:
 - `application/views/reports/`
 - `application/views/leaves/`
 - `application/views/preferences/expense_categories.php`
+- `application/views/store/`
 
 ### Language files
 
@@ -186,6 +191,7 @@ Tables that use DataTables (`.dt-table` class):
 - `application/views/salaries/index.php`
 - `application/views/patients/show.php` for turn history and wallet transactions
 - `application/views/reference_doctors/profile.php` for the all referred patients table
+- `application/views/store/products.php`, `application/views/store/stock.php`, `application/views/store/requisitions.php`, `application/views/store/stock_receipts.php`
 
 Tables that do NOT use DataTables (small or stable data):
 
@@ -230,6 +236,45 @@ Rules for adding a new table:
 - After dynamic AJAX population, trigger `change.select2`
 - After adding a bulk row, call `initSelect2(rowElement)`
 - Before removing a bulk row, call `select2('destroy')`
+
+---
+
+## X. Schema Caching Rule (`ensure_schema()`)
+
+Several models self-migrate their tables lazily via a protected `ensure_schema()`
+method (`table_exists()`, `field_exists()`, `CREATE TABLE IF NOT EXISTS`,
+in-place `ALTER TABLE` migrations). This method **must** be memoized with a
+`protected $schema_ready = FALSE;` instance flag:
+
+```php
+protected function ensure_schema()
+{
+    if ($this->schema_ready) {
+        return;
+    }
+    $this->schema_ready = TRUE;
+
+    // ... table_exists() / field_exists() / CREATE TABLE / ALTER TABLE checks
+}
+```
+
+Without this flag, every public method that calls `ensure_schema()` re-runs the
+full set of metadata queries (and, for models with in-place migration logic,
+`information_schema` lookups) on every call. This is invisible on a page that
+calls the model once, but becomes a severe N+1 problem the moment the model is
+called inside a loop — e.g. once per staff member when calculating salaries.
+That exact bug (`Leave_model`, missing the flag, called once per staff member
+by `Salary_model::calculate_salary()`) turned the Salaries page into a 6-second
+load; adding the flag brought it to under 1 second. `Safe_model` and
+`Debt_model` already carry this flag correctly — copy their pattern, don't
+reinvent it.
+
+Currently correct (flag present): `Safe_model`, `Debt_model`, `Leave_model`,
+`Expense_model`, `Staff_model`, `Expense_category_model`.
+
+If you add a new model with an `ensure_schema()` method, or find one without
+the flag, add it — this is a required convention, not an optional
+optimization.
 
 ---
 
@@ -294,6 +339,11 @@ These are the main active routes:
 - `/leaves`
 - `/preferences/language/{locale}`
 - `/preferences/theme/{theme}`
+- `/store`
+- `/store/products`, `/store/categories`, `/store/stock/{location_id}`
+- `/store/requisitions`, `/store/create_requisition`, `/store/approve_requisition/{id}`, `/store/receive_requisition/{id}`
+- `/store/sell`, `/store/receipt/{sale_id}`
+- `/store/suppliers`, `/store/receive_stock`, `/store/stock_receipts`
 
 If a file is not connected to these active routes, treat it as legacy unless proven otherwise.
 
@@ -413,6 +463,19 @@ This is the practical dependency map of the active system.
 - theme depends on `assets/css/app.css`
 - both login and layout depend on preferences
 
+### Store dependencies
+
+- `Store` depends on `Store_model` (products, variants, categories, requisitions, sales, suppliers, stock receipts)
+- `Store` depends on `Inventory_model` (locations, `stock_levels` cache, `stock_movements` append-only ledger)
+- `Store` depends on `Patient_model` for the POS patient search (`sell.php`)
+- `Store` depends on `Safe_model` for cash/card sale inflow and cash refund outflow
+- `Store` depends on `Wallet_model` for wallet/prepayment sale deduction and refund reversal (via `recalculate_for_patient()`)
+- `Store` depends on `Expense_model` / `Expense_category_model` indirectly: restock receipts create one `expenses` row (category "Inventory Purchase") per receipt
+- `Store` depends on `Auth` for `view_store` / `manage_store` / `approve_store_requisition`
+- `Store` depends on `layout/header.php` for the nav item and the pending-requisition-count badge
+- patient profile can show store purchase history (SM3 acceptance criterion; verify current wiring before assuming it's live)
+- dashboard/reports rollups should treat store sales as an income stream without double-counting the same Safe row
+
 ---
 
 ## 7. Module To Database Table Map
@@ -528,6 +591,19 @@ This section maps each active module to the main tables it reads or writes.
 - writes: `diagnoses`
 - session-driven for theme and language
 
+### Store
+
+- writes: `store_product_categories`, `store_products`, `store_product_variants`
+- writes: `store_locations` (seeded once: Front Desk id 1, Warehouse id 2 — several controller code paths hardcode these IDs instead of looking up by `type`; see the Store module section before changing location seeding)
+- writes: `stock_levels` (maintained cache) and `stock_movements` (append-only ledger, source of truth) — every stock write in every Store flow goes through `Inventory_model::record_movement()`
+- writes: `stock_requisitions`, `stock_requisition_items`
+- writes: `store_sales`, `store_sale_items` (captures `unit_cost_at_sale` per line so profit stays stable if `cost_price` changes later)
+- writes: `store_suppliers`, `store_stock_receipts`, `store_stock_receipt_items`
+- writes: `safe_transactions` as a side effect for cash/card sales (source `store_sale`) and cash refunds (source `store_refund`)
+- writes: `patient_wallet_transactions` as a side effect for wallet/prepayment sales and refunds (no `safe_transactions` row — wallet money never touches the physical safe)
+- writes: `expenses` as a side effect of restock receipts — exactly one row per receipt, category "Inventory Purchase", linked back via `store_stock_receipts.expense_id`
+- reads: `patients` (POS patient search), `users` (audit trail on every write)
+
 ---
 
 ## 8. Authentication, Roles, And Permissions
@@ -569,6 +645,9 @@ Important rules:
 - `manage_leaves`
 - `view_safe`
 - `manage_safe`
+- `view_store`
+- `manage_store`
+- `approve_store_requisition`
 
 ### Navigation rule
 
@@ -1546,7 +1625,154 @@ Pass these steps:
 
 ---
 
-## 27. Database Story
+## 27. Module: Store
+
+### Purpose
+
+This module lets the clinic sell physiotherapy products (balls, belts, bands,
+needles, tape, etc.) from the front desk, hold stock across two locations
+("Front Desk" and "Warehouse"), move stock from the warehouse to the front
+desk with manager approval, restock from suppliers with the spend flowing
+into Expenses/Safe automatically, and take payment via cash, card, wallet, or
+prepayment. The original spec is `STORE_TASKS.md` (root of the repo) —
+consult it for the full milestone breakdown and the locked v1 decisions if
+you need more detail than this section carries.
+
+### Main files
+
+- `application/controllers/Store.php`
+- `application/models/Store_model.php` — categories, products, variants, requisitions, sales, suppliers, stock receipts
+- `application/models/Inventory_model.php` — locations, `stock_levels` cache, `stock_movements` ledger
+- `application/views/store/` — `index.php` (hub), `products.php`, `product_form.php`, `variant_form.php`, `categories.php`, `category_form.php`, `stock.php`, `opening_stock_form.php`, `requisitions.php`, `requisition_form.php`, `approve_requisition.php`, `receive_requisition.php`, `sell.php`, `receipt.php`, `suppliers.php`, `supplier_form.php`, `receive_stock_form.php`, `stock_receipts.php`, `view_stock_receipt.php`
+- `application/config/routes.php` (store routes)
+- `application/views/layout/header.php` (nav item + pending-requisition badge)
+- `application/models/Safe_model.php`, `application/models/Wallet_model.php`, `application/models/Patient_model.php` (reused, not duplicated)
+- `database/physical_therapy_clinic.sql`, `database/store_schema_addon.sql` (idempotent re-apply script for the store tables — safe to re-run, no `DROP` statements)
+- `application/language/english/app_lang.php`, `application/language/farsi/app_lang.php`
+
+### What it currently does (SM1–SM4 shipped; SM5–SM6 deferred)
+
+- product categories, products, and variants CRUD (`manage_store`)
+- two-location stock viewing, with the front desk view showing the warehouse's
+  available quantity read-only alongside its own
+- opening-stock entry (writes an `adjustment` movement)
+- internal requisition workflow: secretary creates → manager
+  approves/adjusts/rejects (`approve_store_requisition`) → fulfillment writes
+  `transfer_out` from the warehouse → secretary confirms receipt, writes
+  `transfer_in` to the front desk, records any qty discrepancy
+- POS sale screen: click-to-add product buttons with live search filter,
+  cash/card/wallet/prepayment payment, optional patient attach, printable
+  Shamsi receipt
+- supplier CRUD and a restock-receive flow: writes `purchase_in` movements,
+  updates each variant's `cost_price` to the received unit cost (last-cost
+  rule), and creates exactly one `expenses` row per receipt
+- pending-requisition count badge on the nav (`approve_store_requisition`)
+
+**Not yet built (SM5/SM6, deferred — do not start without being asked):**
+returns/refunds UI, stock adjustments (damage/loss/theft/expiry/found/
+correction), physical stock counts, and the store reporting/dashboard suite
+(inventory valuation, low-stock, sales/profit reports, dashboard tiles).
+
+### Data model notes
+
+- **Costing:** `store_product_variants.cost_price` is last-purchase-cost,
+  overwritten on every restock receipt. `store_sale_items.unit_cost_at_sale`
+  is a COGS snapshot taken at sale time — never recompute historical profit
+  from the live `cost_price`.
+- **Money-vs-stock rule (locked):** cash/card sale → Safe inflow, source
+  `store_sale`. Wallet/prepayment sale → `patient_wallet_transactions` debit +
+  `Wallet_model::recalculate_for_patient()`, **no** Safe row. Cash refund →
+  Safe outflow, source `store_refund`. Restock → one `expenses` row
+  (category "Inventory Purchase") → Safe outflow via the existing Expense
+  flow. Transfers and adjustments touch stock only, never the Safe.
+- **`store_locations` is seeded with exactly two rows** — Front Desk (id 1)
+  and Warehouse (id 2) — and several places in `Store.php` (`sell()`,
+  `receive_stock()`, `create_requisition()`) hardcode `1`/`2` instead of
+  looking the location up by `type`. This is a known fragility, not a design
+  choice: if you ever need more than two locations, or if seed order ever
+  changes, grep `Store.php` for the literal `1` and `2` location IDs and fix
+  every call site, not just the one your task touches.
+- `stock_movements` is the append-only source of truth; `stock_levels` is a
+  maintained cache. Every write goes through
+  `Inventory_model::record_movement()`, which internally calls
+  `recompute_stock_level()`. Never write to `stock_levels` directly.
+
+### If you want to change this module
+
+Pass these steps:
+
+1. Start with `Store.php` for guards, validation, and workflow state
+   transitions (requisition status, sale payment routing).
+2. Update `Store_model.php` for catalog/requisition/sale/supplier queries, or
+   `Inventory_model.php` for anything touching stock quantities.
+3. If a controller method wraps a multi-step write in
+   `$this->db->trans_start()`, verify there is a matching
+   `$this->db->trans_complete()` on **every** success path before you ship —
+   see "Common risky changes" below, this exact bug silently dropped every
+   POS sale for a period during development.
+4. Update the relevant view(s) under `application/views/store/`.
+5. Update both language files for any new labels or messages — `t()` falls
+   back to printing the raw key string if a translation is missing, so a
+   missed key is visible in Farsi mode as a stray English word.
+6. If schema changes, update `database/physical_therapy_clinic.sql` (and
+   `store_schema_addon.sql` if you want a re-runnable patch for already-live
+   databases).
+7. Verify `view_store` / `manage_store` / `approve_store_requisition` gate the
+   right routes, and the nav item + badge respect them.
+8. Verify ledger sums equal `stock_levels` after your change (`stock_movements`
+   is append-only — if a number looks wrong, check the ledger, don't patch
+   the cache).
+9. Verify mobile layout and RTL — the POS screen (`sell.php`) in particular
+   has a two-column desktop layout that reflows on mobile.
+
+### Common safe changes
+
+- add a new product field (SKU/barcode are already columns, just unexposed in
+  the form)
+- add a low-stock indicator to the stock view (reorder_level already exists
+  on variants)
+- wire up the patient purchase-history block on `patients/show.php` if it
+  isn't already showing store sales (verify current state first)
+- build out SM5 (returns/adjustments/stock count) or SM6 (reports/dashboard)
+  — both were deliberately deferred, not forgotten; the schema for SM5 is
+  sketched in `STORE_TASKS.md` Appendix A but was never created
+
+### Common risky changes
+
+- opening a `trans_start()` in a Store controller method without an explicit
+  `trans_complete()` on every success path — CodeIgniter's transaction depth
+  counter only physically commits when it returns to 0, so a missing outer
+  `trans_complete()` silently discards the entire write (stock movement, Safe
+  row, sale record) even though the request appears to succeed and redirects
+  normally. Always add `if ($this->db->trans_status()) { redirect(...) } else
+  { /* flash error, redirect back */ }` after the `trans_complete()` call.
+- adding a third stock location without fixing every hardcoded `1`/`2`
+  reference (see Data model notes above)
+- writing to `stock_levels` directly instead of through
+  `Inventory_model::record_movement()` — breaks the ledger-is-truth invariant
+- adding a new model with an `ensure_schema()` method and forgetting the
+  `$schema_ready` memoization flag (see the Schema Caching Rule near the top
+  of this file) — this exact mistake elsewhere in the codebase turned the
+  Salaries page into a 6-second load
+- bypassing `Wallet_model`/`Safe_model` and hand-rolling wallet or safe writes
+  from Store code
+
+### AI prompt example for this module
+
+> Read `CANIN.md` first, then `STORE_TASKS.md` for the full spec if your task
+> needs milestone-level detail. Work only on the Store module. Inspect
+> `application/controllers/Store.php`, `application/models/Store_model.php`,
+> `application/models/Inventory_model.php`, and the views under
+> `application/views/store/`. Reuse `Safe_model`, `Wallet_model`, and
+> `Expense_model` rather than duplicating their logic. If you add a
+> multi-step write, verify `trans_complete()` is called on every success
+> path — a missing one has silently dropped writes here before. Keep
+> `view_store` / `manage_store` / `approve_store_requisition` gating intact,
+> and update both language files for any new visible text.
+
+---
+
+## 28. Database Story
 
 The active simplified schema reference is:
 
@@ -1577,6 +1803,19 @@ This file defines the simplified physical therapy structure for:
 - staff_salary_payments
 - safe_transactions
 - safe_adjustments
+- store_product_categories
+- store_products
+- store_product_variants
+- store_locations
+- stock_levels
+- stock_movements
+- stock_requisitions
+- stock_requisition_items
+- store_sales
+- store_sale_items
+- store_suppliers
+- store_stock_receipts
+- store_stock_receipt_items
 
 If the database needs to evolve, update that file and then reflect the change in the related:
 
@@ -1587,7 +1826,7 @@ If the database needs to evolve, update that file and then reflect the change in
 
 ---
 
-## 28. Legacy Code Policy
+## 29. Legacy Code Policy
 
 This repository still contains old dental-era code.
 
@@ -1656,7 +1895,7 @@ Pass these checks:
 
 ---
 
-## 29. Global Change Process For Any Module
+## 30. Global Change Process For Any Module
 
 If you want to change any module, use this exact sequence:
 
@@ -1677,7 +1916,7 @@ If you want to change any module, use this exact sequence:
 
 ---
 
-## 30. Module-Specific Change Matrix
+## 31. Module-Specific Change Matrix
 
 | Module | Start Here | Then Check | Then Update |
 |---|---|---|---|
@@ -1696,10 +1935,11 @@ If you want to change any module, use this exact sequence:
 | Reports | `Reports.php` | `Report_model.php` | `reports/index.php` |
 | Leaves | `Leaves.php` | `Leave_model.php`, `User_model.php` | `leaves/index.php`, `leaves/form.php` |
 | Preferences | `Preferences.php` | `app_helper.php` | `header.php`, `login.php`, `app.css` |
+| Store | `Store.php` | `Store_model.php`, `Inventory_model.php`, `Safe_model.php`, `Wallet_model.php` | views under `store/`, `header.php`, language files |
 
 ---
 
-## 31. Exact File Paths By Module
+## 32. Exact File Paths By Module
 
 This section is intentionally repetitive. It is here so future chats can jump directly into the correct files without re-discovering the structure.
 
@@ -1893,15 +2133,32 @@ This section is intentionally repetitive. It is here so future chats can jump di
 - `application/views/login.php`
 - `assets/css/app.css`
 
+### Store exact paths
+
+- `application/controllers/Store.php`
+- `application/models/Store_model.php`
+- `application/models/Inventory_model.php`
+- `application/models/Safe_model.php`
+- `application/models/Wallet_model.php`
+- `application/models/Patient_model.php`
+- `application/views/store/`
+- `application/views/layout/header.php`
+- `application/config/routes.php`
+- `database/physical_therapy_clinic.sql`
+- `database/store_schema_addon.sql`
+- `application/language/english/app_lang.php`
+- `application/language/farsi/app_lang.php`
+- `STORE_TASKS.md` (full spec, milestone breakdown, locked v1 decisions)
+
 ---
 
-## 32. AI Prompt Library
+## 33. AI Prompt Library
 
 These prompts are designed to be pasted into future chats.
 
 ### Full-project prompt
 
-> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, expenses, salaries, safe, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
+> Read `CANIN.md` first. This repository is a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, expenses, salaries, safe, reports, leaves, preferences, and store. Preserve Wazir for Persian, Inter for English, and keep the whole app responsive.
 
 ### Login prompt
 
@@ -1963,9 +2220,13 @@ These prompts are designed to be pasted into future chats.
 
 > Read `CANIN.md` first. Update only the Preferences module. Start with `application/controllers/Preferences.php`, `application/helpers/app_helper.php`, `application/views/layout/header.php`, `application/views/login.php`, and `assets/css/app.css`. Preserve theme switching, language switching, Wazir for Persian, Inter for English, and responsive behavior.
 
+### Store prompt
+
+> Read `CANIN.md` first, then `STORE_TASKS.md` if the task needs milestone-level detail. Update only the Store module. Start with `application/controllers/Store.php`, `application/models/Store_model.php`, `application/models/Inventory_model.php`, and the views under `application/views/store/`. Reuse `Safe_model` and `Wallet_model` rather than duplicating money logic. Preserve `view_store` / `manage_store` / `approve_store_requisition`, verify `trans_complete()` is called on every success path for any multi-step write, and keep the module bilingual and responsive.
+
 ---
 
-## 33. Language And Content Rules
+## 34. Language And Content Rules
 
 When adding UI text:
 
@@ -1977,7 +2238,7 @@ Do not leave new visible UI strings untranslated if the rest of the module is lo
 
 ---
 
-## 34. Responsive Rules
+## 35. Responsive Rules
 
 Every module change must be checked for:
 
@@ -1995,7 +2256,7 @@ If a module needs special responsive styling, prefer adding small, focused addit
 
 ---
 
-## 35. Validation Checklist Before Finishing Any Change
+## 36. Validation Checklist Before Finishing Any Change
 
 Before saying a task is complete, verify:
 
@@ -2010,15 +2271,15 @@ Before saying a task is complete, verify:
 
 ---
 
-## 36. Best Prompt To Reuse In Other Chats
+## 37. Best Prompt To Reuse In Other Chats
 
 If you want to continue this project in another chat, you can paste something like this:
 
-> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, expenses, salaries, safe, reports, leaves, and preferences. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
+> Read `CANIN.md` first. This repository is now a simplified Physical Therapy Clinic Management System built on CodeIgniter 3. Ignore legacy dental code unless an active route still depends on it. Work only on the active modules: login, dashboard, patients, reference doctors, sections, staff, users, roles, turns, expenses, salaries, safe, reports, leaves, preferences, and store. Preserve Wazir for Persian, Inter for English, and keep everything responsive.
 
 ---
 
-## 37. Final Rule
+## 38. Final Rule
 
 When in doubt:
 
