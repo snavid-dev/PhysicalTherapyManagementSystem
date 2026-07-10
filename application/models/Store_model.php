@@ -125,4 +125,134 @@ class Store_model extends CI_Model
 			->get()
 			->row_array();
 	}
+
+	// ===== Requisitions =====
+	public function get_requisitions($status = NULL)
+	{
+		$this->db
+			->select('stock_requisitions.*, users.first_name, users.last_name, approved_users.first_name as approver_first, approved_users.last_name as approver_last, from_loc.name as from_location, to_loc.name as to_location')
+			->from('stock_requisitions')
+			->join('users', 'stock_requisitions.requested_by = users.id')
+			->join('users as approved_users', 'stock_requisitions.approved_by = approved_users.id', 'left')
+			->join('store_locations as from_loc', 'stock_requisitions.from_location_id = from_loc.id')
+			->join('store_locations as to_loc', 'stock_requisitions.to_location_id = to_loc.id');
+
+		if ($status !== NULL) {
+			$this->db->where('stock_requisitions.status', trim($status));
+		}
+
+		return $this->db
+			->order_by('stock_requisitions.created_at', 'desc')
+			->get()
+			->result_array();
+	}
+
+	public function get_requisition_by_id($requisition_id)
+	{
+		return $this->db
+			->select('stock_requisitions.*, users.first_name, users.last_name, approved_users.first_name as approver_first, approved_users.last_name as approver_last')
+			->from('stock_requisitions')
+			->join('users', 'stock_requisitions.requested_by = users.id')
+			->join('users as approved_users', 'stock_requisitions.approved_by = approved_users.id', 'left')
+			->where('stock_requisitions.id', (int) $requisition_id)
+			->get()
+			->row_array();
+	}
+
+	public function get_requisition_items($requisition_id)
+	{
+		return $this->db
+			->select('stock_requisition_items.*, store_product_variants.variant_label, store_products.name as product_name')
+			->from('stock_requisition_items')
+			->join('store_product_variants', 'stock_requisition_items.variant_id = store_product_variants.id')
+			->join('store_products', 'store_product_variants.product_id = store_products.id')
+			->where('stock_requisition_items.requisition_id', (int) $requisition_id)
+			->get()
+			->result_array();
+	}
+
+	public function create_requisition($from_location_id, $to_location_id, $requested_by, $items)
+	{
+		$this->db->trans_start();
+
+		$req_id = $this->db->insert('stock_requisitions', array(
+			'from_location_id' => (int) $from_location_id,
+			'to_location_id' => (int) $to_location_id,
+			'requested_by' => (int) $requested_by,
+			'status' => 'pending',
+			'created_at' => date('Y-m-d H:i:s'),
+			'updated_at' => date('Y-m-d H:i:s')
+		));
+
+		$req_id = $this->db->insert_id();
+
+		foreach ($items as $item) {
+			$this->db->insert('stock_requisition_items', array(
+				'requisition_id' => $req_id,
+				'variant_id' => (int) $item['variant_id'],
+				'qty_requested' => (int) $item['qty']
+			));
+		}
+
+		$this->db->trans_complete();
+
+		return $this->db->trans_status() ? $req_id : FALSE;
+	}
+
+	public function approve_requisition($requisition_id, $approved_by, $items_approved)
+	{
+		$this->db->trans_start();
+
+		$requisition = $this->get_requisition_by_id($requisition_id);
+		if (!$requisition || $requisition['status'] !== 'pending') {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
+
+		foreach ($items_approved as $item_id => $qty_approved) {
+			$this->db
+				->where('id', (int) $item_id)
+				->update('stock_requisition_items', array('qty_approved' => (int) $qty_approved));
+		}
+
+		$this->db
+			->where('id', (int) $requisition_id)
+			->update('stock_requisitions', array(
+				'status' => 'approved',
+				'approved_by' => (int) $approved_by,
+				'updated_at' => date('Y-m-d H:i:s')
+			));
+
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
+
+	public function reject_requisition($requisition_id, $approved_by, $reason)
+	{
+		return $this->db
+			->where('id', (int) $requisition_id)
+			->update('stock_requisitions', array(
+				'status' => 'rejected',
+				'reject_reason' => trim($reason),
+				'approved_by' => (int) $approved_by,
+				'updated_at' => date('Y-m-d H:i:s')
+			));
+	}
+
+	public function update_requisition_status($requisition_id, $status)
+	{
+		return $this->db
+			->where('id', (int) $requisition_id)
+			->update('stock_requisitions', array(
+				'status' => trim($status),
+				'updated_at' => date('Y-m-d H:i:s')
+			));
+	}
+
+	public function update_requisition_item_received($item_id, $qty_received)
+	{
+		return $this->db
+			->where('id', (int) $item_id)
+			->update('stock_requisition_items', array('qty_received' => (int) $qty_received));
+	}
 }

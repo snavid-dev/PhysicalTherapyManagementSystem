@@ -107,6 +107,10 @@ $route['store/edit_category/(:num)'] = 'Store/edit_category/$1';
 $route['store/delete_category/(:num)'] = 'Store/delete_category/$1';
 $route['store/stock(/(:num))?'] = 'Store/stock/$1';
 $route['store/set_opening_stock'] = 'Store/set_opening_stock';
+$route['store/requisitions'] = 'Store/requisitions';
+$route['store/create_requisition'] = 'Store/create_requisition';
+$route['store/approve_requisition/(:num)'] = 'Store/approve_requisition/$1';
+$route['store/receive_requisition/(:num)'] = 'Store/receive_requisition/$1';
 
 $route['reports'] = 'Reports/index';
 $route['reports/daily-register'] = 'reports/daily_register';

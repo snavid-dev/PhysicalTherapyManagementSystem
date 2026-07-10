@@ -280,4 +280,223 @@ class Store extends Authenticated_Controller
 		$data['locations'] = $this->Inventory_model->get_locations();
 		$this->render('store/opening_stock_form', $data);
 	}
+
+	// ===== Requisitions =====
+	public function requisitions()
+	{
+		$data['requisitions'] = $this->Store_model->get_requisitions();
+		$data['current_section'] = 'store';
+		$this->render('store/requisitions', $data);
+	}
+
+	public function create_requisition()
+	{
+		$this->require_permission('manage_store');
+
+		$data['locations'] = $this->Inventory_model->get_locations();
+		$data['current_section'] = 'store';
+
+		if ($this->input->method() === 'post') {
+			$to_location = (int) $this->input->post('to_location_id');
+			$variants = $this->input->post('variant_id');
+			$quantities = $this->input->post('qty');
+
+			if (empty($variants) || empty($quantities)) {
+				$this->session->set_flashdata('error', t('requisition_empty'));
+				redirect('store/requisitions');
+			}
+
+			$items = array();
+			foreach ($variants as $k => $vid) {
+				if (!empty($vid) && isset($quantities[$k])) {
+					$items[] = array(
+						'variant_id' => (int) $vid,
+						'qty' => (int) $quantities[$k]
+					);
+				}
+			}
+
+			if (empty($items)) {
+				$this->session->set_flashdata('error', t('requisition_empty'));
+				redirect('store/requisitions');
+			}
+
+			$warehouse_id = 2;
+
+			$req_id = $this->Store_model->create_requisition(
+				$warehouse_id,
+				$to_location,
+				$this->auth->user_id(),
+				$items
+			);
+
+			if ($req_id) {
+				$this->session->set_flashdata('success', t('requisition_created'));
+				redirect('store/requisitions');
+			} else {
+				$this->session->set_flashdata('error', t('error_creating_requisition'));
+			}
+		}
+
+		$this->render('store/requisition_form', $data);
+	}
+
+	public function approve_requisition($requisition_id)
+	{
+		$this->require_permission('approve_store_requisition');
+
+		$data['requisition'] = $this->Store_model->get_requisition_by_id($requisition_id);
+		$data['items'] = $this->Store_model->get_requisition_items($requisition_id);
+		$data['current_section'] = 'store';
+
+		if (!$data['requisition']) {
+			show_404();
+		}
+
+		if ($data['requisition']['status'] !== 'pending') {
+			$this->session->set_flashdata('error', t('requisition_not_pending'));
+			redirect('store/requisitions');
+		}
+
+		if ($this->input->method() === 'post') {
+			$action = $this->input->post('action');
+
+			if ($action === 'approve') {
+				$this->db->trans_start();
+
+				$items_approved = array();
+				foreach ($data['items'] as $item) {
+					$qty_key = 'qty_approved_' . $item['id'];
+					$qty = (int) $this->input->post($qty_key);
+
+					if ($qty < 0) {
+						$this->session->set_flashdata('error', t('qty_cannot_be_negative'));
+						redirect('store/requisitions');
+					}
+
+					if ($qty > 0) {
+						$available = $this->Inventory_model->get_stock_level($item['variant_id'], $data['requisition']['from_location_id']);
+						if (!$available || $available['qty_on_hand'] < $qty) {
+							$this->db->trans_rollback();
+							$this->session->set_flashdata('error', t('insufficient_warehouse_stock'));
+							redirect('store/approve_requisition/' . $requisition_id);
+						}
+						$items_approved[$item['id']] = $qty;
+					}
+				}
+
+				if (empty($items_approved)) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('no_items_approved'));
+					redirect('store/approve_requisition/' . $requisition_id);
+				}
+
+				if ($this->Store_model->approve_requisition($requisition_id, $this->auth->user_id(), $items_approved)) {
+					$items = $this->Store_model->get_requisition_items($requisition_id);
+					foreach ($items as $item) {
+						if ($item['qty_approved']) {
+							$this->Inventory_model->record_movement(
+								$item['variant_id'],
+								$data['requisition']['from_location_id'],
+								'transfer_out',
+								-$item['qty_approved'],
+								$this->auth->user_id(),
+								'requisition',
+								$requisition_id
+							);
+						}
+					}
+
+					$this->Store_model->update_requisition_status($requisition_id, 'in_transit');
+					$this->db->trans_complete();
+
+					if ($this->db->trans_status()) {
+						$this->session->set_flashdata('success', t('requisition_approved'));
+						redirect('store/requisitions');
+					} else {
+						$this->session->set_flashdata('error', t('error_approving_requisition'));
+					}
+				} else {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('error_approving_requisition'));
+				}
+			} elseif ($action === 'reject') {
+				$reason = trim($this->input->post('reject_reason'));
+				if (empty($reason)) {
+					$this->session->set_flashdata('error', t('reject_reason_required'));
+					redirect('store/approve_requisition/' . $requisition_id);
+				}
+
+				if ($this->Store_model->reject_requisition($requisition_id, $this->auth->user_id(), $reason)) {
+					$this->session->set_flashdata('success', t('requisition_rejected'));
+					redirect('store/requisitions');
+				} else {
+					$this->session->set_flashdata('error', t('error_rejecting_requisition'));
+				}
+			}
+		}
+
+		$this->render('store/approve_requisition', $data);
+	}
+
+	public function receive_requisition($requisition_id)
+	{
+		$this->require_permission('manage_store');
+
+		$data['requisition'] = $this->Store_model->get_requisition_by_id($requisition_id);
+		$data['items'] = $this->Store_model->get_requisition_items($requisition_id);
+		$data['current_section'] = 'store';
+
+		if (!$data['requisition']) {
+			show_404();
+		}
+
+		if ($data['requisition']['status'] !== 'in_transit') {
+			$this->session->set_flashdata('error', t('requisition_not_in_transit'));
+			redirect('store/requisitions');
+		}
+
+		if ($this->input->method() === 'post') {
+			$this->db->trans_start();
+
+			foreach ($data['items'] as $item) {
+				$qty_key = 'qty_received_' . $item['id'];
+				$qty_received = (int) $this->input->post($qty_key);
+
+				if ($qty_received < 0) {
+					$this->session->set_flashdata('error', t('qty_cannot_be_negative'));
+					$this->db->trans_rollback();
+					redirect('store/receive_requisition/' . $requisition_id);
+				}
+
+				if ($qty_received > 0) {
+					$this->Inventory_model->record_movement(
+						$item['variant_id'],
+						$data['requisition']['to_location_id'],
+						'transfer_in',
+						$qty_received,
+						$this->auth->user_id(),
+						'requisition',
+						$requisition_id
+					);
+
+					if ($qty_received !== $item['qty_approved']) {
+						$this->Store_model->update_requisition_item_received($item['id'], $qty_received);
+					}
+				}
+			}
+
+			$this->Store_model->update_requisition_status($requisition_id, 'received');
+			$this->db->trans_complete();
+
+			if ($this->db->trans_status()) {
+				$this->session->set_flashdata('success', t('requisition_received'));
+				redirect('store/requisitions');
+			} else {
+				$this->session->set_flashdata('error', t('error_receiving_requisition'));
+			}
+		}
+
+		$this->render('store/receive_requisition', $data);
+	}
 }

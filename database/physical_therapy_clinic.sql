@@ -488,6 +488,43 @@ CREATE TABLE `stock_movements` (
 	CONSTRAINT `stock_movements_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `stock_requisitions` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`from_location_id` int unsigned NOT NULL,
+	`to_location_id` int unsigned NOT NULL,
+	`requested_by` int unsigned NOT NULL,
+	`status` enum('pending','approved','rejected','in_transit','received','cancelled') NOT NULL DEFAULT 'pending',
+	`approved_by` int unsigned NULL,
+	`reject_reason` varchar(255) NULL,
+	`note` varchar(255) NULL,
+	`created_at` datetime NOT NULL,
+	`updated_at` datetime NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `stock_requisitions_status_index` (`status`),
+	KEY `stock_requisitions_requested_by_index` (`requested_by`),
+	KEY `stock_requisitions_approved_by_index` (`approved_by`),
+	KEY `stock_requisitions_from_location_index` (`from_location_id`),
+	KEY `stock_requisitions_to_location_index` (`to_location_id`),
+	CONSTRAINT `stock_requisitions_from_location_fk` FOREIGN KEY (`from_location_id`) REFERENCES `store_locations` (`id`),
+	CONSTRAINT `stock_requisitions_to_location_fk` FOREIGN KEY (`to_location_id`) REFERENCES `store_locations` (`id`),
+	CONSTRAINT `stock_requisitions_requested_by_fk` FOREIGN KEY (`requested_by`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
+	CONSTRAINT `stock_requisitions_approved_by_fk` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `stock_requisition_items` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`requisition_id` int unsigned NOT NULL,
+	`variant_id` int unsigned NOT NULL,
+	`qty_requested` int NOT NULL,
+	`qty_approved` int NULL,
+	`qty_received` int NULL,
+	PRIMARY KEY (`id`),
+	KEY `stock_requisition_items_requisition_id_index` (`requisition_id`),
+	KEY `stock_requisition_items_variant_id_index` (`variant_id`),
+	CONSTRAINT `stock_requisition_items_requisition_fk` FOREIGN KEY (`requisition_id`) REFERENCES `stock_requisitions` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `stock_requisition_items_variant_fk` FOREIGN KEY (`variant_id`) REFERENCES `store_product_variants` (`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `roles` (`id`, `name`, `slug`) VALUES
 	(1, 'Administrator', 'administrator'),
 	(2, 'Therapist', 'therapist'),
