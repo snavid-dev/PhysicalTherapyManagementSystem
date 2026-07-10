@@ -17,17 +17,30 @@ class Expenses extends Authenticated_Controller
 		$this->require_permission('manage_expenses');
 
 		$filters = $this->expense_filters();
-		$expenses = $this->Expense_model->get_all($this->expense_query_filters($filters));
+		$query_filters = $this->expense_query_filters($filters);
+		$expenses = $this->Expense_model->get_all($query_filters);
+
+		// Refunds (money out) are shown alongside expenses, but only when not
+		// filtering by an expense-only dimension (category or staff), since refunds
+		// have neither.
+		$show_refunds = empty($filters['category_id']) && empty($filters['staff_id']);
+		$refunds = $show_refunds ? $this->Expense_model->get_refunds($query_filters) : array();
+
 		$total_amount = 0;
 
 		foreach ($expenses as $expense) {
 			$total_amount += (float) $expense['amount'];
 		}
 
+		foreach ($refunds as $refund) {
+			$total_amount += (float) $refund['amount'];
+		}
+
 		$this->render('expenses/index', array(
 			'title' => t('expenses'),
 			'current_section' => 'expenses',
 			'expenses' => $expenses,
+			'refunds' => $refunds,
 			'categories' => $this->Expense_category_model->get_all(),
 			'staff_members' => $this->Staff_model->get_active(),
 			'filters' => $filters,

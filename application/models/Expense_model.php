@@ -43,6 +43,39 @@ class Expense_model extends CI_Model
 			->result_array();
 	}
 
+	/**
+	 * Patient refunds (مستردی) are money leaving the clinic, so the secretary
+	 * needs them visible alongside expenses. They live in
+	 * patient_wallet_transactions (and the safe ledger), NOT the expenses table,
+	 * so we surface them read-only in the expense list without duplicating them
+	 * into expenses (which would double-count against the safe).
+	 */
+	public function get_refunds($filters = array())
+	{
+		if (!$this->db->table_exists('patient_wallet_transactions')) {
+			return array();
+		}
+
+		$this->db
+			->select("pwt.id, pwt.amount, DATE(pwt.created_at) AS expense_date, pwt.note, TRIM(CONCAT(patients.first_name, ' ', COALESCE(patients.last_name, ''))) AS patient_name", FALSE)
+			->from('patient_wallet_transactions pwt')
+			->join('patients', 'patients.id = pwt.patient_id', 'left')
+			->where('pwt.type', 'refund');
+
+		if (!empty($filters['date_from'])) {
+			$this->db->where('DATE(pwt.created_at) >=', $filters['date_from']);
+		}
+
+		if (!empty($filters['date_to'])) {
+			$this->db->where('DATE(pwt.created_at) <=', $filters['date_to']);
+		}
+
+		return $this->db
+			->order_by('pwt.created_at', 'desc')
+			->get()
+			->result_array();
+	}
+
 	public function get_by_id($id)
 	{
 		$this->ensure_schema();

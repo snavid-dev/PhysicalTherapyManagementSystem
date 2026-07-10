@@ -171,6 +171,72 @@ class Salary_model extends CI_Model
 	}
 
 	/**
+	 * Delete a recorded salary payment and unwind everything it created: the safe
+	 * outflow (with balance recompute), the mirrored expense row, the payment row
+	 * itself, and the record's running total/status. Lets a manager correct a
+	 * mistaken payment (re-add the right one afterwards).
+	 */
+	public function delete_payment($payment_id)
+	{
+		$this->ensure_schema();
+
+		$payment_id = (int) $payment_id;
+
+		$payment = $this->db
+			->get_where('staff_salary_payments', array('id' => $payment_id))
+			->row_array();
+
+		if (!$payment) {
+			return FALSE;
+		}
+
+		$this->db->trans_begin();
+
+		$record = $this->get_record_by_id($payment['salary_record_id']);
+
+		// Remove the safe outflow for this payment and recompute the running balance.
+		$this->load->model('Safe_model');
+		$safe_ok = $this->Safe_model->delete_transaction_by_reference('staff_salary_payments', $payment_id, 'salary_payment');
+
+		// Remove the mirrored expense row.
+		if (!empty($payment['expense_id'])) {
+			$this->db->where('id', (int) $payment['expense_id'])->delete('expenses');
+		}
+
+		// Remove the payment row.
+		$this->db->where('id', $payment_id)->delete('staff_salary_payments');
+
+		// Recompute the record's total_paid + status from the remaining payments.
+		if ($record) {
+			$sum_row = $this->db
+				->select('COALESCE(SUM(amount), 0) AS total', FALSE)
+				->from('staff_salary_payments')
+				->where('salary_record_id', (int) $record['id'])
+				->get()
+				->row_array();
+
+			$total_paid = round((float) $sum_row['total'], 2);
+			$status = $this->derive_status($total_paid, $record['final_salary'], isset($record['settled']) ? $record['settled'] : 0);
+
+			$this->db
+				->where('id', (int) $record['id'])
+				->update('staff_salary_records', array(
+					'total_paid' => $total_paid,
+					'status' => $status,
+				));
+		}
+
+		if ($safe_ok === FALSE || $this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
+
+		$this->db->trans_commit();
+
+		return TRUE;
+	}
+
+	/**
 	 * Remaining suggested amount still due for a record. A settled month (closed
 	 * by the manager) and any fully/over-paid month both return 0.
 	 */

@@ -73,6 +73,7 @@ $is_paid = $record['status'] === 'paid';
 								<th><?= t('Amount') ?></th>
 								<th><?= t('Notes') ?></th>
 								<th><?= t('recorded_by') ?></th>
+								<th class="text-end"><?= t('Actions') ?></th>
 							</tr>
 						</thead>
 						<tbody id="paymentHistoryBody">
@@ -83,10 +84,17 @@ $is_paid = $record['status'] === 'paid';
 									<td><?= format_number($payment['amount'], 2) ?></td>
 									<td><?= $payment['note'] ? html_escape($payment['note']) : '&mdash;' ?></td>
 									<td><?= !empty($payment['created_by_first_name']) || !empty($payment['created_by_last_name']) ? html_escape(trim($payment['created_by_first_name'] . ' ' . $payment['created_by_last_name'])) : '&mdash;' ?></td>
+									<td class="text-end">
+										<?= form_open('salaries/payment/' . (int) $payment['id'] . '/delete', 'class="m-0 d-inline"') ?>
+											<input type="hidden" name="staff_id" value="<?= (int) $staff['id'] ?>">
+											<input type="hidden" name="month" value="<?= html_escape($month_display) ?>">
+											<button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('delete_salary_payment_confirm') ?>')"><?= t('Delete') ?></button>
+										<?= form_close() ?>
+									</td>
 								</tr>
 							<?php endforeach; ?>
 						<?php else : ?>
-							<tr><td colspan="4" class="text-muted"><?= t('No salary payments recorded yet.') ?></td></tr>
+							<tr><td colspan="5" class="text-muted"><?= t('No salary payments recorded yet.') ?></td></tr>
 						<?php endif; ?>
 						</tbody>
 					</table>

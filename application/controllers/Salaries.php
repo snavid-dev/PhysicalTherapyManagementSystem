@@ -155,6 +155,27 @@ class Salaries extends Authenticated_Controller
 		redirect('salaries/pay/' . $staff_id . '?month=' . rawurlencode($month_input));
 	}
 
+	public function delete_payment($payment_id)
+	{
+		$this->require_permission('manage_salaries');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$staff_id = (int) $this->input->post('staff_id');
+		$month_input = trim((string) $this->input->post('month', TRUE));
+		$redirect = 'salaries/pay/' . $staff_id . ($month_input !== '' ? '?month=' . rawurlencode($month_input) : '');
+
+		if ($this->Salary_model->delete_payment($payment_id)) {
+			$this->session->set_flashdata('success', t('salary_payment_deleted'));
+		} else {
+			$this->session->set_flashdata('error', t('Unable to delete salary payment right now.'));
+		}
+
+		redirect($redirect);
+	}
+
 	public function get_calculation()
 	{
 		$this->require_permission('manage_salaries');

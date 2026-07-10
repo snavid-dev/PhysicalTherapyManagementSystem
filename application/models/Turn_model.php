@@ -22,6 +22,95 @@ class Turn_model extends CI_Model
 			->result_array();
 	}
 
+	/**
+	 * Server-side DataTables source for the turns index. The full table grew to
+	 * tens of thousands of rows; rendering every row server-side froze the page,
+	 * so the list now pages from the DB (25 at a time) with search + ordering done
+	 * in SQL. Returns ['data' => rows, 'records_total' => int, 'records_filtered' => int].
+	 */
+	public function get_datatable($params)
+	{
+		$this->ensure_schema();
+
+		$orderable = array(
+			0 => 'turns.id',
+			1 => 'turns.turn_date',
+			2 => 'turns.turn_number',
+			3 => 'patients.first_name',
+			4 => 'patients.last_name',
+			5 => 'sections.name',
+			6 => 'staff.first_name',
+			7 => 'turns.fee',
+			8 => 'turns.payment_type',
+		);
+
+		$records_total = (int) $this->db->count_all_results('turns');
+
+		// Filtered count (joins + search), keeping the builder so the data query
+		// below reuses the same FROM/JOIN/WHERE.
+		$this->apply_datatable_joins();
+		$this->apply_datatable_search($params['search'] ?? '');
+		$records_filtered = (int) $this->db->count_all_results('', FALSE);
+
+		$order_col = isset($params['order_col']) ? (int) $params['order_col'] : 1;
+		$order_dir = (isset($params['order_dir']) && strtolower((string) $params['order_dir']) === 'asc') ? 'asc' : 'desc';
+		$order_by = isset($orderable[$order_col]) ? $orderable[$order_col] : 'turns.turn_date';
+
+		$this->db->order_by($order_by, $order_dir);
+		if ($order_by !== 'turns.id') {
+			$this->db->order_by('turns.id', 'desc');
+		}
+
+		$this->db->select("turns.*, patients.first_name AS patient_first_name, patients.last_name AS patient_last_name, patients.father_name AS patient_father_name, sections.name AS section_name, CONCAT(staff.first_name, ' ', staff.last_name) AS staff_full_name, CONCAT(users.first_name, ' ', users.last_name) AS doctor_full_name", FALSE);
+
+		$length = isset($params['length']) ? (int) $params['length'] : 25;
+		$start = isset($params['start']) ? max(0, (int) $params['start']) : 0;
+
+		if ($length > 0) {
+			$this->db->limit($length, $start);
+		}
+
+		$data = $this->db->get()->result_array();
+
+		return array(
+			'data' => $data,
+			'records_total' => $records_total,
+			'records_filtered' => $records_filtered,
+		);
+	}
+
+	protected function apply_datatable_joins()
+	{
+		$this->db
+			->from('turns')
+			->join('patients', 'patients.id = turns.patient_id')
+			->join('sections', 'sections.id = turns.section_id', 'left')
+			->join('staff', 'staff.id = turns.staff_id', 'left')
+			->join('users', 'users.id = turns.doctor_id', 'left');
+	}
+
+	protected function apply_datatable_search($search)
+	{
+		$search = trim((string) $search);
+
+		if ($search === '') {
+			return;
+		}
+
+		$this->db
+			->group_start()
+				->like('patients.first_name', $search)
+				->or_like('patients.last_name', $search)
+				->or_like('patients.father_name', $search)
+				->or_like('sections.name', $search)
+				->or_like('staff.first_name', $search)
+				->or_like('staff.last_name', $search)
+				->or_like('turns.payment_type', $search)
+				->or_like('turns.id', $search)
+				->or_like('turns.turn_number', $search)
+			->group_end();
+	}
+
 	public function find($id)
 	{
 		$this->ensure_schema();

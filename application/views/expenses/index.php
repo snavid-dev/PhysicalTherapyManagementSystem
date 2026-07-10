@@ -96,8 +96,24 @@
 						</tr>
 					<?php endforeach; ?>
 				<?php endif; ?>
+				<?php if (!empty($refunds)) : foreach ($refunds as $refund) : ?>
+					<tr>
+						<td class="col-date"><?= html_escape(to_shamsi($refund['expense_date'])) ?></td>
+						<td><span class="badge bg-danger-subtle text-danger border border-danger-subtle"><?= t('refund') ?></span></td>
+						<td>&mdash;</td>
+						<td><?= format_number($refund['amount'], 2) ?></td>
+						<td class="col-text"><?php
+							$refund_detail = trim((string) ($refund['patient_name'] ?? ''));
+							if (!empty($refund['note'])) {
+								$refund_detail = $refund_detail === '' ? $refund['note'] : $refund_detail . ' - ' . $refund['note'];
+							}
+							echo $refund_detail === '' ? '&mdash;' : html_escape($refund_detail);
+						?></td>
+						<td class="no-export text-end"><span class="text-muted small"><?= t('refund') ?></span></td>
+					</tr>
+				<?php endforeach; endif; ?>
 				</tbody>
-				<?php if ($expenses) : ?>
+				<?php if ($expenses || !empty($refunds)) : ?>
 					<tfoot>
 						<tr>
 							<td colspan="3" class="fw-semibold"><?= t('Total:') ?></td>
