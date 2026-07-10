@@ -255,4 +255,79 @@ class Store_model extends CI_Model
 			->where('id', (int) $item_id)
 			->update('stock_requisition_items', array('qty_received' => (int) $qty_received));
 	}
+
+	// ===== Sales =====
+	public function create_sale($patient_id, $location_id, $sold_by, $subtotal, $discount, $tax, $total, $payment_method, $items, $payment_id = NULL)
+	{
+		$this->db->trans_start();
+
+		$sale_id = $this->db->insert('store_sales', array(
+			'patient_id' => $patient_id ? (int) $patient_id : NULL,
+			'location_id' => (int) $location_id,
+			'sold_by' => (int) $sold_by,
+			'subtotal' => round((float) $subtotal, 2),
+			'discount' => round((float) $discount, 2),
+			'tax' => round((float) $tax, 2),
+			'total' => round((float) $total, 2),
+			'payment_method' => trim($payment_method),
+			'status' => 'completed',
+			'payment_id' => $payment_id ? (int) $payment_id : NULL,
+			'created_at' => date('Y-m-d H:i:s')
+		));
+
+		$sale_id = $this->db->insert_id();
+
+		foreach ($items as $item) {
+			$this->db->insert('store_sale_items', array(
+				'sale_id' => $sale_id,
+				'variant_id' => (int) $item['variant_id'],
+				'qty' => (int) $item['qty'],
+				'unit_price' => round((float) $item['unit_price'], 2),
+				'discount' => round((float) ($item['discount'] ?? 0), 2),
+				'line_total' => round((float) $item['line_total'], 2),
+				'unit_cost_at_sale' => round((float) $item['unit_cost_at_sale'], 2)
+			));
+		}
+
+		$this->db->trans_complete();
+
+		return $this->db->trans_status() ? $sale_id : FALSE;
+	}
+
+	public function get_sales($patient_id = NULL, $limit = 100, $offset = 0)
+	{
+		$this->db
+			->select('store_sales.*, users.first_name, users.last_name')
+			->from('store_sales')
+			->join('users', 'store_sales.sold_by = users.id');
+
+		if ($patient_id !== NULL) {
+			$this->db->where('store_sales.patient_id', (int) $patient_id);
+		}
+
+		return $this->db
+			->order_by('store_sales.created_at', 'desc')
+			->limit($limit, $offset)
+			->get()
+			->result_array();
+	}
+
+	public function get_sale_by_id($sale_id)
+	{
+		return $this->db
+			->get_where('store_sales', array('id' => (int) $sale_id))
+			->row_array();
+	}
+
+	public function get_sale_items($sale_id)
+	{
+		return $this->db
+			->select('store_sale_items.*, store_product_variants.variant_label, store_products.name as product_name')
+			->from('store_sale_items')
+			->join('store_product_variants', 'store_sale_items.variant_id = store_product_variants.id')
+			->join('store_products', 'store_product_variants.product_id = store_products.id')
+			->where('store_sale_items.sale_id', (int) $sale_id)
+			->get()
+			->result_array();
+	}
 }

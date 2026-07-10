@@ -499,4 +499,182 @@ class Store extends Authenticated_Controller
 
 		$this->render('store/receive_requisition', $data);
 	}
+
+	// ===== Sales =====
+	public function sell()
+	{
+		$this->require_permission('manage_store');
+
+		$data['patients'] = array();
+		$data['current_section'] = 'store';
+
+		if ($this->input->method() === 'post') {
+			$this->load->model('Safe_model');
+			$this->load->model('Wallet_model');
+
+			$this->db->trans_start();
+
+			$patient_id = $this->input->post('patient_id') ? (int) $this->input->post('patient_id') : NULL;
+			$payment_method = trim($this->input->post('payment_method'));
+			$variants = $this->input->post('variant_id') ?? array();
+			$quantities = $this->input->post('qty') ?? array();
+			$prices = $this->input->post('price') ?? array();
+
+			$items = array();
+			$subtotal = 0;
+
+			foreach ($variants as $k => $vid) {
+				if (!empty($vid) && isset($quantities[$k], $prices[$k])) {
+					$vid = (int) $vid;
+					$qty = (int) $quantities[$k];
+					$price = round((float) $prices[$k], 2);
+
+					if ($qty <= 0 || $price < 0) continue;
+
+					$variant = $this->Store_model->get_variant_by_id($vid);
+					if (!$variant) continue;
+
+					$available = $this->Inventory_model->get_stock_level($vid, 1);
+					if (!$available || $available['qty_on_hand'] < $qty) {
+						$this->db->trans_rollback();
+						$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+						redirect('store/sell');
+					}
+
+					$line_total = $qty * $price;
+					$items[] = array(
+						'variant_id' => $vid,
+						'qty' => $qty,
+						'unit_price' => $price,
+						'line_total' => $line_total,
+						'unit_cost_at_sale' => $variant['cost_price']
+					);
+
+					$subtotal += $line_total;
+				}
+			}
+
+			if (empty($items)) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('cart_empty'));
+				redirect('store/sell');
+			}
+
+			$discount = round((float) $this->input->post('discount'), 2);
+			$tax = round((float) $this->input->post('tax'), 2);
+			$total = $subtotal - $discount + $tax;
+
+			if ($payment_method === 'cash' || $payment_method === 'card') {
+				if ($total <= 0) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('invalid_sale_amount'));
+					redirect('store/sell');
+				}
+
+				$sale_id = $this->Store_model->create_sale(
+					$patient_id,
+					1,
+					$this->auth->user_id(),
+					$subtotal,
+					$discount,
+					$tax,
+					$total,
+					$payment_method,
+					$items
+				);
+
+				if ($sale_id) {
+					foreach ($items as $item) {
+						$this->Inventory_model->record_movement(
+							$item['variant_id'],
+							1,
+							'sale_out',
+							-$item['qty'],
+							$this->auth->user_id(),
+							'sale',
+							$sale_id
+						);
+					}
+
+					$this->Safe_model->log_transaction(
+						'in',
+						'store_sale',
+						$total,
+						$sale_id,
+						'store_sales',
+						'Store sale: ' . count($items) . ' item(s)',
+						$this->auth->user_id()
+					);
+
+					redirect('store/receipt/' . $sale_id);
+				} else {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('error_creating_sale'));
+				}
+			} elseif ($payment_method === 'wallet' || $payment_method === 'prepayment') {
+				if (!$patient_id) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('patient_required_for_wallet'));
+					redirect('store/sell');
+				}
+
+				if ($total <= 0) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('invalid_sale_amount'));
+					redirect('store/sell');
+				}
+
+				$sale_id = $this->Store_model->create_sale(
+					$patient_id,
+					1,
+					$this->auth->user_id(),
+					$subtotal,
+					$discount,
+					$tax,
+					$total,
+					$payment_method,
+					$items
+				);
+
+				if ($sale_id) {
+					foreach ($items as $item) {
+						$this->Inventory_model->record_movement(
+							$item['variant_id'],
+							1,
+							'sale_out',
+							-$item['qty'],
+							$this->auth->user_id(),
+							'sale',
+							$sale_id
+						);
+					}
+
+					$this->Wallet_model->deduct($patient_id, $total, NULL, 'Store purchase');
+					$this->Wallet_model->recalculate_for_patient($patient_id);
+
+					redirect('store/receipt/' . $sale_id);
+				} else {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('error_creating_sale'));
+				}
+			}
+
+			redirect('store/sell');
+		}
+
+		$this->render('store/sell', $data);
+	}
+
+	public function receipt($sale_id)
+	{
+		$data['sale'] = $this->Store_model->get_sale_by_id($sale_id);
+		$data['items'] = $this->Store_model->get_sale_items($sale_id);
+		$data['current_section'] = 'store';
+
+		if (!$data['sale']) {
+			show_404();
+		}
+
+		$this->render('store/receipt', $data);
+	}
 }

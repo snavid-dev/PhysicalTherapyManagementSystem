@@ -111,6 +111,8 @@ $route['store/requisitions'] = 'Store/requisitions';
 $route['store/create_requisition'] = 'Store/create_requisition';
 $route['store/approve_requisition/(:num)'] = 'Store/approve_requisition/$1';
 $route['store/receive_requisition/(:num)'] = 'Store/receive_requisition/$1';
+$route['store/sell'] = 'Store/sell';
+$route['store/receipt/(:num)'] = 'Store/receipt/$1';
 
 $route['reports'] = 'Reports/index';
 $route['reports/daily-register'] = 'reports/daily_register';

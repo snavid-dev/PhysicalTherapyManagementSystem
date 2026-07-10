@@ -525,6 +525,45 @@ CREATE TABLE `stock_requisition_items` (
 	CONSTRAINT `stock_requisition_items_variant_fk` FOREIGN KEY (`variant_id`) REFERENCES `store_product_variants` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `store_sales` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`patient_id` int unsigned NULL,
+	`location_id` int unsigned NOT NULL,
+	`sold_by` int unsigned NOT NULL,
+	`subtotal` decimal(12,2) NOT NULL,
+	`discount` decimal(12,2) NOT NULL DEFAULT 0,
+	`tax` decimal(12,2) NOT NULL DEFAULT 0,
+	`total` decimal(12,2) NOT NULL,
+	`payment_method` enum('cash','card','wallet','prepayment') NOT NULL,
+	`status` enum('completed','refunded','partially_refunded') NOT NULL DEFAULT 'completed',
+	`payment_id` int unsigned NULL,
+	`created_at` datetime NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_sales_patient_id_index` (`patient_id`),
+	KEY `store_sales_location_id_index` (`location_id`),
+	KEY `store_sales_sold_by_index` (`sold_by`),
+	KEY `store_sales_created_at_index` (`created_at`),
+	CONSTRAINT `store_sales_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE SET NULL,
+	CONSTRAINT `store_sales_location_fk` FOREIGN KEY (`location_id`) REFERENCES `store_locations` (`id`),
+	CONSTRAINT `store_sales_sold_by_fk` FOREIGN KEY (`sold_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `store_sale_items` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`sale_id` int unsigned NOT NULL,
+	`variant_id` int unsigned NOT NULL,
+	`qty` int NOT NULL,
+	`unit_price` decimal(12,2) NOT NULL,
+	`discount` decimal(12,2) NOT NULL DEFAULT 0,
+	`line_total` decimal(12,2) NOT NULL,
+	`unit_cost_at_sale` decimal(12,2) NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_sale_items_sale_id_index` (`sale_id`),
+	KEY `store_sale_items_variant_id_index` (`variant_id`),
+	CONSTRAINT `store_sale_items_sale_fk` FOREIGN KEY (`sale_id`) REFERENCES `store_sales` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `store_sale_items_variant_fk` FOREIGN KEY (`variant_id`) REFERENCES `store_product_variants` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `roles` (`id`, `name`, `slug`) VALUES
 	(1, 'Administrator', 'administrator'),
 	(2, 'Therapist', 'therapist'),
