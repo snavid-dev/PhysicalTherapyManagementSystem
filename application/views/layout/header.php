@@ -61,6 +61,9 @@
 				<?php if ($this->auth->has_permission('manage_salaries')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'salaries' ? 'active' : '' ?>" href="<?= base_url('salaries') ?>"><?= t('salaries') ?></a></li>
 				<?php endif; ?>
+				<?php if ($this->auth->has_permission('view_store')) : ?>
+					<li class="nav-item"><a class="nav-link <?= $current_section === 'store' ? 'active' : '' ?>" href="<?= base_url('store') ?>"><?= t('Store') ?></a></li>
+				<?php endif; ?>
 				<?php if ($this->auth->has_permission('view_reports')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'reports' ? 'active' : '' ?>" href="<?= base_url('reports') ?>"><?= t('Reports') ?></a></li>
 				<?php endif; ?>

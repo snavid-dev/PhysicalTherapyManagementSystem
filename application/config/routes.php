@@ -95,6 +95,19 @@ $route['salaries/settle/(:num)'] = 'salaries/settle/$1';
 $route['salaries/reopen/(:num)'] = 'salaries/reopen/$1';
 $route['salaries/get-calculation'] = 'salaries/get_calculation';
 
+$route['store'] = 'Store/index';
+$route['store/products'] = 'Store/products';
+$route['store/create_product'] = 'Store/create_product';
+$route['store/edit_product/(:num)'] = 'Store/edit_product/$1';
+$route['store/create_variant/(:num)'] = 'Store/create_variant/$1';
+$route['store/edit_variant/(:num)'] = 'Store/edit_variant/$1';
+$route['store/categories'] = 'Store/categories';
+$route['store/create_category'] = 'Store/create_category';
+$route['store/edit_category/(:num)'] = 'Store/edit_category/$1';
+$route['store/delete_category/(:num)'] = 'Store/delete_category/$1';
+$route['store/stock(/(:num))?'] = 'Store/stock/$1';
+$route['store/set_opening_stock'] = 'Store/set_opening_stock';
+
 $route['reports'] = 'Reports/index';
 $route['reports/daily-register'] = 'reports/daily_register';
 $route['reports/daily-register/print'] = 'reports/daily_register_print';
