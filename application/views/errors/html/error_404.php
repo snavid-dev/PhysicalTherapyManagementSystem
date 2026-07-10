@@ -37,8 +37,8 @@ $ci = get_instance();
             <use xlink:href="#tornillo" y="60"></use>
         </g>
     </svg>
-    <h1><?= $ci->lang('404Message') ?></h1>
-    <h2>Go <a target="_self" href="<?= base_url() ?>/admin"><?= $ci->lang('goHome') ?></a></h2>
+    <h1>Page Not Found</h1>
+    <h2>Go <a target="_self" href="<?= base_url() ?>/admin">Home</a></h2>
 </body>
 <script type="text/javascript" src="<?= base_url() ?>assets/js/funcs404.js"></script>
 

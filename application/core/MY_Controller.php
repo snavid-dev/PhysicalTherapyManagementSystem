@@ -82,6 +82,13 @@ class Base_Controller extends CI_Controller
 		$data['current_locale'] = app_locale();
 		$data['current_theme'] = app_theme();
 		$data['is_rtl'] = is_rtl_locale();
+
+		if ($this->auth->has_permission('approve_store_requisition')) {
+			$data['pending_requisitions_count'] = $this->db
+				->where('status', 'pending')
+				->count_all_results('stock_requisitions');
+		}
+
 		$this->load->view('layout/header', $data);
 		$this->load->view($view, $data);
 		$this->load->view('layout/footer');

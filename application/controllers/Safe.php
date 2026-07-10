@@ -97,10 +97,19 @@ class Safe extends Authenticated_Controller
 
 	protected function safe_filters()
 	{
+		$date_from = trim((string) $this->input->get('date_from', TRUE));
+
+		// Ledger grows without bound; default to the current month so an
+		// unfiltered visit doesn't join/render the entire history every time.
+		// Users can still widen the range via the date_from field.
+		if ($date_from === '') {
+			$date_from = to_shamsi(date('Y-m-01'));
+		}
+
 		return array(
 			'type' => trim((string) $this->input->get('type', TRUE)),
 			'source' => trim((string) $this->input->get('source', TRUE)),
-			'date_from' => trim((string) $this->input->get('date_from', TRUE)),
+			'date_from' => $date_from,
 			'date_to' => trim((string) $this->input->get('date_to', TRUE)),
 		);
 	}

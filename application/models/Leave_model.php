@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Leave_model extends CI_Model
 {
+	protected $schema_ready = FALSE;
+
 	public function all()
 	{
 		$this->ensure_schema();
@@ -55,6 +57,11 @@ class Leave_model extends CI_Model
 	 */
 	public function ensure_schema()
 	{
+		if ($this->schema_ready) {
+			return;
+		}
+		$this->schema_ready = TRUE;
+
 		if (!$this->db->table_exists('doctor_leaves')) {
 			$this->db->query("
 				CREATE TABLE IF NOT EXISTS `doctor_leaves` (
