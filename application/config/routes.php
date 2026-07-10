@@ -113,6 +113,12 @@ $route['store/approve_requisition/(:num)'] = 'Store/approve_requisition/$1';
 $route['store/receive_requisition/(:num)'] = 'Store/receive_requisition/$1';
 $route['store/sell'] = 'Store/sell';
 $route['store/receipt/(:num)'] = 'Store/receipt/$1';
+$route['store/suppliers'] = 'Store/suppliers';
+$route['store/create_supplier'] = 'Store/create_supplier';
+$route['store/edit_supplier/(:num)'] = 'Store/edit_supplier/$1';
+$route['store/receive_stock'] = 'Store/receive_stock';
+$route['store/stock_receipts'] = 'Store/stock_receipts';
+$route['store/view_stock_receipt/(:num)'] = 'Store/view_stock_receipt/$1';
 
 $route['reports'] = 'Reports/index';
 $route['reports/daily-register'] = 'reports/daily_register';

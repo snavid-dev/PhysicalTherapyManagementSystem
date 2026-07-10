@@ -330,4 +330,134 @@ class Store_model extends CI_Model
 			->get()
 			->result_array();
 	}
+
+	// ===== Suppliers =====
+	public function get_all_suppliers()
+	{
+		return $this->db
+			->where('is_active', 1)
+			->order_by('name', 'asc')
+			->get('store_suppliers')
+			->result_array();
+	}
+
+	public function get_supplier_by_id($id)
+	{
+		return $this->db
+			->get_where('store_suppliers', array('id' => (int) $id))
+			->row_array();
+	}
+
+	public function create_supplier($data)
+	{
+		$data['created_at'] = date('Y-m-d H:i:s');
+		$this->db->insert('store_suppliers', $data);
+		return $this->db->insert_id();
+	}
+
+	public function update_supplier($id, $data)
+	{
+		return $this->db
+			->where('id', (int) $id)
+			->update('store_suppliers', $data);
+	}
+
+	// ===== Stock Receipts =====
+	public function create_stock_receipt($supplier_id, $received_by, $items, $note = NULL)
+	{
+		$this->db->trans_start();
+
+		$total_cost = 0;
+		foreach ($items as $item) {
+			$total_cost += (int) $item['qty'] * round((float) $item['unit_cost'], 2);
+		}
+
+		$receipt_id = $this->db->insert('store_stock_receipts', array(
+			'supplier_id' => $supplier_id ? (int) $supplier_id : NULL,
+			'received_by' => (int) $received_by,
+			'note' => $note ? trim($note) : NULL,
+			'created_at' => date('Y-m-d H:i:s')
+		));
+
+		$receipt_id = $this->db->insert_id();
+
+		foreach ($items as $item) {
+			$this->db->insert('store_stock_receipt_items', array(
+				'receipt_id' => $receipt_id,
+				'variant_id' => (int) $item['variant_id'],
+				'qty' => (int) $item['qty'],
+				'unit_cost' => round((float) $item['unit_cost'], 2)
+			));
+
+			$this->db->where('id', (int) $item['variant_id'])
+				->update('store_product_variants', array(
+					'cost_price' => round((float) $item['unit_cost'], 2)
+				));
+		}
+
+		$expense_data = array(
+			'category_id' => $this->get_inventory_purchase_category_id(),
+			'amount' => $total_cost,
+			'note' => 'Stock receipt #' . $receipt_id . ($supplier_id ? ' from supplier' : ''),
+			'created_by' => (int) $received_by,
+			'expense_date' => date('Y-m-d')
+		);
+
+		$this->db->insert('expenses', $expense_data);
+		$expense_id = $this->db->insert_id();
+
+		$this->db
+			->where('id', $receipt_id)
+			->update('store_stock_receipts', array('expense_id' => $expense_id));
+
+		$this->db->trans_complete();
+
+		return $this->db->trans_status() ? $receipt_id : FALSE;
+	}
+
+	protected function get_inventory_purchase_category_id()
+	{
+		$category = $this->db
+			->where('name', 'Inventory Purchase')
+			->get('expense_categories')
+			->row_array();
+		return $category ? $category['id'] : 3;
+	}
+
+	public function get_stock_receipts($limit = 50, $offset = 0)
+	{
+		return $this->db
+			->select('store_stock_receipts.*, users.first_name, users.last_name, store_suppliers.name as supplier_name')
+			->from('store_stock_receipts')
+			->join('users', 'store_stock_receipts.received_by = users.id')
+			->join('store_suppliers', 'store_stock_receipts.supplier_id = store_suppliers.id', 'left')
+			->order_by('store_stock_receipts.created_at', 'desc')
+			->limit($limit, $offset)
+			->get()
+			->result_array();
+	}
+
+	public function get_receipt_by_id($receipt_id)
+	{
+		return $this->db
+			->select('store_stock_receipts.*, users.first_name, users.last_name, store_suppliers.name as supplier_name')
+			->from('store_stock_receipts')
+			->join('users', 'store_stock_receipts.received_by = users.id')
+			->join('store_suppliers', 'store_stock_receipts.supplier_id = store_suppliers.id', 'left')
+			->where('store_stock_receipts.id', (int) $receipt_id)
+			->get()
+			->row_array();
+	}
+
+	public function get_receipt_items($receipt_id)
+	{
+		return $this->db
+			->select('store_stock_receipt_items.*, store_product_variants.variant_label, store_products.name as product_name')
+			->from('store_stock_receipt_items')
+			->join('store_product_variants', 'store_stock_receipt_items.variant_id = store_product_variants.id')
+			->join('store_products', 'store_product_variants.product_id = store_products.id')
+			->where('store_stock_receipt_items.receipt_id', (int) $receipt_id)
+			->get()
+			->result_array();
+	}
 }

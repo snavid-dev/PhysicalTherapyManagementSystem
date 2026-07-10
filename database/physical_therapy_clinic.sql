@@ -564,6 +564,45 @@ CREATE TABLE `store_sale_items` (
 	CONSTRAINT `store_sale_items_variant_fk` FOREIGN KEY (`variant_id`) REFERENCES `store_product_variants` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `store_suppliers` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`name` varchar(191) NOT NULL,
+	`contact` varchar(191) NULL,
+	`note` varchar(255) NULL,
+	`is_active` tinyint(1) NOT NULL DEFAULT 1,
+	`created_at` datetime NOT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `store_stock_receipts` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`supplier_id` int unsigned NULL,
+	`received_by` int unsigned NOT NULL,
+	`expense_id` int unsigned NULL,
+	`note` varchar(255) NULL,
+	`created_at` datetime NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_stock_receipts_supplier_id_index` (`supplier_id`),
+	KEY `store_stock_receipts_received_by_index` (`received_by`),
+	KEY `store_stock_receipts_expense_id_index` (`expense_id`),
+	CONSTRAINT `store_stock_receipts_supplier_fk` FOREIGN KEY (`supplier_id`) REFERENCES `store_suppliers` (`id`) ON DELETE SET NULL,
+	CONSTRAINT `store_stock_receipts_received_by_fk` FOREIGN KEY (`received_by`) REFERENCES `users` (`id`),
+	CONSTRAINT `store_stock_receipts_expense_fk` FOREIGN KEY (`expense_id`) REFERENCES `expenses` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `store_stock_receipt_items` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`receipt_id` int unsigned NOT NULL,
+	`variant_id` int unsigned NOT NULL,
+	`qty` int NOT NULL,
+	`unit_cost` decimal(12,2) NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_stock_receipt_items_receipt_id_index` (`receipt_id`),
+	KEY `store_stock_receipt_items_variant_id_index` (`variant_id`),
+	CONSTRAINT `store_stock_receipt_items_receipt_fk` FOREIGN KEY (`receipt_id`) REFERENCES `store_stock_receipts` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `store_stock_receipt_items_variant_fk` FOREIGN KEY (`variant_id`) REFERENCES `store_product_variants` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `roles` (`id`, `name`, `slug`) VALUES
 	(1, 'Administrator', 'administrator'),
 	(2, 'Therapist', 'therapist'),

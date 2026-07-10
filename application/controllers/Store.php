@@ -677,4 +677,158 @@ class Store extends Authenticated_Controller
 
 		$this->render('store/receipt', $data);
 	}
+
+	// ===== Suppliers =====
+	public function suppliers()
+	{
+		$this->require_permission('manage_store');
+		$data['suppliers'] = $this->Store_model->get_all_suppliers();
+		$data['current_section'] = 'store';
+		$this->render('store/suppliers', $data);
+	}
+
+	public function create_supplier()
+	{
+		$this->require_permission('manage_store');
+
+		if ($this->input->method() === 'post') {
+			$name = trim($this->input->post('name'));
+			if (empty($name)) {
+				$this->session->set_flashdata('error', t('supplier_name_required'));
+				redirect('store/suppliers');
+			}
+
+			$this->Store_model->create_supplier(array(
+				'name' => $name,
+				'contact' => trim($this->input->post('contact')) ?: NULL,
+				'note' => trim($this->input->post('note')) ?: NULL,
+				'is_active' => 1
+			));
+
+			$this->session->set_flashdata('success', t('supplier_created'));
+			redirect('store/suppliers');
+		}
+
+		$data['current_section'] = 'store';
+		$this->render('store/supplier_form', $data);
+	}
+
+	public function edit_supplier($supplier_id)
+	{
+		$this->require_permission('manage_store');
+
+		$data['supplier'] = $this->Store_model->get_supplier_by_id($supplier_id);
+		$data['current_section'] = 'store';
+
+		if (!$data['supplier']) {
+			show_404();
+		}
+
+		if ($this->input->method() === 'post') {
+			$name = trim($this->input->post('name'));
+			if (empty($name)) {
+				$this->session->set_flashdata('error', t('supplier_name_required'));
+				redirect('store/suppliers');
+			}
+
+			$this->Store_model->update_supplier($supplier_id, array(
+				'name' => $name,
+				'contact' => trim($this->input->post('contact')) ?: NULL,
+				'note' => trim($this->input->post('note')) ?: NULL
+			));
+
+			$this->session->set_flashdata('success', t('supplier_updated'));
+			redirect('store/suppliers');
+		}
+
+		$this->render('store/supplier_form', $data);
+	}
+
+	// ===== Stock Receipts =====
+	public function receive_stock()
+	{
+		$this->require_permission('manage_store');
+
+		$data['suppliers'] = $this->Store_model->get_all_suppliers();
+		$data['current_section'] = 'store';
+
+		if ($this->input->method() === 'post') {
+			$this->load->model('Inventory_model');
+
+			$supplier_id = $this->input->post('supplier_id') ? (int) $this->input->post('supplier_id') : NULL;
+			$variants = $this->input->post('variant_id') ?? array();
+			$quantities = $this->input->post('qty') ?? array();
+			$costs = $this->input->post('unit_cost') ?? array();
+
+			$items = array();
+			foreach ($variants as $k => $vid) {
+				if (!empty($vid) && isset($quantities[$k], $costs[$k])) {
+					$qty = (int) $quantities[$k];
+					$cost = round((float) $costs[$k], 2);
+
+					if ($qty > 0 && $cost >= 0) {
+						$items[] = array(
+							'variant_id' => (int) $vid,
+							'qty' => $qty,
+							'unit_cost' => $cost
+						);
+					}
+				}
+			}
+
+			if (empty($items)) {
+				$this->session->set_flashdata('error', t('receipt_empty'));
+				redirect('store/receive_stock');
+			}
+
+			$receipt_id = $this->Store_model->create_stock_receipt(
+				$supplier_id,
+				$this->auth->user_id(),
+				$items,
+				trim($this->input->post('note')) ?: NULL
+			);
+
+			if ($receipt_id) {
+				foreach ($items as $item) {
+					$this->Inventory_model->record_movement(
+						$item['variant_id'],
+						2,
+						'purchase_in',
+						$item['qty'],
+						$this->auth->user_id(),
+						'receipt',
+						$receipt_id,
+						$item['unit_cost']
+					);
+				}
+
+				$this->session->set_flashdata('success', t('stock_received'));
+				redirect('store/stock_receipts');
+			} else {
+				$this->session->set_flashdata('error', t('error_receiving_stock'));
+			}
+		}
+
+		$this->render('store/receive_stock_form', $data);
+	}
+
+	public function stock_receipts()
+	{
+		$data['receipts'] = $this->Store_model->get_stock_receipts();
+		$data['current_section'] = 'store';
+		$this->render('store/stock_receipts', $data);
+	}
+
+	public function view_stock_receipt($receipt_id)
+	{
+		$data['receipt'] = $this->Store_model->get_receipt_by_id($receipt_id);
+		$data['items'] = $this->Store_model->get_receipt_items($receipt_id);
+		$data['current_section'] = 'store';
+
+		if (!$data['receipt']) {
+			show_404();
+		}
+
+		$this->render('store/view_stock_receipt', $data);
+	}
 }
