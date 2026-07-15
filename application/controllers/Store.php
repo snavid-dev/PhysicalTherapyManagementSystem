@@ -14,6 +14,21 @@ class Store extends Authenticated_Controller
 	public function index()
 	{
 		$data['current_section'] = 'store';
+
+		if ($this->auth->has_permission('manage_store')) {
+			$today = date('Y-m-d');
+			$rows = $this->Store_model->get_sales_report_rows(array('date_from' => $today, 'date_to' => $today));
+			$revenue_today = 0;
+			$sale_ids_today = array();
+			foreach ($rows as $row) {
+				$revenue_today += (float) $row['line_total'];
+				$sale_ids_today[$row['sale_id']] = TRUE;
+			}
+			$data['today_revenue'] = $revenue_today;
+			$data['today_sales_count'] = count($sale_ids_today);
+			$data['open_debt_count'] = $this->Store_model->count_open_debts();
+		}
+
 		$this->render('store/index', $data);
 	}
 
@@ -253,9 +268,15 @@ class Store extends Authenticated_Controller
 			$variant_id = (int) $this->input->post('variant_id');
 			$location_id = (int) $this->input->post('location_id');
 			$qty = (int) $this->input->post('qty');
+			$reason = trim($this->input->post('reason'));
 
 			if ($qty < 0) {
 				$this->session->set_flashdata('error', t('qty_cannot_be_negative'));
+				redirect('store/stock/' . $location_id);
+			}
+
+			if ($reason === '') {
+				$this->session->set_flashdata('error', t('stock_intake_reason_required'));
 				redirect('store/stock/' . $location_id);
 			}
 
@@ -268,7 +289,7 @@ class Store extends Authenticated_Controller
 				'opening',
 				NULL,
 				NULL,
-				'Opening stock'
+				$reason
 			);
 
 			$this->session->set_flashdata('success', t('opening_stock_set'));
@@ -530,10 +551,30 @@ class Store extends Authenticated_Controller
 			$this->db->trans_start();
 
 			$patient_id = $this->input->post('patient_id') ? (int) $this->input->post('patient_id') : NULL;
+			$customer_name = trim((string) $this->input->post('customer_name'));
+			$customer_phone = trim((string) $this->input->post('customer_phone'));
 			$payment_method = trim($this->input->post('payment_method'));
 			$variants = $this->input->post('variant_id') ?? array();
 			$quantities = $this->input->post('qty') ?? array();
 			$prices = $this->input->post('price') ?? array();
+
+			if (!in_array($payment_method, array('cash', 'wallet', 'debt'), TRUE)) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('invalid_payment_method'));
+				redirect('store/sell');
+			}
+
+			if (!$patient_id && $customer_name === '') {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('customer_name_required'));
+				redirect('store/sell');
+			}
+
+			if ($payment_method === 'wallet' && !$patient_id) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('patient_required_for_wallet'));
+				redirect('store/sell');
+			}
 
 			$items = array();
 			$subtotal = 0;
@@ -579,116 +620,70 @@ class Store extends Authenticated_Controller
 			$tax = round((float) $this->input->post('tax'), 2);
 			$total = $subtotal - $discount + $tax;
 
-			if ($payment_method === 'cash' || $payment_method === 'card') {
-				if ($total <= 0) {
-					$this->db->trans_rollback();
-					$this->session->set_flashdata('error', t('invalid_sale_amount'));
-					redirect('store/sell');
-				}
-
-				$sale_id = $this->Store_model->create_sale(
-					$patient_id,
-					1,
-					$this->auth->user_id(),
-					$subtotal,
-					$discount,
-					$tax,
-					$total,
-					$payment_method,
-					$items
-				);
-
-				if ($sale_id) {
-					foreach ($items as $item) {
-						$this->Inventory_model->record_movement(
-							$item['variant_id'],
-							1,
-							'sale_out',
-							-$item['qty'],
-							$this->auth->user_id(),
-							'sale',
-							$sale_id
-						);
-					}
-
-					$this->Safe_model->log_transaction(
-						'in',
-						'store_sale',
-						$total,
-						$sale_id,
-						'store_sales',
-						'Store sale: ' . count($items) . ' item(s)',
-						$this->auth->user_id()
-					);
-
-					$this->db->trans_complete();
-
-					if ($this->db->trans_status()) {
-						redirect('store/receipt/' . $sale_id);
-					} else {
-						$this->session->set_flashdata('error', t('error_creating_sale'));
-						redirect('store/sell');
-					}
-				} else {
-					$this->db->trans_rollback();
-					$this->session->set_flashdata('error', t('error_creating_sale'));
-				}
-			} elseif ($payment_method === 'wallet' || $payment_method === 'prepayment') {
-				if (!$patient_id) {
-					$this->db->trans_rollback();
-					$this->session->set_flashdata('error', t('patient_required_for_wallet'));
-					redirect('store/sell');
-				}
-
-				if ($total <= 0) {
-					$this->db->trans_rollback();
-					$this->session->set_flashdata('error', t('invalid_sale_amount'));
-					redirect('store/sell');
-				}
-
-				$sale_id = $this->Store_model->create_sale(
-					$patient_id,
-					1,
-					$this->auth->user_id(),
-					$subtotal,
-					$discount,
-					$tax,
-					$total,
-					$payment_method,
-					$items
-				);
-
-				if ($sale_id) {
-					foreach ($items as $item) {
-						$this->Inventory_model->record_movement(
-							$item['variant_id'],
-							1,
-							'sale_out',
-							-$item['qty'],
-							$this->auth->user_id(),
-							'sale',
-							$sale_id
-						);
-					}
-
-					$this->Wallet_model->deduct($patient_id, $total, NULL, 'Store purchase');
-					$this->Wallet_model->recalculate_for_patient($patient_id);
-
-					$this->db->trans_complete();
-
-					if ($this->db->trans_status()) {
-						redirect('store/receipt/' . $sale_id);
-					} else {
-						$this->session->set_flashdata('error', t('error_creating_sale'));
-						redirect('store/sell');
-					}
-				} else {
-					$this->db->trans_rollback();
-					$this->session->set_flashdata('error', t('error_creating_sale'));
-				}
+			if ($total <= 0) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('invalid_sale_amount'));
+				redirect('store/sell');
 			}
 
-			redirect('store/sell');
+			$sale_id = $this->Store_model->create_sale(
+				$patient_id,
+				1,
+				$this->auth->user_id(),
+				$subtotal,
+				$discount,
+				$tax,
+				$total,
+				$payment_method,
+				$items,
+				NULL,
+				$patient_id ? NULL : $customer_name,
+				$patient_id ? NULL : $customer_phone
+			);
+
+			if (!$sale_id) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('error_creating_sale'));
+				redirect('store/sell');
+			}
+
+			foreach ($items as $item) {
+				$this->Inventory_model->record_movement(
+					$item['variant_id'],
+					1,
+					'sale_out',
+					-$item['qty'],
+					$this->auth->user_id(),
+					'sale',
+					$sale_id
+				);
+			}
+
+			if ($payment_method === 'cash') {
+				$this->Safe_model->log_transaction(
+					'in',
+					'store_sale',
+					$total,
+					$sale_id,
+					'store_sales',
+					'Store sale: ' . count($items) . ' item(s)',
+					$this->auth->user_id()
+				);
+			} elseif ($payment_method === 'wallet') {
+				$this->Wallet_model->deduct($patient_id, $total, NULL, 'Store purchase');
+				$this->Wallet_model->recalculate_for_patient($patient_id);
+			}
+			// 'debt' (قرض): no Safe/Wallet effect at sale time — tracked via
+			// store_sales.debt_status = 'open' until cleared from the sales report.
+
+			$this->db->trans_complete();
+
+			if ($this->db->trans_status()) {
+				redirect('store/receipt/' . $sale_id);
+			} else {
+				$this->session->set_flashdata('error', t('error_creating_sale'));
+				redirect('store/sell');
+			}
 		}
 
 		$this->render('store/sell', $data);
@@ -705,6 +700,316 @@ class Store extends Authenticated_Controller
 		}
 
 		$this->render('store/receipt', $data);
+	}
+
+	public function clear_sale_debt($sale_id)
+	{
+		$this->require_permission('manage_store');
+
+		if ($this->Store_model->clear_sale_debt($sale_id, $this->auth->user_id())) {
+			$this->session->set_flashdata('success', t('debt_cleared'));
+		} else {
+			$this->session->set_flashdata('error', t('error_clearing_debt'));
+		}
+
+		redirect('store/reports');
+	}
+
+	// ===== Reports =====
+	public function reports()
+	{
+		$this->require_permission('manage_store');
+
+		$from_input = trim((string) $this->input->get('date_from', TRUE));
+		$to_input = trim((string) $this->input->get('date_to', TRUE));
+		$date_from = $from_input !== '' ? $this->gregorian_date_from_shamsi($from_input) : date('Y-m-01');
+		$date_to = $to_input !== '' ? $this->gregorian_date_from_shamsi($to_input) : date('Y-m-d');
+
+		if ($date_from === '' || $date_to === '' || $date_from > $date_to) {
+			$date_from = date('Y-m-01');
+			$date_to = date('Y-m-d');
+		}
+
+		$filters = array(
+			'date_from' => $date_from,
+			'date_to' => $date_to,
+			'product_id' => $this->input->get('product_id', TRUE) ?: NULL,
+			'payment_method' => $this->input->get('payment_method', TRUE) ?: NULL,
+			'customer_type' => $this->input->get('customer_type', TRUE) ?: NULL
+		);
+
+		$rows = $this->Store_model->get_sales_report_rows($filters);
+
+		$revenue = 0;
+		$cost = 0;
+		$sale_ids = array();
+		$by_user = array();
+
+		foreach ($rows as $row) {
+			$revenue += (float) $row['line_total'];
+			$cost += (float) $row['qty'] * (float) $row['unit_cost_at_sale'];
+			$sale_ids[$row['sale_id']] = TRUE;
+
+			$uid = (int) $row['sold_by'];
+			if (!isset($by_user[$uid])) {
+				$by_user[$uid] = array(
+					'name' => trim($row['first_name'] . ' ' . $row['last_name']),
+					'total' => 0
+				);
+			}
+			$by_user[$uid]['total'] += (float) $row['line_total'];
+		}
+
+		uasort($by_user, function ($a, $b) {
+			return $b['total'] <=> $a['total'];
+		});
+
+		$data['summary'] = array(
+			'revenue' => $revenue,
+			'cost' => $cost,
+			'profit' => $revenue - $cost,
+			'sales_count' => count($sale_ids)
+		);
+		$data['by_user'] = $by_user;
+		$data['sales'] = $this->Store_model->get_sales_list($filters);
+		$data['products'] = $this->Store_model->get_all_products();
+		$data['filters'] = array(
+			'date_from' => to_shamsi($date_from),
+			'date_to' => to_shamsi($date_to),
+			'product_id' => $filters['product_id'],
+			'payment_method' => $filters['payment_method'],
+			'customer_type' => $filters['customer_type']
+		);
+		$data['current_section'] = 'store';
+
+		$this->render('store/reports', $data);
+	}
+
+	// ===== Bulk Sell (manager approval) =====
+	public function bulk_sell()
+	{
+		$this->require_permission('manage_store');
+
+		$this->load->model('Patient_model');
+		$data['patients'] = $this->Patient_model->all();
+		$data['products'] = $this->Store_model->get_all_products();
+		foreach ($data['products'] as &$product) {
+			$product['variants'] = $this->Store_model->get_variants_by_product($product['id']);
+		}
+		unset($product);
+		$data['current_section'] = 'store';
+
+		if ($this->input->method() === 'post') {
+			$customers_raw = $this->input->post('customers') ?? array();
+			$customers = array();
+
+			foreach ($customers_raw as $row) {
+				$patient_id = !empty($row['patient_id']) ? (int) $row['patient_id'] : NULL;
+				$customer_name = trim($row['customer_name'] ?? '');
+				$payment_method = trim($row['payment_method'] ?? '');
+
+				if (!in_array($payment_method, array('cash', 'wallet', 'debt'), TRUE)) continue;
+				if (!$patient_id && $customer_name === '') continue;
+				if ($payment_method === 'wallet' && !$patient_id) continue;
+
+				$items = array();
+				$variant_ids = $row['variant_id'] ?? array();
+				$qtys = $row['qty'] ?? array();
+				$prices = $row['price'] ?? array();
+
+				foreach ($variant_ids as $k => $vid) {
+					if (empty($vid) || !isset($qtys[$k], $prices[$k])) continue;
+					$qty = (int) $qtys[$k];
+					$price = round((float) $prices[$k], 2);
+					if ($qty <= 0 || $price < 0) continue;
+
+					$items[] = array(
+						'variant_id' => (int) $vid,
+						'qty' => $qty,
+						'unit_price' => $price
+					);
+				}
+
+				if (empty($items)) continue;
+
+				$customers[] = array(
+					'patient_id' => $patient_id,
+					'customer_name' => $customer_name,
+					'customer_phone' => trim($row['customer_phone'] ?? ''),
+					'payment_method' => $payment_method,
+					'items' => $items
+				);
+			}
+
+			if (empty($customers)) {
+				$this->session->set_flashdata('error', t('bulk_sell_empty'));
+				redirect('store/bulk_sell');
+			}
+
+			$batch_id = $this->Store_model->create_sale_batch($this->auth->user_id(), $customers);
+
+			if ($batch_id) {
+				$this->session->set_flashdata('success', t('bulk_sell_submitted'));
+				redirect('store/sale_batches');
+			} else {
+				$this->session->set_flashdata('error', t('error_creating_sale'));
+			}
+		}
+
+		$this->render('store/bulk_sell', $data);
+	}
+
+	public function sale_batches()
+	{
+		$data['batches'] = $this->Store_model->get_sale_batches();
+		$data['current_section'] = 'store';
+		$this->render('store/sale_batches', $data);
+	}
+
+	public function approve_sale_batch($batch_id)
+	{
+		$this->require_permission('approve_store_sale_batch');
+
+		$data['batch'] = $this->Store_model->get_sale_batch_by_id($batch_id);
+		$data['customers'] = $this->Store_model->get_batch_customers($batch_id);
+		foreach ($data['customers'] as &$customer) {
+			$customer['items'] = $this->Store_model->get_batch_items($customer['id']);
+		}
+		unset($customer);
+		$data['current_section'] = 'store';
+
+		if (!$data['batch']) {
+			show_404();
+		}
+
+		if ($data['batch']['status'] !== 'pending') {
+			$this->session->set_flashdata('error', t('sale_batch_not_pending'));
+			redirect('store/sale_batches');
+		}
+
+		if ($this->input->method() === 'post') {
+			$action = $this->input->post('action');
+
+			if ($action === 'approve') {
+				$this->load->model('Safe_model');
+				$this->load->model('Wallet_model');
+
+				$this->db->trans_start();
+
+				// Aggregate stock check across the whole batch before touching anything —
+				// several customers can request the same variant in one batch.
+				$needed = array();
+				foreach ($data['customers'] as $customer) {
+					foreach ($customer['items'] as $item) {
+						$vid = (int) $item['variant_id'];
+						$needed[$vid] = ($needed[$vid] ?? 0) + (int) $item['qty'];
+					}
+				}
+
+				foreach ($needed as $vid => $qty) {
+					$available = $this->Inventory_model->get_stock_level($vid, 1);
+					if (!$available || $available['qty_on_hand'] < $qty) {
+						$this->db->trans_rollback();
+						$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+						redirect('store/approve_sale_batch/' . $batch_id);
+					}
+				}
+
+				foreach ($data['customers'] as $customer) {
+					$subtotal = 0;
+					$items = array();
+					foreach ($customer['items'] as $item) {
+						$variant = $this->Store_model->get_variant_by_id($item['variant_id']);
+						$line_total = $item['qty'] * $item['unit_price'];
+						$items[] = array(
+							'variant_id' => $item['variant_id'],
+							'qty' => $item['qty'],
+							'unit_price' => $item['unit_price'],
+							'line_total' => $line_total,
+							'unit_cost_at_sale' => $variant ? $variant['cost_price'] : 0
+						);
+						$subtotal += $line_total;
+					}
+
+					$sale_id = $this->Store_model->create_sale(
+						$customer['patient_id'],
+						1,
+						$this->auth->user_id(),
+						$subtotal,
+						0,
+						0,
+						$subtotal,
+						$customer['payment_method'],
+						$items,
+						NULL,
+						$customer['patient_id'] ? NULL : $customer['customer_name'],
+						$customer['patient_id'] ? NULL : $customer['customer_phone']
+					);
+
+					if (!$sale_id) {
+						$this->db->trans_rollback();
+						$this->session->set_flashdata('error', t('error_creating_sale'));
+						redirect('store/approve_sale_batch/' . $batch_id);
+					}
+
+					foreach ($items as $item) {
+						$this->Inventory_model->record_movement(
+							$item['variant_id'],
+							1,
+							'sale_out',
+							-$item['qty'],
+							$this->auth->user_id(),
+							'sale',
+							$sale_id
+						);
+					}
+
+					if ($customer['payment_method'] === 'cash') {
+						$this->Safe_model->log_transaction(
+							'in',
+							'store_sale',
+							$subtotal,
+							$sale_id,
+							'store_sales',
+							'Bulk store sale: ' . count($items) . ' item(s)',
+							$this->auth->user_id()
+						);
+					} elseif ($customer['payment_method'] === 'wallet') {
+						$this->Wallet_model->deduct($customer['patient_id'], $subtotal, NULL, 'Store purchase (bulk sell)');
+						$this->Wallet_model->recalculate_for_patient($customer['patient_id']);
+					}
+					// 'debt': no Safe/Wallet effect — tracked via store_sales.debt_status.
+
+					$this->Store_model->set_batch_customer_sale_id($customer['id'], $sale_id);
+				}
+
+				$this->Store_model->update_sale_batch_status($batch_id, 'approved', $this->auth->user_id());
+
+				$this->db->trans_complete();
+
+				if ($this->db->trans_status()) {
+					$this->session->set_flashdata('success', t('sale_batch_approved'));
+					redirect('store/sale_batches');
+				} else {
+					$this->session->set_flashdata('error', t('error_approving_sale_batch'));
+				}
+			} elseif ($action === 'reject') {
+				$reason = trim($this->input->post('reject_reason'));
+				if (empty($reason)) {
+					$this->session->set_flashdata('error', t('reject_reason_required'));
+					redirect('store/approve_sale_batch/' . $batch_id);
+				}
+
+				if ($this->Store_model->update_sale_batch_status($batch_id, 'rejected', $this->auth->user_id(), $reason)) {
+					$this->session->set_flashdata('success', t('sale_batch_rejected'));
+					redirect('store/sale_batches');
+				} else {
+					$this->session->set_flashdata('error', t('error_rejecting_sale_batch'));
+				}
+			}
+		}
+
+		$this->render('store/approve_sale_batch', $data);
 	}
 
 	// ===== Suppliers =====

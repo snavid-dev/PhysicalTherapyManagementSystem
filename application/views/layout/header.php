@@ -65,8 +65,9 @@
 					<li class="nav-item">
 						<a class="nav-link <?= $current_section === 'store' ? 'active' : '' ?>" href="<?= base_url('store') ?>">
 							<?= t('Store') ?>
-							<?php if (!empty($pending_requisitions_count)) : ?>
-								<span class="badge bg-warning text-dark rounded-pill"><?= (int) $pending_requisitions_count ?></span>
+							<?php $store_pending_total = (int) ($pending_requisitions_count ?? 0) + (int) ($pending_sale_batches_count ?? 0); ?>
+							<?php if ($store_pending_total > 0) : ?>
+								<span class="badge bg-warning text-dark rounded-pill"><?= $store_pending_total ?></span>
 							<?php endif; ?>
 						</a>
 					</li>

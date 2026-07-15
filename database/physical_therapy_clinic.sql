@@ -85,6 +85,7 @@ CREATE TABLE `safe_transactions` (
 	KEY `safe_transactions_source_index` (`source`),
 	KEY `safe_transactions_created_by_index` (`created_by`),
 	KEY `safe_transactions_created_at_index` (`created_at`),
+	KEY `safe_transactions_source_ref_index` (`source`, `reference_table`, `reference_id`),
 	CONSTRAINT `safe_transactions_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -528,14 +529,19 @@ CREATE TABLE `stock_requisition_items` (
 CREATE TABLE `store_sales` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`patient_id` int unsigned NULL,
+	`customer_name` varchar(191) NULL,
+	`customer_phone` varchar(50) NULL,
 	`location_id` int unsigned NOT NULL,
 	`sold_by` int unsigned NOT NULL,
 	`subtotal` decimal(12,2) NOT NULL,
 	`discount` decimal(12,2) NOT NULL DEFAULT 0,
 	`tax` decimal(12,2) NOT NULL DEFAULT 0,
 	`total` decimal(12,2) NOT NULL,
-	`payment_method` enum('cash','card','wallet','prepayment') NOT NULL,
+	`payment_method` enum('cash','card','wallet','prepayment','debt') NOT NULL,
 	`status` enum('completed','refunded','partially_refunded') NOT NULL DEFAULT 'completed',
+	`debt_status` enum('none','open','cleared') NOT NULL DEFAULT 'none',
+	`debt_cleared_at` datetime NULL,
+	`debt_cleared_by` int unsigned NULL,
 	`payment_id` int unsigned NULL,
 	`created_at` datetime NOT NULL,
 	PRIMARY KEY (`id`),
@@ -562,6 +568,54 @@ CREATE TABLE `store_sale_items` (
 	KEY `store_sale_items_variant_id_index` (`variant_id`),
 	CONSTRAINT `store_sale_items_sale_fk` FOREIGN KEY (`sale_id`) REFERENCES `store_sales` (`id`) ON DELETE CASCADE,
 	CONSTRAINT `store_sale_items_variant_fk` FOREIGN KEY (`variant_id`) REFERENCES `store_product_variants` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `store_sale_batches` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`created_by` int unsigned NOT NULL,
+	`status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+	`approved_by` int unsigned NULL,
+	`reject_reason` varchar(255) NULL,
+	`total_amount` decimal(12,2) NOT NULL DEFAULT 0,
+	`note` varchar(255) NULL,
+	`created_at` datetime NOT NULL,
+	`updated_at` datetime NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_sale_batches_status_index` (`status`),
+	KEY `store_sale_batches_created_by_index` (`created_by`),
+	KEY `store_sale_batches_approved_by_index` (`approved_by`),
+	CONSTRAINT `store_sale_batches_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
+	CONSTRAINT `store_sale_batches_approved_by_fk` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `store_sale_batch_customers` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`batch_id` int unsigned NOT NULL,
+	`patient_id` int unsigned NULL,
+	`customer_name` varchar(191) NULL,
+	`customer_phone` varchar(50) NULL,
+	`payment_method` enum('cash','wallet','debt') NOT NULL DEFAULT 'cash',
+	`sale_id` int unsigned NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_sale_batch_customers_batch_id_index` (`batch_id`),
+	KEY `store_sale_batch_customers_patient_id_index` (`patient_id`),
+	KEY `store_sale_batch_customers_sale_id_index` (`sale_id`),
+	CONSTRAINT `store_sale_batch_customers_batch_fk` FOREIGN KEY (`batch_id`) REFERENCES `store_sale_batches` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `store_sale_batch_customers_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE SET NULL,
+	CONSTRAINT `store_sale_batch_customers_sale_fk` FOREIGN KEY (`sale_id`) REFERENCES `store_sales` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `store_sale_batch_items` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`batch_customer_id` int unsigned NOT NULL,
+	`variant_id` int unsigned NOT NULL,
+	`qty` int NOT NULL,
+	`unit_price` decimal(12,2) NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_sale_batch_items_batch_customer_id_index` (`batch_customer_id`),
+	KEY `store_sale_batch_items_variant_id_index` (`variant_id`),
+	CONSTRAINT `store_sale_batch_items_batch_customer_fk` FOREIGN KEY (`batch_customer_id`) REFERENCES `store_sale_batch_customers` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `store_sale_batch_items_variant_fk` FOREIGN KEY (`variant_id`) REFERENCES `store_product_variants` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `store_suppliers` (
@@ -625,10 +679,11 @@ INSERT INTO `permissions` (`id`, `name`, `module_key`) VALUES
 	(15, 'edit_processed_payments', 'turns'),
 	(16, 'view_store', 'store'),
 	(17, 'manage_store', 'store'),
-	(18, 'approve_store_requisition', 'store');
+	(18, 'approve_store_requisition', 'store'),
+	(19, 'approve_store_sale_batch', 'store');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18),
+	(1, 1), (1, 2), (1, 3), (1, 4), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19),
 	(2, 1), (2, 4), (2, 6), (2, 7),
 	(3, 1), (3, 4), (3, 6), (3, 16), (3, 17);
 

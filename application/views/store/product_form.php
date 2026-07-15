@@ -39,7 +39,7 @@
 
 						<div class="mb-3">
 							<label class="form-label"><?= t('variant_label') ?></label>
-							<input type="text" name="variant_label" class="form-control" placeholder="e.g., Size L">
+							<input type="text" name="variant_label" class="form-control" placeholder="<?= html_escape(t('variant_label_placeholder')) ?>">
 						</div>
 
 						<div class="row">

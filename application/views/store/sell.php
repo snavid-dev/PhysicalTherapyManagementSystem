@@ -59,7 +59,7 @@
 					<div class="card-body">
 						<div class="mb-3">
 							<label class="form-label"><?= t('patient') ?></label>
-							<select name="patient_id" class="form-select s2-select" data-placeholder="<?= html_escape(t('search_patient')) ?>">
+							<select name="patient_id" id="patient-select" class="form-select s2-select" data-placeholder="<?= html_escape(t('search_patient')) ?>">
 								<option value=""><?= t('walk_in_customer') ?></option>
 								<?php foreach ($patients as $patient): ?>
 									<?php
@@ -69,6 +69,17 @@
 									<option value="<?= (int) $patient['id'] ?>"><?= html_escape($patient_name) ?></option>
 								<?php endforeach; ?>
 							</select>
+						</div>
+
+						<div class="row mb-3" id="external-customer-fields">
+							<div class="col-6">
+								<label class="form-label small"><?= t('customer_name') ?></label>
+								<input type="text" name="customer_name" id="customer-name-input" class="form-control">
+							</div>
+							<div class="col-6">
+								<label class="form-label small"><?= t('customer_phone') ?></label>
+								<input type="text" name="customer_phone" class="form-control">
+							</div>
 						</div>
 
 						<div class="table-responsive mb-3">
@@ -127,19 +138,12 @@
 
 						<div class="mb-3">
 							<label class="form-label"><?= t('payment_method') ?></label>
-							<div class="btn-group w-100" role="group">
-								<input type="radio" class="btn-check" name="payment_method" id="pm-cash" value="cash" checked>
-								<label class="btn btn-outline-secondary" for="pm-cash"><?= t('cash') ?></label>
-
-								<input type="radio" class="btn-check" name="payment_method" id="pm-card" value="card">
-								<label class="btn btn-outline-secondary" for="pm-card"><?= t('card') ?></label>
-
-								<input type="radio" class="btn-check" name="payment_method" id="pm-wallet" value="wallet">
-								<label class="btn btn-outline-secondary" for="pm-wallet"><?= t('wallet') ?></label>
-
-								<input type="radio" class="btn-check" name="payment_method" id="pm-prepayment" value="prepayment">
-								<label class="btn btn-outline-secondary" for="pm-prepayment"><?= t('prepayment') ?></label>
-							</div>
+							<select name="payment_method" id="payment-method-select" class="form-select" required>
+								<option value="cash"><?= t('cash') ?></option>
+								<option value="wallet" id="pm-option-wallet"><?= t('wallet') ?></option>
+								<option value="debt"><?= t('debt') ?></option>
+							</select>
+							<div class="form-text" id="wallet-requires-patient-hint" style="display:none;"><?= t('patient_required_for_wallet') ?></div>
 						</div>
 
 						<button type="submit" class="btn btn-primary btn-lg w-100" id="complete-sale-btn" disabled><?= t('complete_sale') ?></button>
@@ -155,6 +159,33 @@ document.addEventListener('DOMContentLoaded', function () {
 	const cartItems = document.getElementById('cart-items');
 	const completeBtn = document.getElementById('complete-sale-btn');
 	const emptyRowHtml = '<tr class="empty-row"><td colspan="5" class="text-center text-muted py-4"><?= t("no_items_in_cart") ?></td></tr>';
+
+	const patientSelect = document.getElementById('patient-select');
+	const externalFields = document.getElementById('external-customer-fields');
+	const customerNameInput = document.getElementById('customer-name-input');
+	const paymentMethodSelect = document.getElementById('payment-method-select');
+	const walletOption = document.getElementById('pm-option-wallet');
+	const walletHint = document.getElementById('wallet-requires-patient-hint');
+
+	function syncPatientDependentFields() {
+		const hasPatient = !!patientSelect.value;
+
+		externalFields.style.display = hasPatient ? 'none' : '';
+		customerNameInput.required = !hasPatient;
+		if (hasPatient) customerNameInput.value = '';
+
+		walletOption.disabled = !hasPatient;
+		walletHint.style.display = hasPatient ? 'none' : '';
+		if (!hasPatient && paymentMethodSelect.value === 'wallet') {
+			paymentMethodSelect.value = 'cash';
+		}
+	}
+
+	syncPatientDependentFields();
+	patientSelect.addEventListener('change', syncPatientDependentFields);
+	if (window.jQuery) {
+		jQuery(patientSelect).on('select2:select select2:clear', syncPatientDependentFields);
+	}
 
 	function calculateTotals() {
 		let subtotal = 0;

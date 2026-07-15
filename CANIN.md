@@ -648,6 +648,7 @@ Important rules:
 - `view_store`
 - `manage_store`
 - `approve_store_requisition`
+- `approve_store_sale_batch`
 
 ### Navigation rule
 
@@ -1233,6 +1234,26 @@ Pass these steps:
 - adding backdated writes without thinking through historical balance display
 - bypassing the write hooks in turns, expenses, or salaries
 - exposing safe data without permission checks
+- **[CANIN-CHG, 2026-07-15 incident]** re-introducing a per-row loop in
+  `Safe_model::recalculate_balances()`. It rewrites `balance_after` for the
+  **entire** ledger (`sync_turn_safe_entries()` calls it on every turn edit,
+  and `sync_historical_transactions()`/`cleanup_deleted_reference_transactions()`
+  call it via `ensure_schema()` too), so as the table grows this is a full
+  scan every time it runs. It used to do one `UPDATE` per row; at ~14k rows
+  that took 100+ seconds and PHP-FPM's `request_terminate_timeout` (100s)
+  killed the worker mid-loop, leaving `balance_after` partially rewritten and
+  the dashboard 503ing for every user with `view_safe`. Fixed by batching the
+  whole recompute through a temp table + single `JOIN UPDATE`
+  (`insert_batch()` + one `UPDATE ... JOIN`). If you touch this method, keep
+  it batched — do not go back to `foreach ($rows as $row) { ...->update(...) }`.
+  Also added `safe_transactions_source_ref_index (source, reference_table,
+  reference_id)` — `transaction_exists()` and the orphan-cleanup joins filter
+  on those columns and had no index at all, so every legacy-event dedupe
+  check in `sync_historical_transactions()` was a full table scan too. Both
+  are self-healing via `Safe_model::ensure_reference_index()` (same pattern
+  as `ensure_source_enum()`), so existing deployments pick up the index
+  automatically the next time `ensure_schema()` runs — no manual migration
+  needed.
 
 ### AI prompt example for this module
 
@@ -1667,11 +1688,39 @@ you need more detail than this section carries.
   updates each variant's `cost_price` to the received unit cost (last-cost
   rule), and creates exactly one `expenses` row per receipt
 - pending-requisition count badge on the nav (`approve_store_requisition`)
+- **[CANIN-CHG]** sell payment type is now a 3-option select — cash / wallet /
+  `debt` (قرض). `debt` is tracked entirely within `store_sales` (`debt_status`
+  `none`/`open`/`cleared` + `debt_cleared_at`/`debt_cleared_by`) and
+  deliberately does **not** touch `patient_debts` — that table's `turn_id` is
+  `NOT NULL` and hard-tied to the Turns/Salaries/Safe reversal logic, so store
+  debt is a separate, store-only ledger. Clear it from `store/reports`.
+- **[CANIN-CHG]** sales can target a walk-in/external customer instead of a
+  patient — `store_sales.customer_name`/`customer_phone` (nullable, used only
+  when `patient_id` is NULL). Only the `wallet` payment path still requires a
+  real patient (it must reuse `Wallet_model`, which is patient-scoped).
+- **[CANIN-CHG]** bulk sell (`store/bulk_sell` → `store/sale_batches` →
+  `store/approve_sale_batch/{id}`, gated by new permission
+  `approve_store_sale_batch`): one operator batches sales for multiple
+  patients/customers, each with their own item list, into
+  `store_sale_batches` + `store_sale_batch_customers` +
+  `store_sale_batch_items` (mirrors the `stock_requisitions`
+  pending/approved/rejected pattern). Stock movements, Safe/Wallet/debt
+  effects, and the real `store_sales` rows are only created when a manager
+  approves — nothing is applied at submit time.
+- **[CANIN-CHG]** `store/reports`: revenue/cost/profit, sales-per-user, total
+  sales, filtered by product/payment-type/customer-type/date-range. Built on
+  `Store_model::get_sales_report_rows()` (item-level, drives revenue/cost/
+  profit and product filtering) and `get_sales_list()` (sale-level, drives the
+  detail table + the debt "mark paid" action).
+- **[CANIN-CHG]** `store/set_opening_stock` now requires a `reason` field
+  (stored as the `stock_movements.note`) and doubles as the general
+  non-purchase stock intake flow (donations, samples, corrections) — no
+  separate screen was added, the existing opening-stock flow already fit.
 
 **Not yet built (SM5/SM6, deferred — do not start without being asked):**
-returns/refunds UI, stock adjustments (damage/loss/theft/expiry/found/
-correction), physical stock counts, and the store reporting/dashboard suite
-(inventory valuation, low-stock, sales/profit reports, dashboard tiles).
+returns/refunds UI, stock adjustments for damage/loss/theft/expiry/found
+(distinct from the non-purchase intake above, which is now covered), and
+physical stock counts.
 
 ### Data model notes
 
@@ -1679,12 +1728,16 @@ correction), physical stock counts, and the store reporting/dashboard suite
   overwritten on every restock receipt. `store_sale_items.unit_cost_at_sale`
   is a COGS snapshot taken at sale time — never recompute historical profit
   from the live `cost_price`.
-- **Money-vs-stock rule (locked):** cash/card sale → Safe inflow, source
-  `store_sale`. Wallet/prepayment sale → `patient_wallet_transactions` debit +
-  `Wallet_model::recalculate_for_patient()`, **no** Safe row. Cash refund →
-  Safe outflow, source `store_refund`. Restock → one `expenses` row
-  (category "Inventory Purchase") → Safe outflow via the existing Expense
-  flow. Transfers and adjustments touch stock only, never the Safe.
+- **Money-vs-stock rule (locked):** cash sale → Safe inflow, source
+  `store_sale`. Wallet sale → `patient_wallet_transactions` debit +
+  `Wallet_model::recalculate_for_patient()`, **no** Safe row. `debt` (قرض)
+  sale → no Safe/Wallet row at all, just `store_sales.debt_status = 'open'`
+  until cleared. Cash refund → Safe outflow, source `store_refund`. Restock →
+  one `expenses` row (category "Inventory Purchase") → Safe outflow via the
+  existing Expense flow. Transfers and adjustments touch stock only, never
+  the Safe. (`card`/`prepayment` remain valid historical enum values on old
+  rows but are no longer offered in the sell/bulk-sell UI — only
+  cash/wallet/debt are.)
 - **`store_locations` is seeded with exactly two rows** — Front Desk (id 1)
   and Warehouse (id 2) — and several places in `Store.php` (`sell()`,
   `receive_stock()`, `create_requisition()`) hardcode `1`/`2` instead of
@@ -1816,6 +1869,9 @@ This file defines the simplified physical therapy structure for:
 - store_suppliers
 - store_stock_receipts
 - store_stock_receipt_items
+- store_sale_batches
+- store_sale_batch_customers
+- store_sale_batch_items
 
 If the database needs to evolve, update that file and then reflect the change in the related:
 
