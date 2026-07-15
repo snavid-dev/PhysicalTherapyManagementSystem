@@ -4,6 +4,7 @@
 	<div class="row">
 		<div class="col-md-6 offset-md-3">
 			<h2><?= t('set_opening_stock') ?></h2>
+			<p class="text-muted small"><?= t('stock_intake_hint') ?></p>
 
 			<form method="post">
 				<div class="mb-3">
@@ -34,6 +35,11 @@
 				<div class="mb-3">
 					<label class="form-label"><?= t('quantity') ?></label>
 					<input type="number" name="qty" class="form-control" min="0" value="0" required>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label"><?= t('stock_intake_reason') ?></label>
+					<textarea name="reason" class="form-control" rows="2" placeholder="<?= html_escape(t('stock_intake_reason_placeholder')) ?>" required></textarea>
 				</div>
 
 				<div class="d-flex gap-2">

@@ -620,6 +620,7 @@ class Safe_model extends CI_Model
 						KEY `safe_transactions_source_index` (`source`),
 						KEY `safe_transactions_created_by_index` (`created_by`),
 						KEY `safe_transactions_created_at_index` (`created_at`),
+						KEY `safe_transactions_source_ref_index` (`source`, `reference_table`, `reference_id`),
 						CONSTRAINT `safe_transactions_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 					) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 				");
@@ -646,6 +647,7 @@ class Safe_model extends CI_Model
 			}
 
 			$this->ensure_source_enum();
+			$this->ensure_reference_index();
 			$this->schema_ready = TRUE;
 		}
 
@@ -673,6 +675,32 @@ class Safe_model extends CI_Model
 		$this->db->query("
 			ALTER TABLE `safe_transactions`
 			MODIFY COLUMN `source` ENUM('turn_cash','wallet_topup','patient_payment','patient_debt_payment','patient_refund','other_income','expense','salary_payment','wallet_refund','adjustment','store_sale','store_refund') NOT NULL
+		");
+	}
+
+	// transaction_exists()/count_safe_records()/delete_orphaned_transactions_for_table()
+	// all filter by (source, reference_table, reference_id) — without this index
+	// each of those is a full table scan, and sync_historical_transactions() calls
+	// transaction_exists() once per legacy event (thousands on a mature ledger).
+	protected function ensure_reference_index()
+	{
+		$exists = $this->db
+			->query("
+				SELECT 1 FROM information_schema.STATISTICS
+				WHERE TABLE_SCHEMA = DATABASE()
+				AND TABLE_NAME = 'safe_transactions'
+				AND INDEX_NAME = 'safe_transactions_source_ref_index'
+				LIMIT 1
+			")
+			->num_rows() > 0;
+
+		if ($exists) {
+			return;
+		}
+
+		$this->db->query("
+			ALTER TABLE `safe_transactions`
+			ADD INDEX `safe_transactions_source_ref_index` (`source`, `reference_table`, `reference_id`)
 		");
 	}
 
@@ -1194,7 +1222,13 @@ class Safe_model extends CI_Model
 			->get()
 			->result_array();
 
+		if (empty($rows)) {
+			return;
+		}
+
 		$running_balance = 0.00;
+		$balances = array();
+		$adjustments = array();
 
 		foreach ($rows as $row) {
 			$amount = round((float) $row['amount'], 2);
@@ -1208,21 +1242,42 @@ class Safe_model extends CI_Model
 				$running_balance = $amount;
 			}
 
-			$this->db
-				->where('id', (int) $row['id'])
-				->update('safe_transactions', array(
-					'balance_after' => $running_balance,
-				));
+			$balances[] = array('id' => (int) $row['id'], 'balance_after' => $running_balance);
 
 			if ($row['type'] === 'adjustment') {
-				$this->db
-					->where('safe_transaction_id', (int) $row['id'])
-					->update('safe_adjustments', array(
-						'previous_balance' => $previous_balance,
-						'adjustment_amount' => round($running_balance - $previous_balance, 2),
-						'new_balance' => $running_balance,
-					));
+				$adjustments[] = array(
+					'safe_transaction_id' => (int) $row['id'],
+					'previous_balance' => $previous_balance,
+					'adjustment_amount' => round($running_balance - $previous_balance, 2),
+					'new_balance' => $running_balance,
+				);
 			}
+		}
+
+		// Bulk-apply balance_after via a temp table + JOIN UPDATE instead of one
+		// UPDATE per row. With a large ledger, one round trip per row can run
+		// past PHP-FPM's request_terminate_timeout and get killed mid-loop,
+		// leaving balance_after inconsistent for whatever wasn't reached yet.
+		$this->db->query('DROP TEMPORARY TABLE IF EXISTS tmp_safe_balances');
+		$this->db->query('CREATE TEMPORARY TABLE tmp_safe_balances (id INT UNSIGNED PRIMARY KEY, balance_after DECIMAL(12,2))');
+		$this->db->insert_batch('tmp_safe_balances', $balances, TRUE, 1000);
+		$this->db->query('
+			UPDATE safe_transactions st
+			JOIN tmp_safe_balances t ON t.id = st.id
+			SET st.balance_after = t.balance_after
+		');
+		$this->db->query('DROP TEMPORARY TABLE IF EXISTS tmp_safe_balances');
+
+		// Adjustment rows are rare (manual balance corrections), so per-row
+		// updates here are not a scale concern the way the loop above was.
+		foreach ($adjustments as $adjustment) {
+			$this->db
+				->where('safe_transaction_id', $adjustment['safe_transaction_id'])
+				->update('safe_adjustments', array(
+					'previous_balance' => $adjustment['previous_balance'],
+					'adjustment_amount' => $adjustment['adjustment_amount'],
+					'new_balance' => $adjustment['new_balance'],
+				));
 		}
 	}
 

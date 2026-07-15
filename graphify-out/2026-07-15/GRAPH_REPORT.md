@@ -1,12 +1,12 @@
 # Graph Report - test-navid.cyborgtech.co  (2026-07-10)
 
 ## Corpus Check
-- 424 files · ~2,587,053 words
+- 428 files · ~2,592,982 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3661 nodes · 5358 edges · 432 communities (268 shown, 164 thin omitted)
-- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 578 edges (avg confidence: 0.8)
+- 3682 nodes · 5383 edges · 427 communities (272 shown, 155 thin omitted)
+- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 584 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -91,7 +91,6 @@
 - [[_COMMUNITY_CI_Cart|CI_Cart]]
 - [[_COMMUNITY_CI_Unit_test|CI_Unit_test]]
 - [[_COMMUNITY_CI_Xmlrpcs|CI_Xmlrpcs]]
-- [[_COMMUNITY_Leaves|Leaves]]
 - [[_COMMUNITY_Expense_model|Expense_model]]
 - [[_COMMUNITY_AI Agent Guide|AI Agent Guide]]
 - [[_COMMUNITY_CI_Router|CI_Router]]
@@ -149,7 +148,6 @@
 - [[_COMMUNITY_CI_DB_sqlite3_result|CI_DB_sqlite3_result]]
 - [[_COMMUNITY_CI_DB_sqlite_result|CI_DB_sqlite_result]]
 - [[_COMMUNITY_CI_Driver|CI_Driver]]
-- [[_COMMUNITY_Safe|Safe]]
 - [[_COMMUNITY_Language|Language]]
 - [[_COMMUNITY_Expense_category_model|Expense_category_model]]
 - [[_COMMUNITY_11. Module Login|11. Module: Login]]
@@ -211,7 +209,6 @@
 - [[_COMMUNITY_CI_DB_pdo_sqlsrv_forge|CI_DB_pdo_sqlsrv_forge]]
 - [[_COMMUNITY_CI_DB_sqlsrv_forge|CI_DB_sqlsrv_forge]]
 - [[_COMMUNITY_smiley_helper.php|smiley_helper.php]]
-- [[_COMMUNITY_._execute|._execute]]
 - [[_COMMUNITY_Migration_Add_roles_permissions|Migration_Add_roles_permissions]]
 - [[_COMMUNITY_select2-init.js|select2-init.js]]
 - [[_COMMUNITY_1. Project Story|1. Project Story]]
@@ -230,25 +227,19 @@
 - [[_COMMUNITY_CI_DB_sqlite_utility|CI_DB_sqlite_utility]]
 - [[_COMMUNITY_CLAUDE|CLAUDE.md]]
 - [[_COMMUNITY_Store Module Build Log|Store Module Build Log]]
-- [[_COMMUNITY_Xmlrpc.php|Xmlrpc.php]]
 - [[_COMMUNITY_1. Project Story|1. Project Story]]
-- [[_COMMUNITY_CI_Cache_file|CI_Cache_file]]
 - [[_COMMUNITY_Base_Controller|Base_Controller]]
 - [[_COMMUNITY_CI_Session_files_driver|CI_Session_files_driver]]
-- [[_COMMUNITY_.get_summary|.get_summary]]
 - [[_COMMUNITY_27. Module Store|27. Module: Store]]
-- [[_COMMUNITY_CI_DB_Cache|CI_DB_Cache]]
 - [[_COMMUNITY_24. Module Staff|24. Module: Staff]]
-- [[_COMMUNITY_.sync_historical_transactions|.sync_historical_transactions]]
-- [[_COMMUNITY_.chmod|.chmod]]
 - [[_COMMUNITY_Xmlrpc.php|Xmlrpc.php]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Admin_model` - 238 edges
-2. `t()` - 138 edges
+2. `t()` - 141 edges
 3. `log_message()` - 110 edges
-4. `CI_DB_query_builder` - 74 edges
-5. `redirect()` - 74 edges
+4. `redirect()` - 77 edges
+5. `CI_DB_query_builder` - 74 edges
 6. `CI_Email` - 62 edges
 7. `CI_DB_driver` - 57 edges
 8. `CI_Form_validation` - 54 edges
@@ -270,7 +261,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (432 total, 164 thin omitted)
+## Communities (427 total, 155 thin omitted)
+
+### Community 1 - "CI_Image_lib"
+Cohesion: 0.05
+Nodes (11): function_usable(), get_mimes(), CI_DB_Cache, delete_files(), get_dir_file_info(), get_file_info(), get_mime_by_extension(), write_file() (+3 more)
 
 ### Community 4 - "date_helper.php"
 Cohesion: 0.05
@@ -285,24 +280,32 @@ Cohesion: 0.08
 Nodes (9): hash_equals(), hash_pbkdf2(), mb_strlen(), mb_strpos(), mb_substr(), ascii_to_entities(), character_limiter(), ellipsize() (+1 more)
 
 ### Community 15 - "form_helper.php"
-Cohesion: 0.15
-Nodes (23): html_escape(), _attributes_to_string(), form_button(), form_checkbox(), form_dropdown(), form_error(), form_fieldset(), form_hidden() (+15 more)
+Cohesion: 0.14
+Nodes (24): safe_reference_label(), html_escape(), _attributes_to_string(), form_button(), form_checkbox(), form_dropdown(), form_error(), form_fieldset() (+16 more)
 
 ### Community 19 - "log_message"
 Cohesion: 0.18
 Nodes (3): log_message(), CI_Lang, CI_Session_redis_driver
 
 ### Community 21 - "config_item"
-Cohesion: 0.24
-Nodes (12): Array, _error_handler(), _exception_handler(), get_config(), get_mimes(), is_loaded(), load_class(), set_status_header() (+4 more)
+Cohesion: 0.19
+Nodes (13): Array, config_item(), _error_handler(), _exception_handler(), get_config(), is_cli(), is_loaded(), load_class() (+5 more)
+
+### Community 27 - "Authenticated_Controller"
+Cohesion: 0.11
+Nodes (3): Turns, safe_turn_cash_note(), safe_turn_wallet_topup_note()
 
 ### Community 28 - "t"
-Cohesion: 0.14
-Nodes (3): Reports, Salaries, t()
+Cohesion: 0.13
+Nodes (3): Leaves, Reports, t()
 
 ### Community 39 - "CANIN Project Story And AI Agent Guide"
 Cohesion: 0.09
 Nodes (22): 10. Module Overview, 28. Database Story, 2. Tech Stack, 30. Global Change Process For Any Module, 31. Module-Specific Change Matrix, 34. Language And Content Rules, 35. Responsive Rules, 36. Validation Checklist Before Finishing Any Change (+14 more)
+
+### Community 40 - "CI_Output"
+Cohesion: 0.12
+Nodes (3): is_really_writable(), CI_Output, create_captcha()
 
 ### Community 49 - "CI_Session_database_driver"
 Cohesion: 0.13
@@ -315,6 +318,10 @@ Nodes (17): description, homepage, license, name, require, require-dev, mikey179
 ### Community 56 - "Fixes Applied"
 Cohesion: 0.11
 Nodes (17): DB Changes, Files Changed, Fix 10: Removed invalid form id from update submit aggregation, Fix 11: Reworked edit modal JS prefill and multi-select behavior, Fix 12: Aligned dynamic list edit button call signature, Fix 1: Hardened controller validation and permissions for edit flow, Fix 2: Corrected update department lifecycle to mirror insert behavior, Fix 3: Stabilized department upsert paths and service inserts (+9 more)
+
+### Community 60 - "Reference_doctors"
+Cohesion: 0.12
+Nodes (3): Reference_doctors, Salaries, show_404_if_empty()
 
 ### Community 62 - "32. AI Prompt Library"
 Cohesion: 0.11
@@ -339,10 +346,6 @@ Nodes (17): 7. Module To Database Table Map, Dashboard, Expenses, Leaves, Login,
 ### Community 71 - "Frontend Views"
 Cohesion: 0.12
 Nodes (15): Controller Layer, Frontend Views, Language System, Manual Verification, Model Layer, [MODIFY] `application/controllers/Admin.php`, [MODIFY] `application/libraries/Language.php`, [MODIFY] `application/models/Admin_model.php` (+7 more)
-
-### Community 77 - "Leaves"
-Cohesion: 0.18
-Nodes (3): config_item(), is_cli(), CI_Exceptions
 
 ### Community 79 - "AI Agent Guide"
 Cohesion: 0.14
@@ -377,8 +380,8 @@ Cohesion: 0.22
 Nodes (9): 22. Module: Leaves, AI prompt example for this module, Common risky changes, Common safe changes, Current leave statuses, If you want to change this module, Main files, Purpose (+1 more)
 
 ### Community 125 - "23. Module: Reference Doctors"
-Cohesion: 0.14
-Nodes (11): app_locale(), app_theme(), format_amount(), format_number(), gregorian_month_to_shamsi(), is_rtl_locale(), safe_patient_wallet_topup_note(), safe_reference_label() (+3 more)
+Cohesion: 0.15
+Nodes (11): app_locale(), app_theme(), format_amount(), format_number(), gregorian_month_to_shamsi(), is_rtl_locale(), safe_patient_payment_note(), safe_patient_wallet_topup_note() (+3 more)
 
 ### Community 126 - "manifest.json"
 Cohesion: 0.22
@@ -387,10 +390,6 @@ Nodes (8): background_color, description, display, icons, name, screenshots, sho
 ### Community 127 - "STORE_TASKS.md — CANIN Physical Therapy Clinic — Store / Inventory Module"
 Cohesion: 0.22
 Nodes (8): 0. Execution Protocol (Read This First), 1. Decisions Locked For v1, 2. New Permissions (do this in SM1, keep consistent thereafter), Appendix A — Proposed Schema (DDL sketch), Appendix B — AI Prompt To Start (paste into Claude Code), Appendix C — Completion Report, Store Milestone 7 (SM7) — Deferred / Future, STORE_TASKS.md — CANIN Physical Therapy Clinic — Store / Inventory Module
-
-### Community 137 - "Safe"
-Cohesion: 0.15
-Nodes (3): Dashboard, Safe, Authenticated_Controller
 
 ### Community 140 - "11. Module: Login"
 Cohesion: 0.25
@@ -504,13 +503,9 @@ Nodes (8): Build Summary, SM1: Catalog, Treasuries, Stock Ledger ✅, SM2: Inter
 Cohesion: 0.50
 Nodes (4): 1. Project Story, Current Story, Original Story, What This Means For Future Changes
 
-### Community 421 - "CI_Cache_file"
-Cohesion: 0.14
-Nodes (4): get_dir_file_info(), get_file_info(), write_file(), CI_Cache_file
-
 ### Community 423 - "Base_Controller"
-Cohesion: 0.16
-Nodes (4): Admin, Login, Base_Controller, CI_Controller
+Cohesion: 0.08
+Nodes (7): Admin, Dashboard, Login, Safe, Authenticated_Controller, Base_Controller, CI_Controller
 
 ### Community 426 - "27. Module: Store"
 Cohesion: 0.22
@@ -520,29 +515,25 @@ Nodes (9): 27. Module: Store, AI prompt example for this module, Common risky ch
 Cohesion: 0.25
 Nodes (8): 24. Module: Staff, AI prompt example for this module, Common risky changes, Common safe changes, If you want to change this module, Main files, Purpose, What it currently does
 
-### Community 430 - ".chmod"
-Cohesion: 0.29
-Nodes (3): function_usable(), is_really_writable(), create_captcha()
-
 ## Knowledge Gaps
 - **369 isolated node(s):** `description`, `name`, `type`, `homepage`, `license` (+364 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **164 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **155 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `log_message()` connect `log_message` to `CI_Image_lib`, `CI_Email`, `date_helper.php`, `CI_Jquery`, `CI_Javascript`, `CI_Driver`, `CI_Form_validation`, `mb_strlen`, `CI_Loader`, `CI_Upload`, `CI_DB_driver`, `config_item`, `CI_Security`, `CI_User_agent`, `Xmlrpc.php`, `CI_DB_forge`, `CI_Parser`, `CI_DB_oci8_driver`, `CI_DB_mssql_driver`, `CI_Output`, `CI_Input`, `CI_DB_mysql_driver`, `CI_DB_Cache`, `CI_URI`, `CI_Pagination`, `CI_DB_mysqli_driver`, `CI_Encrypt`, `CI_Controller`, `CI_Utf8`, `CI_DB_sqlite_driver`, `CI_Session_database_driver`, `CI_Encryption`, `Debt_model`, `CI_Zip`, `CI_DB_sqlite3_driver`, `CI_Trackback`, `CI_Hooks`, `.query`, `CI_Table`, `CI_DB_pdo_driver`, `CI_Cart`, `CI_Unit_test`, `CI_Xmlrpcs`, `Leaves`, `CI_Router`, `CI_DB_utility`, `CI_DB_pdo_mysql_driver`, `CI_Cache_memcached`, `CI_Cache_redis`, `CI_Session_files_driver`, `CI_Xmlrpc`, `CI_DB_pdo_dblib_driver`, `CI_Cache`, `CI_Cache_apc`, `CI_Cache_wincache`, `CI_Migration`, `CI_Session_memcached_driver`, `CI_Config`?**
-  _High betweenness centrality (0.351) - this node is a cross-community bridge._
+- **Why does `log_message()` connect `log_message` to `CI_Image_lib`, `CI_Email`, `date_helper.php`, `CI_Jquery`, `CI_Javascript`, `CI_Driver`, `CI_Form_validation`, `mb_strlen`, `CI_Loader`, `CI_Session`, `CI_Upload`, `CI_DB_driver`, `config_item`, `CI_Security`, `CI_User_agent`, `CI_DB_forge`, `CI_Parser`, `CI_DB_oci8_driver`, `CI_DB_mssql_driver`, `CI_Output`, `CI_Input`, `CI_DB_mysql_driver`, `CI_Pagination`, `CI_URI`, `CI_Session_files_driver`, `CI_DB_mysqli_driver`, `CI_Encrypt`, `CI_Controller`, `CI_Utf8`, `CI_DB_sqlite_driver`, `CI_Session_database_driver`, `CI_Encryption`, `Debt_model`, `CI_Zip`, `CI_DB_sqlite3_driver`, `CI_Trackback`, `CI_Hooks`, `.query`, `CI_Table`, `CI_DB_pdo_driver`, `CI_Cart`, `CI_Unit_test`, `CI_Xmlrpcs`, `CI_Router`, `CI_DB_utility`, `CI_DB_pdo_mysql_driver`, `CI_Cache_memcached`, `CI_Cache_redis`, `CI_Xmlrpc`, `CI_DB_pdo_dblib_driver`, `CI_Cache`, `CI_Cache_apc`, `CI_Cache_wincache`, `CI_Migration`, `CI_Session_memcached_driver`, `CI_Config`?**
+  _High betweenness centrality (0.345) - this node is a cross-community bridge._
 - **Why does `Debt_model` connect `Debt_model` to `CI_Model`?**
-  _High betweenness centrality (0.147) - this node is a cross-community bridge._
-- **Why does `t()` connect `t` to `app_helper.php`, `redirect`, `Safe_model`, `Authenticated_Controller`, `Safe`, `._execute`, `show_404_if_empty`, `.get_summary`, `.sync_historical_transactions`, `Sections`, `Staff`, `Users`, `Roles`, `Expenses`, `Reference_doctors`, `23. Module: Reference Doctors`, `array_column`?**
-  _High betweenness centrality (0.091) - this node is a cross-community bridge._
-- **Are the 129 inferred relationships involving `t()` (e.g. with `.index()` and `.delete()`) actually correct?**
-  _`t()` has 129 INFERRED edges - model-reasoned connections that need verification._
+  _High betweenness centrality (0.146) - this node is a cross-community bridge._
+- **Why does `t()` connect `t` to `app_helper.php`, `redirect`, `Safe_model`, `Base_Controller`, `Authenticated_Controller`, `show_404_if_empty`, `form_helper.php`, `Sections`, `Staff`, `Users`, `Roles`, `Expenses`, `Reference_doctors`, `23. Module: Reference Doctors`, `array_column`?**
+  _High betweenness centrality (0.094) - this node is a cross-community bridge._
+- **Are the 132 inferred relationships involving `t()` (e.g. with `.index()` and `.delete()`) actually correct?**
+  _`t()` has 132 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 108 inferred relationships involving `log_message()` (e.g. with `.unwind_incorrect_auto_settlements()` and `mb_strlen()`) actually correct?**
   _`log_message()` has 108 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 72 inferred relationships involving `redirect()` (e.g. with `.index()` and `.delete()`) actually correct?**
-  _`redirect()` has 72 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 75 inferred relationships involving `redirect()` (e.g. with `.index()` and `.delete()`) actually correct?**
+  _`redirect()` has 75 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `description`, `name`, `type` to the rest of the system?**
   _369 weakly-connected nodes found - possible documentation gaps or missing edges._

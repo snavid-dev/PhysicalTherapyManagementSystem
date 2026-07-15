@@ -237,3 +237,93 @@ ALTER TABLE `safe_transactions`
 INSERT INTO `expense_categories` (`name`, `name_fa`)
 SELECT 'Inventory Purchase', 'خرید موجودی'
 WHERE NOT EXISTS (SELECT 1 FROM `expense_categories` WHERE `name` = 'Inventory Purchase');
+
+-- CANIN-CHG: sell/buy improvements, external customers, non-purchase intake,
+-- bulk sell with manager approval. All additive, idempotent, no DROP.
+
+-- Sell section: add 'debt' (قرض) payment method, external walk-in customer
+-- fields, and a store-only debt ledger flag (kept separate from
+-- patient_debts, which is hard-tied to turns via a NOT NULL turn_id FK).
+ALTER TABLE `store_sales`
+	MODIFY COLUMN `payment_method` enum('cash','card','wallet','prepayment','debt') NOT NULL;
+
+-- MySQL 5.7 has no ADD COLUMN IF NOT EXISTS, so guard each column via
+-- information_schema + dynamic SQL (mirrors PHP's field_exists() pattern).
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'store_sales' AND COLUMN_NAME = 'customer_name');
+SET @stmt := IF(@col = 0, 'ALTER TABLE `store_sales` ADD COLUMN `customer_name` varchar(191) NULL AFTER `patient_id`', 'SELECT 1');
+PREPARE stmt FROM @stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'store_sales' AND COLUMN_NAME = 'customer_phone');
+SET @stmt := IF(@col = 0, 'ALTER TABLE `store_sales` ADD COLUMN `customer_phone` varchar(50) NULL AFTER `customer_name`', 'SELECT 1');
+PREPARE stmt FROM @stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'store_sales' AND COLUMN_NAME = 'debt_status');
+SET @stmt := IF(@col = 0, "ALTER TABLE `store_sales` ADD COLUMN `debt_status` enum('none','open','cleared') NOT NULL DEFAULT 'none' AFTER `status`", 'SELECT 1');
+PREPARE stmt FROM @stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'store_sales' AND COLUMN_NAME = 'debt_cleared_at');
+SET @stmt := IF(@col = 0, 'ALTER TABLE `store_sales` ADD COLUMN `debt_cleared_at` datetime NULL AFTER `debt_status`', 'SELECT 1');
+PREPARE stmt FROM @stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'store_sales' AND COLUMN_NAME = 'debt_cleared_by');
+SET @stmt := IF(@col = 0, 'ALTER TABLE `store_sales` ADD COLUMN `debt_cleared_by` int unsigned NULL AFTER `debt_cleared_at`', 'SELECT 1');
+PREPARE stmt FROM @stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- Bulk sell: one batch per operator submission, one row per
+-- patient/customer in the batch, each with its own item list. Mirrors the
+-- stock_requisitions pending/approved/rejected pattern — stock and money
+-- effects are only applied once a manager approves.
+CREATE TABLE IF NOT EXISTS `store_sale_batches` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`created_by` int unsigned NOT NULL,
+	`status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+	`approved_by` int unsigned NULL,
+	`reject_reason` varchar(255) NULL,
+	`total_amount` decimal(12,2) NOT NULL DEFAULT 0,
+	`note` varchar(255) NULL,
+	`created_at` datetime NOT NULL,
+	`updated_at` datetime NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_sale_batches_status_index` (`status`),
+	KEY `store_sale_batches_created_by_index` (`created_by`),
+	KEY `store_sale_batches_approved_by_index` (`approved_by`),
+	CONSTRAINT `store_sale_batches_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
+	CONSTRAINT `store_sale_batches_approved_by_fk` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `store_sale_batch_customers` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`batch_id` int unsigned NOT NULL,
+	`patient_id` int unsigned NULL,
+	`customer_name` varchar(191) NULL,
+	`customer_phone` varchar(50) NULL,
+	`payment_method` enum('cash','wallet','debt') NOT NULL DEFAULT 'cash',
+	`sale_id` int unsigned NULL COMMENT 'set once approved and a store_sales row is created',
+	PRIMARY KEY (`id`),
+	KEY `store_sale_batch_customers_batch_id_index` (`batch_id`),
+	KEY `store_sale_batch_customers_patient_id_index` (`patient_id`),
+	KEY `store_sale_batch_customers_sale_id_index` (`sale_id`),
+	CONSTRAINT `store_sale_batch_customers_batch_fk` FOREIGN KEY (`batch_id`) REFERENCES `store_sale_batches` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `store_sale_batch_customers_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE SET NULL,
+	CONSTRAINT `store_sale_batch_customers_sale_fk` FOREIGN KEY (`sale_id`) REFERENCES `store_sales` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `store_sale_batch_items` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`batch_customer_id` int unsigned NOT NULL,
+	`variant_id` int unsigned NOT NULL,
+	`qty` int NOT NULL,
+	`unit_price` decimal(12,2) NOT NULL,
+	PRIMARY KEY (`id`),
+	KEY `store_sale_batch_items_batch_customer_id_index` (`batch_customer_id`),
+	KEY `store_sale_batch_items_variant_id_index` (`variant_id`),
+	CONSTRAINT `store_sale_batch_items_batch_customer_fk` FOREIGN KEY (`batch_customer_id`) REFERENCES `store_sale_batch_customers` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `store_sale_batch_items_variant_fk` FOREIGN KEY (`variant_id`) REFERENCES `store_product_variants` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Manager-approval permission for bulk sell batches (mirrors approve_store_requisition).
+INSERT IGNORE INTO `permissions` (`name`, `module_key`) VALUES
+	('approve_store_sale_batch', 'store');
+
+INSERT IGNORE INTO `role_permissions` (`role_id`, `permission_id`)
+SELECT 1, id FROM `permissions` WHERE `name` = 'approve_store_sale_batch';

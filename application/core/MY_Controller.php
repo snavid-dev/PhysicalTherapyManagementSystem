@@ -89,6 +89,12 @@ class Base_Controller extends CI_Controller
 				->count_all_results('stock_requisitions');
 		}
 
+		if ($this->auth->has_permission('approve_store_sale_batch')) {
+			$data['pending_sale_batches_count'] = $this->db
+				->where('status', 'pending')
+				->count_all_results('store_sale_batches');
+		}
+
 		$this->load->view('layout/header', $data);
 		$this->load->view($view, $data);
 		$this->load->view('layout/footer');

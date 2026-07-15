@@ -64,7 +64,7 @@
 				<p class="mb-1"><small><strong><?= t('payment_method') ?>:</strong></small></p>
 				<p class="mb-3" style="font-size: 0.85rem;">
 					<?php
-						$methods = array('cash' => t('cash'), 'card' => t('card'), 'wallet' => t('wallet'), 'prepayment' => t('prepayment'));
+						$methods = array('cash' => t('cash'), 'card' => t('card'), 'wallet' => t('wallet'), 'prepayment' => t('prepayment'), 'debt' => t('debt'));
 						echo html_escape($methods[$sale['payment_method']] ?? $sale['payment_method']);
 					?>
 				</p>
@@ -77,6 +77,9 @@
 							echo html_escape($patient ? ($patient['first_name'] . ' ' . ($patient['last_name'] ?? '')) : '—');
 						?>
 					</p>
+				<?php elseif (!empty($sale['customer_name'])): ?>
+					<p class="mb-1"><small><strong><?= t('customer_name') ?>:</strong></small></p>
+					<p style="font-size: 0.85rem;"><?= html_escape($sale['customer_name']) ?></p>
 				<?php endif; ?>
 			</div>
 
