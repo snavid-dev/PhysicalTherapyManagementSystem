@@ -46,77 +46,99 @@
 				<?php if ($this->auth->has_permission('manage_patients')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'patients' ? 'active' : '' ?>" href="<?= base_url('patients') ?>"><?= t('Patients') ?></a></li>
 				<?php endif; ?>
-				<?php if ($this->auth->has_permission('manage_reference_doctors')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'reference_doctors' ? 'active' : '' ?>" href="<?= base_url('reference_doctors') ?>"><?= t('Reference Doctors') ?></a></li>
-				<?php endif; ?>
 				<?php if ($this->auth->has_permission('manage_turns')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'turns' ? 'active' : '' ?>" href="<?= base_url('turns') ?>"><?= t('Turns') ?></a></li>
-				<?php endif; ?>
-				<?php if ($this->auth->has_permission('manage_expenses')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'expenses' ? 'active' : '' ?>" href="<?= base_url('expenses') ?>"><?= t('expenses') ?></a></li>
-				<?php endif; ?>
-				<?php if ($this->auth->has_permission('view_safe')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'safe' ? 'active' : '' ?>" href="<?= base_url('safe') ?>"><?= t('safe') ?></a></li>
-				<?php endif; ?>
-				<?php if ($this->auth->has_permission('manage_salaries')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'salaries' ? 'active' : '' ?>" href="<?= base_url('salaries') ?>"><?= t('salaries') ?></a></li>
-				<?php endif; ?>
-				<?php if ($this->auth->has_permission('view_store')) : ?>
-					<li class="nav-item">
-						<a class="nav-link <?= $current_section === 'store' ? 'active' : '' ?>" href="<?= base_url('store') ?>">
-							<?= t('Store') ?>
-							<?php $store_pending_total = (int) ($pending_requisitions_count ?? 0) + (int) ($pending_sale_batches_count ?? 0); ?>
-							<?php if ($store_pending_total > 0) : ?>
-								<span class="badge bg-warning text-dark rounded-pill"><?= $store_pending_total ?></span>
-							<?php endif; ?>
-						</a>
-					</li>
 				<?php endif; ?>
 				<?php if ($this->auth->has_permission('view_reports')) : ?>
 					<li class="nav-item"><a class="nav-link <?= $current_section === 'reports' ? 'active' : '' ?>" href="<?= base_url('reports') ?>"><?= t('Reports') ?></a></li>
 				<?php endif; ?>
-				<?php if ($this->auth->has_permission('manage_leaves')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'leaves' ? 'active' : '' ?>" href="<?= base_url('leaves') ?>"><?= t('Employee Leaves') ?></a></li>
+
+				<?php $show_clinic_menu = $this->auth->has_permission('manage_reference_doctors') || $this->auth->has_permission('manage_staff') || $this->auth->has_permission('manage_sections') || $this->auth->has_permission('manage_leaves'); ?>
+				<?php if ($show_clinic_menu) : ?>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle <?= in_array($current_section, ['reference_doctors', 'staff', 'sections', 'leaves']) ? 'active' : '' ?>" href="#" role="button" data-bs-toggle="dropdown"><?= t('Clinic') ?></a>
+						<ul class="dropdown-menu">
+							<?php if ($this->auth->has_permission('manage_reference_doctors')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'reference_doctors' ? 'active' : '' ?>" href="<?= base_url('reference_doctors') ?>"><?= t('Reference Doctors') ?></a></li>
+							<?php endif; ?>
+							<?php if ($this->auth->has_permission('manage_staff')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'staff' ? 'active' : '' ?>" href="<?= base_url('staff') ?>"><?= t('Staff') ?></a></li>
+							<?php endif; ?>
+							<?php if ($this->auth->has_permission('manage_sections')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'sections' ? 'active' : '' ?>" href="<?= base_url('sections') ?>"><?= t('Sections') ?></a></li>
+							<?php endif; ?>
+							<?php if ($this->auth->has_permission('manage_leaves')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'leaves' ? 'active' : '' ?>" href="<?= base_url('leaves') ?>"><?= t('Employee Leaves') ?></a></li>
+							<?php endif; ?>
+						</ul>
+					</li>
 				<?php endif; ?>
-				<?php if ($this->auth->has_permission('manage_staff')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'staff' ? 'active' : '' ?>" href="<?= base_url('staff') ?>"><?= t('Staff') ?></a></li>
+
+				<?php $show_finance_menu = $this->auth->has_permission('manage_expenses') || $this->auth->has_permission('view_safe') || $this->auth->has_permission('manage_salaries') || $this->auth->has_permission('view_store'); ?>
+				<?php if ($show_finance_menu) : ?>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle <?= in_array($current_section, ['expenses', 'safe', 'salaries', 'store']) ? 'active' : '' ?>" href="#" role="button" data-bs-toggle="dropdown"><?= t('Finance') ?></a>
+						<ul class="dropdown-menu">
+							<?php if ($this->auth->has_permission('manage_expenses')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'expenses' ? 'active' : '' ?>" href="<?= base_url('expenses') ?>"><?= t('expenses') ?></a></li>
+							<?php endif; ?>
+							<?php if ($this->auth->has_permission('view_safe')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'safe' ? 'active' : '' ?>" href="<?= base_url('safe') ?>"><?= t('safe') ?></a></li>
+							<?php endif; ?>
+							<?php if ($this->auth->has_permission('manage_salaries')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'salaries' ? 'active' : '' ?>" href="<?= base_url('salaries') ?>"><?= t('salaries') ?></a></li>
+							<?php endif; ?>
+							<?php if ($this->auth->has_permission('view_store')) : ?>
+								<?php $store_pending_total = (int) ($pending_requisitions_count ?? 0) + (int) ($pending_sale_batches_count ?? 0); ?>
+								<li>
+									<a class="dropdown-item d-flex align-items-center justify-content-between <?= $current_section === 'store' ? 'active' : '' ?>" href="<?= base_url('store') ?>">
+										<?= t('Store') ?>
+										<?php if ($store_pending_total > 0) : ?>
+											<span class="badge bg-warning text-dark rounded-pill"><?= $store_pending_total ?></span>
+										<?php endif; ?>
+									</a>
+								</li>
+							<?php endif; ?>
+						</ul>
+					</li>
 				<?php endif; ?>
-				<?php if ($this->auth->has_permission('manage_sections')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'sections' ? 'active' : '' ?>" href="<?= base_url('sections') ?>"><?= t('Sections') ?></a></li>
-				<?php endif; ?>
-				<?php if ($this->auth->has_permission('manage_users')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'users' ? 'active' : '' ?>" href="<?= base_url('users') ?>"><?= t('Users') ?></a></li>
-				<?php endif; ?>
-				<?php if ($this->auth->has_permission('manage_roles')) : ?>
-					<li class="nav-item"><a class="nav-link <?= $current_section === 'roles' ? 'active' : '' ?>" href="<?= base_url('roles') ?>"><?= t('Roles') ?></a></li>
+
+				<?php $show_admin_menu = $this->auth->has_permission('manage_users') || $this->auth->has_permission('manage_roles'); ?>
+				<?php if ($show_admin_menu) : ?>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle <?= in_array($current_section, ['users', 'roles']) ? 'active' : '' ?>" href="#" role="button" data-bs-toggle="dropdown"><?= t('Admin') ?></a>
+						<ul class="dropdown-menu">
+							<?php if ($this->auth->has_permission('manage_users')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'users' ? 'active' : '' ?>" href="<?= base_url('users') ?>"><?= t('Users') ?></a></li>
+							<?php endif; ?>
+							<?php if ($this->auth->has_permission('manage_roles')) : ?>
+								<li><a class="dropdown-item <?= $current_section === 'roles' ? 'active' : '' ?>" href="<?= base_url('roles') ?>"><?= t('Roles') ?></a></li>
+							<?php endif; ?>
+						</ul>
+					</li>
 				<?php endif; ?>
 			</ul>
 			<div class="d-flex align-items-center gap-3 header-tools">
-				<?php if ($this->auth->has_permission('manage_patients') || $this->auth->has_permission('manage_expenses')) : ?>
-					<div class="dropdown">
-						<button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button"><?= t('Preferences') ?></button>
-						<ul class="dropdown-menu dropdown-menu-end">
-							<?php if ($this->auth->has_permission('manage_patients')) : ?>
-								<li><a class="dropdown-item" href="<?= base_url('preferences/diagnoses') ?>"><?= t('manage_diagnoses') ?></a></li>
-							<?php endif; ?>
-							<?php if ($this->auth->has_permission('manage_expenses')) : ?>
-								<li><a class="dropdown-item" href="<?= base_url('preferences/expense-categories') ?>"><?= t('expense_categories') ?></a></li>
-							<?php endif; ?>
-						</ul>
-					</div>
-				<?php endif; ?>
 				<div class="dropdown">
-					<button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button"><?= t('Language') ?></button>
+					<button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button"><?= html_escape($auth_user['first_name'] . ' ' . $auth_user['last_name']) ?></button>
 					<ul class="dropdown-menu dropdown-menu-end">
-						<li><a class="dropdown-item" href="<?= base_url('preferences/language/farsi') ?>"><?= t('Farsi') ?></a></li>
-						<li><a class="dropdown-item" href="<?= base_url('preferences/language/english') ?>"><?= t('English') ?></a></li>
+						<?php if ($this->auth->has_permission('manage_patients')) : ?>
+							<li><a class="dropdown-item" href="<?= base_url('preferences/diagnoses') ?>"><?= t('manage_diagnoses') ?></a></li>
+						<?php endif; ?>
+						<?php if ($this->auth->has_permission('manage_expenses')) : ?>
+							<li><a class="dropdown-item" href="<?= base_url('preferences/expense-categories') ?>"><?= t('expense_categories') ?></a></li>
+						<?php endif; ?>
+						<?php if ($this->auth->has_permission('manage_patients') || $this->auth->has_permission('manage_expenses')) : ?>
+							<li><hr class="dropdown-divider"></li>
+						<?php endif; ?>
+						<li><a class="dropdown-item <?= $current_locale === 'farsi' ? 'active' : '' ?>" href="<?= base_url('preferences/language/farsi') ?>"><?= t('Farsi') ?></a></li>
+						<li><a class="dropdown-item <?= $current_locale === 'english' ? 'active' : '' ?>" href="<?= base_url('preferences/language/english') ?>"><?= t('English') ?></a></li>
+						<li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item" href="<?= base_url('preferences/theme/' . ($current_theme === 'dark' ? 'light' : 'dark')) ?>"><?= $current_theme === 'dark' ? t('Light Mode') : t('Dark Mode') ?></a></li>
+						<li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item" href="<?= base_url('logout') ?>"><?= t('Logout') ?></a></li>
 					</ul>
 				</div>
-				<a class="btn btn-outline-secondary btn-sm" href="<?= base_url('preferences/theme/' . ($current_theme === 'dark' ? 'light' : 'dark')) ?>">
-					<?= $current_theme === 'dark' ? t('Light Mode') : t('Dark Mode') ?>
-				</a>
-				<span class="small text-muted"><?= html_escape($auth_user['first_name'] . ' ' . $auth_user['last_name']) ?></span>
-				<a class="btn btn-outline-dark btn-sm" href="<?= base_url('logout') ?>"><?= t('Logout') ?></a>
 			</div>
 		</div>
 	</div>
