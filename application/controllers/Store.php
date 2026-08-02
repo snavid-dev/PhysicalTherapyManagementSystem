@@ -648,7 +648,7 @@ class Store extends Authenticated_Controller
 			}
 
 			foreach ($items as $item) {
-				$this->Inventory_model->record_movement(
+				$stock_recorded = $this->Inventory_model->record_movement(
 					$item['variant_id'],
 					1,
 					'sale_out',
@@ -657,6 +657,16 @@ class Store extends Authenticated_Controller
 					'sale',
 					$sale_id
 				);
+
+				if (!$stock_recorded) {
+					// A concurrent sale already took the remaining stock between the
+					// availability check above and this write — reject the whole sale
+					// rather than charging/logging money for stock that wasn't
+					// actually there to sell.
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+					redirect('store/sell');
+				}
 			}
 
 			if ($payment_method === 'cash') {
@@ -953,7 +963,7 @@ class Store extends Authenticated_Controller
 					}
 
 					foreach ($items as $item) {
-						$this->Inventory_model->record_movement(
+						$stock_recorded = $this->Inventory_model->record_movement(
 							$item['variant_id'],
 							1,
 							'sale_out',
@@ -962,6 +972,15 @@ class Store extends Authenticated_Controller
 							'sale',
 							$sale_id
 						);
+
+						if (!$stock_recorded) {
+							// The aggregate pre-check above can't catch a concurrent sale
+							// (e.g. from the walk-in sell() flow) draining stock in between —
+							// reject rather than charge/log money for stock that wasn't there.
+							$this->db->trans_rollback();
+							$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+							redirect('store/approve_sale_batch/' . $batch_id);
+						}
 					}
 
 					if ($customer['payment_method'] === 'cash') {

@@ -13,17 +13,93 @@ class Patients extends Authenticated_Controller
 		$this->load->model('Safe_model');
 		$this->load->model('Discount_model');
 		$this->load->model('Section_model');
+		$this->load->model('Staff_model');
 	}
 
 	public function index()
 	{
 		$this->require_permission('manage_patients');
 
+		// Rows are loaded on demand via the server-side DataTables endpoint
+		// (patients/datatable) so the page no longer ships every patient up front.
 		$this->render('patients/index', array(
 			'title' => t('Patients'),
 			'current_section' => 'patients',
-			'patients' => $this->Patient_model->get_all(),
+			'datatable_url' => base_url('patients/datatable'),
 		));
+	}
+
+	public function datatable()
+	{
+		$this->require_permission('manage_patients');
+
+		$draw = (int) $this->input->get('draw');
+		$start = (int) $this->input->get('start');
+		$length = (int) $this->input->get('length');
+
+		if ($length <= 0) {
+			$length = 25;
+		}
+
+		$search = $this->input->get('search');
+		$search_value = is_array($search) ? trim((string) ($search['value'] ?? '')) : '';
+
+		$order = $this->input->get('order');
+		$order_col = 0;
+		$order_dir = 'asc';
+
+		if (is_array($order) && isset($order[0]) && is_array($order[0])) {
+			$order_col = (int) ($order[0]['column'] ?? 0);
+			$order_dir = (string) ($order[0]['dir'] ?? 'asc');
+		}
+
+		$result = $this->Patient_model->get_datatable(array(
+			'start' => $start,
+			'length' => $length,
+			'search' => $search_value,
+			'order_col' => $order_col,
+			'order_dir' => $order_dir,
+		));
+
+		$rows = array();
+		foreach ($result['data'] as $patient) {
+			$rows[] = $this->patient_row_for_datatable($patient);
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'draw' => $draw,
+				'recordsTotal' => (int) $result['records_total'],
+				'recordsFiltered' => (int) $result['records_filtered'],
+				'data' => $rows,
+			)));
+	}
+
+	protected function patient_row_for_datatable($patient)
+	{
+		$id = (int) $patient['id'];
+		$full_name = trim((string) $patient['first_name'] . ' ' . (string) ($patient['last_name'] ?? ''));
+		$father_name = $patient['father_name'] ?? NULL;
+		$gender = $patient['gender'] ?? NULL;
+		$age = $patient['age'] ?? NULL;
+		$phone = $patient['phone'] ?? NULL;
+
+		$actions = '<div class="d-flex gap-2 justify-content-end flex-wrap">'
+			. '<a href="' . base_url('patients/' . $id) . '" class="btn btn-sm btn-outline-dark">' . html_escape(t('Profile')) . '</a>'
+			. '<a href="' . base_url('patients/' . $id . '/edit') . '" class="btn btn-sm btn-outline-secondary">' . html_escape(t('Edit')) . '</a>'
+			. '<a href="' . base_url('patients/' . $id . '/delete') . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(\'' . html_escape(t('Delete this patient?')) . '\')">' . html_escape(t('Delete')) . '</a>'
+			. '</div>';
+
+		return array(
+			html_escape($full_name),
+			$father_name ? html_escape($father_name) : '&mdash;',
+			$gender ? html_escape($gender) : '&mdash;',
+			$age !== NULL ? format_number($age) : '&mdash;',
+			$phone ? html_escape($phone) : '&mdash;',
+			'<span class="badge text-bg-success">' . html_escape(t('Active')) . '</span>',
+			$actions,
+		);
 	}
 
 	public function create()
@@ -99,7 +175,9 @@ class Patients extends Authenticated_Controller
 		$turns = $this->Turn_model->get_turns_for_patient($id);
 		$wallet_balance = $this->Wallet_model->get_balance($id);
 		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($id);
-		$wallet_transactions = $this->Wallet_model->get_transactions($id);
+		// Full history, not the default recent-20 page — financial_summary/timeline
+		// below need every transaction to total correctly.
+		$wallet_transactions = $this->Wallet_model->get_transactions($id, 0);
 		$open_debts = $this->Debt_model->get_open_debts($id);
 		$total_open_debt = $this->Debt_model->get_total_open_debt($id);
 		show_404_if_empty($patient);
@@ -117,6 +195,8 @@ class Patients extends Authenticated_Controller
 			'total_open_debt' => $total_open_debt,
 			'discounts' => $this->normalized_discounts($id),
 			'all_sections' => $this->Section_model->get_all(),
+			'all_staff' => $this->Staff_model->get_active(),
+			'standalone_payments' => $this->normalized_standalone_payments($id),
 			'financial_summary' => $this->build_financial_summary($wallet_transactions, $turns, $wallet_balance, $total_open_debt, $wallet_breakdown),
 			'financial_timeline' => $this->build_financial_timeline($wallet_transactions, $turns),
 		));
@@ -400,6 +480,7 @@ class Patients extends Authenticated_Controller
 		$note = $this->null_if_empty($this->input->post('note', TRUE));
 		$payment_date_input = trim((string) $this->input->post('payment_date', TRUE));
 		$payment_date = $payment_date_input === '' ? date('Y-m-d') : $this->gregorian_date_from_shamsi($payment_date_input);
+		list($section_id, $staff_id, $dimension_error) = $this->payment_dimension_from_post();
 
 		if ($amount <= 0) {
 			return $this->respond_wallet_topup_error($id, t('Invalid debt payment amount.'), 422, $wants_json);
@@ -407,6 +488,10 @@ class Patients extends Authenticated_Controller
 
 		if ($payment_date_input !== '' && $payment_date === '') {
 			return $this->respond_wallet_topup_error($id, t('Please choose a valid date.'), 422, $wants_json);
+		}
+
+		if ($dimension_error !== NULL) {
+			return $this->respond_wallet_topup_error($id, $dimension_error, 422, $wants_json);
 		}
 
 		$payment_note = trim(t('Debt payment from patient profile') . ($note ? ' - ' . $note : ''));
@@ -430,7 +515,8 @@ class Patients extends Authenticated_Controller
 			// row it does not desync the safe ledger's payment reconciliation (which
 			// expects every payments row to have a patient_(debt_)payment safe entry).
 			$payment_datetime = $this->payment_datetime_from_date($payment_date);
-			$topped = $this->Wallet_model->top_up_cash($id, $amount, NULL, $payment_note, $payment_datetime);
+			$dimension_options = array('section_id' => $section_id, 'staff_id' => $staff_id);
+			$topped = $this->Wallet_model->top_up_cash($id, $amount, NULL, $payment_note, $payment_datetime, $dimension_options);
 
 			if ($topped === FALSE) {
 				$this->db->trans_rollback();
@@ -449,7 +535,8 @@ class Patients extends Authenticated_Controller
 				$wallet_ref_table,
 				$payment_note,
 				$this->session->userdata('user_id'),
-				$payment_datetime
+				$payment_datetime,
+				$dimension_options
 			);
 
 			if ($safe_logged === FALSE || $this->db->trans_status() === FALSE) {
@@ -477,7 +564,7 @@ class Patients extends Authenticated_Controller
 				))));
 		}
 
-		$payment_id = $this->record_standalone_debt_payment($id, $amount, $payment_date, $payment_note);
+		$payment_id = $this->record_standalone_debt_payment($id, $amount, $payment_date, $payment_note, $section_id, $staff_id);
 
 		if (!$payment_id) {
 			$this->db->trans_rollback();
@@ -538,6 +625,7 @@ class Patients extends Authenticated_Controller
 		$note = $this->null_if_empty($this->input->post('note', TRUE));
 		$refund_date_input = trim((string) $this->input->post('refund_date', TRUE));
 		$refund_date = $refund_date_input === '' ? date('Y-m-d') : $this->gregorian_date_from_shamsi($refund_date_input);
+		list($section_id, $staff_id, $dimension_error) = $this->payment_dimension_from_post();
 
 		if ($amount <= 0) {
 			return $this->respond_wallet_topup_error($id, t('Invalid refund amount.'), 422, $wants_json);
@@ -545,6 +633,10 @@ class Patients extends Authenticated_Controller
 
 		if ($refund_date_input !== '' && $refund_date === '') {
 			return $this->respond_wallet_topup_error($id, t('Please choose a valid date.'), 422, $wants_json);
+		}
+
+		if ($dimension_error !== NULL) {
+			return $this->respond_wallet_topup_error($id, $dimension_error, 422, $wants_json);
 		}
 
 		// Only the cash_topup bucket is refundable — historical_credit represents
@@ -570,7 +662,8 @@ class Patients extends Authenticated_Controller
 		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $id));
 
 		$refund_datetime = $refund_date . ' 12:00:00';
-		$refund_transaction_id = $this->Wallet_model->record_refund($id, $amount, $note, $refund_datetime);
+		$dimension_options = array('section_id' => $section_id, 'staff_id' => $staff_id);
+		$refund_transaction_id = $this->Wallet_model->record_refund($id, $amount, $note, $refund_datetime, $dimension_options);
 
 		if (!$refund_transaction_id) {
 			$this->db->trans_rollback();
@@ -591,7 +684,8 @@ class Patients extends Authenticated_Controller
 			'patient_wallet_transactions',
 			$safe_note,
 			$this->session->userdata('user_id'),
-			$refund_datetime
+			$refund_datetime,
+			$dimension_options
 		);
 
 		if ($safe_logged === FALSE) {
@@ -632,6 +726,270 @@ class Patients extends Authenticated_Controller
 				'message' => t('Refund recorded successfully.'),
 				'refunded_amount' => (float) $amount,
 			))));
+	}
+
+	public function edit_debt_payment($patient_id, $payment_id)
+	{
+		$this->require_permission('manage_turns');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient = $this->Patient_model->get_by_id($patient_id);
+		show_404_if_empty($patient);
+		$wants_json = $this->wants_json_response();
+
+		$payment = $this->db
+			->where('id', (int) $payment_id)
+			->where('patient_id', (int) $patient_id)
+			->get('payments')
+			->row_array();
+
+		if (!$payment) {
+			return $this->respond_wallet_topup_error($patient_id, t('Payment not found.'), 404, $wants_json);
+		}
+
+		list($section_id, $staff_id, $dimension_error) = $this->payment_dimension_from_post();
+
+		if ($dimension_error !== NULL) {
+			return $this->respond_wallet_topup_error($patient_id, $dimension_error, 422, $wants_json);
+		}
+
+		$note = $this->null_if_empty($this->input->post('note', TRUE));
+
+		$this->db->where('id', (int) $payment_id)->update('payments', array(
+			'notes' => $note,
+			'section_id' => $section_id,
+			'staff_id' => $staff_id,
+		));
+
+		$this->sync_standalone_payment_dimension((int) $payment_id, $section_id, $staff_id);
+
+		if (!$wants_json) {
+			$this->session->set_flashdata('success', t('Payment updated successfully.'));
+			redirect('patients/' . $patient_id);
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array_merge($this->financial_profile_payload($patient_id), array(
+				'success' => TRUE,
+				'message' => t('Payment updated successfully.'),
+				'standalone_payments' => $this->normalized_standalone_payments($patient_id),
+			))));
+	}
+
+	public function delete_debt_payment($patient_id, $payment_id)
+	{
+		$this->require_permission('manage_turns');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient = $this->Patient_model->get_by_id($patient_id);
+		show_404_if_empty($patient);
+		$wants_json = $this->wants_json_response();
+
+		$payment = $this->db
+			->where('id', (int) $payment_id)
+			->where('patient_id', (int) $patient_id)
+			->get('payments')
+			->row_array();
+
+		if (!$payment) {
+			return $this->respond_wallet_topup_error($patient_id, t('Payment not found.'), 404, $wants_json);
+		}
+
+		$this->db->trans_begin();
+
+		$this->Wallet_model->ensure_wallet_exists($patient_id);
+		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $patient_id));
+
+		// Undo exactly the debts this payment settled, restoring each to its pre-payment
+		// amount/open status (Debt_model::reopen_debts_for_payment reads the application
+		// ledger, so partial applications are restored precisely, not guessed at).
+		$this->Debt_model->reopen_debts_for_payment((int) $payment_id);
+
+		// Any overflow beyond the open debt was routed to the wallet as a top-up — reverse that too.
+		$overflow = $this->db
+			->where('payment_id', (int) $payment_id)
+			->where('type', 'topup')
+			->get('patient_wallet_transactions')
+			->row_array();
+
+		if ($overflow) {
+			$this->Safe_model->delete_transaction_by_reference('patient_wallet_transactions', (int) $overflow['id'], 'wallet_topup');
+			$this->db->where('id', (int) $overflow['id'])->delete('patient_wallet_transactions');
+		}
+
+		$this->Safe_model->delete_transaction_by_reference('payments', (int) $payment_id, 'patient_debt_payment');
+		$this->db->where('id', (int) $payment_id)->delete('payments');
+
+		if ($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return $this->respond_wallet_topup_error($patient_id, t('Unable to delete payment right now.'), 500, $wants_json);
+		}
+
+		$this->db->trans_commit();
+		$this->Wallet_model->recalculate_for_patient($patient_id);
+
+		if (!$wants_json) {
+			$this->session->set_flashdata('success', t('Payment deleted successfully.'));
+			redirect('patients/' . $patient_id);
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array_merge($this->financial_profile_payload($patient_id), array(
+				'success' => TRUE,
+				'message' => t('Payment deleted successfully.'),
+				'standalone_payments' => $this->normalized_standalone_payments($patient_id),
+			))));
+	}
+
+	public function edit_refund($patient_id, $wallet_transaction_id)
+	{
+		$this->require_permission('manage_turns');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient = $this->Patient_model->get_by_id($patient_id);
+		show_404_if_empty($patient);
+		$wants_json = $this->wants_json_response();
+
+		$refund = $this->db
+			->where('id', (int) $wallet_transaction_id)
+			->where('patient_id', (int) $patient_id)
+			->where('type', 'refund')
+			->get('patient_wallet_transactions')
+			->row_array();
+
+		if (!$refund) {
+			return $this->respond_wallet_topup_error($patient_id, t('Refund not found.'), 404, $wants_json);
+		}
+
+		list($section_id, $staff_id, $dimension_error) = $this->payment_dimension_from_post();
+
+		if ($dimension_error !== NULL) {
+			return $this->respond_wallet_topup_error($patient_id, $dimension_error, 422, $wants_json);
+		}
+
+		$note = $this->null_if_empty($this->input->post('note', TRUE));
+
+		$this->db->where('id', (int) $wallet_transaction_id)->update('patient_wallet_transactions', array(
+			'note' => $note,
+			'section_id' => $section_id,
+			'staff_id' => $staff_id,
+		));
+
+		$this->db
+			->where('reference_table', 'patient_wallet_transactions')
+			->where('reference_id', (int) $wallet_transaction_id)
+			->where('source', 'patient_refund')
+			->update('safe_transactions', array('section_id' => $section_id, 'staff_id' => $staff_id));
+
+		if (!$wants_json) {
+			$this->session->set_flashdata('success', t('Refund updated successfully.'));
+			redirect('patients/' . $patient_id);
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array_merge($this->financial_profile_payload($patient_id), array(
+				'success' => TRUE,
+				'message' => t('Refund updated successfully.'),
+				'standalone_payments' => $this->normalized_standalone_payments($patient_id),
+			))));
+	}
+
+	public function delete_refund($patient_id, $wallet_transaction_id)
+	{
+		$this->require_permission('manage_turns');
+
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Method Not Allowed', 405);
+		}
+
+		$patient = $this->Patient_model->get_by_id($patient_id);
+		show_404_if_empty($patient);
+		$wants_json = $this->wants_json_response();
+
+		$refund = $this->db
+			->where('id', (int) $wallet_transaction_id)
+			->where('patient_id', (int) $patient_id)
+			->where('type', 'refund')
+			->get('patient_wallet_transactions')
+			->row_array();
+
+		if (!$refund) {
+			return $this->respond_wallet_topup_error($patient_id, t('Refund not found.'), 404, $wants_json);
+		}
+
+		$this->db->trans_begin();
+
+		$this->Wallet_model->ensure_wallet_exists($patient_id);
+		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $patient_id));
+
+		$this->Safe_model->delete_transaction_by_reference('patient_wallet_transactions', (int) $wallet_transaction_id, 'patient_refund');
+		$this->db->where('id', (int) $wallet_transaction_id)->delete('patient_wallet_transactions');
+
+		if ($this->db->trans_status() === FALSE) {
+			$this->db->trans_rollback();
+			return $this->respond_wallet_topup_error($patient_id, t('Unable to delete refund right now.'), 500, $wants_json);
+		}
+
+		$this->db->trans_commit();
+		$this->Wallet_model->recalculate_for_patient($patient_id);
+
+		if (!$wants_json) {
+			$this->session->set_flashdata('success', t('Refund deleted successfully.'));
+			redirect('patients/' . $patient_id);
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array_merge($this->financial_profile_payload($patient_id), array(
+				'success' => TRUE,
+				'message' => t('Refund deleted successfully.'),
+				'standalone_payments' => $this->normalized_standalone_payments($patient_id),
+			))));
+	}
+
+	protected function sync_standalone_payment_dimension($payment_id, $section_id, $staff_id)
+	{
+		$this->db
+			->where('reference_table', 'payments')
+			->where('reference_id', (int) $payment_id)
+			->where('source', 'patient_debt_payment')
+			->update('safe_transactions', array('section_id' => $section_id, 'staff_id' => $staff_id));
+
+		$overflow = $this->db
+			->select('id')
+			->where('payment_id', (int) $payment_id)
+			->where('type', 'topup')
+			->get('patient_wallet_transactions')
+			->row_array();
+
+		if (!$overflow) {
+			return;
+		}
+
+		$overflow_id = (int) $overflow['id'];
+
+		$this->db->where('id', $overflow_id)->update('patient_wallet_transactions', array(
+			'section_id' => $section_id,
+			'staff_id' => $staff_id,
+		));
+
+		$this->db
+			->where('reference_table', 'patient_wallet_transactions')
+			->where('reference_id', $overflow_id)
+			->where('source', 'wallet_topup')
+			->update('safe_transactions', array('section_id' => $section_id, 'staff_id' => $staff_id));
 	}
 
 	public function edit($id)
@@ -885,7 +1243,8 @@ class Patients extends Authenticated_Controller
 
 	protected function financial_profile_payload($patient_id)
 	{
-		$wallet_transactions = $this->Wallet_model->get_transactions($patient_id);
+		// Full history — see show() for why this can't be the default recent-20 page.
+		$wallet_transactions = $this->Wallet_model->get_transactions($patient_id, 0);
 		$turns = $this->Turn_model->get_turns_for_patient($patient_id);
 		$wallet_balance = (float) $this->Wallet_model->get_balance($patient_id);
 		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
@@ -1075,12 +1434,14 @@ class Patients extends Authenticated_Controller
 		return $timeline;
 	}
 
-	protected function record_standalone_debt_payment($patient_id, $amount, $payment_date, $note)
+	protected function record_standalone_debt_payment($patient_id, $amount, $payment_date, $note, $section_id = NULL, $staff_id = NULL)
 	{
 		$amount = round((float) $amount, 2);
 
 		$payment_data = array(
 			'patient_id' => (int) $patient_id,
+			'section_id' => $section_id ? (int) $section_id : NULL,
+			'staff_id' => $staff_id ? (int) $staff_id : NULL,
 			'payment_date' => (string) $payment_date,
 			'amount' => $amount,
 			'payment_method' => 'cash',
@@ -1095,9 +1456,14 @@ class Patients extends Authenticated_Controller
 			return FALSE;
 		}
 
+		$safe_options = array('section_id' => $section_id, 'staff_id' => $staff_id);
+		// Also tags the overflow wallet top-up with the payment it came from, so deleting
+		// the payment later can find and reverse that top-up too.
+		$topup_options = $safe_options + array('payment_id' => $payment_id);
+
 		// Explicit user-initiated payment must clear ALL open debts (manual_only AND auto_settleable),
 		// oldest first. Any leftover after debts are paid becomes a wallet top-up.
-		$leftover = $this->Debt_model->clear_debts((int) $patient_id, $amount, NULL);
+		$leftover = $this->Debt_model->clear_debts((int) $patient_id, $amount, NULL, $payment_id);
 		$leftover = round((float) $leftover, 2);
 		$applied_to_debt = round($amount - $leftover, 2);
 
@@ -1109,7 +1475,8 @@ class Patients extends Authenticated_Controller
 				$leftover,
 				NULL,
 				$note ?: ('Debt payment overflow #' . $payment_id),
-				$payment_datetime
+				$payment_datetime,
+				$topup_options
 			);
 
 			if ($top_up_result === FALSE) {
@@ -1136,7 +1503,8 @@ class Patients extends Authenticated_Controller
 				'payments',
 				$safe_note,
 				$user_id,
-				$payment_datetime
+				$payment_datetime,
+				$safe_options
 			);
 
 			if ($safe_logged === FALSE) {
@@ -1157,7 +1525,8 @@ class Patients extends Authenticated_Controller
 				$wallet_ref_table,
 				$safe_note,
 				$user_id,
-				$payment_datetime
+				$payment_datetime,
+				$safe_options
 			);
 
 			if ($safe_logged === FALSE) {
@@ -1166,6 +1535,111 @@ class Patients extends Authenticated_Controller
 		}
 
 		return $payment_id;
+	}
+
+	/**
+	 * Unified, editable list of the money movements staff record directly from this profile
+	 * (not generated by a turn): standalone debt payments, refunds, and prepayments taken
+	 * with no open debt. Each carries the section/doctor tag captured on the form.
+	 */
+	protected function normalized_standalone_payments($patient_id)
+	{
+		$patient_id = (int) $patient_id;
+		$rows = array();
+
+		$staff_name_expr = "TRIM(CONCAT(staff.first_name, ' ', COALESCE(staff.last_name, '')))";
+
+		$payments = $this->db
+			->select("payments.id, payments.amount, payments.notes, payments.section_id, payments.staff_id, payments.created_at,
+				sections.name AS section_name, {$staff_name_expr} AS staff_name", FALSE)
+			->from('payments')
+			->join('sections', 'sections.id = payments.section_id', 'left')
+			->join('staff', 'staff.id = payments.staff_id', 'left')
+			->where('payments.patient_id', $patient_id)
+			->order_by('payments.id', 'desc')
+			->get()
+			->result_array();
+
+		foreach ($payments as $row) {
+			$rows[] = array(
+				'kind' => 'debt_payment',
+				'edit_kind' => 'payment',
+				'id' => (int) $row['id'],
+				'amount' => (float) $row['amount'],
+				'note' => $row['notes'],
+				'section_id' => $row['section_id'] ? (int) $row['section_id'] : NULL,
+				'section_name' => !empty($row['section_name']) ? t($row['section_name']) : '',
+				'staff_id' => $row['staff_id'] ? (int) $row['staff_id'] : NULL,
+				'staff_name' => trim((string) ($row['staff_name'] ?? '')),
+				'occurred_at' => to_shamsi((string) $row['created_at'], 'Y/m/d H:i'),
+				'label' => t('debt_payment'),
+			);
+		}
+
+		$wallet_rows = $this->db
+			->select("patient_wallet_transactions.id, patient_wallet_transactions.type, patient_wallet_transactions.amount, patient_wallet_transactions.note,
+				patient_wallet_transactions.section_id, patient_wallet_transactions.staff_id, patient_wallet_transactions.created_at,
+				sections.name AS section_name, {$staff_name_expr} AS staff_name", FALSE)
+			->from('patient_wallet_transactions')
+			->join('sections', 'sections.id = patient_wallet_transactions.section_id', 'left')
+			->join('staff', 'staff.id = patient_wallet_transactions.staff_id', 'left')
+			->where('patient_wallet_transactions.patient_id', $patient_id)
+			->group_start()
+				->where('patient_wallet_transactions.type', 'refund')
+				->or_group_start()
+					->where('patient_wallet_transactions.type', 'topup')
+					->where('patient_wallet_transactions.turn_id IS NULL', NULL, FALSE)
+					->where('patient_wallet_transactions.payment_id IS NULL', NULL, FALSE)
+				->group_end()
+			->group_end()
+			->order_by('patient_wallet_transactions.id', 'desc')
+			->get()
+			->result_array();
+
+		foreach ($wallet_rows as $row) {
+			$is_refund = (string) $row['type'] === 'refund';
+
+			$rows[] = array(
+				'kind' => $is_refund ? 'refund' : 'no_turn_payment',
+				'edit_kind' => 'wallet_transaction',
+				'id' => (int) $row['id'],
+				'amount' => (float) $row['amount'],
+				'note' => $row['note'],
+				'section_id' => $row['section_id'] ? (int) $row['section_id'] : NULL,
+				'section_name' => !empty($row['section_name']) ? t($row['section_name']) : '',
+				'staff_id' => $row['staff_id'] ? (int) $row['staff_id'] : NULL,
+				'staff_name' => trim((string) ($row['staff_name'] ?? '')),
+				'occurred_at' => to_shamsi((string) $row['created_at'], 'Y/m/d H:i'),
+				'label' => $is_refund ? t('refund') : t('payment_without_turn'),
+			);
+		}
+
+		usort($rows, static function ($left, $right) {
+			return strcmp((string) $right['occurred_at'], (string) $left['occurred_at']);
+		});
+
+		return $rows;
+	}
+
+	/**
+	 * Section + doctor are required on standalone payment/refund forms so a filtered daily
+	 * report can attribute money paid or refunded outside a turn to the right department.
+	 * Returns [section_id, staff_id, error_message_or_NULL].
+	 */
+	protected function payment_dimension_from_post()
+	{
+		$section_id = (int) $this->input->post('section_id');
+		$staff_id = (int) $this->input->post('staff_id');
+
+		if ($section_id <= 0 || !$this->Section_model->get_by_id($section_id)) {
+			return array(NULL, NULL, t('Please choose a valid section.'));
+		}
+
+		if ($staff_id <= 0 || !$this->Staff_model->get_by_id($staff_id)) {
+			return array(NULL, NULL, t('Please choose a valid doctor.'));
+		}
+
+		return array($section_id, $staff_id, NULL);
 	}
 
 	protected function payment_datetime_from_date($date)
