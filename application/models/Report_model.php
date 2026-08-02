@@ -382,8 +382,6 @@ class Report_model extends CI_Model
 
 		if (
 			!$this->db->table_exists('safe_transactions')
-			|| !empty($filters['section_ids'])
-			|| !empty($filters['staff_ids'])
 			|| $filters['gender'] !== NULL
 			|| $filters['date_from'] === ''
 			|| $filters['date_to'] === ''
@@ -391,16 +389,36 @@ class Report_model extends CI_Model
 			return $result;
 		}
 
-		$row = $this->db
+		// Section/staff filters need the columns this feature added; skip the
+		// whole breakdown on older schemas rather than silently ignoring the filter.
+		if (
+			(!empty($filters['section_ids']) || !empty($filters['staff_ids']))
+			&& (!$this->db->field_exists('section_id', 'safe_transactions') || !$this->db->field_exists('staff_id', 'safe_transactions'))
+		) {
+			return $result;
+		}
+
+		$query = $this->db
 			->select("
 				COALESCE(SUM(CASE WHEN source = 'patient_debt_payment' AND type = 'in' THEN amount ELSE 0 END), 0) AS debt_payments,
 				COALESCE(SUM(CASE WHEN source = 'patient_refund' AND type = 'out' THEN amount ELSE 0 END), 0) AS refunds
 			", FALSE)
 			->from('safe_transactions')
-			->where('DATE(safe_transactions.created_at) >=', $filters['date_from'])
-			->where('DATE(safe_transactions.created_at) <=', $filters['date_to'])
-			->get()
-			->row_array();
+			// Compare against the indexed created_at column directly (not wrapped in
+			// DATE()) so this can use safe_transactions_created_at_index instead of
+			// scanning the whole table.
+			->where('safe_transactions.created_at >=', $filters['date_from'] . ' 00:00:00')
+			->where('safe_transactions.created_at <=', $filters['date_to'] . ' 23:59:59');
+
+		if (!empty($filters['section_ids'])) {
+			$query->where_in('safe_transactions.section_id', $filters['section_ids']);
+		}
+
+		if (!empty($filters['staff_ids'])) {
+			$query->where_in('safe_transactions.staff_id', $filters['staff_ids']);
+		}
+
+		$row = $query->get()->row_array();
 
 		if ($row) {
 			$result['debt_payments'] = round((float) $row['debt_payments'], 2);
@@ -488,10 +506,17 @@ class Report_model extends CI_Model
 	protected function get_manual_wallet_topups_total($filters)
 	{
 		if (
-			!empty($filters['section_ids'])
-			|| !empty($filters['staff_ids'])
-			|| !$this->db->table_exists('patient_wallet_transactions')
+			!$this->db->table_exists('patient_wallet_transactions')
 			|| !$this->db->table_exists('patients')
+		) {
+			return 0.00;
+		}
+
+		// Section/staff filters need the columns this feature added; skip the whole
+		// breakdown on older schemas rather than silently ignoring the filter.
+		if (
+			(!empty($filters['section_ids']) || !empty($filters['staff_ids']))
+			&& (!$this->db->field_exists('section_id', 'patient_wallet_transactions') || !$this->db->field_exists('staff_id', 'patient_wallet_transactions'))
 		) {
 			return 0.00;
 		}
@@ -523,6 +548,14 @@ class Report_model extends CI_Model
 
 		if ($this->db->field_exists('fund_type', 'patient_wallet_transactions')) {
 			$query->where('patient_wallet_transactions.fund_type', 'cash_topup');
+		}
+
+		if (!empty($filters['section_ids'])) {
+			$query->where_in('patient_wallet_transactions.section_id', $filters['section_ids']);
+		}
+
+		if (!empty($filters['staff_ids'])) {
+			$query->where_in('patient_wallet_transactions.staff_id', $filters['staff_ids']);
 		}
 
 		if ($filters['gender'] !== NULL) {

@@ -447,6 +447,132 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 		</div>
 		<div class="card mb-4">
 			<div class="card-body">
+				<h2 class="h5 mb-3"><?= t('payment_refund_history') ?></h2>
+				<div class="table-responsive">
+					<table class="table table-sm align-middle mb-0">
+						<thead>
+							<tr>
+								<th><?= t('date_time') ?></th>
+								<th><?= t('wallet_action') ?></th>
+								<th><?= t('Amount') ?></th>
+								<th><?= t('section') ?></th>
+								<th><?= t('staff_member') ?></th>
+								<th><?= t('wallet_note') ?></th>
+								<th class="text-end"><?= t('Actions') ?></th>
+							</tr>
+						</thead>
+						<tbody>
+						<?php if ($standalone_payments) : foreach ($standalone_payments as $entry) : ?>
+							<?php
+							$kind_badge = array(
+								'debt_payment' => array('bg-success-subtle text-success', t('pay_debt')),
+								'refund' => array('bg-danger-subtle text-danger', t('refund')),
+								'no_turn_payment' => array('bg-info-subtle text-info', t('payment_without_turn')),
+							)[$entry['kind']] ?? array('bg-secondary-subtle text-secondary', $entry['kind']);
+							$can_manage_entry = $entry['kind'] !== 'no_turn_payment';
+							$edit_url = $entry['edit_kind'] === 'payment'
+								? base_url('patients/' . $patient['id'] . '/payments/' . $entry['id'] . '/edit')
+								: base_url('patients/' . $patient['id'] . '/refunds/' . $entry['id'] . '/edit');
+							$delete_url = $entry['edit_kind'] === 'payment'
+								? base_url('patients/' . $patient['id'] . '/payments/' . $entry['id'] . '/delete')
+								: base_url('patients/' . $patient['id'] . '/refunds/' . $entry['id'] . '/delete');
+							?>
+							<tr>
+								<td class="col-date"><?= html_escape($entry['occurred_at']) ?></td>
+								<td><span class="badge rounded-pill <?= $kind_badge[0] ?>"><?= html_escape($kind_badge[1]) ?></span></td>
+								<td><?= format_amount($entry['amount']) ?></td>
+								<td><?= html_escape($entry['section_name'] ?: '&mdash;') ?></td>
+								<td><?= html_escape($entry['staff_name'] ?: '&mdash;') ?></td>
+								<td><?= !empty($entry['note']) ? html_escape($entry['note']) : '&mdash;' ?></td>
+								<td class="text-end">
+									<?php if ($can_manage_entry) : ?>
+										<button type="button" class="btn btn-sm btn-outline-secondary standalone-payment-edit-btn"
+											data-edit-url="<?= html_escape($edit_url) ?>"
+											data-note="<?= html_escape((string) $entry['note']) ?>"
+											data-section-id="<?= (int) $entry['section_id'] ?>"
+											data-staff-id="<?= (int) $entry['staff_id'] ?>"
+										><?= t('Edit') ?></button>
+										<form action="<?= html_escape($delete_url) ?>" method="post" class="d-inline" onsubmit="return confirm('<?= html_escape(t('confirm_delete')) ?>');">
+											<button type="submit" class="btn btn-sm btn-outline-danger"><?= t('Delete') ?></button>
+										</form>
+									<?php endif; ?>
+								</td>
+							</tr>
+						<?php endforeach; else : ?>
+							<tr><td colspan="7" class="text-muted"><?= t('no_financial_entries') ?></td></tr>
+						<?php endif; ?>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="standalonePaymentEditModal" tabindex="-1" aria-labelledby="standalonePaymentEditModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h2 class="modal-title h5 mb-0" id="standalonePaymentEditModalLabel"><?= t('Edit') ?></h2>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
+					</div>
+					<form id="standalonePaymentEditForm" method="post">
+						<div class="modal-body">
+							<div class="mb-3">
+								<label class="form-label"><?= t('section') ?></label>
+								<select name="section_id" id="standalonePaymentEditSection" class="form-select s2-select" required>
+									<option value=""><?= t('Select') ?></option>
+									<?php foreach ($all_sections as $section) : ?>
+										<option value="<?= (int) $section['id'] ?>"><?= html_escape(t($section['name'])) ?></option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<div class="mb-3">
+								<label class="form-label"><?= t('staff_member') ?></label>
+								<select name="staff_id" id="standalonePaymentEditStaff" class="form-select s2-select" required>
+									<option value=""><?= t('Select') ?></option>
+									<?php foreach ($all_staff as $staff_member) : ?>
+										<option value="<?= (int) $staff_member['id'] ?>"><?= html_escape(trim($staff_member['first_name'] . ' ' . ($staff_member['last_name'] ?? ''))) ?></option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<div class="mb-0">
+								<label class="form-label"><?= t('wallet_note') ?></label>
+								<input type="text" name="note" id="standalonePaymentEditNote" class="form-control" maxlength="255">
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
+							<button type="submit" class="btn btn-primary"><?= t('Save') ?></button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<script>
+		(function () {
+			const modalEl = document.getElementById('standalonePaymentEditModal');
+			if (!modalEl) {
+				return;
+			}
+			const form = document.getElementById('standalonePaymentEditForm');
+			const sectionSelect = document.getElementById('standalonePaymentEditSection');
+			const staffSelect = document.getElementById('standalonePaymentEditStaff');
+			const noteInput = document.getElementById('standalonePaymentEditNote');
+			const modal = new bootstrap.Modal(modalEl);
+
+			document.querySelectorAll('.standalone-payment-edit-btn').forEach(function (button) {
+				button.addEventListener('click', function () {
+					form.action = button.dataset.editUrl;
+					sectionSelect.value = button.dataset.sectionId && button.dataset.sectionId !== '0' ? button.dataset.sectionId : '';
+					staffSelect.value = button.dataset.staffId && button.dataset.staffId !== '0' ? button.dataset.staffId : '';
+					noteInput.value = button.dataset.note || '';
+					modal.show();
+				});
+			});
+		})();
+		</script>
+
+		<div class="card mb-4">
+			<div class="card-body">
 				<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
 					<div>
 						<h2 class="h5 mb-1"><?= t('discounts') ?></h2>
@@ -524,6 +650,24 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 						<label class="form-label"><?= t('payment_date') ?></label>
 						<input type="text" name="payment_date" class="form-control shamsi-date" value="<?= html_escape(shamsi_today()) ?>" placeholder="<?= t('month_format_hint') ?>">
 					</div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('section') ?></label>
+						<select name="section_id" class="form-select s2-select" required>
+							<option value=""><?= t('Select') ?></option>
+							<?php foreach ($all_sections as $section) : ?>
+								<option value="<?= (int) $section['id'] ?>"><?= html_escape(t($section['name'])) ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('staff_member') ?></label>
+						<select name="staff_id" class="form-select s2-select" required>
+							<option value=""><?= t('Select') ?></option>
+							<?php foreach ($all_staff as $staff_member) : ?>
+								<option value="<?= (int) $staff_member['id'] ?>"><?= html_escape(trim($staff_member['first_name'] . ' ' . ($staff_member['last_name'] ?? ''))) ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
 					<div class="mb-0">
 						<label class="form-label"><?= t('wallet_note') ?></label>
 						<input type="text" name="note" class="form-control" maxlength="255" placeholder="<?= t('debt_note_placeholder') ?>">
@@ -557,6 +701,24 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 					<div class="mb-3">
 						<label class="form-label"><?= t('refund_date') ?></label>
 						<input type="text" name="refund_date" class="form-control shamsi-date" value="<?= html_escape(shamsi_today()) ?>" placeholder="<?= t('month_format_hint') ?>">
+					</div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('section') ?></label>
+						<select name="section_id" class="form-select s2-select" required>
+							<option value=""><?= t('Select') ?></option>
+							<?php foreach ($all_sections as $section) : ?>
+								<option value="<?= (int) $section['id'] ?>"><?= html_escape(t($section['name'])) ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label"><?= t('staff_member') ?></label>
+						<select name="staff_id" class="form-select s2-select" required>
+							<option value=""><?= t('Select') ?></option>
+							<?php foreach ($all_staff as $staff_member) : ?>
+								<option value="<?= (int) $staff_member['id'] ?>"><?= html_escape(trim($staff_member['first_name'] . ' ' . ($staff_member['last_name'] ?? ''))) ?></option>
+							<?php endforeach; ?>
+						</select>
 					</div>
 					<div class="mb-0">
 						<label class="form-label"><?= t('wallet_note') ?></label>

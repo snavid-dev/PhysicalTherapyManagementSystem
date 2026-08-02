@@ -263,8 +263,6 @@ class Turns extends Authenticated_Controller
 		$payment_type = $this->input->post('payment_type', TRUE);
 		$topup_amount = $this->decimal_value($this->input->post('topup_amount'));
 		$doctor_id = (int) $staff['user_id'];
-		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
-		$wallet_split = $this->planned_wallet_deduction_split($wallet_breakdown, $topup_amount, $fee, $payment_type);
 		$wallet_deducted = 0.00;
 		$historical_wallet_deducted = 0.00;
 		$cash_wallet_deducted = 0.00;
@@ -272,6 +270,15 @@ class Turns extends Authenticated_Controller
 		$remaining_fee = 0.00;
 
 		$this->db->trans_begin();
+
+		// Lock the patient's wallet row before reading its balance, so two
+		// concurrent turn submissions for the same patient can't both read the
+		// same starting balance and each deduct against it independently.
+		$this->Wallet_model->ensure_wallet_exists($patient_id);
+		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array($patient_id));
+
+		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
+		$wallet_split = $this->planned_wallet_deduction_split($wallet_breakdown, $topup_amount, $fee, $payment_type);
 
 		switch ($payment_type) {
 			case 'free':
@@ -426,6 +433,13 @@ class Turns extends Authenticated_Controller
 			$cash_wallet_deducted = 0.00;
 			$cash_collected = 0.00;
 			$remaining_fee = 0.00;
+
+			// Same row-lock rationale as store() — each row here is a distinct patient
+			// (validate_bulk_submission rejects duplicates), so lock that patient's
+			// wallet before reading its balance for this row's split.
+			$this->Wallet_model->ensure_wallet_exists($row['patient_id']);
+			$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array($row['patient_id']));
+
 			$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($row['patient_id']);
 			$wallet_split = $this->planned_wallet_deduction_split($wallet_breakdown, $row['topup_amount'], $row['fee'], $row['payment_type']);
 
@@ -677,6 +691,12 @@ class Turns extends Authenticated_Controller
 		$cash_collected = 0.00;
 
 		$this->db->trans_begin();
+
+		// Lock the patient's wallet row before touching it — reverse_turn_financials()
+		// below already mutates the balance, so the lock must be taken first, not
+		// just before the later get_balance_breakdown() read.
+		$this->Wallet_model->ensure_wallet_exists($patient_id);
+		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array($patient_id));
 
 		// Safe rows are adjusted in place after the new amounts are computed
 		// (M2 task 2.3). Reverse only wallet + debt effects here.

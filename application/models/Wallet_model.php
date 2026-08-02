@@ -133,17 +133,17 @@ class Wallet_model extends CI_Model
 		));
 	}
 
-	public function top_up_cash($patient_id, $amount, $turn_id = NULL, $note = NULL, $created_at = NULL)
+	public function top_up_cash($patient_id, $amount, $turn_id = NULL, $note = NULL, $created_at = NULL, $options = array())
 	{
-		return $this->top_up($patient_id, $amount, $turn_id, $note, 'cash_topup', $created_at);
+		return $this->top_up($patient_id, $amount, $turn_id, $note, 'cash_topup', $created_at, $options);
 	}
 
-	public function top_up_historical($patient_id, $amount, $turn_id = NULL, $note = NULL, $created_at = NULL)
+	public function top_up_historical($patient_id, $amount, $turn_id = NULL, $note = NULL, $created_at = NULL, $options = array())
 	{
-		return $this->top_up($patient_id, $amount, $turn_id, $note, 'historical_credit', $created_at);
+		return $this->top_up($patient_id, $amount, $turn_id, $note, 'historical_credit', $created_at, $options);
 	}
 
-	public function top_up($patient_id, $amount, $turn_id = NULL, $note = NULL, $fund_type = 'cash_topup', $created_at = NULL)
+	public function top_up($patient_id, $amount, $turn_id = NULL, $note = NULL, $fund_type = 'cash_topup', $created_at = NULL, $options = array())
 	{
 		$this->ensure_schema();
 
@@ -175,6 +175,11 @@ class Wallet_model extends CI_Model
 			'fund_type' => $fund_type,
 			'amount' => $amount,
 			'note' => $note,
+			'section_id' => !empty($options['section_id']) ? (int) $options['section_id'] : NULL,
+			'staff_id' => !empty($options['staff_id']) ? (int) $options['staff_id'] : NULL,
+			// Links an overflow top-up back to the standalone debt payment that created it,
+			// so deleting that payment can find and reverse this row too.
+			'payment_id' => !empty($options['payment_id']) ? (int) $options['payment_id'] : NULL,
 		);
 
 		if ($created_at !== NULL && $this->is_valid_datetime((string) $created_at)) {
@@ -394,18 +399,23 @@ class Wallet_model extends CI_Model
 		return $this->top_up($patient_id, $amount, $turn_id, $this->reversal_note($note), 'cash_topup');
 	}
 
+	// $limit <= 0 means "no limit" — callers computing lifetime totals (financial
+	// summary/timeline) need the full history, not just the most recent page.
 	public function get_transactions($patient_id, $limit = 20)
 	{
 		$this->ensure_schema();
 
-		return $this->db
+		$query = $this->db
 			->from('patient_wallet_transactions')
 			->where('patient_id', (int) $patient_id)
 			->order_by('created_at', 'desc')
-			->order_by('id', 'desc')
-			->limit((int) $limit)
-			->get()
-			->result_array();
+			->order_by('id', 'desc');
+
+		if ((int) $limit > 0) {
+			$query->limit((int) $limit);
+		}
+
+		return $query->get()->result_array();
 	}
 
 	/**
@@ -534,7 +544,7 @@ class Wallet_model extends CI_Model
 		return $row ? round((float) $row['net'], 2) : 0.00;
 	}
 
-	public function record_refund($patient_id, $amount, $note = NULL, $created_at = NULL)
+	public function record_refund($patient_id, $amount, $note = NULL, $created_at = NULL, $options = array())
 	{
 		$this->ensure_schema();
 
@@ -567,6 +577,8 @@ class Wallet_model extends CI_Model
 			'fund_type' => 'cash_topup',
 			'amount' => $amount,
 			'note' => $note,
+			'section_id' => !empty($options['section_id']) ? (int) $options['section_id'] : NULL,
+			'staff_id' => !empty($options['staff_id']) ? (int) $options['staff_id'] : NULL,
 		);
 
 		if ($created_at !== NULL && $this->is_valid_datetime((string) $created_at)) {
@@ -765,6 +777,18 @@ class Wallet_model extends CI_Model
 
 		$this->ensure_fund_type_column();
 		$this->ensure_type_enum();
+
+		if (!$this->db->field_exists('section_id', 'patient_wallet_transactions')) {
+			$this->db->query("ALTER TABLE `patient_wallet_transactions` ADD COLUMN `section_id` int unsigned DEFAULT NULL AFTER `turn_id`");
+		}
+
+		if (!$this->db->field_exists('staff_id', 'patient_wallet_transactions')) {
+			$this->db->query("ALTER TABLE `patient_wallet_transactions` ADD COLUMN `staff_id` int unsigned DEFAULT NULL AFTER `section_id`");
+		}
+
+		if (!$this->db->field_exists('payment_id', 'patient_wallet_transactions')) {
+			$this->db->query("ALTER TABLE `patient_wallet_transactions` ADD COLUMN `payment_id` int unsigned DEFAULT NULL AFTER `staff_id`");
+		}
 
 		$this->schema_ready = TRUE;
 	}

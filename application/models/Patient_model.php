@@ -26,6 +26,97 @@ class Patient_model extends CI_Model
 			->result_array();
 	}
 
+	/**
+	 * Server-side DataTables source for the patients index — same pattern as
+	 * Turn_model::get_datatable(). The list used to ship every patient (and re-ship
+	 * them on every pagination/sort click) with pagination/search done in JS.
+	 */
+	public function get_datatable($params)
+	{
+		$this->ensure_schema();
+
+		$orderable = array(
+			0 => 'patients.first_name',
+			1 => 'patients.father_name',
+			2 => 'patients.gender',
+			3 => 'patients.age',
+			4 => 'patients.phone',
+		);
+
+		$records_total = (int) $this->db->count_all_results('patients');
+
+		$this->db->from('patients');
+		$this->apply_datatable_search($params['search'] ?? '');
+		$records_filtered = (int) $this->db->count_all_results('', FALSE);
+
+		$order_col = isset($params['order_col']) ? (int) $params['order_col'] : 0;
+		$order_dir = (isset($params['order_dir']) && strtolower((string) $params['order_dir']) === 'desc') ? 'desc' : 'asc';
+		$order_by = isset($orderable[$order_col]) ? $orderable[$order_col] : 'patients.first_name';
+
+		$this->db->order_by($order_by, $order_dir);
+		if ($order_by !== 'patients.last_name') {
+			$this->db->order_by('patients.last_name', $order_dir);
+		}
+
+		$this->db->select('patients.*');
+
+		$length = isset($params['length']) ? (int) $params['length'] : 25;
+		$start = isset($params['start']) ? max(0, (int) $params['start']) : 0;
+
+		if ($length > 0) {
+			$this->db->limit($length, $start);
+		}
+
+		$data = $this->db->get()->result_array();
+
+		return array(
+			'data' => $data,
+			'records_total' => $records_total,
+			'records_filtered' => $records_filtered,
+		);
+	}
+
+	protected function apply_datatable_search($search)
+	{
+		$search = trim((string) $search);
+
+		if ($search === '') {
+			return;
+		}
+
+		$this->db
+			->group_start()
+				->like('patients.first_name', $search)
+				->or_like('patients.last_name', $search)
+				->or_like('patients.father_name', $search)
+				->or_like('patients.phone', $search)
+				->or_like('patients.phone2', $search)
+			->group_end();
+	}
+
+	protected function ensure_schema()
+	{
+		if (!$this->db->table_exists('patients')) {
+			return;
+		}
+
+		// Backs the default name-sorted listing (get_datatable()'s default order);
+		// the leading-wildcard search itself can't use a btree index either way.
+		$this->add_index_if_missing('patients', 'patients_first_last_name_index', '(`first_name`, `last_name`)');
+	}
+
+	protected function add_index_if_missing($table, $index_name, $columns_sql)
+	{
+		$exists = $this->db->query(
+			"SELECT 1 FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = ? AND index_name = ? LIMIT 1",
+			array($table, $index_name)
+		)->row_array();
+
+		if (!$exists) {
+			$this->db->query("ALTER TABLE `{$table}` ADD INDEX `{$index_name}` {$columns_sql}");
+		}
+	}
+
 	public function get_by_id($id)
 	{
 		return $this->db
@@ -62,7 +153,7 @@ class Patient_model extends CI_Model
 	{
 		$identity = $this->normalized_identity_fields($data);
 
-		if ($identity['phone'] === NULL) {
+		if ($identity['first_name'] === NULL && $identity['last_name'] === NULL && $identity['father_name'] === NULL) {
 			return NULL;
 		}
 
@@ -91,7 +182,10 @@ class Patient_model extends CI_Model
 				continue;
 			}
 
-			if ($candidate_identity['phone'] !== $identity['phone']) {
+			// Phone is only a useful discriminator when both records actually have
+			// one on file — requiring an exact match let an identical-name duplicate
+			// through whenever either phone field was left blank.
+			if ($identity['phone'] !== NULL && $candidate_identity['phone'] !== NULL && $candidate_identity['phone'] !== $identity['phone']) {
 				continue;
 			}
 

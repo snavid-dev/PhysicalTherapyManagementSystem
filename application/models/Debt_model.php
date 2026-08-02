@@ -16,6 +16,20 @@ class Debt_model extends CI_Model
 
 		$debt_type = in_array($debt_type, $this->allowed_debt_types, TRUE) ? $debt_type : self::DEBT_TYPE_AUTO_SETTLEABLE;
 
+		// A turn must never carry more than one open debt at a time — a new debt for this
+		// turn supersedes any stale open one (e.g. left behind by a reversal race). No cash
+		// changed hands against the stale row, so it's closed out rather than double-counted.
+		if ((int) $turn_id > 0) {
+			$this->db
+				->where('turn_id', (int) $turn_id)
+				->where('status', 'open')
+				->update('patient_debts', array(
+					'status' => 'cleared',
+					'cleared_at' => date('Y-m-d H:i:s'),
+					'note' => 'Superseded by a newer debt for this turn (auto-closed)',
+				));
+		}
+
 		$data = array(
 			'patient_id' => (int) $patient_id,
 			'turn_id' => (int) $turn_id,
@@ -71,12 +85,13 @@ class Debt_model extends CI_Model
 		return $row ? (float) $row['total_open_debt'] : 0.00;
 	}
 
-	public function clear_debts($patient_id, $cash_available, $clearing_turn_id)
+	public function clear_debts($patient_id, $cash_available, $clearing_turn_id, $payment_id = NULL)
 	{
 		$this->ensure_schema();
 
 		$cash_available = round((float) $cash_available, 2);
 		$debts = $this->get_open_debts($patient_id);
+		$payment_id = $payment_id === NULL ? NULL : (int) $payment_id;
 
 		foreach ($debts as $debt) {
 			if ($cash_available <= 0) {
@@ -86,6 +101,8 @@ class Debt_model extends CI_Model
 			$debt_amount = round((float) $debt['amount'], 2);
 
 			if ($cash_available >= $debt_amount) {
+				$this->record_payment_application($payment_id, (int) $debt['id'], $debt_amount);
+
 				$this->db
 					->where('id', (int) $debt['id'])
 					->update('patient_debts', array(
@@ -100,6 +117,8 @@ class Debt_model extends CI_Model
 			}
 
 			if ($cash_available > 0) {
+				$this->record_payment_application($payment_id, (int) $debt['id'], $debt_amount);
+
 				$this->db
 					->where('id', (int) $debt['id'])
 					->update('patient_debts', array(
@@ -112,6 +131,57 @@ class Debt_model extends CI_Model
 		}
 
 		return $cash_available;
+	}
+
+	protected function record_payment_application($payment_id, $debt_id, $amount_before)
+	{
+		if ($payment_id === NULL) {
+			return;
+		}
+
+		$this->db->insert('debt_payment_applications', array(
+			'payment_id' => (int) $payment_id,
+			'debt_id' => (int) $debt_id,
+			'amount_before' => round((float) $amount_before, 2),
+		));
+	}
+
+	/**
+	 * Undo exactly the debts a standalone payment (Patients::record_standalone_debt_payment)
+	 * applied cash to, restoring each debt to its pre-payment amount/open status. Used when
+	 * staff delete a mistaken debt payment entry.
+	 */
+	public function reopen_debts_for_payment($payment_id)
+	{
+		$this->ensure_schema();
+
+		$payment_id = (int) $payment_id;
+
+		if ($payment_id <= 0) {
+			return 0;
+		}
+
+		$applications = $this->db
+			->select('debt_id, amount_before')
+			->from('debt_payment_applications')
+			->where('payment_id', $payment_id)
+			->get()
+			->result_array();
+
+		foreach ($applications as $application) {
+			$this->db
+				->where('id', (int) $application['debt_id'])
+				->update('patient_debts', array(
+					'status' => 'open',
+					'cleared_at' => NULL,
+					'cleared_by_turn_id' => NULL,
+					'amount' => round((float) $application['amount_before'], 2),
+				));
+		}
+
+		$this->db->where('payment_id', $payment_id)->delete('debt_payment_applications');
+
+		return count($applications);
 	}
 
 	public function get_all_debts_for_patient($patient_id)
@@ -210,6 +280,26 @@ class Debt_model extends CI_Model
 		// MySQL DDL implicitly commits the caller's transaction. We hoisted that work
 		// to Debt_model::bootstrap_debt_type_migration(), which MUST be invoked once
 		// per process BEFORE any controller transaction starts (see MY_Controller).
+
+		if (!$this->db->table_exists('debt_payment_applications')) {
+			$this->db->query("
+				CREATE TABLE IF NOT EXISTS `debt_payment_applications` (
+					`id` int unsigned NOT NULL AUTO_INCREMENT,
+					`payment_id` int unsigned NOT NULL,
+					`debt_id` int unsigned NOT NULL,
+					`amount_before` decimal(12,2) NOT NULL,
+					`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					PRIMARY KEY (`id`),
+					KEY `debt_payment_applications_payment_id_index` (`payment_id`),
+					CONSTRAINT `debt_payment_applications_debt_fk` FOREIGN KEY (`debt_id`) REFERENCES `patient_debts` (`id`) ON DELETE CASCADE
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+			");
+		}
+
+		if ($this->db->table_exists('payments')) {
+			$this->add_column_if_missing('payments', 'section_id', "ALTER TABLE `payments` ADD COLUMN `section_id` int unsigned DEFAULT NULL AFTER `patient_id`");
+			$this->add_column_if_missing('payments', 'staff_id', "ALTER TABLE `payments` ADD COLUMN `staff_id` int unsigned DEFAULT NULL AFTER `section_id`");
+		}
 
 		$this->schema_ready = TRUE;
 	}

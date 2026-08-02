@@ -116,16 +116,9 @@ class Safe_model extends CI_Model
 			'created_by' => $created_by ? (int) $created_by : NULL,
 			'created_at' => $created_at,
 			'skip_duplicate_check' => !empty($options['skip_duplicate_check']),
+			'section_id' => !empty($options['section_id']) ? (int) $options['section_id'] : NULL,
+			'staff_id' => !empty($options['staff_id']) ? (int) $options['staff_id'] : NULL,
 		));
-
-		if ($result === FALSE) {
-			return FALSE;
-		}
-
-		if ($created_at && $this->is_valid_datetime($created_at)) {
-			$this->recalculate_balances();
-			return $this->get_current_balance(FALSE);
-		}
 
 		return $result;
 	}
@@ -648,6 +641,15 @@ class Safe_model extends CI_Model
 
 			$this->ensure_source_enum();
 			$this->ensure_reference_index();
+
+			if (!$this->db->field_exists('section_id', 'safe_transactions')) {
+				$this->db->query("ALTER TABLE `safe_transactions` ADD COLUMN `section_id` int unsigned DEFAULT NULL AFTER `reference_table`");
+			}
+
+			if (!$this->db->field_exists('staff_id', 'safe_transactions')) {
+				$this->db->query("ALTER TABLE `safe_transactions` ADD COLUMN `staff_id` int unsigned DEFAULT NULL AFTER `section_id`");
+			}
+
 			$this->schema_ready = TRUE;
 		}
 
@@ -1107,6 +1109,22 @@ class Safe_model extends CI_Model
 			return $this->get_current_balance(FALSE);
 		}
 
+		$has_explicit_created_at = !empty($data['created_at']) && $this->is_valid_datetime($data['created_at']);
+		$effective_created_at = $has_explicit_created_at ? $data['created_at'] : date('Y-m-d H:i:s');
+
+		// The incremental shortcut below (anchor to whatever row is currently
+		// "latest") is only correct when this row is ALSO chronologically latest.
+		// A legacy-synced row (date-only source, defaulted to noon) or any other
+		// backdated entry can land with a created_at that isn't actually the
+		// latest — and once that happens, every ordinary NOW()-timestamped insert
+		// keeps anchoring to that same stale row instead of the true running
+		// total, silently discarding every real contribution in between. Detect
+		// that condition from the table itself, not from whether the caller
+		// happened to pass an explicit timestamp.
+		$max_existing = $this->db->select_max('created_at', 'max_created_at')->from('safe_transactions')->get()->row_array();
+		$max_existing_created_at = $max_existing['max_created_at'] ?? NULL;
+		$is_out_of_order = $max_existing_created_at !== NULL && $effective_created_at < $max_existing_created_at;
+
 		$current_balance = $this->get_current_balance(FALSE);
 		$new_balance = $current_balance;
 
@@ -1127,14 +1145,21 @@ class Safe_model extends CI_Model
 			'reference_table' => !empty($data['reference_table']) ? (string) $data['reference_table'] : NULL,
 			'note' => $this->null_if_empty($data['note'] ?? NULL),
 			'created_by' => !empty($data['created_by']) ? (int) $data['created_by'] : NULL,
+			'section_id' => !empty($data['section_id']) ? (int) $data['section_id'] : NULL,
+			'staff_id' => !empty($data['staff_id']) ? (int) $data['staff_id'] : NULL,
 		);
 
-		if (!empty($data['created_at']) && $this->is_valid_datetime($data['created_at'])) {
+		if ($has_explicit_created_at) {
 			$insert['created_at'] = $data['created_at'];
 		}
 
 		if (!$this->db->insert('safe_transactions', $insert)) {
 			return FALSE;
+		}
+
+		if ($is_out_of_order) {
+			$this->recalculate_balances();
+			return $this->get_current_balance(FALSE);
 		}
 
 		return $new_balance;

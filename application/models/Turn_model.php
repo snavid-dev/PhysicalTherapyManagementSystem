@@ -281,7 +281,36 @@ class Turn_model extends CI_Model
 		$this->ensure_turn_columns();
 		$this->ensure_turn_time_nullable();
 		$this->ensure_turn_status_values();
+		$this->ensure_turn_indexes();
 		$this->schema_ready = TRUE;
+	}
+
+	/**
+	 * turn_date had no index at all — every list/report query filters or sorts by
+	 * it, so at this table's size every one of those was a full table scan +
+	 * filesort. section_id/staff_id back the report date-range filters.
+	 */
+	protected function ensure_turn_indexes()
+	{
+		if (!$this->db->table_exists('turns')) {
+			return;
+		}
+
+		$this->add_index_if_missing('turns', 'turns_turn_date_id_index', '(`turn_date`, `id`)');
+		$this->add_index_if_missing('turns', 'turns_section_id_index', '(`section_id`)');
+		$this->add_index_if_missing('turns', 'turns_staff_id_index', '(`staff_id`)');
+	}
+
+	protected function add_index_if_missing($table, $index_name, $columns_sql)
+	{
+		$exists = $this->db->query(
+			"SELECT 1 FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = ? AND index_name = ? LIMIT 1",
+			array($table, $index_name)
+		)->row_array();
+
+		if (!$exists) {
+			$this->db->query("ALTER TABLE `{$table}` ADD INDEX `{$index_name}` {$columns_sql}");
+		}
 	}
 
 	protected function ensure_turn_columns()

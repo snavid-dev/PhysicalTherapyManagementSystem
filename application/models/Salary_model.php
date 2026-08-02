@@ -108,6 +108,15 @@ class Salary_model extends CI_Model
 
 		$this->db->trans_begin();
 
+		// Lock this staff+month's record before reading total_paid — otherwise two
+		// concurrent payment submissions can both read the same stale total and
+		// the second UPDATE silently overwrites the first payment's contribution
+		// (same race pattern already found and fixed on the patient wallet balance).
+		$this->db->query(
+			'SELECT id FROM staff_salary_records WHERE staff_id = ? AND month = ? FOR UPDATE',
+			array((int) $staff_id, $month)
+		);
+
 		$record = $this->get_or_create_record($staff_id, $month);
 		$record = $this->sync_record_if_empty($record, $month);
 

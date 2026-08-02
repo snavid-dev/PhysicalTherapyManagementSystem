@@ -97,7 +97,25 @@ class Inventory_model extends CI_Model
 		$location_id = (int) $location_id;
 		$qty = (int) $qty;
 
-		$this->db->trans_start();
+		$this->db->trans_begin();
+
+		// Guarantee a stock_levels row exists so the lock below actually locks
+		// something — a variant/location's very first movement would otherwise
+		// lock nothing. uq_variant_location keeps this safe if two concurrent
+		// first-movements race here.
+		$this->db->query(
+			'INSERT IGNORE INTO stock_levels (variant_id, location_id, qty_on_hand, updated_at) VALUES (?, ?, 0, ?)',
+			array($variant_id, $location_id, date('Y-m-d H:i:s'))
+		);
+
+		// Lock this variant+location's stock row before recomputing, so two
+		// concurrent movements (e.g. two sales of the last units) can't both pass
+		// a stale availability check upstream and both get recorded as if they
+		// succeeded.
+		$this->db->query(
+			'SELECT id FROM stock_levels WHERE variant_id = ? AND location_id = ? FOR UPDATE',
+			array($variant_id, $location_id)
+		);
 
 		$this->db->insert('stock_movements', array(
 			'variant_id' => $variant_id,
@@ -112,11 +130,19 @@ class Inventory_model extends CI_Model
 			'created_at' => date('Y-m-d H:i:s')
 		));
 
-		$this->recompute_stock_level($variant_id, $location_id);
+		$recomputed = $this->recompute_stock_level($variant_id, $location_id);
 
-		$this->db->trans_complete();
+		if ($recomputed === FALSE || $this->db->trans_status() === FALSE) {
+			// Negative resulting stock (or any other failure) must reject the
+			// whole movement — previously this left stock_movements already
+			// inserted while stock_levels silently kept its stale value, with no
+			// error surfaced anywhere and no caller checking the return value.
+			$this->db->trans_rollback();
+			return FALSE;
+		}
 
-		return $this->db->trans_status();
+		$this->db->trans_commit();
+		return TRUE;
 	}
 
 	public function get_movements($variant_id = NULL, $location_id = NULL, $limit = 100, $offset = 0)
