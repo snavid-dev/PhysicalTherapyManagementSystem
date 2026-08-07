@@ -7,7 +7,7 @@
 		</div>
 		<?php if ($this->auth->has_permission('manage_store')): ?>
 		<div class="col-auto">
-			<a href="<?= site_url('store/bulk_sell') ?>" class="btn btn-primary"><?= t('bulk_sell') ?></a>
+			<a href="<?= site_url('store/bulk_sell') ?>" class="btn btn-primary btn-icon"><i class="bi bi-cart" aria-hidden="true"></i> <?= t('bulk_sell') ?></a>
 		</div>
 		<?php endif; ?>
 	</div>
@@ -54,7 +54,7 @@
 							<td><?= html_escape(to_shamsi($batch['created_at'])) ?></td>
 							<td>
 								<?php if ($batch['status'] === 'pending' && $this->auth->has_permission('approve_store_sale_batch')): ?>
-									<a href="<?= site_url('store/approve_sale_batch/' . $batch['id']) ?>" class="btn btn-sm btn-outline-warning"><?= t('approve') ?></a>
+									<a href="<?= site_url('store/approve_sale_batch/' . $batch['id']) ?>" class="btn btn-sm btn-outline-warning btn-icon"><i class="bi bi-check-circle" aria-hidden="true"></i> <?= t('approve') ?></a>
 								<?php endif; ?>
 							</td>
 						</tr>

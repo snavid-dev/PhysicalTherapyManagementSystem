@@ -146,7 +146,7 @@
 							<div class="form-text" id="wallet-requires-patient-hint" style="display:none;"><?= t('patient_required_for_wallet') ?></div>
 						</div>
 
-						<button type="submit" class="btn btn-primary btn-lg w-100" id="complete-sale-btn" disabled><?= t('complete_sale') ?></button>
+						<button type="submit" class="btn btn-primary btn-lg w-100 btn-icon" id="complete-sale-btn" disabled><i class="bi bi-cart" aria-hidden="true"></i> <?= t('complete_sale') ?></button>
 					</div>
 				</div>
 			</div>
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			'<td><input type="number" name="qty[]" class="form-control form-control-sm qty-input" min="1" value="1" required></td>' +
 			'<td><input type="number" name="price[]" class="form-control form-control-sm price-input" step="0.01" value="' + price.toFixed(2) + '" required></td>' +
 			'<td class="line-total">0.00</td>' +
-			'<td><button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">&times;</button></td>';
+			'<td><button type="button" class="btn btn-sm btn-outline-danger remove-item-btn" aria-label="<?= html_escape(t('remove')) ?>"><i class="bi bi-trash" aria-hidden="true"></i></button></td>';
 
 		cartItems.appendChild(row);
 		row.querySelector('.qty-input').addEventListener('change', calculateTotals);

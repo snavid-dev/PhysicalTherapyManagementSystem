@@ -12,7 +12,7 @@ $to = $filters['to'] ?? '';
 		<h1 class="h3 mb-1"><?= t('Patient Financial Summary') ?></h1>
 		<p class="text-muted mb-0"><?= t('Patient balances and visit totals.') ?></p>
 	</div>
-	<a href="<?= base_url('reports') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('reports') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card mb-4">
@@ -31,7 +31,7 @@ $to = $filters['to'] ?? '';
 				<input type="text" name="to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($to) ?>">
 			</div>
 			<div class="col-md-2">
-				<button type="submit" class="btn btn-dark w-100"><?= t('Apply') ?></button>
+				<button type="submit" class="btn btn-dark w-100 btn-icon"><i class="bi bi-funnel" aria-hidden="true"></i> <?= t('Apply') ?></button>
 			</div>
 		<?= form_close() ?>
 		<p class="text-muted small mt-3 mb-0"><?= t('Use date filters only for turn totals and last visit.') ?></p>
@@ -73,7 +73,7 @@ $to = $filters['to'] ?? '';
 							<td><?= !empty($row['last_turn_date']) ? html_escape(to_shamsi($row['last_turn_date'])) : '&mdash;' ?></td>
 							<td class="no-export text-end">
 								<?php if ($can_open_patient) : ?>
-									<a href="<?= base_url('patients/' . (int) $row['id']) ?>" class="btn btn-sm btn-outline-secondary"><?= t('Open Profile') ?></a>
+									<a href="<?= base_url('patients/' . (int) $row['id']) ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Open Profile') ?></a>
 								<?php else : ?>
 									&mdash;
 								<?php endif; ?>

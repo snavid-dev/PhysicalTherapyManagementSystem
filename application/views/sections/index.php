@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= t('sections') ?></h1>
 		<p class="text-muted mb-0"><?= t('manage_sections') ?></p>
 	</div>
-	<a href="<?= base_url('sections/create') ?>" class="btn btn-dark"><?= t('add_section') ?></a>
+	<a href="<?= base_url('sections/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_section') ?></a>
 </div>
 
 <div class="card">
@@ -24,9 +24,9 @@
 						<td><?= format_amount($section['default_fee']) ?></td>
 						<td class="text-end">
 							<div class="d-flex gap-2 justify-content-end">
-								<a href="<?= base_url('sections/' . $section['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Chart') ?></a>
-								<a href="<?= base_url('sections/' . $section['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
-								<a href="<?= base_url('sections/' . $section['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this section?') ?>')"><?= t('Delete') ?></a>
+								<a href="<?= base_url('sections/' . $section['id']) ?>" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-bar-chart" aria-hidden="true"></i> <?= t('Chart') ?></a>
+								<a href="<?= base_url('sections/' . $section['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+								<a href="<?= base_url('sections/' . $section['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('Delete this section?') ?>')"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></a>
 							</div>
 						</td>
 					</tr>

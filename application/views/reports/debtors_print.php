@@ -11,6 +11,7 @@ $today_label = to_shamsi(date('Y-m-d'));
 <head>
 	<meta charset="UTF-8">
 	<title><?= html_escape(t('debtors_list') . ' - ' . $today_label) ?></title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 	<style>
 		body {
 			font-family: 'Wazir', 'Tahoma', sans-serif;
@@ -31,12 +32,17 @@ $today_label = to_shamsi(date('Y-m-d'));
 		.print-actions { margin-bottom: 10px; }
 		.print-actions button { padding: 6px 14px; cursor: pointer; }
 		@media print { .print-actions { display: none; } }
+		.btn-icon {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.4rem;
+		}
 	</style>
 </head>
 <body>
 	<div class="print-actions">
-		<button type="button" onclick="window.print()"><?= t('print_register') ?></button>
-		<button type="button" onclick="window.close()"><?= t('Close') ?></button>
+		<button type="button" class="btn-icon" onclick="window.print()"><i class="bi bi-printer" aria-hidden="true"></i> <?= t('print_register') ?></button>
+		<button type="button" class="btn-icon" onclick="window.close()"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('Close') ?></button>
 	</div>
 
 	<div class="clinic-header">

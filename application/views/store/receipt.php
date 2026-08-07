@@ -89,8 +89,8 @@
 			</div>
 
 			<div class="mt-4 text-center">
-				<button class="btn btn-sm btn-primary" onclick="window.print();"><?= t('print_receipt') ?></button>
-				<a href="<?= site_url('store/sell') ?>" class="btn btn-sm btn-secondary"><?= t('new_sale') ?></a>
+				<button class="btn btn-sm btn-primary btn-icon" onclick="window.print();"><i class="bi bi-printer" aria-hidden="true"></i> <?= t('print_receipt') ?></button>
+				<a href="<?= site_url('store/sell') ?>" class="btn btn-sm btn-secondary btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('new_sale') ?></a>
 			</div>
 		</div>
 	</div>

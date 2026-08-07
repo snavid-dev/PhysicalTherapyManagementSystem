@@ -29,7 +29,7 @@
 				</table>
 			</div>
 
-			<button type="button" class="btn btn-sm btn-outline-success mb-3" id="add-row"><?= t('add_line') ?></button>
+			<button type="button" class="btn btn-sm btn-outline-success mb-3 btn-icon" id="add-row"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_line') ?></button>
 
 			<div class="mb-3">
 				<label class="form-label"><?= t('note') ?></label>
@@ -37,8 +37,8 @@
 			</div>
 
 			<div class="d-flex gap-2">
-				<button type="submit" class="btn btn-primary"><?= t('receive_stock') ?></button>
-				<a href="<?= site_url('store/stock_receipts') ?>" class="btn btn-secondary"><?= t('cancel') ?></a>
+				<button type="submit" class="btn btn-primary btn-icon"><i class="bi bi-box-seam" aria-hidden="true"></i> <?= t('receive_stock') ?></button>
+				<a href="<?= site_url('store/stock_receipts') ?>" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('cancel') ?></a>
 			</div>
 		</div>
 	</form>
@@ -60,7 +60,7 @@
 		</td>
 		<td><input type="number" name="qty[]" class="form-control" min="1" value="1" required></td>
 		<td><input type="number" name="unit_cost[]" class="form-control cost-input" step="0.01" value="0" required></td>
-		<td><button type="button" class="btn btn-sm btn-outline-danger remove-row"><?= t('remove') ?></button></td>
+		<td><button type="button" class="btn btn-sm btn-outline-danger remove-row btn-icon"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('remove') ?></button></td>
 	</tr>
 </template>
 

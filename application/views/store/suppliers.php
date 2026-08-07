@@ -6,7 +6,7 @@
 			<h1><?= t('suppliers') ?></h1>
 		</div>
 		<div class="col-auto">
-			<a href="<?= site_url('store/create_supplier') ?>" class="btn btn-primary"><?= t('create_supplier') ?></a>
+			<a href="<?= site_url('store/create_supplier') ?>" class="btn btn-primary btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('create_supplier') ?></a>
 		</div>
 	</div>
 
@@ -32,7 +32,7 @@
 							<td><?= html_escape($s['name']) ?></td>
 							<td><?= html_escape($s['contact'] ?: '—') ?></td>
 							<td>
-								<a href="<?= site_url('store/edit_supplier/' . $s['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('Edit') ?></a>
+								<a href="<?= site_url('store/edit_supplier/' . $s['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
 							</td>
 						</tr>
 					<?php endforeach; ?>

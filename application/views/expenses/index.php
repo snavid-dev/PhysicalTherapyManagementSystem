@@ -7,7 +7,7 @@
 		<h1 class="h3 mb-1"><?= t('expenses') ?></h1>
 		<p class="text-muted mb-0"><?= t('Track clinic expenses and salary payments.') ?></p>
 	</div>
-	<a href="<?= base_url('expenses/create') ?>" class="btn btn-dark"><?= t('add_expense') ?></a>
+	<a href="<?= base_url('expenses/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_expense') ?></a>
 </div>
 
 <div class="card mb-4">
@@ -45,8 +45,8 @@
 					</select>
 				</div>
 				<div class="col-md-2 d-flex gap-2 align-items-end">
-					<button type="submit" class="btn btn-dark w-100"><?= t('Apply') ?></button>
-					<a href="<?= base_url('expenses') ?>" class="btn btn-outline-secondary w-100"><?= t('Reset') ?></a>
+					<button type="submit" class="btn btn-dark w-100 btn-icon"><i class="bi bi-search" aria-hidden="true"></i> <?= t('Apply') ?></button>
+					<a href="<?= base_url('expenses') ?>" class="btn btn-outline-secondary w-100 btn-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('Reset') ?></a>
 				</div>
 			</div>
 		</form>
@@ -85,11 +85,11 @@
 							<td class="col-text"><?= $expense['description'] ? html_escape($expense['description']) : '&mdash;' ?></td>
 							<td class="no-export text-end">
 								<div class="d-flex gap-2 justify-content-end flex-wrap">
-									<a href="<?= base_url('expenses/edit/' . $expense['id']) ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
+									<a href="<?= base_url('expenses/edit/' . $expense['id']) ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
 									<?php if ($is_salary_linked) : ?>
-										<button type="button" class="btn btn-sm btn-outline-danger" disabled><?= t('Delete') ?></button>
+										<button type="button" class="btn btn-sm btn-outline-danger btn-icon" disabled><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></button>
 									<?php else : ?>
-										<a href="<?= base_url('expenses/delete/' . $expense['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this expense?') ?>')"><?= t('Delete') ?></a>
+										<a href="<?= base_url('expenses/delete/' . $expense['id']) ?>" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('Delete this expense?') ?>')"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></a>
 									<?php endif; ?>
 								</div>
 							</td>

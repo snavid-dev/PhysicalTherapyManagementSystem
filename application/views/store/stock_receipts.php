@@ -6,7 +6,7 @@
 			<h1><?= t('stock_receipts') ?></h1>
 		</div>
 		<div class="col-auto">
-			<a href="<?= site_url('store/receive_stock') ?>" class="btn btn-primary"><?= t('receive_stock') ?></a>
+			<a href="<?= site_url('store/receive_stock') ?>" class="btn btn-primary btn-icon"><i class="bi bi-box-seam" aria-hidden="true"></i> <?= t('receive_stock') ?></a>
 		</div>
 	</div>
 
@@ -32,7 +32,7 @@
 							<td><?= html_escape($r['first_name'] . ' ' . $r['last_name']) ?></td>
 							<td><?= html_escape(to_shamsi($r['created_at'])) ?></td>
 							<td>
-								<a href="<?= site_url('store/view_stock_receipt/' . $r['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('view') ?></a>
+								<a href="<?= site_url('store/view_stock_receipt/' . $r['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-receipt" aria-hidden="true"></i> <?= t('view') ?></a>
 							</td>
 						</tr>
 					<?php endforeach; ?>

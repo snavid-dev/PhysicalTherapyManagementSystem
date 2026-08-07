@@ -10,7 +10,7 @@ $selected_staff_id = (int) set_value('staff_id', $expense['staff_id'] ?? 0);
 		<h1 class="h3 mb-1"><?= html_escape($title) ?></h1>
 		<p class="text-muted mb-0"><?= t('Record non-salary clinic expenses.') ?></p>
 	</div>
-	<a href="<?= base_url('expenses') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('expenses') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <?php if ($read_only) : ?>
@@ -67,7 +67,7 @@ $selected_staff_id = (int) set_value('staff_id', $expense['staff_id'] ?? 0);
 			</div>
 			<?php if (!$read_only) : ?>
 				<div class="mt-4">
-					<button type="submit" class="btn btn-dark"><?= t('Save Expense') ?></button>
+					<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save Expense') ?></button>
 				</div>
 			<?php endif; ?>
 		<?= form_close() ?>

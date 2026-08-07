@@ -22,8 +22,8 @@
 				</div>
 
 				<div class="d-flex gap-2">
-					<button type="submit" class="btn btn-primary"><?= t('save') ?></button>
-					<a href="<?= site_url('store/suppliers') ?>" class="btn btn-secondary"><?= t('cancel') ?></a>
+					<button type="submit" class="btn btn-primary btn-icon"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('save') ?></button>
+					<a href="<?= site_url('store/suppliers') ?>" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('cancel') ?></a>
 				</div>
 			</form>
 		</div>

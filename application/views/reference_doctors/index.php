@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= t('reference_doctors') ?></h1>
 		<p class="text-muted mb-0"><?= t('Reference doctor records and referral tracking.') ?></p>
 	</div>
-	<a href="<?= base_url('reference_doctors/create') ?>" class="btn btn-dark"><?= t('add_reference_doctor') ?></a>
+	<a href="<?= base_url('reference_doctors/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_reference_doctor') ?></a>
 </div>
 
 <div class="card">
@@ -32,12 +32,12 @@
 						<td><?= $reference_doctor['status'] === 'active' ? t('Active') : t('Inactive') ?></td>
 						<td class="text-end">
 							<div class="d-flex gap-2 justify-content-end flex-wrap">
-								<a href="<?= base_url('reference_doctors/edit/' . $reference_doctor['id']) ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
-								<a href="<?= base_url('reference_doctors/profile/' . $reference_doctor['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
+								<a href="<?= base_url('reference_doctors/edit/' . $reference_doctor['id']) ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+								<a href="<?= base_url('reference_doctors/profile/' . $reference_doctor['id']) ?>" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Profile') ?></a>
 								<?php if ($reference_doctor['status'] === 'active') : ?>
-									<a href="<?= base_url('reference_doctors/delete/' . $reference_doctor['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Deactivate this reference doctor?') ?>')"><?= t('Deactivate') ?></a>
+									<a href="<?= base_url('reference_doctors/delete/' . $reference_doctor['id']) ?>" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('Deactivate this reference doctor?') ?>')"><i class="bi bi-x-circle" aria-hidden="true"></i> <?= t('Deactivate') ?></a>
 								<?php else : ?>
-									<a href="<?= base_url('reference_doctors/activate/' . $reference_doctor['id']) ?>" class="btn btn-sm btn-outline-success"><?= t('Activate') ?></a>
+									<a href="<?= base_url('reference_doctors/activate/' . $reference_doctor['id']) ?>" class="btn btn-sm btn-outline-success btn-icon"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> <?= t('Activate') ?></a>
 								<?php endif; ?>
 							</div>
 						</td>

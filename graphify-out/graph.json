@@ -837,7 +837,7 @@
       "label": ".financial_profile_payload()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1244",
+      "source_location": "L1245",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_financial_profile_payload",
       "community": 11,
@@ -847,7 +847,7 @@
       "label": ".normalized_discounts()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1265",
+      "source_location": "L1266",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_normalized_discounts",
       "community": 11,
@@ -857,7 +857,7 @@
       "label": ".respond_discount_error()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1297",
+      "source_location": "L1298",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_respond_discount_error",
       "community": 11,
@@ -867,7 +867,7 @@
       "label": ".build_financial_summary()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1314",
+      "source_location": "L1315",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_build_financial_summary",
       "community": 11,
@@ -877,7 +877,7 @@
       "label": ".build_financial_timeline()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1360",
+      "source_location": "L1378",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_build_financial_timeline",
       "community": 11,
@@ -887,7 +887,7 @@
       "label": ".record_standalone_debt_payment()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1437",
+      "source_location": "L1455",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_record_standalone_debt_payment",
       "community": 11,
@@ -897,7 +897,7 @@
       "label": ".normalized_standalone_payments()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1545",
+      "source_location": "L1563",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_normalized_standalone_payments",
       "community": 11,
@@ -907,7 +907,7 @@
       "label": ".payment_dimension_from_post()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1629",
+      "source_location": "L1647",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_payment_dimension_from_post",
       "community": 11,
@@ -917,7 +917,7 @@
       "label": ".payment_datetime_from_date()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1645",
+      "source_location": "L1663",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_payment_datetime_from_date",
       "community": 11,
@@ -3170,7 +3170,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_turn_cash_note",
-      "community": 125,
+      "community": 27,
       "norm_label": "safe_turn_cash_note()"
     },
     {
@@ -3180,7 +3180,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_turn_wallet_topup_note",
-      "community": 125,
+      "community": 6,
       "norm_label": "safe_turn_wallet_topup_note()"
     },
     {
@@ -3220,7 +3220,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_patient_wallet_topup_note",
-      "community": 211,
+      "community": 125,
       "norm_label": "safe_patient_wallet_topup_note()"
     },
     {
@@ -6810,7 +6810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_models_dashboard_model",
-      "community": 64,
+      "community": 211,
       "norm_label": "dashboard_model.php"
     },
     {
@@ -6820,7 +6820,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model",
-      "community": 64,
+      "community": 211,
       "norm_label": "dashboard_model"
     },
     {
@@ -6830,7 +6830,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model_construct",
-      "community": 64,
+      "community": 211,
       "norm_label": ".__construct()"
     },
     {
@@ -6840,28 +6840,78 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model_stats",
-      "community": 64,
+      "community": 211,
       "norm_label": ".stats()"
-    },
-    {
-      "label": ".today_turns()",
-      "file_type": "code",
-      "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L21",
-      "_origin": "ast",
-      "id": "application_models_dashboard_model_dashboard_model_today_turns",
-      "community": 64,
-      "norm_label": ".today_turns()"
     },
     {
       "label": ".get_safe_balance()",
       "file_type": "code",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L34",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model_get_safe_balance",
-      "community": 64,
+      "community": 211,
       "norm_label": ".get_safe_balance()"
+    },
+    {
+      "label": ".turns_by_section_today()",
+      "file_type": "code",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "application_models_dashboard_model_dashboard_model_turns_by_section_today",
+      "community": 211,
+      "norm_label": ".turns_by_section_today()"
+    },
+    {
+      "label": ".open_debt_summary()",
+      "file_type": "code",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "application_models_dashboard_model_dashboard_model_open_debt_summary",
+      "community": 211,
+      "norm_label": ".open_debt_summary()"
+    },
+    {
+      "label": ".staff_on_leave_today()",
+      "file_type": "code",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L54",
+      "_origin": "ast",
+      "id": "application_models_dashboard_model_dashboard_model_staff_on_leave_today",
+      "community": 211,
+      "norm_label": ".staff_on_leave_today()"
+    },
+    {
+      "label": ".unpaid_salary_count_this_month()",
+      "file_type": "code",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "application_models_dashboard_model_dashboard_model_unpaid_salary_count_this_month",
+      "community": 211,
+      "norm_label": ".unpaid_salary_count_this_month()"
+    },
+    {
+      "label": ".expenses_this_month()",
+      "file_type": "code",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L77",
+      "_origin": "ast",
+      "id": "application_models_dashboard_model_dashboard_model_expenses_this_month",
+      "community": 211,
+      "norm_label": ".expenses_this_month()"
+    },
+    {
+      "label": ".new_patients_this_month()",
+      "file_type": "code",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "application_models_dashboard_model_dashboard_model_new_patients_this_month",
+      "community": 211,
+      "norm_label": ".new_patients_this_month()"
     },
     {
       "label": "Debt_model.php",
@@ -8560,7 +8610,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_delete_transaction_by_reference",
-      "community": 422,
+      "community": 6,
       "norm_label": ".delete_transaction_by_reference()"
     },
     {
@@ -8570,7 +8620,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_delete_transactions_for_patient",
-      "community": 422,
+      "community": 6,
       "norm_label": ".delete_transactions_for_patient()"
     },
     {
@@ -8580,7 +8630,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_get_current_balance",
-      "community": 422,
+      "community": 6,
       "norm_label": ".get_current_balance()"
     },
     {
@@ -8590,7 +8640,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_get_latest_transaction",
-      "community": 422,
+      "community": 6,
       "norm_label": ".get_latest_transaction()"
     },
     {
@@ -8600,7 +8650,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_log_transaction",
-      "community": 422,
+      "community": 6,
       "norm_label": ".log_transaction()"
     },
     {
@@ -8610,7 +8660,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_sync_reference_transaction",
-      "community": 422,
+      "community": 6,
       "norm_label": ".sync_reference_transaction()"
     },
     {
@@ -8620,7 +8670,7 @@
       "source_location": "L223",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_sync_turn_safe_entries",
-      "community": 422,
+      "community": 6,
       "norm_label": ".sync_turn_safe_entries()"
     },
     {
@@ -8630,7 +8680,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_upsert_turn_safe_row",
-      "community": 422,
+      "community": 6,
       "norm_label": ".upsert_turn_safe_row()"
     },
     {
@@ -8650,7 +8700,7 @@
       "source_location": "L393",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_adjust_balance",
-      "community": 422,
+      "community": 6,
       "norm_label": ".adjust_balance()"
     },
     {
@@ -8660,7 +8710,7 @@
       "source_location": "L441",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_get_ledger",
-      "community": 6,
+      "community": 422,
       "norm_label": ".get_ledger()"
     },
     {
@@ -8670,7 +8720,7 @@
       "source_location": "L482",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_get_balance_at_date",
-      "community": 6,
+      "community": 422,
       "norm_label": ".get_balance_at_date()"
     },
     {
@@ -8680,7 +8730,7 @@
       "source_location": "L505",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_get_summary",
-      "community": 6,
+      "community": 422,
       "norm_label": ".get_summary()"
     },
     {
@@ -8690,7 +8740,7 @@
       "source_location": "L541",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_get_balance_before_date",
-      "community": 6,
+      "community": 422,
       "norm_label": ".get_balance_before_date()"
     },
     {
@@ -8700,7 +8750,7 @@
       "source_location": "L562",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_apply_filters",
-      "community": 6,
+      "community": 422,
       "norm_label": ".apply_filters()"
     },
     {
@@ -8710,7 +8760,7 @@
       "source_location": "L595",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_ensure_schema",
-      "community": 422,
+      "community": 6,
       "norm_label": ".ensure_schema()"
     },
     {
@@ -8730,7 +8780,7 @@
       "source_location": "L687",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_ensure_reference_index",
-      "community": 422,
+      "community": 6,
       "norm_label": ".ensure_reference_index()"
     },
     {
@@ -8790,7 +8840,7 @@
       "source_location": "L790",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_count_manual_wallet_topup_records",
-      "community": 211,
+      "community": 6,
       "norm_label": ".count_manual_wallet_topup_records()"
     },
     {
@@ -8830,7 +8880,7 @@
       "source_location": "L850",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_cleanup_deleted_reference_transactions",
-      "community": 422,
+      "community": 6,
       "norm_label": ".cleanup_deleted_reference_transactions()"
     },
     {
@@ -8870,7 +8920,7 @@
       "source_location": "L987",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_legacy_manual_wallet_topup_events",
-      "community": 211,
+      "community": 6,
       "norm_label": ".legacy_manual_wallet_topup_events()"
     },
     {
@@ -8900,7 +8950,7 @@
       "source_location": "L1100",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_insert_transaction",
-      "community": 422,
+      "community": 6,
       "norm_label": ".insert_transaction()"
     },
     {
@@ -8910,7 +8960,7 @@
       "source_location": "L1168",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_delete_transactions_by_reference",
-      "community": 422,
+      "community": 6,
       "norm_label": ".delete_transactions_by_reference()"
     },
     {
@@ -8920,7 +8970,7 @@
       "source_location": "L1199",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_delete_orphaned_transactions_for_table",
-      "community": 422,
+      "community": 6,
       "norm_label": ".delete_orphaned_transactions_for_table()"
     },
     {
@@ -8930,7 +8980,7 @@
       "source_location": "L1231",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_transaction_exists",
-      "community": 422,
+      "community": 6,
       "norm_label": ".transaction_exists()"
     },
     {
@@ -8940,7 +8990,7 @@
       "source_location": "L1240",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_recalculate_balances",
-      "community": 422,
+      "community": 6,
       "norm_label": ".recalculate_balances()"
     },
     {
@@ -8980,7 +9030,7 @@
       "source_location": "L1349",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_wallet_fund_type_supported",
-      "community": 211,
+      "community": 6,
       "norm_label": ".wallet_fund_type_supported()"
     },
     {
@@ -8990,7 +9040,7 @@
       "source_location": "L1355",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_normalize_start_of_day",
-      "community": 6,
+      "community": 422,
       "norm_label": ".normalize_start_of_day()"
     },
     {
@@ -9000,7 +9050,7 @@
       "source_location": "L1364",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_normalize_end_of_day",
-      "community": 6,
+      "community": 422,
       "norm_label": ".normalize_end_of_day()"
     },
     {
@@ -9010,7 +9060,7 @@
       "source_location": "L1373",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_is_valid_date",
-      "community": 6,
+      "community": 422,
       "norm_label": ".is_valid_date()"
     },
     {
@@ -9020,7 +9070,7 @@
       "source_location": "L1379",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_is_valid_datetime",
-      "community": 422,
+      "community": 6,
       "norm_label": ".is_valid_datetime()"
     },
     {
@@ -9030,7 +9080,7 @@
       "source_location": "L1385",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_null_if_empty",
-      "community": 422,
+      "community": 6,
       "norm_label": ".null_if_empty()"
     },
     {
@@ -10577,7 +10627,7 @@
       "label": ".compute_raw_balance()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L533",
+      "source_location": "L538",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_compute_raw_balance",
       "community": 18,
@@ -10587,7 +10637,7 @@
       "label": ".record_refund()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L547",
+      "source_location": "L552",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_record_refund",
       "community": 18,
@@ -10597,7 +10647,7 @@
       "label": ".get_turn_balance_effect()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L597",
+      "source_location": "L602",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_get_turn_balance_effect",
       "community": 18,
@@ -10607,7 +10657,7 @@
       "label": ".reverse_turn_balance_effect()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L630",
+      "source_location": "L635",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_reverse_turn_balance_effect",
       "community": 18,
@@ -10617,7 +10667,7 @@
       "label": ".force_reverse_credit()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L699",
+      "source_location": "L704",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_force_reverse_credit",
       "community": 18,
@@ -10627,7 +10677,7 @@
       "label": ".ensure_schema()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L738",
+      "source_location": "L743",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_ensure_schema",
       "community": 18,
@@ -10637,7 +10687,7 @@
       "label": ".ensure_type_enum()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L796",
+      "source_location": "L801",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_ensure_type_enum",
       "community": 18,
@@ -10647,7 +10697,7 @@
       "label": ".ensure_fund_type_column()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L813",
+      "source_location": "L818",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_ensure_fund_type_column",
       "community": 18,
@@ -10657,7 +10707,7 @@
       "label": ".column_definition()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L834",
+      "source_location": "L839",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_column_definition",
       "community": 18,
@@ -10667,7 +10717,7 @@
       "label": ".normalize_fund_type()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L840",
+      "source_location": "L845",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_normalize_fund_type",
       "community": 18,
@@ -10677,7 +10727,7 @@
       "label": ".reversal_note()",
       "file_type": "code",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L851",
+      "source_location": "L856",
       "_origin": "ast",
       "id": "application_models_wallet_model_wallet_model_reversal_note",
       "community": 18,
@@ -12604,6 +12654,26 @@
       "norm_label": "initshamsimonthpicker()"
     },
     {
+      "label": "tooltip-init.js",
+      "file_type": "code",
+      "source_file": "assets/js/tooltip-init.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "assets_js_tooltip_init",
+      "community": 433,
+      "norm_label": "tooltip-init.js"
+    },
+    {
+      "label": "initAll()",
+      "file_type": "code",
+      "source_file": "assets/js/tooltip-init.js",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "assets_js_tooltip_init_initall",
+      "community": 433,
+      "norm_label": "initall()"
+    },
+    {
       "label": "composer.json",
       "file_type": "code",
       "source_file": "composer.json",
@@ -13050,7 +13120,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_core_common",
-      "community": 21,
+      "community": 429,
       "norm_label": "common.php"
     },
     {
@@ -13060,7 +13130,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "system_core_common_is_php",
-      "community": 21,
+      "community": 3,
       "norm_label": "is_php()"
     },
     {
@@ -13070,7 +13140,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "system_core_common_is_really_writable",
-      "community": 21,
+      "community": 40,
       "norm_label": "is_really_writable()"
     },
     {
@@ -13080,7 +13150,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "system_core_common_load_class",
-      "community": 21,
+      "community": 429,
       "norm_label": "load_class()"
     },
     {
@@ -13090,7 +13160,7 @@
       "source_location": "L195",
       "_origin": "ast",
       "id": "system_core_common_is_loaded",
-      "community": 21,
+      "community": 429,
       "norm_label": "is_loaded()"
     },
     {
@@ -13100,7 +13170,7 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "system_core_common_get_config",
-      "community": 21,
+      "community": 429,
       "norm_label": "get_config()"
     },
     {
@@ -13110,7 +13180,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "array",
-      "community": 21,
+      "community": 429,
       "norm_label": "array"
     },
     {
@@ -13120,7 +13190,7 @@
       "source_location": "L266",
       "_origin": "ast",
       "id": "system_core_common_config_item",
-      "community": 21,
+      "community": 429,
       "norm_label": "config_item()"
     },
     {
@@ -13130,7 +13200,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "system_core_common_get_mimes",
-      "community": 50,
+      "community": 429,
       "norm_label": "get_mimes()"
     },
     {
@@ -13140,7 +13210,7 @@
       "source_location": "L316",
       "_origin": "ast",
       "id": "system_core_common_is_https",
-      "community": 22,
+      "community": 102,
       "norm_label": "is_https()"
     },
     {
@@ -13150,7 +13220,7 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "system_core_common_is_cli",
-      "community": 21,
+      "community": 429,
       "norm_label": "is_cli()"
     },
     {
@@ -13160,7 +13230,7 @@
       "source_location": "L364",
       "_origin": "ast",
       "id": "system_core_common_show_error",
-      "community": 21,
+      "community": 429,
       "norm_label": "show_error()"
     },
     {
@@ -13170,7 +13240,7 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "system_core_common_show_404",
-      "community": 21,
+      "community": 429,
       "norm_label": "show_404()"
     },
     {
@@ -13190,7 +13260,7 @@
       "source_location": "L438",
       "_origin": "ast",
       "id": "system_core_common_set_status_header",
-      "community": 21,
+      "community": 429,
       "norm_label": "set_status_header()"
     },
     {
@@ -13200,7 +13270,7 @@
       "source_location": "L541",
       "_origin": "ast",
       "id": "system_core_common_error_handler",
-      "community": 21,
+      "community": 429,
       "norm_label": "_error_handler()"
     },
     {
@@ -13210,7 +13280,7 @@
       "source_location": "L591",
       "_origin": "ast",
       "id": "system_core_common_exception_handler",
-      "community": 21,
+      "community": 429,
       "norm_label": "_exception_handler()"
     },
     {
@@ -13220,7 +13290,7 @@
       "source_location": "L622",
       "_origin": "ast",
       "id": "system_core_common_shutdown_handler",
-      "community": 21,
+      "community": 429,
       "norm_label": "_shutdown_handler()"
     },
     {
@@ -13420,7 +13490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_core_exceptions",
-      "community": 21,
+      "community": 429,
       "norm_label": "exceptions.php"
     },
     {
@@ -13430,7 +13500,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions",
-      "community": 21,
+      "community": 429,
       "norm_label": "ci_exceptions"
     },
     {
@@ -13440,7 +13510,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_construct",
-      "community": 21,
+      "community": 429,
       "norm_label": ".__construct()"
     },
     {
@@ -13450,7 +13520,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_log_exception",
-      "community": 21,
+      "community": 429,
       "norm_label": ".log_exception()"
     },
     {
@@ -13460,7 +13530,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_show_404",
-      "community": 21,
+      "community": 429,
       "norm_label": ".show_404()"
     },
     {
@@ -13470,7 +13540,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_show_error",
-      "community": 21,
+      "community": 429,
       "norm_label": ".show_error()"
     },
     {
@@ -13480,7 +13550,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_show_exception",
-      "community": 21,
+      "community": 429,
       "norm_label": ".show_exception()"
     },
     {
@@ -13490,7 +13560,7 @@
       "source_location": "L222",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_show_php_error",
-      "community": 21,
+      "community": 429,
       "norm_label": ".show_php_error()"
     },
     {
@@ -13570,7 +13640,7 @@
       "source_location": "L139",
       "_origin": "ast",
       "id": "system_core_input_ci_input_construct",
-      "community": 41,
+      "community": 429,
       "norm_label": ".__construct()"
     },
     {
@@ -13680,7 +13750,7 @@
       "source_location": "L476",
       "_origin": "ast",
       "id": "system_core_input_ci_input_set_cookie",
-      "community": 21,
+      "community": 429,
       "norm_label": ".set_cookie()"
     },
     {
@@ -13760,7 +13830,7 @@
       "source_location": "L773",
       "_origin": "ast",
       "id": "system_core_input_ci_input_is_cli_request",
-      "community": 21,
+      "community": 41,
       "norm_label": ".is_cli_request()"
     },
     {
@@ -13810,7 +13880,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "system_core_lang_ci_lang_load",
-      "community": 19,
+      "community": 429,
       "norm_label": ".load()"
     },
     {
@@ -14160,7 +14230,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "system_core_log_ci_log_construct",
-      "community": 21,
+      "community": 40,
       "norm_label": ".__construct()"
     },
     {
@@ -14270,7 +14340,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "system_core_output_ci_output_construct",
-      "community": 50,
+      "community": 429,
       "norm_label": ".__construct()"
     },
     {
@@ -14450,7 +14520,7 @@
       "source_location": "L739",
       "_origin": "ast",
       "id": "system_core_output_ci_output_delete_cache",
-      "community": 40,
+      "community": 19,
       "norm_label": ".delete_cache()"
     },
     {
@@ -14650,7 +14720,7 @@
       "source_location": "L282",
       "_origin": "ast",
       "id": "system_core_security_ci_security_csrf_verify",
-      "community": 22,
+      "community": 429,
       "norm_label": ".csrf_verify()"
     },
     {
@@ -14660,7 +14730,7 @@
       "source_location": "L333",
       "_origin": "ast",
       "id": "system_core_security_ci_security_csrf_set_cookie",
-      "community": 22,
+      "community": 429,
       "norm_label": ".csrf_set_cookie()"
     },
     {
@@ -14670,7 +14740,7 @@
       "source_location": "L363",
       "_origin": "ast",
       "id": "system_core_security_ci_security_csrf_show_error",
-      "community": 22,
+      "community": 429,
       "norm_label": ".csrf_show_error()"
     },
     {
@@ -18990,7 +19060,7 @@
       "source_location": "L399",
       "_origin": "ast",
       "id": "system_database_drivers_mysqli_mysqli_driver_ci_db_mysqli_driver_trans_begin",
-      "community": 46,
+      "community": 3,
       "norm_label": "._trans_begin()"
     },
     {
@@ -23930,7 +24000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_captcha_helper",
-      "community": 21,
+      "community": 40,
       "norm_label": "captcha_helper.php"
     },
     {
@@ -23940,7 +24010,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "system_helpers_captcha_helper_create_captcha",
-      "community": 21,
+      "community": 40,
       "norm_label": "create_captcha()"
     },
     {
@@ -23950,7 +24020,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_cookie_helper",
-      "community": 21,
+      "community": 432,
       "norm_label": "cookie_helper.php"
     },
     {
@@ -23960,7 +24030,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "system_helpers_cookie_helper_set_cookie",
-      "community": 21,
+      "community": 432,
       "norm_label": "set_cookie()"
     },
     {
@@ -23970,7 +24040,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "system_helpers_cookie_helper_get_cookie",
-      "community": 21,
+      "community": 432,
       "norm_label": "get_cookie()"
     },
     {
@@ -23980,7 +24050,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "system_helpers_cookie_helper_delete_cookie",
-      "community": 21,
+      "community": 432,
       "norm_label": "delete_cookie()"
     },
     {
@@ -24160,7 +24230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_download_helper",
-      "community": 50,
+      "community": 429,
       "norm_label": "download_helper.php"
     },
     {
@@ -24170,7 +24240,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "system_helpers_download_helper_force_download",
-      "community": 50,
+      "community": 429,
       "norm_label": "force_download()"
     },
     {
@@ -24280,7 +24350,7 @@
       "source_location": "L310",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_mime_by_extension",
-      "community": 50,
+      "community": 1,
       "norm_label": "get_mime_by_extension()"
     },
     {
@@ -25070,7 +25140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_text_helper",
-      "community": 13,
+      "community": 421,
       "norm_label": "text_helper.php"
     },
     {
@@ -25080,7 +25150,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "system_helpers_text_helper_word_limiter",
-      "community": 13,
+      "community": 421,
       "norm_label": "word_limiter()"
     },
     {
@@ -25090,7 +25160,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "system_helpers_text_helper_character_limiter",
-      "community": 13,
+      "community": 421,
       "norm_label": "character_limiter()"
     },
     {
@@ -25100,7 +25170,7 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "system_helpers_text_helper_ascii_to_entities",
-      "community": 13,
+      "community": 421,
       "norm_label": "ascii_to_entities()"
     },
     {
@@ -25110,7 +25180,7 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "system_helpers_text_helper_entities_to_ascii",
-      "community": 13,
+      "community": 421,
       "norm_label": "entities_to_ascii()"
     },
     {
@@ -25120,7 +25190,7 @@
       "source_location": "L236",
       "_origin": "ast",
       "id": "system_helpers_text_helper_word_censor",
-      "community": 13,
+      "community": 421,
       "norm_label": "word_censor()"
     },
     {
@@ -25130,7 +25200,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "system_helpers_text_helper_highlight_code",
-      "community": 13,
+      "community": 421,
       "norm_label": "highlight_code()"
     },
     {
@@ -25140,7 +25210,7 @@
       "source_location": "L344",
       "_origin": "ast",
       "id": "system_helpers_text_helper_highlight_phrase",
-      "community": 13,
+      "community": 421,
       "norm_label": "highlight_phrase()"
     },
     {
@@ -25150,7 +25220,7 @@
       "source_location": "L361",
       "_origin": "ast",
       "id": "system_helpers_text_helper_convert_accented_characters",
-      "community": 13,
+      "community": 421,
       "norm_label": "convert_accented_characters()"
     },
     {
@@ -25970,7 +26040,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_is_supported",
-      "community": 1,
+      "community": 40,
       "norm_label": ".is_supported()"
     },
     {
@@ -26730,7 +26800,7 @@
       "source_location": "L353",
       "_origin": "ast",
       "id": "system_libraries_email_ci_email_construct",
-      "community": 21,
+      "community": 3,
       "norm_label": ".__construct()"
     },
     {
@@ -27440,7 +27510,7 @@
       "source_location": "L235",
       "_origin": "ast",
       "id": "system_libraries_encrypt_ci_encrypt_strlen",
-      "community": 47,
+      "community": 13,
       "norm_label": ".strlen()"
     },
     {
@@ -27580,7 +27650,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "system_libraries_encryption_ci_encryption_construct",
-      "community": 52,
+      "community": 19,
       "norm_label": ".__construct()"
     },
     {
@@ -27590,7 +27660,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "system_libraries_encryption_ci_encryption_initialize",
-      "community": 52,
+      "community": 19,
       "norm_label": ".initialize()"
     },
     {
@@ -27600,7 +27670,7 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "system_libraries_encryption_ci_encryption_strlen",
-      "community": 13,
+      "community": 52,
       "norm_label": ".strlen()"
     },
     {
@@ -27860,7 +27930,7 @@
       "source_location": "L296",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_run",
-      "community": 421,
+      "community": 12,
       "norm_label": ".run()"
     },
     {
@@ -27870,7 +27940,7 @@
       "source_location": "L378",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_set_rules",
-      "community": 421,
+      "community": 12,
       "norm_label": ".set_rules()"
     },
     {
@@ -27880,7 +27950,7 @@
       "source_location": "L462",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_reduce_array",
-      "community": 421,
+      "community": 12,
       "norm_label": "._reduce_array()"
     },
     {
@@ -27890,7 +27960,7 @@
       "source_location": "L483",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_execute",
-      "community": 206,
+      "community": 12,
       "norm_label": "._execute()"
     },
     {
@@ -27900,7 +27970,7 @@
       "source_location": "L652",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_prepare_rules",
-      "community": 206,
+      "community": 12,
       "norm_label": "._prepare_rules()"
     },
     {
@@ -27910,7 +27980,7 @@
       "source_location": "L691",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_get_error_message",
-      "community": 206,
+      "community": 12,
       "norm_label": "._get_error_message()"
     },
     {
@@ -27920,7 +27990,7 @@
       "source_location": "L717",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_translate_fieldname",
-      "community": 206,
+      "community": 12,
       "norm_label": "._translate_fieldname()"
     },
     {
@@ -27930,7 +28000,7 @@
       "source_location": "L738",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_build_error_msg",
-      "community": 206,
+      "community": 12,
       "norm_label": "._build_error_msg()"
     },
     {
@@ -27940,7 +28010,7 @@
       "source_location": "L755",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_reset_post_array",
-      "community": 421,
+      "community": 12,
       "norm_label": "._reset_post_array()"
     },
     {
@@ -27980,7 +28050,7 @@
       "source_location": "L872",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_set_checkbox",
-      "community": 424,
+      "community": 12,
       "norm_label": ".set_checkbox()"
     },
     {
@@ -27990,7 +28060,7 @@
       "source_location": "L891",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_set_radio",
-      "community": 424,
+      "community": 12,
       "norm_label": ".set_radio()"
     },
     {
@@ -28080,7 +28150,7 @@
       "source_location": "L1056",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_valid_url",
-      "community": 12,
+      "community": 3,
       "norm_label": ".valid_url()"
     },
     {
@@ -28090,7 +28160,7 @@
       "source_location": "L1094",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_valid_emails",
-      "community": 425,
+      "community": 12,
       "norm_label": ".valid_emails()"
     },
     {
@@ -28100,7 +28170,7 @@
       "source_location": "L1117",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_valid_email",
-      "community": 425,
+      "community": 12,
       "norm_label": ".valid_email()"
     },
     {
@@ -30060,7 +30130,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_construct",
-      "community": 21,
+      "community": 16,
       "norm_label": ".__construct()"
     },
     {
@@ -30070,7 +30140,7 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_ci_load_classes",
-      "community": 21,
+      "community": 16,
       "norm_label": "._ci_load_classes()"
     },
     {
@@ -30080,7 +30150,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_configure",
-      "community": 21,
+      "community": 16,
       "norm_label": "._configure()"
     },
     {
@@ -30090,7 +30160,7 @@
       "source_location": "L301",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_configure_sid_length",
-      "community": 19,
+      "community": 16,
       "norm_label": "._configure_sid_length()"
     },
     {
@@ -30410,7 +30480,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver",
-      "community": 19,
+      "community": 21,
       "norm_label": "session_driver.php"
     },
     {
@@ -30420,7 +30490,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver",
-      "community": 19,
+      "community": 21,
       "norm_label": "ci_session_driver"
     },
     {
@@ -30430,7 +30500,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "sessionhandlerinterface",
-      "community": 19,
+      "community": 21,
       "norm_label": "sessionhandlerinterface"
     },
     {
@@ -30450,7 +30520,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_php5_validate_id",
-      "community": 19,
+      "community": 21,
       "norm_label": ".php5_validate_id()"
     },
     {
@@ -30460,7 +30530,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_cookie_destroy",
-      "community": 19,
+      "community": 21,
       "norm_label": "._cookie_destroy()"
     },
     {
@@ -30470,7 +30540,7 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_get_lock",
-      "community": 19,
+      "community": 21,
       "norm_label": "._get_lock()"
     },
     {
@@ -30480,7 +30550,7 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_release_lock",
-      "community": 19,
+      "community": 21,
       "norm_label": "._release_lock()"
     },
     {
@@ -30610,7 +30680,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver",
-      "community": 19,
+      "community": 21,
       "norm_label": "session_files_driver.php"
     },
     {
@@ -30620,7 +30690,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver",
-      "community": 19,
+      "community": 21,
       "norm_label": "ci_session_files_driver"
     },
     {
@@ -30630,7 +30700,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_construct",
-      "community": 19,
+      "community": 21,
       "norm_label": ".__construct()"
     },
     {
@@ -30640,7 +30710,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_open",
-      "community": 19,
+      "community": 21,
       "norm_label": ".open()"
     },
     {
@@ -30650,7 +30720,7 @@
       "source_location": "L158",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_write",
-      "community": 19,
+      "community": 21,
       "norm_label": ".write()"
     },
     {
@@ -30660,7 +30730,7 @@
       "source_location": "L206",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_close",
-      "community": 19,
+      "community": 21,
       "norm_label": ".close()"
     },
     {
@@ -30670,7 +30740,7 @@
       "source_location": "L228",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_read",
-      "community": 19,
+      "community": 21,
       "norm_label": ".read()"
     },
     {
@@ -30680,7 +30750,7 @@
       "source_location": "L285",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_strlen",
-      "community": 19,
+      "community": 16,
       "norm_label": ".strlen()"
     },
     {
@@ -30690,7 +30760,7 @@
       "source_location": "L302",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_destroy",
-      "community": 19,
+      "community": 21,
       "norm_label": ".destroy()"
     },
     {
@@ -30700,7 +30770,7 @@
       "source_location": "L338",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_gc",
-      "community": 19,
+      "community": 21,
       "norm_label": ".gc()"
     },
     {
@@ -30710,7 +30780,7 @@
       "source_location": "L384",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_validatesessionid",
-      "community": 19,
+      "community": 21,
       "norm_label": ".validatesessionid()"
     },
     {
@@ -30720,7 +30790,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver",
-      "community": 19,
+      "community": 206,
       "norm_label": "session_memcached_driver.php"
     },
     {
@@ -30730,7 +30800,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver",
-      "community": 19,
+      "community": 206,
       "norm_label": "ci_session_memcached_driver"
     },
     {
@@ -30740,7 +30810,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_construct",
-      "community": 19,
+      "community": 206,
       "norm_label": ".__construct()"
     },
     {
@@ -30750,7 +30820,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_open",
-      "community": 19,
+      "community": 206,
       "norm_label": ".open()"
     },
     {
@@ -30760,7 +30830,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_read",
-      "community": 19,
+      "community": 206,
       "norm_label": ".read()"
     },
     {
@@ -30770,7 +30840,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_get_lock",
-      "community": 19,
+      "community": 206,
       "norm_label": "._get_lock()"
     },
     {
@@ -30780,7 +30850,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_write",
-      "community": 19,
+      "community": 206,
       "norm_label": ".write()"
     },
     {
@@ -30790,7 +30860,7 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_release_lock",
-      "community": 19,
+      "community": 206,
       "norm_label": "._release_lock()"
     },
     {
@@ -30800,7 +30870,7 @@
       "source_location": "L299",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_close",
-      "community": 19,
+      "community": 206,
       "norm_label": ".close()"
     },
     {
@@ -30810,7 +30880,7 @@
       "source_location": "L324",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_destroy",
-      "community": 19,
+      "community": 206,
       "norm_label": ".destroy()"
     },
     {
@@ -30820,7 +30890,7 @@
       "source_location": "L345",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_gc",
-      "community": 19,
+      "community": 206,
       "norm_label": ".gc()"
     },
     {
@@ -30830,7 +30900,7 @@
       "source_location": "L362",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_validatesessionid",
-      "community": 19,
+      "community": 206,
       "norm_label": ".validatesessionid()"
     },
     {
@@ -32080,7 +32150,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc",
-      "community": 431,
+      "community": 424,
       "norm_label": "xmlrpc.php"
     },
     {
@@ -32180,7 +32250,7 @@
       "source_location": "L470",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_ci_xmlrpc_send_request",
-      "community": 431,
+      "community": 424,
       "norm_label": ".send_request()"
     },
     {
@@ -32230,7 +32300,7 @@
       "source_location": "L546",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client",
-      "community": 431,
+      "community": 424,
       "norm_label": "xml_rpc_client"
     },
     {
@@ -32240,7 +32310,7 @@
       "source_location": "L638",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_construct",
-      "community": 431,
+      "community": 424,
       "norm_label": ".__construct()"
     },
     {
@@ -32250,7 +32320,7 @@
       "source_location": "L664",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_send",
-      "community": 431,
+      "community": 424,
       "norm_label": ".send()"
     },
     {
@@ -32260,7 +32330,7 @@
       "source_location": "L682",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_sendpayload",
-      "community": 431,
+      "community": 424,
       "norm_label": ".sendpayload()"
     },
     {
@@ -37102,7 +37172,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Dashboard.php",
-      "source_location": "L22",
+      "source_location": "L49",
       "weight": 1.0,
       "source": "application_controllers_dashboard_dashboard_index",
       "target": "application_helpers_app_helper_t"
@@ -38107,7 +38177,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1314",
+      "source_location": "L1315",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_build_financial_summary",
@@ -38117,7 +38187,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1360",
+      "source_location": "L1378",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_build_financial_timeline",
@@ -38247,7 +38317,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1244",
+      "source_location": "L1245",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_financial_profile_payload",
@@ -38317,7 +38387,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1265",
+      "source_location": "L1266",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_normalized_discounts",
@@ -38337,7 +38407,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1545",
+      "source_location": "L1563",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_normalized_standalone_payments",
@@ -38407,7 +38477,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1645",
+      "source_location": "L1663",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_payment_datetime_from_date",
@@ -38417,7 +38487,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1629",
+      "source_location": "L1647",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_payment_dimension_from_post",
@@ -38427,7 +38497,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1437",
+      "source_location": "L1455",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_record_standalone_debt_payment",
@@ -38447,7 +38517,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1297",
+      "source_location": "L1298",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_respond_discount_error",
@@ -40064,7 +40134,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1257",
+      "source_location": "L1258",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_financial_profile_payload",
       "target": "application_controllers_patients_patients_normalize_wallet_transactions_rows",
@@ -40086,7 +40156,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1258",
+      "source_location": "L1259",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_financial_profile_payload",
       "target": "application_controllers_patients_patients_normalize_open_debts_rows",
@@ -40108,7 +40178,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1260",
+      "source_location": "L1261",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_financial_profile_payload",
       "target": "application_controllers_patients_patients_build_financial_summary",
@@ -40119,7 +40189,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1261",
+      "source_location": "L1262",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_financial_profile_payload",
       "target": "application_controllers_patients_patients_build_financial_timeline",
@@ -40131,7 +40201,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1286",
+      "source_location": "L1287",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_normalized_discounts",
       "target": "application_helpers_app_helper_t"
@@ -40141,7 +40211,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1310",
+      "source_location": "L1311",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_respond_discount_error",
       "target": "application_controllers_patients_patients_normalized_discounts",
@@ -40153,7 +40223,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1301",
+      "source_location": "L1302",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_respond_discount_error",
       "target": "system_helpers_url_helper_redirect"
@@ -40164,7 +40234,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1408",
+      "source_location": "L1426",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_build_financial_timeline",
       "target": "application_helpers_app_helper_format_amount"
@@ -40175,7 +40245,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1386",
+      "source_location": "L1404",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_build_financial_timeline",
       "target": "application_helpers_app_helper_t"
@@ -40185,7 +40255,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1470",
+      "source_location": "L1488",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_record_standalone_debt_payment",
       "target": "application_controllers_patients_patients_payment_datetime_from_date",
@@ -40197,7 +40267,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1489",
+      "source_location": "L1507",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_record_standalone_debt_payment",
       "target": "application_helpers_app_helper_safe_patient_payment_note"
@@ -40208,7 +40278,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1571",
+      "source_location": "L1589",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_normalized_standalone_payments",
       "target": "application_helpers_app_helper_t"
@@ -40219,7 +40289,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1635",
+      "source_location": "L1653",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_payment_dimension_from_post",
       "target": "application_helpers_app_helper_t"
@@ -50825,10 +50895,50 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L34",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "application_models_dashboard_model_dashboard_model",
+      "target": "application_models_dashboard_model_dashboard_model_expenses_this_month",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L21",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
       "target": "application_models_dashboard_model_dashboard_model_get_safe_balance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "application_models_dashboard_model_dashboard_model",
+      "target": "application_models_dashboard_model_dashboard_model_new_patients_this_month",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "application_models_dashboard_model_dashboard_model",
+      "target": "application_models_dashboard_model_dashboard_model_open_debt_summary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "application_models_dashboard_model_dashboard_model",
+      "target": "application_models_dashboard_model_dashboard_model_staff_on_leave_today",
       "confidence_score": 1.0
     },
     {
@@ -50845,10 +50955,20 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L21",
+      "source_location": "L26",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
-      "target": "application_models_dashboard_model_dashboard_model_today_turns",
+      "target": "application_models_dashboard_model_dashboard_model_turns_by_section_today",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/models/Dashboard_model.php",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "application_models_dashboard_model_dashboard_model",
+      "target": "application_models_dashboard_model_dashboard_model_unpaid_salary_count_this_month",
       "confidence_score": 1.0
     },
     {
@@ -57231,7 +57351,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L834",
+      "source_location": "L839",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_column_definition",
@@ -57241,7 +57361,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L533",
+      "source_location": "L538",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_compute_raw_balance",
@@ -57271,7 +57391,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L813",
+      "source_location": "L818",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_ensure_fund_type_column",
@@ -57281,7 +57401,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L738",
+      "source_location": "L743",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_ensure_schema",
@@ -57291,7 +57411,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L796",
+      "source_location": "L801",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_ensure_type_enum",
@@ -57311,7 +57431,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L699",
+      "source_location": "L704",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_force_reverse_credit",
@@ -57351,7 +57471,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L597",
+      "source_location": "L602",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_get_turn_balance_effect",
@@ -57371,7 +57491,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L840",
+      "source_location": "L845",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_normalize_fund_type",
@@ -57391,7 +57511,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L547",
+      "source_location": "L552",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_record_refund",
@@ -57401,7 +57521,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L851",
+      "source_location": "L856",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_reversal_note",
@@ -57431,7 +57551,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L630",
+      "source_location": "L635",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model",
       "target": "application_models_wallet_model_wallet_model_reverse_turn_balance_effect",
@@ -57514,7 +57634,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L711",
+      "source_location": "L716",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_force_reverse_credit",
       "target": "application_models_wallet_model_wallet_model_get_balance",
@@ -57547,7 +57667,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L562",
+      "source_location": "L567",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_record_refund",
       "target": "application_models_wallet_model_wallet_model_get_balance",
@@ -57646,7 +57766,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L705",
+      "source_location": "L710",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_force_reverse_credit",
       "target": "application_models_wallet_model_wallet_model_ensure_wallet_exists",
@@ -57668,7 +57788,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L558",
+      "source_location": "L563",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_record_refund",
       "target": "application_models_wallet_model_wallet_model_ensure_wallet_exists",
@@ -57745,7 +57865,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L674",
+      "source_location": "L679",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_reverse_turn_balance_effect",
       "target": "application_models_wallet_model_wallet_model_top_up",
@@ -57800,7 +57920,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L584",
+      "source_location": "L589",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_record_refund",
       "target": "application_models_wallet_model_wallet_model_is_valid_datetime",
@@ -57996,9 +58116,20 @@
     {
       "relation": "calls",
       "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "application/models/Wallet_model.php",
+      "source_location": "L525",
+      "weight": 1.0,
+      "source": "application_models_wallet_model_wallet_model_recalculate_for_patient",
+      "target": "system_core_common_log_message"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L535",
+      "source_location": "L540",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_compute_raw_balance",
       "target": "application_models_wallet_model_wallet_model_ensure_schema",
@@ -58009,7 +58140,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L549",
+      "source_location": "L554",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_record_refund",
       "target": "application_models_wallet_model_wallet_model_ensure_schema",
@@ -58020,7 +58151,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L599",
+      "source_location": "L604",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_get_turn_balance_effect",
       "target": "application_models_wallet_model_wallet_model_ensure_schema",
@@ -58031,7 +58162,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L621",
+      "source_location": "L626",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_get_turn_balance_effect",
       "target": "application_models_wallet_model_wallet_model_normalize_fund_type",
@@ -58042,7 +58173,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L641",
+      "source_location": "L646",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_reverse_turn_balance_effect",
       "target": "application_models_wallet_model_wallet_model_get_turn_balance_effect",
@@ -58053,7 +58184,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L632",
+      "source_location": "L637",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_reverse_turn_balance_effect",
       "target": "application_models_wallet_model_wallet_model_ensure_schema",
@@ -58064,7 +58195,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L658",
+      "source_location": "L663",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_reverse_turn_balance_effect",
       "target": "application_models_wallet_model_wallet_model_force_reverse_credit",
@@ -58075,7 +58206,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L662",
+      "source_location": "L667",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_reverse_turn_balance_effect",
       "target": "application_models_wallet_model_wallet_model_reversal_note",
@@ -58086,7 +58217,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L703",
+      "source_location": "L708",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_force_reverse_credit",
       "target": "application_models_wallet_model_wallet_model_normalize_fund_type",
@@ -58097,7 +58228,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L778",
+      "source_location": "L783",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_ensure_schema",
       "target": "application_models_wallet_model_wallet_model_ensure_fund_type_column",
@@ -58108,7 +58239,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L779",
+      "source_location": "L784",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_ensure_schema",
       "target": "application_models_wallet_model_wallet_model_ensure_type_enum",
@@ -58119,7 +58250,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L798",
+      "source_location": "L803",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_ensure_type_enum",
       "target": "application_models_wallet_model_wallet_model_column_definition",
@@ -58130,7 +58261,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Wallet_model.php",
-      "source_location": "L815",
+      "source_location": "L820",
       "weight": 1.0,
       "source": "application_models_wallet_model_wallet_model_ensure_fund_type_column",
       "target": "application_models_wallet_model_wallet_model_column_definition",
@@ -58468,6 +58599,16 @@
       "weight": 1.0,
       "source": "assets_js_shamsi_formatpersiandate",
       "target": "assets_js_shamsi_parsegregoriandate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "assets/js/tooltip-init.js",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "assets_js_tooltip_init",
+      "target": "assets_js_tooltip_init_initall",
       "confidence_score": 1.0
     },
     {
@@ -93595,5 +93736,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4c43a6a8c26b92c8f1c323334054672e7aed05e5"
+  "built_at_commit": "f66fec7fb766f3950f2e3eb542a8e2041460874d"
 }

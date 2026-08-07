@@ -9,7 +9,7 @@ $is_paid = $record['status'] === 'paid';
 		<h1 class="h3 mb-1"><?= t('Pay Salary') ?> - <?= html_escape($staff_name) ?> - <?= html_escape($month_display) ?></h1>
 		<p class="text-muted mb-0"><?= t('salary_payment') ?></p>
 	</div>
-	<a href="<?= base_url('salaries?month=' . rawurlencode($month_display)) ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('salaries?month=' . rawurlencode($month_display)) ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card mb-4">
@@ -20,7 +20,7 @@ $is_paid = $record['status'] === 'paid';
 				<input type="text" id="salaryPayMonth" class="form-control shamsi-month" placeholder="1403/01" value="<?= html_escape($month_display) ?>">
 			</div>
 			<div class="col-md-4">
-				<a href="<?= base_url('salaries?month=' . rawurlencode($month_display)) ?>" class="btn btn-outline-secondary"><?= t('View All Salaries') ?></a>
+				<a href="<?= base_url('salaries?month=' . rawurlencode($month_display)) ?>" class="btn btn-outline-secondary btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('View All Salaries') ?></a>
 			</div>
 		</div>
 	</div>
@@ -88,7 +88,7 @@ $is_paid = $record['status'] === 'paid';
 										<?= form_open('salaries/payment/' . (int) $payment['id'] . '/delete', 'class="m-0 d-inline"') ?>
 											<input type="hidden" name="staff_id" value="<?= (int) $staff['id'] ?>">
 											<input type="hidden" name="month" value="<?= html_escape($month_display) ?>">
-											<button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('delete_salary_payment_confirm') ?>')"><?= t('Delete') ?></button>
+											<button type="submit" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('delete_salary_payment_confirm') ?>')"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></button>
 										<?= form_close() ?>
 									</td>
 								</tr>
@@ -113,7 +113,7 @@ $is_paid = $record['status'] === 'paid';
 						<span><?= t('salary_settled_badge') ?></span>
 						<?= form_open('salaries/reopen/' . (int) $staff['id'], 'class="m-0"') ?>
 							<input type="hidden" name="month" value="<?= html_escape($month_display) ?>">
-							<button type="submit" class="btn btn-sm btn-outline-dark"><?= t('reopen_salary') ?></button>
+							<button type="submit" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('reopen_salary') ?></button>
 						<?= form_close() ?>
 					</div>
 				<?php elseif ($is_paid) : ?>
@@ -140,7 +140,7 @@ $is_paid = $record['status'] === 'paid';
 						</div>
 					</div>
 					<div class="mt-4">
-						<button type="submit" class="btn btn-dark"><?= t('record_payment') ?></button>
+						<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i> <?= t('record_payment') ?></button>
 					</div>
 				<?= form_close() ?>
 
@@ -148,7 +148,7 @@ $is_paid = $record['status'] === 'paid';
 					<hr>
 					<?= form_open('salaries/settle/' . (int) $staff['id'], 'class="d-flex align-items-center flex-wrap gap-2 mb-0"') ?>
 						<input type="hidden" name="month" value="<?= html_escape($month_display) ?>">
-						<button type="submit" class="btn btn-outline-secondary btn-sm"><?= t('mark_salary_settled') ?></button>
+						<button type="submit" class="btn btn-outline-secondary btn-sm btn-icon"><i class="bi bi-check-circle" aria-hidden="true"></i> <?= t('mark_salary_settled') ?></button>
 						<span class="text-muted small"><?= t('mark_salary_settled_hint') ?></span>
 					<?= form_close() ?>
 				<?php endif; ?>

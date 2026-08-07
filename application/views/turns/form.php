@@ -72,7 +72,7 @@ $staff_payload = array_map(static function ($staff_member) {
 		<h1 class="h3 mb-1"><?= html_escape($title) ?></h1>
 		<p class="text-muted mb-0"><?= t('Create or update a patient turn.') ?></p>
 	</div>
-	<a href="<?= base_url('turns') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('turns') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card">
@@ -126,8 +126,8 @@ $staff_payload = array_map(static function ($staff_member) {
 								<span id="openDebtBadge" class="badge rounded-pill bg-danger-subtle text-danger"<?= $total_open_debt > 0 ? '' : ' style="display:none;"' ?>><?= format_amount($total_open_debt) ?></span>
 							</div>
 							<div class="turn-financial-item turn-financial-toggle" id="openDebtToggleWrap"<?= empty($open_debts) ? ' style="display:none;"' : '' ?>>
-								<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#turnOpenDebtCollapse" aria-expanded="false" aria-controls="turnOpenDebtCollapse">
-									<?= t('open_debts') ?>
+								<button class="btn btn-sm btn-outline-secondary btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#turnOpenDebtCollapse" aria-expanded="false" aria-controls="turnOpenDebtCollapse">
+									<i class="bi bi-chevron-down" aria-hidden="true"></i> <?= t('open_debts') ?>
 								</button>
 							</div>
 						</div>
@@ -183,7 +183,7 @@ $staff_payload = array_map(static function ($staff_member) {
 								<div id="discountInfoWrap" class="alert alert-info py-2 px-3 mt-2<?= (float) $selected_discount_percent > 0 ? '' : ' d-none' ?>">
 									<div id="discountInfoText" class="small fw-semibold"></div>
 									<div id="feeOverrideWarning" class="small text-warning-emphasis mt-2 d-none"><?= t('fee_overridden') ?></div>
-									<a href="#" id="resetDiscountedFeeLink" class="small d-none"><?= t('reset_to_discounted') ?></a>
+									<a href="#" id="resetDiscountedFeeLink" class="small btn-icon d-none"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('reset_to_discounted') ?></a>
 								</div>
 								<small class="text-danger"><?= form_error('fee') ?></small>
 							</div>
@@ -323,7 +323,7 @@ $staff_payload = array_map(static function ($staff_member) {
 				</div>
 
 				<div class="col-12">
-					<button type="submit" class="btn btn-dark" id="submitButton"<?= !$is_edit && (!$selected_patient_id || !$selected_section_id) ? ' disabled' : '' ?>><?= t('Save Turn') ?></button>
+					<button type="submit" class="btn btn-dark btn-icon" id="submitButton"<?= !$is_edit && (!$selected_patient_id || !$selected_section_id) ? ' disabled' : '' ?>><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save Turn') ?></button>
 				</div>
 			</div>
 		<?= form_close() ?>

@@ -74,7 +74,8 @@ body.ltr {
 .stat-value {
 	font-size: 2rem;
 	font-weight: 700;
-	line-height: 1;
+	line-height: 1.15;
+	overflow-wrap: anywhere;
 }
 
 .table > :not(caption) > * > * {
@@ -99,7 +100,6 @@ dt,
 dd,
 .navbar-brand,
 .nav-link,
-.btn,
 .alert,
 .list-group-item {
 	color: var(--text);
@@ -431,6 +431,17 @@ body[data-theme="dark"] .bulk-create-patient-modal .modal-content {
 .financial-summary-card__value {
 	font-size: 1.15rem;
 	line-height: 1.2;
+}
+
+.btn-icon {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+body.rtl .icon-flip-rtl {
+	display: inline-block;
+	transform: scaleX(-1);
 }
 
 .daily-register-summary-card {
@@ -811,6 +822,8 @@ body.rtl .navbar-nav {
 
 .card-body {
 	padding: 1.25rem;
+	display: flex;
+	flex-direction: column;
 }
 
 @media (max-width: 991.98px) {

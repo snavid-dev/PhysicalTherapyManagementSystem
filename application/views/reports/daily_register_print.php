@@ -35,6 +35,7 @@ $income_total += (float) ($summary['total_manual_wallet_topups'] ?? 0);
 <head>
 	<meta charset="UTF-8">
 	<title><?= html_escape(t('daily_register') . ' - ' . $date_range_label) ?></title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 	<style>
 		body {
 			font-family: 'Wazir', 'Tahoma', sans-serif;
@@ -108,12 +109,17 @@ $income_total += (float) ($summary['total_manual_wallet_topups'] ?? 0);
 		@media print {
 			.no-print { display: none; }
 		}
+		.btn-icon {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.4rem;
+		}
 	</style>
 </head>
 <body>
 	<div class="no-print" style="padding:10px">
-		<button onclick="window.print()"><?= html_escape(t('dt_print')) ?></button>
-		<button onclick="window.close()"><?= html_escape(t('Close')) ?></button>
+		<button class="btn-icon" onclick="window.print()"><i class="bi bi-printer" aria-hidden="true"></i> <?= html_escape(t('dt_print')) ?></button>
+		<button class="btn-icon" onclick="window.close()"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= html_escape(t('Close')) ?></button>
 	</div>
 
 	<div class="clinic-header">

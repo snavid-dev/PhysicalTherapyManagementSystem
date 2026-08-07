@@ -4,8 +4,8 @@
 		<p class="text-muted mb-0"><?= t('Appointments for physical therapy sessions.') ?></p>
 	</div>
 	<div class="d-flex gap-2">
-		<a href="<?= base_url('turns/bulk') ?>" class="btn btn-outline-dark"><?= t('Bulk Entry') ?></a>
-		<a href="<?= base_url('turns/create') ?>" class="btn btn-dark"><?= t('Add Turn') ?></a>
+		<a href="<?= base_url('turns/bulk') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-list-check" aria-hidden="true"></i> <?= t('Bulk Entry') ?></a>
+		<a href="<?= base_url('turns/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('Add Turn') ?></a>
 	</div>
 </div>
 

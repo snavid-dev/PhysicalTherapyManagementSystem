@@ -97,8 +97,8 @@ class Turns extends Authenticated_Controller
 		$id = (int) $turn['id'];
 
 		$actions = '<div class="d-flex gap-2 justify-content-end flex-wrap">'
-			. '<a href="' . base_url('turns/' . $id . '/edit') . '" class="btn btn-sm btn-outline-secondary">' . html_escape(t('Edit')) . '</a>'
-			. '<a href="' . base_url('turns/' . $id . '/delete') . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(\'' . html_escape(t('Delete this turn?')) . '\')">' . html_escape(t('Delete')) . '</a>'
+			. '<a href="' . base_url('turns/' . $id . '/edit') . '" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> ' . html_escape(t('Edit')) . '</a>'
+			. '<a href="' . base_url('turns/' . $id . '/delete') . '" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm(\'' . html_escape(t('Delete this turn?')) . '\')"><i class="bi bi-trash" aria-hidden="true"></i> ' . html_escape(t('Delete')) . '</a>'
 			. '</div>';
 
 		return array(

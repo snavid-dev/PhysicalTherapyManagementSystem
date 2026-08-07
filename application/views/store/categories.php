@@ -6,7 +6,7 @@
 			<h1><?= t('product_categories') ?></h1>
 		</div>
 		<div class="col-auto">
-			<a href="<?= site_url('store/create_category') ?>" class="btn btn-primary"><?= t('create_category') ?></a>
+			<a href="<?= site_url('store/create_category') ?>" class="btn btn-primary btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('create_category') ?></a>
 		</div>
 	</div>
 
@@ -39,8 +39,8 @@
 						<tr>
 							<td><?= html_escape($cat['name']) ?></td>
 							<td>
-								<a href="<?= site_url('store/edit_category/' . $cat['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('Edit') ?></a>
-								<a href="<?= site_url('store/delete_category/' . $cat['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('confirm_delete') ?>');"><?= t('Delete') ?></a>
+								<a href="<?= site_url('store/edit_category/' . $cat['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+								<a href="<?= site_url('store/delete_category/' . $cat['id']) ?>" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('confirm_delete') ?>');"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></a>
 							</td>
 						</tr>
 					<?php endforeach; ?>

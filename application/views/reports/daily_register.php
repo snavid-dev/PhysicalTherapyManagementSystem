@@ -82,7 +82,7 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 		<h1 class="h3 mb-1"><?= t('daily_register') ?></h1>
 		<p class="text-muted mb-0"><?= t('register_title') ?></p>
 	</div>
-	<a href="<?= base_url('reports') ?>" class="btn btn-outline-secondary"><?= t('Back') ?></a>
+	<a href="<?= base_url('reports') ?>" class="btn btn-outline-secondary btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card mb-4">
@@ -126,8 +126,8 @@ $can_open_reference_doctor = $this->auth->has_permission('manage_reference_docto
 			</div>
 			<div class="col-xl-3 col-md-8">
 				<div class="d-flex gap-2">
-					<button type="submit" class="btn btn-dark flex-grow-1"><?= t('Search') ?></button>
-					<a href="<?= $print_url ?>" class="btn btn-outline-dark flex-grow-1" target="_blank" rel="noopener"><?= t('print_register') ?></a>
+					<button type="submit" class="btn btn-dark flex-grow-1 btn-icon"><i class="bi bi-funnel" aria-hidden="true"></i> <?= t('Search') ?></button>
+					<a href="<?= $print_url ?>" class="btn btn-outline-dark flex-grow-1 btn-icon" target="_blank" rel="noopener"><i class="bi bi-printer" aria-hidden="true"></i> <?= t('print_register') ?></a>
 				</div>
 			</div>
 		<?= form_close() ?>

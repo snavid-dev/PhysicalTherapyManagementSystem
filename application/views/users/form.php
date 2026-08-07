@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= html_escape($title) ?></h1>
 		<p class="text-muted mb-0"><?= t('Manage login access and privileges.') ?></p>
 	</div>
-	<a href="<?= base_url('users') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('users') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card">
@@ -58,7 +58,7 @@
 				</div>
 			</div>
 			<div class="mt-4">
-				<button type="submit" class="btn btn-dark"><?= t('Save User') ?></button>
+				<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save User') ?></button>
 			</div>
 		<?= form_close() ?>
 	</div>

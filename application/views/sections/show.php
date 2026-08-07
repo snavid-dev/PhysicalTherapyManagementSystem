@@ -4,8 +4,8 @@
 		<p class="text-muted mb-0"><?= html_escape(t($section['name'])) ?></p>
 	</div>
 	<div class="d-flex gap-2">
-		<a href="<?= base_url('sections/' . $section['id'] . '/edit') ?>" class="btn btn-outline-secondary"><?= t('Edit') ?></a>
-		<a href="<?= base_url('sections') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+		<a href="<?= base_url('sections/' . $section['id'] . '/edit') ?>" class="btn btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+		<a href="<?= base_url('sections') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 	</div>
 </div>
 
@@ -79,7 +79,7 @@
 								<td><?= $staff['gender'] === 'male' ? t('Male') : t('Female') ?></td>
 								<td><?= $staff['status'] === 'active' ? t('Active') : t('Inactive') ?></td>
 								<td class="text-end">
-									<a href="<?= base_url('staff/profile/' . $staff['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
+									<a href="<?= base_url('staff/profile/' . $staff['id']) ?>" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Profile') ?></a>
 								</td>
 							</tr>
 						<?php endforeach; else : ?>
