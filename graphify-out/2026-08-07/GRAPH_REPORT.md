@@ -1,16 +1,16 @@
-# Graph Report - test-navid.cyborgtech.co  (2026-08-07)
+# Graph Report - test-navid.cyborgtech.co  (2026-08-06)
 
 ## Corpus Check
-- 429 files · ~2,599,412 words
+- 429 files · ~2,599,289 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3707 nodes · 5462 edges · 430 communities (271 shown, 159 thin omitted)
+- 3707 nodes · 5462 edges · 430 communities (272 shown, 158 thin omitted)
 - Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 602 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5a1a1f28`
+- Built from commit: `f66fec7f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -229,7 +229,6 @@
 - [[_COMMUNITY_Store Module Build Log|Store Module Build Log]]
 - [[_COMMUNITY_1. Project Story|1. Project Story]]
 - [[_COMMUNITY_CI_FTP|CI_FTP]]
-- [[_COMMUNITY_.ensure_schema|.ensure_schema]]
 - [[_COMMUNITY_Base_Controller|Base_Controller]]
 - [[_COMMUNITY_CI_Session_files_driver|CI_Session_files_driver]]
 - [[_COMMUNITY_27. Module Store|27. Module: Store]]
@@ -264,7 +263,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (430 total, 159 thin omitted)
+## Communities (430 total, 158 thin omitted)
 
 ### Community 1 - "CI_Image_lib"
 Cohesion: 0.05
@@ -517,14 +516,14 @@ Nodes (3): delete_cookie(), get_cookie(), set_cookie()
 ## Knowledge Gaps
 - **369 isolated node(s):** `description`, `name`, `type`, `homepage`, `license` (+364 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **159 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **158 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `log_message()` connect `log_message` to `CI_Image_lib`, `CI_Email`, `date_helper.php`, `CI_Jquery`, `CI_Javascript`, `CI_Driver`, `CI_Form_validation`, `mb_strlen`, `CI_Loader`, `CI_Session`, `CI_Upload`, `Wallet_model`, `CI_DB_driver`, `config_item`, `CI_Security`, `CI_User_agent`, `CI_DB_forge`, `CI_Parser`, `CI_DB_oci8_driver`, `CI_DB_mssql_driver`, `CI_Output`, `CI_Input`, `CI_DB_mysql_driver`, `CI_Pagination`, `CI_URI`, `Common.php`, `CI_DB_mysqli_driver`, `CI_Encrypt`, `CI_Controller`, `CI_Utf8`, `CI_DB_sqlite_driver`, `CI_Session_database_driver`, `CI_Encryption`, `Debt_model`, `CI_Zip`, `CI_DB_sqlite3_driver`, `CI_Trackback`, `CI_Hooks`, `.query`, `CI_Table`, `CI_DB_pdo_driver`, `CI_Cart`, `CI_Unit_test`, `CI_Xmlrpcs`, `1. Project Story`, `CI_Router`, `CI_DB_utility`, `CI_DB_pdo_mysql_driver`, `CI_Cache_memcached`, `CI_Cache_redis`, `CI_Xmlrpc`, `CI_DB_pdo_dblib_driver`, `CI_Cache`, `CI_Cache_apc`, `CI_Cache_wincache`, `CI_Migration`, `CI_Config`?**
   _High betweenness centrality (0.362) - this node is a cross-community bridge._
-- **Why does `t()` connect `app_helper.php` to `CI_Session_memcached_driver`, `redirect`, `.ensure_schema`, `Safe_model`, `Authenticated_Controller`, `show_404_if_empty`, `Reference_doctors`, `form_helper.php`, `Sections`, `Users`, `Staff`, `Roles`, `Expenses`, `t`, `23. Module: Reference Doctors`, `array_column`?**
+- **Why does `t()` connect `app_helper.php` to `CI_Session_memcached_driver`, `redirect`, `Safe_model`, `Authenticated_Controller`, `show_404_if_empty`, `Reference_doctors`, `form_helper.php`, `Sections`, `Users`, `Staff`, `Roles`, `Expenses`, `t`, `23. Module: Reference Doctors`, `array_column`?**
   _High betweenness centrality (0.096) - this node is a cross-community bridge._
 - **Why does `html_escape()` connect `form_helper.php` to `show_404_if_empty`, `23. Module: Reference Doctors`, `Common.php`?**
   _High betweenness centrality (0.088) - this node is a cross-community bridge._

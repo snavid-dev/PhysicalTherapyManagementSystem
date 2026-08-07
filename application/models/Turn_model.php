@@ -97,18 +97,20 @@ class Turn_model extends CI_Model
 			return;
 		}
 
-		$this->db
-			->group_start()
-				->like('patients.first_name', $search)
-				->or_like('patients.last_name', $search)
-				->or_like('patients.father_name', $search)
-				->or_like('sections.name', $search)
-				->or_like('staff.first_name', $search)
-				->or_like('staff.last_name', $search)
-				->or_like('turns.payment_type', $search)
-				->or_like('turns.id', $search)
-				->or_like('turns.turn_number', $search)
-			->group_end();
+		foreach (preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY) as $term) {
+			$this->db
+				->group_start()
+					->like('patients.first_name', $term)
+					->or_like('patients.last_name', $term)
+					->or_like('patients.father_name', $term)
+					->or_like('sections.name', $term)
+					->or_like('staff.first_name', $term)
+					->or_like('staff.last_name', $term)
+					->or_like('turns.payment_type', $term)
+					->or_like('turns.id', $term)
+					->or_like('turns.turn_number', $term)
+				->group_end();
+		}
 	}
 
 	public function find($id)
