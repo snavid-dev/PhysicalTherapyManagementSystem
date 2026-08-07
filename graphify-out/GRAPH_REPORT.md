@@ -1,7 +1,7 @@
 # Graph Report - test-navid.cyborgtech.co  (2026-08-07)
 
 ## Corpus Check
-- 429 files · ~2,599,412 words
+- 429 files · ~2,599,418 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5a1a1f28`
+- Built from commit: `832ec2d9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
