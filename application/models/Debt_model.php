@@ -147,6 +147,41 @@ class Debt_model extends CI_Model
 	}
 
 	/**
+	 * A payment can only be safely reopened by reopen_debts_for_payment() if every
+	 * dollar it moved is accounted for: either as a debt_payment_applications row,
+	 * or as wallet overflow. Payments made before debt_payment_applications existed
+	 * (2026-08-02) have no application rows even though they may have legitimately
+	 * cleared or reduced a real debt — reopen_debts_for_payment would then silently
+	 * restore nothing, permanently understating what the patient owes. Refuse
+	 * deletion of those instead of guessing.
+	 */
+	public function payment_is_reconcilable($payment_id, $payment_amount)
+	{
+		$this->ensure_schema();
+
+		$payment_id = (int) $payment_id;
+
+		$has_applications = $this->db
+			->where('payment_id', $payment_id)
+			->count_all_results('debt_payment_applications') > 0;
+
+		if ($has_applications) {
+			return TRUE;
+		}
+
+		$overflow = (float) $this->db
+			->select_sum('amount', 'total')
+			->where('payment_id', $payment_id)
+			->where('type', 'topup')
+			->get('patient_wallet_transactions')
+			->row('total');
+
+		// No application rows — only safe to reopen if the WHOLE amount is proven
+		// to have gone to wallet overflow (i.e. nothing was silently applied to a debt).
+		return $overflow >= round((float) $payment_amount, 2) - 0.01;
+	}
+
+	/**
 	 * Undo exactly the debts a standalone payment (Patients::record_standalone_debt_payment)
 	 * applied cash to, restoring each debt to its pre-payment amount/open status. Used when
 	 * staff delete a mistaken debt payment entry.
@@ -301,7 +336,38 @@ class Debt_model extends CI_Model
 			$this->add_column_if_missing('payments', 'staff_id', "ALTER TABLE `payments` ADD COLUMN `staff_id` int unsigned DEFAULT NULL AFTER `section_id`");
 		}
 
+		$this->close_orphaned_cash_free_debts();
+
 		$this->schema_ready = TRUE;
+	}
+
+	/**
+	 * A 'cash' or 'free' turn is always fully settled the moment it's created or
+	 * edited — Turns.php's payment_type switch never calls create() for either
+	 * branch — so it can never legitimately carry an open debt. reverse_turn_debts()
+	 * is supposed to void any pre-existing debt whenever a turn is edited into one
+	 * of these types, but 3 real patients (2026-08 audit) ended up with a debt that
+	 * survived anyway, still showing as owed real money for a turn now recorded as
+	 * fully paid — silently double-billing them. The exact trigger wasn't pinned
+	 * down (rare — 3 of ~190 cash edits), so this runs every request rather than
+	 * once, self-healing any survivor the same way create()'s own supersede logic
+	 * closes a stale debt: preserve the historical amount, mark it cleared. Cheap
+	 * once caught up — the join only matches rows that are actually still open.
+	 */
+	protected function close_orphaned_cash_free_debts()
+	{
+		if (!$this->db->table_exists('patient_debts') || !$this->db->table_exists('turns')) {
+			return;
+		}
+
+		$this->db->query("
+			UPDATE `patient_debts` pd
+			INNER JOIN `turns` t ON t.id = pd.turn_id
+			SET pd.status = 'cleared',
+				pd.cleared_at = t.updated_at,
+				pd.note = 'Superseded — turn reprocessed as cash/free (auto-closed)'
+			WHERE pd.status = 'open' AND t.payment_type IN ('cash', 'free')
+		");
 	}
 
 	/**

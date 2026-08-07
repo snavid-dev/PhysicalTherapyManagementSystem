@@ -120,6 +120,7 @@ $route['store/receive_requisition/(:num)'] = 'Store/receive_requisition/$1';
 $route['store/sell'] = 'Store/sell';
 $route['store/receipt/(:num)'] = 'Store/receipt/$1';
 $route['store/clear_sale_debt/(:num)'] = 'Store/clear_sale_debt/$1';
+$route['store/refund_sale/(:num)'] = 'Store/refund_sale/$1';
 $route['store/bulk_sell'] = 'Store/bulk_sell';
 $route['store/sale_batches'] = 'Store/sale_batches';
 $route['store/approve_sale_batch/(:num)'] = 'Store/approve_sale_batch/$1';

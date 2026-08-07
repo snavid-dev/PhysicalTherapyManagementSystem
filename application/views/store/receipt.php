@@ -6,6 +6,9 @@
 			<div class="text-center mb-4 border-bottom pb-3">
 				<h4><?= t('physical_therapy_clinic') ?></h4>
 				<small class="text-muted"><?= t('store_receipt') ?></small>
+				<?php if ($sale['status'] !== 'completed'): ?>
+					<div class="mt-2"><span class="badge bg-secondary"><?= html_escape(t('sale_status_' . $sale['status'])) ?></span></div>
+				<?php endif; ?>
 			</div>
 
 			<div class="mb-3">

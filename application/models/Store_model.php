@@ -351,6 +351,19 @@ class Store_model extends CI_Model
 			));
 	}
 
+	public function mark_sale_refunded($sale_id, $sale)
+	{
+		return $this->db
+			->where('id', (int) $sale_id)
+			->update('store_sales', array(
+				'status' => 'refunded',
+				// A refund voids whatever was still owed on a debt sale too —
+				// otherwise the sales report keeps showing "open" for an item
+				// that was returned.
+				'debt_status' => $sale['debt_status'] === 'open' ? 'cleared' : $sale['debt_status'],
+			));
+	}
+
 	public function count_open_debts()
 	{
 		return $this->db

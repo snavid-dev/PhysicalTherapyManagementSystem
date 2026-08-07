@@ -802,6 +802,10 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($patient_id, t('Payment not found.'), 404, $wants_json);
 		}
 
+		if (!$this->Debt_model->payment_is_reconcilable((int) $payment_id, (float) $payment['amount'])) {
+			return $this->respond_wallet_topup_error($patient_id, t('This payment predates automatic debt-application tracking and cannot be safely auto-reversed. Adjust the affected debt manually before deleting this payment.'), 422, $wants_json);
+		}
+
 		$this->db->trans_begin();
 
 		$this->Wallet_model->ensure_wallet_exists($patient_id);
@@ -1383,8 +1387,15 @@ class Patients extends Authenticated_Controller
 			$type = (string) ($transaction['type'] ?? '');
 			$fund_type = (string) ($transaction['fund_type'] ?? 'cash_topup');
 			$is_topup = $type === 'topup';
+			$note = (string) ($transaction['note'] ?? '');
 
-			if ($type === 'auto_debt_settlement') {
+			if (strpos($note, 'REVERSAL:') === 0) {
+				// Internal bookkeeping (Wallet_model::reversal_note()), not money the
+				// patient paid or was refunded — keep it visually distinct from a real
+				// cash top-up so it can't be mistaken for a payment and double-counted.
+				$label_key = 'wallet_correction';
+				$badge = 'secondary';
+			} elseif ($type === 'auto_debt_settlement') {
 				$label_key = 'auto_debt_settlement';
 				$badge = 'primary';
 			} elseif ($type === 'refund') {
@@ -1602,6 +1613,13 @@ class Patients extends Authenticated_Controller
 			->join('sections', 'sections.id = patient_wallet_transactions.section_id', 'left')
 			->join('staff', 'staff.id = patient_wallet_transactions.staff_id', 'left')
 			->where('patient_wallet_transactions.patient_id', $patient_id)
+			// Reversal entries (Wallet_model::reversal_note(), always prefixed
+			// 'REVERSAL:') are internal bookkeeping for a cancelled/edited turn, never
+			// a real payment or refund. When the turn is deleted outright, its FK
+			// (ON DELETE SET NULL) nulls out turn_id on the reversal row too, which
+			// would otherwise satisfy the "topup with no turn" branch below and list
+			// it here as a phantom standalone payment.
+			->where("(patient_wallet_transactions.note NOT LIKE 'REVERSAL:%' OR patient_wallet_transactions.note IS NULL)", NULL, FALSE)
 			->group_start()
 				->where('patient_wallet_transactions.type', 'refund')
 				->or_group_start()

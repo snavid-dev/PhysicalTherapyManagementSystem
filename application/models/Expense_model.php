@@ -140,7 +140,7 @@ class Expense_model extends CI_Model
 		$this->ensure_schema();
 		$id = (int) $id;
 
-		if ($this->is_linked_to_salary_payment($id)) {
+		if ($this->is_linked_to_salary_payment($id) || $this->is_linked_to_store_receipt($id)) {
 			return FALSE;
 		}
 
@@ -168,6 +168,19 @@ class Expense_model extends CI_Model
 		return $this->db
 			->where('expense_id', (int) $id)
 			->count_all_results('staff_salary_payments') > 0;
+	}
+
+	public function is_linked_to_store_receipt($id)
+	{
+		$this->ensure_schema();
+
+		if (!$this->db->table_exists('store_stock_receipts')) {
+			return FALSE;
+		}
+
+		return $this->db
+			->where('expense_id', (int) $id)
+			->count_all_results('store_stock_receipts') > 0;
 	}
 
 	public function get_total_by_category($date_from, $date_to)

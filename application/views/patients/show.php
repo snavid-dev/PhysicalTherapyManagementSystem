@@ -32,6 +32,20 @@ $discounts_payload = json_encode($discounts, JSON_UNESCAPED_UNICODE | JSON_UNESC
 $wallet_transaction_meta = static function ($transaction) {
 	$type = (string) ($transaction['type'] ?? '');
 	$fund_type = (string) ($transaction['fund_type'] ?? 'cash_topup');
+	$note = (string) ($transaction['note'] ?? '');
+
+	// An internal reversal (e.g. a cancelled/edited turn undoing its own wallet
+	// effect) is not money the patient paid in or was refunded — it's bookkeeping.
+	// Wallet_model::reversal_note() always prefixes these with 'REVERSAL:'. Shown
+	// with the same badge as a real cash top-up, staff have mistaken it for a
+	// payment and double-subtracted it from the patient's debt total.
+	if (strpos($note, 'REVERSAL:') === 0) {
+		return array(
+			'class' => 'bg-secondary-subtle text-secondary',
+			'label' => t('wallet_correction'),
+			'prefix' => $type === 'topup' ? '+' : '-',
+		);
+	}
 
 	if ($type === 'auto_debt_settlement') {
 		return array(
@@ -767,6 +781,7 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 	const labels = {
 		noOpenDebt: <?= json_encode(t('no_open_debt')) ?>,
 		cashTopup: <?= json_encode(t('cash_wallet_topup')) ?>,
+		walletCorrection: <?= json_encode(t('wallet_correction')) ?>,
 		historicalCredit: <?= json_encode(t('historical_wallet_credit')) ?>,
 		cashDeduction: <?= json_encode(t('cash_wallet_deduction')) ?>,
 		historicalDeduction: <?= json_encode(t('historical_wallet_deduction')) ?>,
@@ -838,11 +853,18 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 			const type = transaction.type;
 			const isTopup = type === 'topup';
 			const fundType = transaction.fund_type || 'cash_topup';
+			const rawNote = transaction.note || '';
 			let badgeClass = 'bg-warning-subtle text-warning';
 			let label = fundType === 'historical_credit' ? labels.historicalDeduction : labels.cashDeduction;
 			let prefix = isTopup ? '+' : '-';
 
-			if (type === 'auto_debt_settlement') {
+			if (rawNote.indexOf('REVERSAL:') === 0) {
+				// Internal bookkeeping (e.g. a cancelled/edited turn undoing its own
+				// wallet effect) — not a payment or refund. Kept distinct from a real
+				// cash top-up so staff don't mistake it for money in and double-count it.
+				badgeClass = 'bg-secondary-subtle text-secondary';
+				label = labels.walletCorrection;
+			} else if (type === 'auto_debt_settlement') {
 				badgeClass = 'bg-primary-subtle text-primary';
 				label = labels.autoDebtSettlement;
 				prefix = '-';

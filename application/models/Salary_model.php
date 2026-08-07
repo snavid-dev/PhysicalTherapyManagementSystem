@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Salary_model extends CI_Model
 {
+	protected $schema_ready = FALSE;
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -201,6 +203,13 @@ class Salary_model extends CI_Model
 
 		$this->db->trans_begin();
 
+		// Same lock rationale as record_payment(): serialize concurrent deletes
+		// against this record so the total_paid recompute below can't read stale data.
+		$this->db->query(
+			'SELECT id FROM staff_salary_records WHERE id = ? FOR UPDATE',
+			array((int) $payment['salary_record_id'])
+		);
+
 		$record = $this->get_record_by_id($payment['salary_record_id']);
 
 		// Remove the safe outflow for this payment and recompute the running balance.
@@ -379,6 +388,63 @@ class Salary_model extends CI_Model
 		}
 	}
 
+	/**
+	 * Keep an existing salary record's calculated_deduction/final_salary in sync
+	 * when leave is created, edited, or deleted for a month that already has a
+	 * record — including a paid/settled one. record_needs_initial_calculation()
+	 * only refreshes a record while it's untouched (unpaid, unsettled, nothing
+	 * paid yet), so leave approved *after* that point previously never fed back
+	 * into the record at all (confirmed: staff #18's June 2026 record stayed at
+	 * a $0 deduction after 2 leave days were approved post-settlement).
+	 *
+	 * Deliberately narrow: only calculated_deduction/final_salary are touched.
+	 * daily_rate stays whatever calculate_salary() already has pinned for this
+	 * record (Fix B8 — the rate itself must never drift), and total_paid/status/
+	 * settled are never touched here, so no already-recorded payment is altered.
+	 * If the record doesn't exist yet, there's nothing to reconcile — a fresh
+	 * calculate_salary() will pick up the leave correctly whenever the record is
+	 * first created.
+	 */
+	public function reconcile_leave_impact($staff_id, $start_date, $end_date)
+	{
+		$this->ensure_schema();
+
+		$staff_id = (int) $staff_id;
+
+		if ($staff_id <= 0 || !$this->is_valid_date($start_date) || !$this->is_valid_date($end_date)) {
+			return;
+		}
+
+		$cursor = date('Y-m', strtotime($start_date));
+		$last_month = date('Y-m', strtotime($end_date));
+
+		while ($cursor <= $last_month) {
+			$record = $this->db
+				->get_where('staff_salary_records', array('staff_id' => $staff_id, 'month' => $cursor))
+				->row_array();
+
+			if ($record) {
+				$calculation = $this->calculate_salary($staff_id, $cursor);
+
+				$this->db
+					->where('id', (int) $record['id'])
+					->update('staff_salary_records', array(
+						'calculated_deduction' => $calculation['deduction'],
+						'final_salary' => $calculation['final_salary'],
+					));
+			}
+
+			$cursor = date('Y-m', strtotime($cursor . '-01 +1 month'));
+		}
+	}
+
+	protected function is_valid_date($date)
+	{
+		$date = (string) $date;
+		$parsed = DateTime::createFromFormat('Y-m-d', $date);
+		return $parsed && $parsed->format('Y-m-d') === $date;
+	}
+
 	public function get_record_by_id($id)
 	{
 		$this->ensure_schema();
@@ -523,6 +589,11 @@ class Salary_model extends CI_Model
 
 	protected function ensure_schema()
 	{
+		if ($this->schema_ready) {
+			return;
+		}
+		$this->schema_ready = TRUE;
+
 		if (!$this->db->table_exists('expense_categories')) {
 			$this->db->query("
 				CREATE TABLE IF NOT EXISTS `expense_categories` (

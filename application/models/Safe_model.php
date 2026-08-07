@@ -804,6 +804,12 @@ class Safe_model extends CI_Model
 			->where('patient_wallet_transactions.type', 'topup')
 			->where('patient_wallet_transactions.amount >', 0)
 			->where('patient_wallet_transactions.turn_id IS NULL', NULL, FALSE)
+			// A reversal (Wallet_model::reversal_note(), always prefixed 'REVERSAL:')
+			// is internal bookkeeping, never real incoming cash. When its turn is
+			// deleted, the FK (ON DELETE SET NULL) nulls turn_id on it too, which
+			// would otherwise satisfy this "manual topup" shape and get backfilled
+			// into the safe ledger as phantom income (found: 11 patients, $1,990).
+			->where("(patient_wallet_transactions.note NOT LIKE 'REVERSAL:%' OR patient_wallet_transactions.note IS NULL)", NULL, FALSE)
 			->group_start()
 				->where("patient_wallet_transactions.note IS NOT NULL AND patient_wallet_transactions.note != ''", NULL, FALSE)
 				->or_where('turns.id IS NULL', NULL, FALSE)
@@ -857,6 +863,7 @@ class Safe_model extends CI_Model
 			'expenses',
 			'staff_salary_payments',
 			'patients',
+			'store_sales',
 		);
 
 		foreach ($reference_tables as $reference_table) {
@@ -1001,6 +1008,9 @@ class Safe_model extends CI_Model
 			->where('patient_wallet_transactions.type', 'topup')
 			->where('patient_wallet_transactions.amount >', 0)
 			->where('patient_wallet_transactions.turn_id IS NULL', NULL, FALSE)
+			// See the matching guard in count_manual_wallet_topup_records() — a
+			// reversal must never be backfilled into the safe ledger as income.
+			->where("(patient_wallet_transactions.note NOT LIKE 'REVERSAL:%' OR patient_wallet_transactions.note IS NULL)", NULL, FALSE)
 			->group_start()
 				->where("patient_wallet_transactions.note IS NOT NULL AND patient_wallet_transactions.note != ''", NULL, FALSE)
 				->or_where('turns.id IS NULL', NULL, FALSE)

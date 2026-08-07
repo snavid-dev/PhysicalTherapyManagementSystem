@@ -146,6 +146,13 @@
 											<button type="submit" class="btn btn-sm btn-outline-success btn-icon"><i class="bi bi-check-circle" aria-hidden="true"></i> <?= t('mark_debt_cleared') ?></button>
 										</form>
 									<?php endif; ?>
+									<?php if ($sale['status'] === 'completed'): ?>
+										<form method="post" action="<?= site_url('store/refund_sale/' . $sale['id']) ?>" class="d-inline" onsubmit="return confirm('<?= t('confirm_refund_sale') ?>');">
+											<button type="submit" class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('refund') ?></button>
+										</form>
+									<?php else: ?>
+										<span class="badge bg-secondary"><?= html_escape(t('sale_status_' . $sale['status'])) ?></span>
+									<?php endif; ?>
 								</td>
 							</tr>
 						<?php endforeach; ?>

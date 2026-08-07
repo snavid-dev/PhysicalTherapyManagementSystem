@@ -1146,7 +1146,7 @@ This module calculates monthly staff salary, records partial or final payments, 
 
 - calculates monthly salary from staff salary data and approved leave days
 - creates one salary record per staff member per month
-- records advance and final payments
+- records advance and final payments — the calculated `final_salary` is only a suggestion; payments are intentionally NOT capped at it (bonuses/corrections), only non-positive amounts are rejected (see `Salary_model::record_payment()`)
 - updates unpaid, partial, and paid salary status
 - creates matching expense entries for salary payments
 - reuses the same salary calculation in the staff profile and payroll screens
@@ -1162,7 +1162,7 @@ Pass these steps:
 5. Update both language files for any new labels or states.
 6. If schema changes, update `database/physical_therapy_clinic.sql`.
 7. Verify the join path between `staff.id` and `doctor_leaves.staff_id` still matches the live schema.
-8. Verify partial payment, final payment, and overpayment-blocking behavior.
+8. Verify partial payment and final payment behavior. Overpayment is intentionally allowed (not blocked) — verify `total_paid` still reconciles exactly with `SUM(staff_salary_payments.amount)` for the record, not that it's capped.
 
 ### AI prompt example for this module
 
