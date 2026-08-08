@@ -18,21 +18,78 @@ class Dashboard_model extends CI_Model
 		);
 	}
 
-	public function today_turns()
+	public function get_safe_balance()
+	{
+		return $this->Safe_model->get_current_balance();
+	}
+
+	public function turns_by_section_today()
 	{
 		return $this->db
-			->select('turns.*, patients.first_name AS patient_first_name, patients.last_name AS patient_last_name, users.first_name AS therapist_first_name, users.last_name AS therapist_last_name')
+			->select('sections.name AS section_name, COUNT(turns.id) AS turn_count', FALSE)
 			->from('turns')
-			->join('patients', 'patients.id = turns.patient_id')
-			->join('users', 'users.id = turns.doctor_id')
+			->join('sections', 'sections.id = turns.section_id', 'left')
 			->where('turns.turn_date', date('Y-m-d'))
-			->order_by('turns.turn_time', 'asc')
+			->group_by('turns.section_id')
+			->order_by('turn_count', 'desc')
 			->get()
 			->result_array();
 	}
 
-	public function get_safe_balance()
+	public function open_debt_summary()
 	{
-		return $this->Safe_model->get_current_balance();
+		$row = $this->db
+			->select('COUNT(DISTINCT patient_id) AS patient_count, COALESCE(SUM(amount), 0) AS total_amount', FALSE)
+			->from('patient_debts')
+			->where('status', 'open')
+			->get()
+			->row_array();
+
+		return array(
+			'patient_count' => (int) ($row['patient_count'] ?? 0),
+			'total_amount' => (float) ($row['total_amount'] ?? 0),
+		);
+	}
+
+	public function staff_on_leave_today()
+	{
+		$today = date('Y-m-d');
+
+		return $this->db
+			->select('staff.id, staff.first_name, staff.last_name')
+			->from('doctor_leaves')
+			->join('staff', 'staff.id = doctor_leaves.staff_id')
+			->where('doctor_leaves.status', 'approved')
+			->where('doctor_leaves.start_date <=', $today)
+			->where('doctor_leaves.end_date >=', $today)
+			->get()
+			->result_array();
+	}
+
+	public function unpaid_salary_count_this_month()
+	{
+		return (int) $this->db
+			->where('month', date('Y-m'))
+			->where_in('status', array('unpaid', 'partial'))
+			->count_all_results('staff_salary_records');
+	}
+
+	public function expenses_this_month()
+	{
+		$amount = $this->db
+			->select_sum('amount')
+			->where('expense_date >=', date('Y-m-01'))
+			->where('expense_date <=', date('Y-m-t'))
+			->get('expenses')
+			->row('amount');
+
+		return (float) $amount;
+	}
+
+	public function new_patients_this_month()
+	{
+		return (int) $this->db
+			->where('created_at >=', date('Y-m-01 00:00:00'))
+			->count_all_results('patients');
 	}
 }

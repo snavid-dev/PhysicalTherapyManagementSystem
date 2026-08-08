@@ -46,7 +46,7 @@
 								<input type="password" name="password" class="form-control">
 								<small class="text-danger"><?= form_error('password') ?></small>
 							</div>
-							<button type="submit" class="btn btn-dark w-100"><?= t('Sign In') ?></button>
+							<button type="submit" class="btn btn-dark w-100 btn-icon"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> <?= t('Sign In') ?></button>
 						<?= form_close() ?>
 					</div>
 				</div>

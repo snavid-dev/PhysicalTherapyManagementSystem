@@ -157,6 +157,7 @@
 		api = $table.DataTable({
 			processing: isServer,
 			serverSide: isServer,
+			searchDelay: isServer ? 400 : 0,
 			ajax: isServer ? { url: serverUrl, type: 'GET' } : undefined,
 			deferRender: isServer,
 			order: [[parseOrderColumn($table), $table.data('order-dir') || 'desc']],

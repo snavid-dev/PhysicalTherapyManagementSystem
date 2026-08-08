@@ -19,14 +19,14 @@
 		<div id="bulk-customers"></div>
 
 		<div class="d-flex justify-content-between align-items-center my-4">
-			<button type="button" class="btn btn-outline-primary" id="add-customer-btn"><?= t('add_customer') ?></button>
+			<button type="button" class="btn btn-outline-primary btn-icon" id="add-customer-btn"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_customer') ?></button>
 			<div class="text-end">
 				<div class="text-muted small"><?= t('total_amount') ?></div>
 				<div class="fs-4 fw-bold" id="grand-total">0.00 AFN</div>
 			</div>
 		</div>
 
-		<button type="submit" class="btn btn-primary btn-lg w-100" id="submit-batch-btn" disabled><?= t('submit_for_approval') ?></button>
+		<button type="submit" class="btn btn-primary btn-lg w-100 btn-icon" id="submit-batch-btn" disabled><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('submit_for_approval') ?></button>
 	</form>
 </div>
 
@@ -34,7 +34,7 @@
 	<div class="card mb-3 customer-row" data-index="__INDEX__">
 		<div class="card-header d-flex justify-content-between align-items-center">
 			<span><?= t('customer') ?> #<span class="row-number">__ROW_NUMBER__</span></span>
-			<button type="button" class="btn btn-sm btn-outline-danger remove-customer-btn"><?= t('remove') ?></button>
+			<button type="button" class="btn btn-sm btn-outline-danger remove-customer-btn btn-icon"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('remove') ?></button>
 		</div>
 		<div class="card-body">
 			<div class="row mb-3">
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			'<td><input type="number" name="customers[' + index + '][qty][]" class="form-control form-control-sm qty-input" min="1" value="1" required></td>' +
 			'<td><input type="number" name="customers[' + index + '][price][]" class="form-control form-control-sm price-input" step="0.01" value="' + price.toFixed(2) + '" required></td>' +
 			'<td class="line-total">0.00</td>' +
-			'<td><button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">&times;</button></td>';
+			'<td><button type="button" class="btn btn-sm btn-outline-danger remove-item-btn" aria-label="<?= html_escape(t('remove')) ?>"><i class="bi bi-trash" aria-hidden="true"></i></button></td>';
 
 		itemsBody.appendChild(tr);
 		tr.querySelector('.qty-input').addEventListener('change', function () { recalcRow(row); });

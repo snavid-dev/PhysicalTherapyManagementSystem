@@ -597,13 +597,15 @@ class Report_model extends CI_Model
 			return;
 		}
 
-		$this->db->group_start()
-			->like('patients.first_name', $search)
-			->or_like('patients.last_name', $search)
-			->or_like("TRIM(CONCAT(patients.first_name, ' ', COALESCE(patients.last_name, '')))", $search, 'both', FALSE)
-			->or_like('patients.phone', $search)
-			->or_like('patients.phone2', $search)
-		->group_end();
+		foreach (preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY) as $term) {
+			$this->db->group_start()
+				->like('patients.first_name', $term)
+				->or_like('patients.last_name', $term)
+				->or_like('patients.father_name', $term)
+				->or_like('patients.phone', $term)
+				->or_like('patients.phone2', $term)
+			->group_end();
+		}
 	}
 
 	protected function patient_turn_summary_subquery($from, $to)

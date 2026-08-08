@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= t('Roles') ?></h1>
 		<p class="text-muted mb-0"><?= t('Simple role and permission management.') ?></p>
 	</div>
-	<a href="<?= base_url('roles/create') ?>" class="btn btn-dark"><?= t('Add Role') ?></a>
+	<a href="<?= base_url('roles/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('Add Role') ?></a>
 </div>
 
 <div class="card">
@@ -18,8 +18,8 @@
 						<td><?= html_escape($role['slug']) ?></td>
 						<td><?= (int) $role['user_count'] ?></td>
 						<td class="text-end">
-							<a href="<?= base_url('roles/' . $role['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
-							<a href="<?= base_url('roles/' . $role['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this role?') ?>')"><?= t('Delete') ?></a>
+							<a href="<?= base_url('roles/' . $role['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+							<a href="<?= base_url('roles/' . $role['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('Delete this role?') ?>')"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></a>
 						</td>
 					</tr>
 				<?php endforeach; else : ?>

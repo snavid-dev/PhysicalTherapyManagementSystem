@@ -51,8 +51,8 @@
 				</div>
 				<div class="card-footer">
 					<div class="d-flex gap-2">
-						<button type="submit" class="btn btn-success"><?= t('confirm_receipt') ?></button>
-						<a href="<?= site_url('store/requisitions') ?>" class="btn btn-secondary"><?= t('cancel') ?></a>
+						<button type="submit" class="btn btn-success btn-icon"><i class="bi bi-box-seam" aria-hidden="true"></i> <?= t('confirm_receipt') ?></button>
+						<a href="<?= site_url('store/requisitions') ?>" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('cancel') ?></a>
 					</div>
 				</div>
 			</form>

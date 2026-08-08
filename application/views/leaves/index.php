@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= t('Employee Leaves') ?></h1>
 		<p class="text-muted mb-0"><?= t('Track leave periods for any employee.') ?></p>
 	</div>
-	<a href="<?= base_url('leaves/create') ?>" class="btn btn-dark"><?= t('Add Leave') ?></a>
+	<a href="<?= base_url('leaves/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('Add Leave') ?></a>
 </div>
 
 <div class="card">
@@ -19,8 +19,8 @@
 						<td class="col-date"><?= html_escape(to_shamsi($leave['end_date'])) ?></td>
 						<td><?= t(ucfirst($leave['status'])) ?></td>
 						<td class="no-export text-end">
-							<a href="<?= base_url('leaves/' . $leave['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
-							<a href="<?= base_url('leaves/' . $leave['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this leave?') ?>')"><?= t('Delete') ?></a>
+							<a href="<?= base_url('leaves/' . $leave['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+							<a href="<?= base_url('leaves/' . $leave['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('Delete this leave?') ?>')"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></a>
 						</td>
 					</tr>
 				<?php endforeach; endif; ?>

@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= html_escape($title) ?></h1>
 		<p class="text-muted mb-0"><?= t('Keep the patient record simple and reusable.') ?></p>
 	</div>
-	<a href="<?= base_url('patients') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('patients') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card">
@@ -14,7 +14,7 @@
 					<strong><?= t('Duplicate patient found.') ?></strong>
 					<div class="mt-1"><?= t('A patient with this first name, last name, father name, and phone number already exists.') ?></div>
 				</div>
-				<a href="<?= base_url('patients/' . (int) $duplicate_patient['id']) ?>" class="btn btn-outline-danger"><?= t('Go to patient profile') ?></a>
+				<a href="<?= base_url('patients/' . (int) $duplicate_patient['id']) ?>" class="btn btn-outline-danger btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Go to patient profile') ?></a>
 			</div>
 		<?php endif; ?>
 		<?= form_open($action) ?>
@@ -122,10 +122,10 @@
 			</div>
 			<div class="mt-4 d-flex flex-wrap justify-content-end gap-2">
 				<?php if (empty($patient)) : ?>
-					<button type="submit" name="submit_action" value="save_and_open" class="btn btn-outline-dark"><?= t('Save and Open Profile') ?></button>
-					<button type="submit" name="submit_action" value="save" class="btn btn-dark"><?= t('Save Patient') ?></button>
+					<button type="submit" name="submit_action" value="save_and_open" class="btn btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Save and Open Profile') ?></button>
+					<button type="submit" name="submit_action" value="save" class="btn btn-dark btn-icon"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save Patient') ?></button>
 				<?php else : ?>
-					<button type="submit" class="btn btn-dark"><?= t('Save Patient') ?></button>
+					<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save Patient') ?></button>
 				<?php endif; ?>
 			</div>
 		<?= form_close() ?>

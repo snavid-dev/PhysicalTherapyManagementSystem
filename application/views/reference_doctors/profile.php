@@ -4,8 +4,8 @@
 		<p class="text-muted mb-0"><?= html_escape($reference_doctor['first_name'] . ' ' . $reference_doctor['last_name']) ?></p>
 	</div>
 	<div class="d-flex gap-2">
-		<a href="<?= base_url('reference_doctors/edit/' . $reference_doctor['id']) ?>" class="btn btn-outline-secondary"><?= t('Edit') ?></a>
-		<a href="<?= base_url('reference_doctors') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+		<a href="<?= base_url('reference_doctors/edit/' . $reference_doctor['id']) ?>" class="btn btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+		<a href="<?= base_url('reference_doctors') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 	</div>
 </div>
 
@@ -76,7 +76,7 @@
 		<div class="card">
 			<div class="card-body">
 				<h2 class="h5 mb-3"><?= t('count_by_date_range') ?></h2>
-				<button type="button" class="btn btn-dark" id="openPatientCountModal"><?= t('count_by_date_range') ?></button>
+				<button type="button" class="btn btn-dark btn-icon" id="openPatientCountModal"><i class="bi bi-search" aria-hidden="true"></i> <?= t('count_by_date_range') ?></button>
 			</div>
 		</div>
 	</div>
@@ -104,7 +104,7 @@
 								<td><?= html_escape($patient['phone']) ?></td>
 								<td class="col-date"><?= html_escape(to_shamsi($patient['created_at'], 'Y/m/d H:i')) ?></td>
 								<td class="no-export text-end">
-									<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
+									<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Profile') ?></a>
 								</td>
 							</tr>
 						<?php endforeach; endif; ?>
@@ -135,7 +135,8 @@
 						<input type="text" id="dateToInput" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(to_shamsi(date('Y-m-t'))) ?>">
 					</div>
 					<div class="col-md-4">
-						<button type="button" class="btn btn-dark w-100" id="searchPatientCountButton">
+						<button type="button" class="btn btn-dark w-100 btn-icon" id="searchPatientCountButton">
+							<i class="bi bi-search" aria-hidden="true"></i>
 							<span class="button-label"><?= t('Search') ?></span>
 							<span class="spinner-border spinner-border-sm ms-2 d-none" id="patientCountSpinner" role="status" aria-hidden="true"></span>
 						</button>
@@ -161,7 +162,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
+				<button type="button" class="btn btn-outline-secondary btn-icon" data-bs-dismiss="modal"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('Close') ?></button>
 			</div>
 		</div>
 	</div>
@@ -221,7 +222,7 @@
 				+ '<td>' + escapeHtml(patient.gender) + '</td>'
 				+ '<td>' + escapeHtml(patient.phone) + '</td>'
 				+ '<td>' + escapeHtml(patient.created_at) + '</td>'
-				+ '<td class="text-end"><a href=' + JSON.stringify(<?= json_encode(base_url('patients/')) ?> + patient.id) + ' class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a></td>'
+				+ '<td class="text-end"><a href=' + JSON.stringify(<?= json_encode(base_url('patients/')) ?> + patient.id) + ' class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Profile') ?></a></td>'
 				+ '</tr>';
 		}).join('');
 	}

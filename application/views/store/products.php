@@ -7,8 +7,8 @@
 		</div>
 		<?php if ($this->auth->has_permission('manage_store')): ?>
 		<div class="col-auto">
-			<a href="<?= site_url('store/categories') ?>" class="btn btn-outline-secondary"><?= t('manage_categories') ?></a>
-			<a href="<?= site_url('store/create_product') ?>" class="btn btn-primary"><?= t('create_product') ?></a>
+			<a href="<?= site_url('store/categories') ?>" class="btn btn-outline-secondary btn-icon"><i class="bi bi-tags" aria-hidden="true"></i> <?= t('manage_categories') ?></a>
+			<a href="<?= site_url('store/create_product') ?>" class="btn btn-primary btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('create_product') ?></a>
 		</div>
 		<?php endif; ?>
 	</div>
@@ -55,8 +55,8 @@
 							</td>
 							<td>
 								<?php if ($this->auth->has_permission('manage_store')): ?>
-									<a href="<?= site_url('store/edit_product/' . $product['id']) ?>" class="btn btn-sm btn-outline-primary"><?= t('Edit') ?></a>
-									<a href="<?= site_url('store/create_variant/' . $product['id']) ?>" class="btn btn-sm btn-outline-success"><?= t('add_variant') ?></a>
+									<a href="<?= site_url('store/edit_product/' . $product['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+									<a href="<?= site_url('store/create_variant/' . $product['id']) ?>" class="btn btn-sm btn-outline-success btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_variant') ?></a>
 								<?php endif; ?>
 							</td>
 						</tr>

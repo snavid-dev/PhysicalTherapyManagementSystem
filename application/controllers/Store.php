@@ -725,6 +725,86 @@ class Store extends Authenticated_Controller
 		redirect('store/reports');
 	}
 
+	public function refund_sale($sale_id)
+	{
+		$this->require_permission('manage_store');
+
+		$sale = $this->Store_model->get_sale_by_id($sale_id);
+
+		if (!$sale || $sale['status'] !== 'completed') {
+			$this->session->set_flashdata('error', t('error_refunding_sale'));
+			redirect('store/reports');
+		}
+
+		$items = $this->Store_model->get_sale_items($sale_id);
+
+		$this->db->trans_start();
+
+		foreach ($items as $item) {
+			$restocked = $this->Inventory_model->record_movement(
+				$item['variant_id'],
+				$sale['location_id'],
+				'return_in',
+				(int) $item['qty'],
+				$this->auth->user_id(),
+				'sale',
+				$sale_id
+			);
+
+			if (!$restocked) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('error_refunding_sale'));
+				redirect('store/reports');
+			}
+		}
+
+		$note = 'Store refund: sale #' . $sale_id;
+
+		// Cash/card were paid into the physical safe, so the refund pays back out
+		// of it. Wallet/prepayment never touched the safe at sale time (see
+		// sell()), so the refund only credits the wallet back — mirrors the
+		// cash/wallet asymmetry documented for the sell flow. 'debt' never
+		// collected anything, so there's nothing financial to reverse; only the
+		// stock and the sale status change.
+		if (in_array($sale['payment_method'], array('cash', 'card'), TRUE)) {
+			$this->load->model('Safe_model');
+			$this->Safe_model->log_transaction(
+				'out',
+				'store_refund',
+				$sale['total'],
+				$sale_id,
+				'store_sales',
+				$note,
+				$this->auth->user_id()
+			);
+		} elseif (in_array($sale['payment_method'], array('wallet', 'prepayment'), TRUE) && $sale['patient_id']) {
+			$this->load->model('Wallet_model');
+			$this->Wallet_model->top_up_cash($sale['patient_id'], $sale['total'], NULL, $note);
+		}
+
+		$updated = $this->Store_model->mark_sale_refunded($sale_id, $sale);
+
+		if (!$updated) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('error_refunding_sale'));
+			redirect('store/reports');
+		}
+
+		$this->db->trans_complete();
+
+		if (!$this->db->trans_status()) {
+			$this->session->set_flashdata('error', t('error_refunding_sale'));
+			redirect('store/reports');
+		}
+
+		if (in_array($sale['payment_method'], array('wallet', 'prepayment'), TRUE) && $sale['patient_id']) {
+			$this->Wallet_model->recalculate_for_patient($sale['patient_id']);
+		}
+
+		$this->session->set_flashdata('success', t('sale_refunded_success'));
+		redirect('store/reports');
+	}
+
 	// ===== Reports =====
 	public function reports()
 	{

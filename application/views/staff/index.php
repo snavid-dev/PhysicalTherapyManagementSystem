@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= t('staff') ?></h1>
 		<p class="text-muted mb-0"><?= t('manage_staff') ?></p>
 	</div>
-	<a href="<?= base_url('staff/create') ?>" class="btn btn-dark"><?= t('add_staff') ?></a>
+	<a href="<?= base_url('staff/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_staff') ?></a>
 </div>
 
 <div class="card">
@@ -36,12 +36,12 @@
 						<td><?= $staff['status'] === 'active' ? t('Active') : t('Inactive') ?></td>
 						<td class="text-end">
 							<div class="d-flex gap-2 justify-content-end">
-								<a href="<?= base_url('staff/edit/' . $staff['id']) ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
-								<a href="<?= base_url('staff/profile/' . $staff['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Profile') ?></a>
+								<a href="<?= base_url('staff/edit/' . $staff['id']) ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+								<a href="<?= base_url('staff/profile/' . $staff['id']) ?>" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Profile') ?></a>
 								<?php if ($staff['status'] === 'active') : ?>
-									<a href="<?= base_url('staff/delete/' . $staff['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Deactivate this staff member?') ?>')"><?= t('Deactivate') ?></a>
+									<a href="<?= base_url('staff/delete/' . $staff['id']) ?>" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('Deactivate this staff member?') ?>')"><i class="bi bi-x-circle" aria-hidden="true"></i> <?= t('Deactivate') ?></a>
 								<?php else : ?>
-									<a href="<?= base_url('staff/activate/' . $staff['id']) ?>" class="btn btn-sm btn-outline-success"><?= t('Activate') ?></a>
+									<a href="<?= base_url('staff/activate/' . $staff['id']) ?>" class="btn btn-sm btn-outline-success btn-icon"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> <?= t('Activate') ?></a>
 								<?php endif; ?>
 							</div>
 						</td>

@@ -52,9 +52,9 @@
 				</div>
 				<div class="card-footer">
 					<div class="d-flex gap-2">
-						<button type="submit" name="action" value="approve" class="btn btn-success"><?= t('approve_requisition') ?></button>
-						<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal"><?= t('reject') ?></button>
-						<a href="<?= site_url('store/requisitions') ?>" class="btn btn-secondary"><?= t('cancel') ?></a>
+						<button type="submit" name="action" value="approve" class="btn btn-success btn-icon"><i class="bi bi-check-circle" aria-hidden="true"></i> <?= t('approve_requisition') ?></button>
+						<button type="button" class="btn btn-danger btn-icon" data-bs-toggle="modal" data-bs-target="#rejectModal"><i class="bi bi-x-circle" aria-hidden="true"></i> <?= t('reject') ?></button>
+						<a href="<?= site_url('store/requisitions') ?>" class="btn btn-secondary btn-icon"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('cancel') ?></a>
 					</div>
 				</div>
 			</form>
@@ -77,8 +77,8 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= t('cancel') ?></button>
-					<button type="submit" name="action" value="reject" class="btn btn-danger"><?= t('reject_requisition') ?></button>
+					<button type="button" class="btn btn-secondary btn-icon" data-bs-dismiss="modal"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('cancel') ?></button>
+					<button type="submit" name="action" value="reject" class="btn btn-danger btn-icon"><i class="bi bi-x-circle" aria-hidden="true"></i> <?= t('reject_requisition') ?></button>
 				</div>
 			</form>
 		</div>

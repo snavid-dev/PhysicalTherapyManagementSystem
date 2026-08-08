@@ -13,7 +13,7 @@
 			<h2 class="h5 mb-1"><?= t('daily_register') ?></h2>
 			<p class="text-muted mb-0"><?= t('register_title') ?></p>
 		</div>
-		<a href="<?= base_url('reports/daily-register') ?>" class="btn btn-dark"><?= t('daily_register') ?></a>
+		<a href="<?= base_url('reports/daily-register') ?>" class="btn btn-dark btn-icon"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i> <?= t('daily_register') ?></a>
 	</div>
 </div>
 
@@ -23,7 +23,7 @@
 			<h2 class="h5 mb-1"><?= t('Outstanding Balances') ?></h2>
 			<p class="text-muted mb-0"><?= t('Review patients with negative wallet balances or open debt.') ?></p>
 		</div>
-		<a href="<?= base_url('reports/outstanding-balances') ?>" class="btn btn-dark"><?= t('Open Report') ?></a>
+		<a href="<?= base_url('reports/outstanding-balances') ?>" class="btn btn-dark btn-icon"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i> <?= t('Open Report') ?></a>
 	</div>
 </div>
 
@@ -33,7 +33,7 @@
 			<h2 class="h5 mb-1"><?= t('Patient Financial Summary') ?></h2>
 			<p class="text-muted mb-0"><?= t('Review each patient balance, visit count, and total turn fees.') ?></p>
 		</div>
-		<a href="<?= base_url('reports/patient-financial-summary') ?>" class="btn btn-dark"><?= t('Open Report') ?></a>
+		<a href="<?= base_url('reports/patient-financial-summary') ?>" class="btn btn-dark btn-icon"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i> <?= t('Open Report') ?></a>
 	</div>
 </div>
 
@@ -43,7 +43,7 @@
 			<h2 class="h5 mb-1"><?= t('debtors_list') ?></h2>
 			<p class="text-muted mb-0"><?= t('debtors_list_hint') ?></p>
 		</div>
-		<a href="<?= base_url('reports/debtors') ?>" class="btn btn-dark"><?= t('Open Report') ?></a>
+		<a href="<?= base_url('reports/debtors') ?>" class="btn btn-dark btn-icon"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i> <?= t('Open Report') ?></a>
 	</div>
 </div>
 
@@ -53,7 +53,7 @@
 			<h2 class="h5 mb-1"><?= t('new_patients_report') ?></h2>
 			<p class="text-muted mb-0"><?= t('new_patients_report_hint') ?></p>
 		</div>
-		<a href="<?= base_url('reports/new-patients') ?>" class="btn btn-dark"><?= t('Open Report') ?></a>
+		<a href="<?= base_url('reports/new-patients') ?>" class="btn btn-dark btn-icon"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i> <?= t('Open Report') ?></a>
 	</div>
 </div>
 
@@ -69,7 +69,7 @@
 				<input type="text" name="to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($to) ?>">
 			</div>
 			<div class="col-md-4">
-				<button type="submit" class="btn btn-dark"><?= t('Apply') ?></button>
+				<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-funnel" aria-hidden="true"></i> <?= t('Apply') ?></button>
 			</div>
 		<?= form_close() ?>
 	</div>
@@ -91,7 +91,7 @@
 						<li class="list-group-item px-0 d-flex justify-content-between align-items-center gap-3 flex-wrap">
 							<span><?= html_escape(to_shamsi($turn['turn_date'])) ?> | <?= html_escape($turn['patient_first_name'] . ' ' . $turn['patient_last_name']) ?></span>
 							<?php if ($can_edit_turn && !empty($turn['id'])) : ?>
-								<a href="<?= base_url('turns/' . (int) $turn['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
+								<a href="<?= base_url('turns/' . (int) $turn['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
 							<?php endif; ?>
 						</li>
 					<?php endforeach; else : ?>

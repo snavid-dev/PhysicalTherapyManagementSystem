@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= t('expense_categories') ?></h1>
 		<p class="text-muted mb-0"><?= t('manage_expenses') ?></p>
 	</div>
-	<a href="<?= base_url('dashboard') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('dashboard') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card mb-4">
@@ -20,7 +20,7 @@
 					<input type="text" name="name_fa" class="form-control" value="<?= set_value('name_fa') ?>">
 				</div>
 				<div class="col-md-2">
-					<button type="submit" class="btn btn-dark"><?= t('add_expense_category') ?></button>
+					<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_expense_category') ?></button>
 				</div>
 			</div>
 		<?= form_close() ?>
@@ -46,12 +46,12 @@
 							<td><?= $category['name_fa'] ? html_escape($category['name_fa']) : '&mdash;' ?></td>
 							<td class="text-end">
 								<div class="d-flex gap-2 justify-content-end flex-wrap">
-									<button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#expense-category-edit-<?= $category['id'] ?>" aria-expanded="false">
-										<?= t('Edit') ?>
+									<button class="btn btn-sm btn-outline-secondary btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#expense-category-edit-<?= $category['id'] ?>" aria-expanded="false">
+										<i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?>
 									</button>
 									<?= form_open('preferences/expense-categories/delete/' . $category['id'], array('class' => 'd-inline')) ?>
-										<button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this expense category?') ?>')">
-											<?= t('Delete') ?>
+										<button type="submit" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('Delete this expense category?') ?>')">
+											<i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?>
 										</button>
 									<?= form_close() ?>
 								</div>
@@ -70,7 +70,7 @@
 											<input type="text" name="name_fa" class="form-control" value="<?= html_escape($category['name_fa']) ?>">
 										</div>
 										<div class="col-md-2">
-											<button type="submit" class="btn btn-dark"><?= t('Update') ?></button>
+											<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Update') ?></button>
 										</div>
 									</div>
 								<?= form_close() ?>

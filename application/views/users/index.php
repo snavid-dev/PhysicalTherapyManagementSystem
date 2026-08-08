@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= t('Users') ?></h1>
 		<p class="text-muted mb-0"><?= t('Login accounts and role assignments.') ?></p>
 	</div>
-	<a href="<?= base_url('users/create') ?>" class="btn btn-dark"><?= t('Add User') ?></a>
+	<a href="<?= base_url('users/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('Add User') ?></a>
 </div>
 
 <div class="card">
@@ -19,8 +19,8 @@
 						<td><?= html_escape($item['role_name']) ?></td>
 						<td><?= $item['is_active'] ? t('Active') : t('Inactive') ?></td>
 						<td class="text-end">
-							<a href="<?= base_url('users/' . $item['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary"><?= t('Edit') ?></a>
-							<a href="<?= base_url('users/' . $item['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('<?= t('Delete this user?') ?>')"><?= t('Delete') ?></a>
+							<a href="<?= base_url('users/' . $item['id'] . '/edit') ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+							<a href="<?= base_url('users/' . $item['id'] . '/delete') ?>" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm('<?= t('Delete this user?') ?>')"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></a>
 						</td>
 					</tr>
 				<?php endforeach; else : ?>

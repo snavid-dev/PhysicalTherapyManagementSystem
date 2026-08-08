@@ -7,7 +7,7 @@
 		</div>
 		<?php if ($this->auth->has_permission('manage_store')): ?>
 		<div class="col-auto">
-			<a href="<?= site_url('store/set_opening_stock') ?>" class="btn btn-primary"><?= t('set_opening_stock') ?></a>
+			<a href="<?= site_url('store/set_opening_stock') ?>" class="btn btn-primary btn-icon" data-tooltip="1" title="<?= html_escape(t('stock_intake_hint')) ?>"><i class="bi bi-sliders" aria-hidden="true"></i> <?= t('set_opening_stock') ?></a>
 		</div>
 		<?php endif; ?>
 	</div>

@@ -518,6 +518,11 @@ class Wallet_model extends CI_Model
 		if (!$in_outer_transaction) {
 			if ($this->db->trans_status() === FALSE) {
 				$this->db->trans_rollback();
+				// No caller checks this return value, and the wallet write that led here
+				// already committed — without this, a failed sweep here silently leaves
+				// the wallet balance and open auto-settleable debts out of sync forever
+				// (see the 2026-08 backfill of 23 patients stuck this way).
+				log_message('error', 'Wallet_model::recalculate_for_patient failed to commit for patient #' . $patient_id . ' — wallet balance and open debts may be out of sync.');
 				return FALSE;
 			}
 			$this->db->trans_commit();

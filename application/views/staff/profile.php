@@ -4,9 +4,9 @@
 		<p class="text-muted mb-0"><?= html_escape($staff['first_name'] . ' ' . $staff['last_name']) ?></p>
 	</div>
 	<div class="d-flex gap-2">
-		<a href="<?= base_url('salaries/pay/' . $staff['id'] . '?month=' . rawurlencode($current_month_shamsi)) ?>" class="btn btn-dark"><?= t('go_to_salary_payment') ?></a>
-		<a href="<?= base_url('staff/edit/' . $staff['id']) ?>" class="btn btn-outline-secondary"><?= t('Edit') ?></a>
-		<a href="<?= base_url('staff') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+		<a href="<?= base_url('salaries/pay/' . $staff['id'] . '?month=' . rawurlencode($current_month_shamsi)) ?>" class="btn btn-dark btn-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i> <?= t('go_to_salary_payment') ?></a>
+		<a href="<?= base_url('staff/edit/' . $staff['id']) ?>" class="btn btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
+		<a href="<?= base_url('staff') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 	</div>
 </div>
 
@@ -110,7 +110,7 @@
 					</div>
 					<div class="d-flex gap-2 flex-wrap">
 						<input type="text" id="salaryMonth" class="form-control shamsi-month" placeholder="1403/01" value="<?= html_escape($current_month_shamsi) ?>" style="max-width: 180px;">
-						<button type="button" class="btn btn-dark" id="calculateSalaryButton"><?= t('calculate_salary') ?></button>
+						<button type="button" class="btn btn-dark btn-icon" id="calculateSalaryButton"><i class="bi bi-calculator" aria-hidden="true"></i> <?= t('calculate_salary') ?></button>
 					</div>
 				</div>
 				<div id="salaryCalculationError" class="alert alert-danger d-none"></div>

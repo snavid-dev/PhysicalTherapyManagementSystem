@@ -8,7 +8,7 @@ $can_open_patient = $this->auth->has_permission('manage_patients');
 		<h1 class="h3 mb-1"><?= t('new_patients_report') ?></h1>
 		<p class="text-muted mb-0"><?= t('new_patients_report_hint') ?></p>
 	</div>
-	<a href="<?= base_url('reports') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('reports') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card mb-4">
@@ -23,7 +23,7 @@ $can_open_patient = $this->auth->has_permission('manage_patients');
 				<input type="text" name="to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($to) ?>">
 			</div>
 			<div class="col-md-4">
-				<button type="submit" class="btn btn-dark w-100"><?= t('Apply') ?></button>
+				<button type="submit" class="btn btn-dark w-100 btn-icon"><i class="bi bi-funnel" aria-hidden="true"></i> <?= t('Apply') ?></button>
 			</div>
 		<?= form_close() ?>
 	</div>
@@ -68,7 +68,7 @@ $can_open_patient = $this->auth->has_permission('manage_patients');
 						<td><?= !empty($row['referred_by_name']) ? html_escape($row['referred_by_name']) : '&mdash;' ?></td>
 						<td class="no-export text-end">
 							<?php if ($can_open_patient) : ?>
-								<a href="<?= base_url('patients/' . (int) $row['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Open') ?></a>
+								<a href="<?= base_url('patients/' . (int) $row['id']) ?>" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Open') ?></a>
 							<?php else : ?>
 								&mdash;
 							<?php endif; ?>

@@ -41,8 +41,8 @@ foreach ($records as $record) {
 					</select>
 				</div>
 				<div class="col-md-2 d-flex gap-2 align-items-end">
-					<button type="submit" class="btn btn-dark w-100"><?= t('Apply') ?></button>
-					<a href="<?= base_url('salaries') ?>" class="btn btn-outline-secondary w-100"><?= t('Reset') ?></a>
+					<button type="submit" class="btn btn-dark w-100 btn-icon"><i class="bi bi-search" aria-hidden="true"></i> <?= t('Apply') ?></button>
+					<a href="<?= base_url('salaries') ?>" class="btn btn-outline-secondary w-100 btn-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('Reset') ?></a>
 				</div>
 			</div>
 		</form>
@@ -92,7 +92,7 @@ foreach ($records as $record) {
 								<?php endif; ?>
 							</td>
 							<td class="no-export text-end">
-								<a href="<?= base_url('salaries/pay/' . $record['staff_id'] . '?month=' . rawurlencode(gregorian_month_to_shamsi($record['month']))) ?>" class="btn btn-sm btn-dark"><?= t('salary_payment') ?></a>
+								<a href="<?= base_url('salaries/pay/' . $record['staff_id'] . '?month=' . rawurlencode(gregorian_month_to_shamsi($record['month']))) ?>" class="btn btn-sm btn-dark btn-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i> <?= t('salary_payment') ?></a>
 							</td>
 						</tr>
 					<?php endforeach; ?>

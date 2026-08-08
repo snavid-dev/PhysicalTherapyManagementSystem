@@ -48,6 +48,6 @@
 	</div>
 
 	<div class="d-flex gap-2">
-		<a href="<?= site_url('store/stock_receipts') ?>" class="btn btn-secondary"><?= t('Back') ?></a>
+		<a href="<?= site_url('store/stock_receipts') ?>" class="btn btn-secondary btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 	</div>
 </div>

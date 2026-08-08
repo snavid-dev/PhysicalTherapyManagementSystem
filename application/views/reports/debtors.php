@@ -18,8 +18,8 @@ foreach ($debtors as $debtor) {
 		<p class="text-muted mb-0"><?= t('debtors_list_hint') ?></p>
 	</div>
 	<div class="d-flex gap-2">
-		<a href="<?= base_url('reports/debtors/print') ?>" class="btn btn-outline-dark" target="_blank" rel="noopener"><?= t('print_register') ?></a>
-		<a href="<?= base_url('reports') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+		<a href="<?= base_url('reports/debtors/print') ?>" class="btn btn-outline-dark btn-icon" target="_blank" rel="noopener"><i class="bi bi-printer" aria-hidden="true"></i> <?= t('print_register') ?></a>
+		<a href="<?= base_url('reports') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 	</div>
 </div>
 
@@ -84,7 +84,7 @@ foreach ($debtors as $debtor) {
 							<td><?= $last_turn !== '' ? html_escape($last_turn) : '&mdash;' ?></td>
 							<td class="no-export text-end">
 								<?php if ($can_open_patient) : ?>
-									<a href="<?= base_url('patients/' . (int) $row['id']) ?>" class="btn btn-sm btn-outline-dark"><?= t('Open') ?></a>
+									<a href="<?= base_url('patients/' . (int) $row['id']) ?>" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Open') ?></a>
 								<?php else : ?>
 									&mdash;
 								<?php endif; ?>

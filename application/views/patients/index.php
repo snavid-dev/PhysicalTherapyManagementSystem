@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= t('Patients') ?></h1>
 		<p class="text-muted mb-0"><?= t('Basic patient records and profile access.') ?></p>
 	</div>
-	<a href="<?= base_url('patients/create') ?>" class="btn btn-dark"><?= t('Add Patient') ?></a>
+	<a href="<?= base_url('patients/create') ?>" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('Add Patient') ?></a>
 </div>
 
 <div class="card">

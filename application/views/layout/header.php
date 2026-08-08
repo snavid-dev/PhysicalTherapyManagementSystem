@@ -16,6 +16,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 	<link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>">
 	<script>
 		window.APP_LANG = <?= json_encode($current_locale ?? ($this->session->userdata('app_locale') ?: 'farsi')) ?>;
@@ -120,23 +121,23 @@
 			</ul>
 			<div class="d-flex align-items-center gap-3 header-tools">
 				<div class="dropdown">
-					<button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button"><?= html_escape($auth_user['first_name'] . ' ' . $auth_user['last_name']) ?></button>
+					<button class="btn btn-outline-secondary btn-sm dropdown-toggle btn-icon" data-bs-toggle="dropdown" type="button"><i class="bi bi-person-circle" aria-hidden="true"></i> <?= html_escape($auth_user['first_name'] . ' ' . $auth_user['last_name']) ?></button>
 					<ul class="dropdown-menu dropdown-menu-end">
 						<?php if ($this->auth->has_permission('manage_patients')) : ?>
-							<li><a class="dropdown-item" href="<?= base_url('preferences/diagnoses') ?>"><?= t('manage_diagnoses') ?></a></li>
+							<li><a class="dropdown-item btn-icon" href="<?= base_url('preferences/diagnoses') ?>"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i> <?= t('manage_diagnoses') ?></a></li>
 						<?php endif; ?>
 						<?php if ($this->auth->has_permission('manage_expenses')) : ?>
-							<li><a class="dropdown-item" href="<?= base_url('preferences/expense-categories') ?>"><?= t('expense_categories') ?></a></li>
+							<li><a class="dropdown-item btn-icon" href="<?= base_url('preferences/expense-categories') ?>"><i class="bi bi-tags" aria-hidden="true"></i> <?= t('expense_categories') ?></a></li>
 						<?php endif; ?>
 						<?php if ($this->auth->has_permission('manage_patients') || $this->auth->has_permission('manage_expenses')) : ?>
 							<li><hr class="dropdown-divider"></li>
 						<?php endif; ?>
-						<li><a class="dropdown-item <?= $current_locale === 'farsi' ? 'active' : '' ?>" href="<?= base_url('preferences/language/farsi') ?>"><?= t('Farsi') ?></a></li>
-						<li><a class="dropdown-item <?= $current_locale === 'english' ? 'active' : '' ?>" href="<?= base_url('preferences/language/english') ?>"><?= t('English') ?></a></li>
+						<li><a class="dropdown-item btn-icon <?= $current_locale === 'farsi' ? 'active' : '' ?>" href="<?= base_url('preferences/language/farsi') ?>"><i class="bi bi-translate" aria-hidden="true"></i> <?= t('Farsi') ?></a></li>
+						<li><a class="dropdown-item btn-icon <?= $current_locale === 'english' ? 'active' : '' ?>" href="<?= base_url('preferences/language/english') ?>"><i class="bi bi-translate" aria-hidden="true"></i> <?= t('English') ?></a></li>
 						<li><hr class="dropdown-divider"></li>
-						<li><a class="dropdown-item" href="<?= base_url('preferences/theme/' . ($current_theme === 'dark' ? 'light' : 'dark')) ?>"><?= $current_theme === 'dark' ? t('Light Mode') : t('Dark Mode') ?></a></li>
+						<li><a class="dropdown-item btn-icon" href="<?= base_url('preferences/theme/' . ($current_theme === 'dark' ? 'light' : 'dark')) ?>"><i class="bi bi-<?= $current_theme === 'dark' ? 'sun' : 'moon-stars' ?>" aria-hidden="true"></i> <?= $current_theme === 'dark' ? t('Light Mode') : t('Dark Mode') ?></a></li>
 						<li><hr class="dropdown-divider"></li>
-						<li><a class="dropdown-item" href="<?= base_url('logout') ?>"><?= t('Logout') ?></a></li>
+						<li><a class="dropdown-item btn-icon" href="<?= base_url('logout') ?>"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> <?= t('Logout') ?></a></li>
 					</ul>
 				</div>
 			</div>

@@ -140,11 +140,18 @@
 								<td class="text-end"><?= number_format($sale['total'], 2) ?></td>
 								<td><?= html_escape($sale['first_name'] . ' ' . $sale['last_name']) ?></td>
 								<td>
-									<a href="<?= site_url('store/receipt/' . $sale['id']) ?>" class="btn btn-sm btn-outline-secondary"><?= t('view') ?></a>
+									<a href="<?= site_url('store/receipt/' . $sale['id']) ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-receipt" aria-hidden="true"></i> <?= t('view') ?></a>
 									<?php if ($sale['payment_method'] === 'debt' && $sale['debt_status'] === 'open'): ?>
 										<form method="post" action="<?= site_url('store/clear_sale_debt/' . $sale['id']) ?>" class="d-inline">
-											<button type="submit" class="btn btn-sm btn-outline-success"><?= t('mark_debt_cleared') ?></button>
+											<button type="submit" class="btn btn-sm btn-outline-success btn-icon"><i class="bi bi-check-circle" aria-hidden="true"></i> <?= t('mark_debt_cleared') ?></button>
 										</form>
+									<?php endif; ?>
+									<?php if ($sale['status'] === 'completed'): ?>
+										<form method="post" action="<?= site_url('store/refund_sale/' . $sale['id']) ?>" class="d-inline" onsubmit="return confirm('<?= t('confirm_refund_sale') ?>');">
+											<button type="submit" class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('refund') ?></button>
+										</form>
+									<?php else: ?>
+										<span class="badge bg-secondary"><?= html_escape(t('sale_status_' . $sale['status'])) ?></span>
 									<?php endif; ?>
 								</td>
 							</tr>

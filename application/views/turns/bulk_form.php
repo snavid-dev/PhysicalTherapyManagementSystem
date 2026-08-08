@@ -51,7 +51,7 @@ $initial_rows = array_map(static function ($row) {
 		<h1 class="h3 mb-1"><?= t('bulk_turns') ?></h1>
 		<p class="text-muted mb-0"><?= t('Add many turns for one day from a single screen.') ?></p>
 	</div>
-	<a href="<?= base_url('turns') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('turns') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <?= form_open('turns/bulk/store', array('id' => 'bulkTurnsForm')) ?>
@@ -98,8 +98,8 @@ $initial_rows = array_map(static function ($row) {
 			</div>
 			<div class="col-lg-3">
 				<div class="d-grid gap-2">
-					<button type="button" class="btn btn-dark" id="addBulkRowButton"><?= t('add_row') ?></button>
-					<button type="button" class="btn btn-outline-dark" id="addBulkRowsButton"><?= t('add_rows') ?></button>
+					<button type="button" class="btn btn-dark btn-icon" id="addBulkRowButton"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_row') ?></button>
+					<button type="button" class="btn btn-outline-dark btn-icon" id="addBulkRowsButton"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_rows') ?></button>
 				</div>
 			</div>
 		</div>
@@ -108,7 +108,7 @@ $initial_rows = array_map(static function ($row) {
 
 <div class="d-flex justify-content-between align-items-center mb-3">
 	<div class="text-muted small"><?= t('payment_summary') ?>: <?= t('Each row is saved with accepted status and the shared date above.') ?></div>
-	<button type="submit" class="btn btn-dark"><?= t('Save All Turns') ?></button>
+	<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save All Turns') ?></button>
 </div>
 
 <div id="bulkRows" class="bulk-turn-rows"></div>
@@ -222,8 +222,8 @@ $initial_rows = array_map(static function ($row) {
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-outline-secondary bulk-create-patient-close" data-bs-dismiss="modal"><?= t('Close') ?></button>
-					<button type="button" class="btn btn-dark" id="bulkCreatePatientSubmit"><?= t('Save Patient') ?></button>
+					<button type="button" class="btn btn-outline-secondary btn-icon bulk-create-patient-close" data-bs-dismiss="modal"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('Close') ?></button>
+					<button type="button" class="btn btn-dark btn-icon" id="bulkCreatePatientSubmit"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save Patient') ?></button>
 				</div>
 			</div>
 		</div>
@@ -234,15 +234,15 @@ $initial_rows = array_map(static function ($row) {
 	<div class="card bulk-turn-row mb-4" data-index="__INDEX__" data-fee-edited="0">
 		<div class="card-header d-flex justify-content-between align-items-center gap-3">
 			<div class="d-flex align-items-center gap-3 flex-wrap">
-				<button type="button" class="btn btn-sm btn-outline-secondary bulk-toggle-row" aria-expanded="true">
-					<span class="bulk-toggle-label"><?= t('Collapse') ?></span>
+				<button type="button" class="btn btn-sm btn-outline-secondary btn-icon bulk-toggle-row" aria-expanded="true">
+					<i class="bi bi-arrow-down-up" aria-hidden="true"></i> <span class="bulk-toggle-label"><?= t('Collapse') ?></span>
 				</button>
 				<div>
 					<div class="fw-semibold bulk-row-title"><?= t('row_number') ?> __ROW_NUMBER__</div>
 					<div class="text-muted small bulk-row-summary-title"><?= t('Patient') ?>: <?= t('Select') ?> | <?= t('fee') ?>: 0 | <?= t('payment_type') ?>: <?= t('cash') ?></div>
 				</div>
 			</div>
-			<button type="button" class="btn btn-sm btn-outline-danger bulk-remove-row" aria-label="<?= t('remove_row') ?>">&times;</button>
+			<button type="button" class="btn btn-sm btn-outline-danger btn-icon bulk-remove-row" aria-label="<?= t('remove_row') ?>" data-tooltip="1" title="<?= html_escape(t('remove_row')) ?>"><i class="bi bi-dash-circle" aria-hidden="true"></i></button>
 		</div>
 		<div class="card-body bulk-row-body">
 			<div class="bulk-row-errors d-none alert alert-danger py-2 px-3 mb-3"></div>
@@ -255,7 +255,7 @@ $initial_rows = array_map(static function ($row) {
 							<select class="form-select bulk-patient-select s2-select" data-placeholder="<?= html_escape(t('search_patient')) ?>"></select>
 							<?php if ($can_manage_patients) : ?>
 								<div class="mt-2">
-									<button type="button" class="btn btn-sm btn-outline-dark bulk-create-patient-button"><?= t('Create Patient') ?></button>
+									<button type="button" class="btn btn-sm btn-outline-dark btn-icon bulk-create-patient-button"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('Create Patient') ?></button>
 								</div>
 							<?php endif; ?>
 						</div>
@@ -287,7 +287,7 @@ $initial_rows = array_map(static function ($row) {
 									<span class="badge rounded-pill bg-secondary-subtle text-secondary bulk-debt-badge"><?= format_amount(0) ?></span>
 								</div>
 								<div class="turn-financial-item bulk-debt-toggle-wrap d-none">
-									<button type="button" class="btn btn-sm btn-outline-secondary bulk-debt-toggle"><?= t('open_debts') ?></button>
+									<button type="button" class="btn btn-sm btn-outline-secondary btn-icon bulk-debt-toggle"><i class="bi bi-chevron-down" aria-hidden="true"></i> <?= t('open_debts') ?></button>
 								</div>
 							</div>
 						</div>
@@ -322,7 +322,7 @@ $initial_rows = array_map(static function ($row) {
 							<div class="alert alert-info py-2 px-3 mt-2 d-none bulk-discount-info">
 								<div class="small fw-semibold bulk-discount-info-text"></div>
 								<div class="small text-warning-emphasis mt-2 d-none bulk-fee-warning"><?= t('fee_overridden') ?></div>
-								<a href="#" class="small d-none bulk-reset-discount-link"><?= t('reset_to_discounted') ?></a>
+								<a href="#" class="small btn-icon d-none bulk-reset-discount-link"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('reset_to_discounted') ?></a>
 							</div>
 						</div>
 						<div class="col-md-6 bulk-cash-wrap d-none">

@@ -86,9 +86,9 @@ class Patients extends Authenticated_Controller
 		$phone = $patient['phone'] ?? NULL;
 
 		$actions = '<div class="d-flex gap-2 justify-content-end flex-wrap">'
-			. '<a href="' . base_url('patients/' . $id) . '" class="btn btn-sm btn-outline-dark">' . html_escape(t('Profile')) . '</a>'
-			. '<a href="' . base_url('patients/' . $id . '/edit') . '" class="btn btn-sm btn-outline-secondary">' . html_escape(t('Edit')) . '</a>'
-			. '<a href="' . base_url('patients/' . $id . '/delete') . '" class="btn btn-sm btn-outline-danger" onclick="return confirm(\'' . html_escape(t('Delete this patient?')) . '\')">' . html_escape(t('Delete')) . '</a>'
+			. '<a href="' . base_url('patients/' . $id) . '" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> ' . html_escape(t('Profile')) . '</a>'
+			. '<a href="' . base_url('patients/' . $id . '/edit') . '" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> ' . html_escape(t('Edit')) . '</a>'
+			. '<a href="' . base_url('patients/' . $id . '/delete') . '" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm(\'' . html_escape(t('Delete this patient?')) . '\')"><i class="bi bi-trash" aria-hidden="true"></i> ' . html_escape(t('Delete')) . '</a>'
 			. '</div>';
 
 		return array(
@@ -178,7 +178,7 @@ class Patients extends Authenticated_Controller
 		// Full history, not the default recent-20 page — financial_summary/timeline
 		// below need every transaction to total correctly.
 		$wallet_transactions = $this->Wallet_model->get_transactions($id, 0);
-		$open_debts = $this->Debt_model->get_open_debts($id);
+		$open_debts = $this->Debt_model->get_all_debts_for_patient($id);
 		$total_open_debt = $this->Debt_model->get_total_open_debt($id);
 		show_404_if_empty($patient);
 
@@ -802,6 +802,10 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($patient_id, t('Payment not found.'), 404, $wants_json);
 		}
 
+		if (!$this->Debt_model->payment_is_reconcilable((int) $payment_id, (float) $payment['amount'])) {
+			return $this->respond_wallet_topup_error($patient_id, t('This payment predates automatic debt-application tracking and cannot be safely auto-reversed. Adjust the affected debt manually before deleting this payment.'), 422, $wants_json);
+		}
+
 		$this->db->trans_begin();
 
 		$this->Wallet_model->ensure_wallet_exists($patient_id);
@@ -1237,6 +1241,7 @@ class Patients extends Authenticated_Controller
 				'debt_date' => to_shamsi((string) $debt['debt_date']),
 				'section_name' => !empty($debt['section_name']) ? t($debt['section_name']) : '',
 				'debt_type' => (string) ($debt['debt_type'] ?? 'auto_settleable'),
+				'status' => (string) ($debt['status'] ?? 'open'),
 			);
 		}, $debts);
 	}
@@ -1248,7 +1253,7 @@ class Patients extends Authenticated_Controller
 		$turns = $this->Turn_model->get_turns_for_patient($patient_id);
 		$wallet_balance = (float) $this->Wallet_model->get_balance($patient_id);
 		$wallet_breakdown = $this->Wallet_model->get_balance_breakdown($patient_id);
-		$open_debts = $this->Debt_model->get_open_debts($patient_id);
+		$open_debts = $this->Debt_model->get_all_debts_for_patient($patient_id);
 		$total_open_debt = (float) $this->Debt_model->get_total_open_debt($patient_id);
 
 		return array(
@@ -1318,7 +1323,7 @@ class Patients extends Authenticated_Controller
 		$historical_wallet_credits = 0.00;
 		$wallet_deductions = 0.00;
 		$turn_cash_total = 0.00;
-		$turn_debt_total = 0.00;
+		$paid_by_section = array();
 
 		foreach ($wallet_transactions as $transaction) {
 			$type = (string) ($transaction['type'] ?? '');
@@ -1340,8 +1345,25 @@ class Patients extends Authenticated_Controller
 
 		foreach ($turns as $turn) {
 			$turn_cash_total += (float) ($turn['cash_collected'] ?? 0);
-			$turn_debt_total += max(0, (float) ($turn['fee'] ?? 0) - (float) ($turn['wallet_deducted'] ?? 0) - (float) ($turn['cash_collected'] ?? 0));
+
+			$paid = round((float) ($turn['cash_collected'] ?? 0) + (float) ($turn['wallet_deducted'] ?? 0), 2);
+			if ($paid <= 0) {
+				continue;
+			}
+
+			$section_id = (int) ($turn['section_id'] ?? 0);
+			if (!isset($paid_by_section[$section_id])) {
+				$paid_by_section[$section_id] = array(
+					'section_name' => !empty($turn['section_name']) ? $turn['section_name'] : NULL,
+					'paid' => 0.00,
+				);
+			}
+			$paid_by_section[$section_id]['paid'] = round($paid_by_section[$section_id]['paid'] + $paid, 2);
 		}
+
+		usort($paid_by_section, static function ($left, $right) {
+			return $right['paid'] <=> $left['paid'];
+		});
 
 		return array(
 			'wallet_balance' => (float) $wallet_balance,
@@ -1353,7 +1375,7 @@ class Patients extends Authenticated_Controller
 			'historical_wallet_credits' => $historical_wallet_credits,
 			'wallet_deductions' => $wallet_deductions,
 			'turn_cash_total' => $turn_cash_total,
-			'turn_debt_total' => $turn_debt_total,
+			'paid_by_section' => $paid_by_section,
 		);
 	}
 
@@ -1365,8 +1387,15 @@ class Patients extends Authenticated_Controller
 			$type = (string) ($transaction['type'] ?? '');
 			$fund_type = (string) ($transaction['fund_type'] ?? 'cash_topup');
 			$is_topup = $type === 'topup';
+			$note = (string) ($transaction['note'] ?? '');
 
-			if ($type === 'auto_debt_settlement') {
+			if (strpos($note, 'REVERSAL:') === 0) {
+				// Internal bookkeeping (Wallet_model::reversal_note()), not money the
+				// patient paid or was refunded — keep it visually distinct from a real
+				// cash top-up so it can't be mistaken for a payment and double-counted.
+				$label_key = 'wallet_correction';
+				$badge = 'secondary';
+			} elseif ($type === 'auto_debt_settlement') {
 				$label_key = 'auto_debt_settlement';
 				$badge = 'primary';
 			} elseif ($type === 'refund') {
@@ -1584,6 +1613,13 @@ class Patients extends Authenticated_Controller
 			->join('sections', 'sections.id = patient_wallet_transactions.section_id', 'left')
 			->join('staff', 'staff.id = patient_wallet_transactions.staff_id', 'left')
 			->where('patient_wallet_transactions.patient_id', $patient_id)
+			// Reversal entries (Wallet_model::reversal_note(), always prefixed
+			// 'REVERSAL:') are internal bookkeeping for a cancelled/edited turn, never
+			// a real payment or refund. When the turn is deleted outright, its FK
+			// (ON DELETE SET NULL) nulls out turn_id on the reversal row too, which
+			// would otherwise satisfy the "topup with no turn" branch below and list
+			// it here as a phantom standalone payment.
+			->where("(patient_wallet_transactions.note NOT LIKE 'REVERSAL:%' OR patient_wallet_transactions.note IS NULL)", NULL, FALSE)
 			->group_start()
 				->where('patient_wallet_transactions.type', 'refund')
 				->or_group_start()

@@ -9,8 +9,8 @@
 			</div>
 			<?php if ($this->auth->has_permission('manage_store')): ?>
 			<div class="d-flex gap-2 flex-wrap">
-				<a href="<?= site_url('store/sell') ?>" class="btn btn-primary btn-lg"><?= t('sell_product') ?></a>
-				<a href="<?= site_url('store/bulk_sell') ?>" class="btn btn-outline-primary btn-lg"><?= t('bulk_sell') ?></a>
+				<a href="<?= site_url('store/sell') ?>" class="btn btn-primary btn-lg btn-icon"><i class="bi bi-cart-check" aria-hidden="true"></i> <?= t('sell_product') ?></a>
+				<a href="<?= site_url('store/bulk_sell') ?>" class="btn btn-outline-primary btn-lg btn-icon"><i class="bi bi-cart-plus" aria-hidden="true"></i> <?= t('bulk_sell') ?></a>
 			</div>
 			<?php endif; ?>
 		</div>
@@ -81,7 +81,9 @@
 					</div>
 					<h5 class="card-title"><?= t('stock') ?></h5>
 					<p class="card-text text-muted small"><?= t('view_manage_stock_levels') ?></p>
-					<a href="<?= site_url('store/stock') ?>" class="btn btn-outline-primary"><?= t('go_to_stock') ?></a>
+					<div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+						<a href="<?= site_url('store/stock') ?>" class="btn btn-outline-primary btn-icon"><i class="bi bi-clipboard-data" aria-hidden="true"></i> <?= t('go_to_stock') ?></a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -106,7 +108,9 @@
 						<?php endif; ?>
 					</h5>
 					<p class="card-text text-muted small"><?= t('bulk_sell_hint') ?></p>
-					<a href="<?= site_url('store/sale_batches') ?>" class="btn btn-outline-primary"><?= t('sale_batches') ?></a>
+					<div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+						<a href="<?= site_url('store/sale_batches') ?>" class="btn btn-outline-primary btn-icon"><i class="bi bi-collection" aria-hidden="true"></i> <?= t('sale_batches') ?></a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -122,7 +126,9 @@
 					</div>
 					<h5 class="card-title"><?= t('store_reports') ?></h5>
 					<p class="card-text text-muted small"><?= t('store_reports_hint') ?></p>
-					<a href="<?= site_url('store/reports') ?>" class="btn btn-outline-primary"><?= t('store_reports') ?></a>
+					<div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+						<a href="<?= site_url('store/reports') ?>" class="btn btn-outline-primary btn-icon"><i class="bi bi-graph-up" aria-hidden="true"></i> <?= t('store_reports') ?></a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -139,8 +145,10 @@
 					</div>
 					<h5 class="card-title"><?= t('store_products') ?></h5>
 					<p class="card-text text-muted small"><?= t('manage_products_and_variants') ?></p>
-					<a href="<?= site_url('store/products') ?>" class="btn btn-outline-primary"><?= t('go_to_products') ?></a>
-					<a href="<?= site_url('store/categories') ?>" class="btn btn-outline-secondary btn-sm ms-1"><?= t('manage_categories') ?></a>
+					<div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+						<a href="<?= site_url('store/products') ?>" class="btn btn-outline-primary btn-icon"><i class="bi bi-box" aria-hidden="true"></i> <?= t('go_to_products') ?></a>
+						<a href="<?= site_url('store/categories') ?>" class="btn btn-outline-secondary btn-sm btn-icon"><i class="bi bi-tags" aria-hidden="true"></i> <?= t('manage_categories') ?></a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -155,7 +163,9 @@
 					</div>
 					<h5 class="card-title"><?= t('set_opening_stock') ?></h5>
 					<p class="card-text text-muted small"><?= t('stock_intake_hint') ?></p>
-					<a href="<?= site_url('store/set_opening_stock') ?>" class="btn btn-outline-primary"><?= t('set_opening_stock') ?></a>
+					<div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+						<a href="<?= site_url('store/set_opening_stock') ?>" class="btn btn-outline-primary btn-icon" data-tooltip="1" title="<?= html_escape(t('stock_intake_hint')) ?>"><i class="bi bi-sliders" aria-hidden="true"></i> <?= t('set_opening_stock') ?></a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -180,7 +190,9 @@
 						<?php endif; ?>
 					</h5>
 					<p class="card-text text-muted small"><?= t('request_to_location') ?></p>
-					<a href="<?= site_url('store/requisitions') ?>" class="btn btn-outline-primary"><?= t('requisitions') ?></a>
+					<div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+						<a href="<?= site_url('store/requisitions') ?>" class="btn btn-outline-primary btn-icon"><i class="bi bi-clipboard-check" aria-hidden="true"></i> <?= t('requisitions') ?></a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -197,8 +209,10 @@
 					</div>
 					<h5 class="card-title"><?= t('stock_receipts') ?></h5>
 					<p class="card-text text-muted small"><?= t('receive_stock') ?></p>
-					<a href="<?= site_url('store/receive_stock') ?>" class="btn btn-outline-primary"><?= t('receive_stock') ?></a>
-					<a href="<?= site_url('store/stock_receipts') ?>" class="btn btn-outline-secondary btn-sm ms-1"><?= t('stock_receipts') ?></a>
+					<div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+						<a href="<?= site_url('store/receive_stock') ?>" class="btn btn-outline-primary btn-icon"><i class="bi bi-box-seam" aria-hidden="true"></i> <?= t('receive_stock') ?></a>
+						<a href="<?= site_url('store/stock_receipts') ?>" class="btn btn-outline-secondary btn-sm btn-icon"><i class="bi bi-eye" aria-hidden="true"></i> <?= t('stock_receipts') ?></a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -216,7 +230,9 @@
 					</div>
 					<h5 class="card-title"><?= t('suppliers') ?></h5>
 					<p class="card-text text-muted small"><?= t('suppliers') ?></p>
-					<a href="<?= site_url('store/suppliers') ?>" class="btn btn-outline-primary"><?= t('suppliers') ?></a>
+					<div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+						<a href="<?= site_url('store/suppliers') ?>" class="btn btn-outline-primary btn-icon"><i class="bi bi-truck" aria-hidden="true"></i> <?= t('suppliers') ?></a>
+					</div>
 				</div>
 			</div>
 		</div>

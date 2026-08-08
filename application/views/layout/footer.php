@@ -18,5 +18,6 @@
 	<script src="<?= base_url('assets/js/shamsi.js') ?>"></script>
 	<script src="<?= base_url('assets/js/datatables-init.js') ?>"></script>
 	<script src="<?= base_url('assets/js/select2-init.js') ?>"></script>
+	<script src="<?= base_url('assets/js/tooltip-init.js') ?>"></script>
 </body>
 </html>

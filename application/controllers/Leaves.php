@@ -8,6 +8,7 @@ class Leaves extends Authenticated_Controller
 		parent::__construct();
 		$this->load->model('Leave_model');
 		$this->load->model('Staff_model');
+		$this->load->model('Salary_model');
 	}
 
 	public function index()
@@ -36,7 +37,9 @@ class Leaves extends Authenticated_Controller
 			return $this->form(NULL, 'leaves/store');
 		}
 
-		$this->Leave_model->create($this->leave_payload());
+		$payload = $this->leave_payload();
+		$this->Leave_model->create($payload);
+		$this->Salary_model->reconcile_leave_impact($payload['staff_id'], $payload['start_date'], $payload['end_date']);
 		$this->session->set_flashdata('success', t('Leave saved successfully.'));
 		redirect('leaves');
 	}
@@ -60,7 +63,13 @@ class Leaves extends Authenticated_Controller
 			return $this->form($leave, 'leaves/' . $id . '/update');
 		}
 
-		$this->Leave_model->update($id, $this->leave_payload());
+		$payload = $this->leave_payload();
+		$this->Leave_model->update($id, $payload);
+		// Reconcile both the old and new ranges -- if the staff member or dates
+		// changed, a month that used to include this leave may no longer, and a
+		// newly-covered month needs the leave applied.
+		$this->Salary_model->reconcile_leave_impact($leave['staff_id'], $leave['start_date'], $leave['end_date']);
+		$this->Salary_model->reconcile_leave_impact($payload['staff_id'], $payload['start_date'], $payload['end_date']);
 		$this->session->set_flashdata('success', t('Leave updated successfully.'));
 		redirect('leaves');
 	}
@@ -72,6 +81,7 @@ class Leaves extends Authenticated_Controller
 		show_404_if_empty($leave);
 
 		$this->Leave_model->delete($id);
+		$this->Salary_model->reconcile_leave_impact($leave['staff_id'], $leave['start_date'], $leave['end_date']);
 		$this->session->set_flashdata('success', t('Leave deleted successfully.'));
 		redirect('leaves');
 	}

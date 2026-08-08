@@ -139,9 +139,9 @@ $reference_label = static function ($entry) {
 		<p class="text-muted mb-0"><?= t('Manual other income and cash movement ledger.') ?></p>
 	</div>
 	<div class="d-flex gap-2 flex-wrap">
-		<button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addIncomeModal"><?= t('add_income') ?></button>
+		<button type="button" class="btn btn-dark btn-icon" data-bs-toggle="modal" data-bs-target="#addIncomeModal"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_income') ?></button>
 		<?php if ($manage_safe) : ?>
-			<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#adjustBalanceModal"><?= t('adjust_balance') ?></button>
+			<button type="button" class="btn btn-outline-dark btn-icon" data-bs-toggle="modal" data-bs-target="#adjustBalanceModal" data-tooltip="1" title="<?= html_escape(t('adjustment_warning')) ?>"><i class="bi bi-sliders" aria-hidden="true"></i> <?= t('adjust_balance') ?></button>
 		<?php endif; ?>
 	</div>
 </div>
@@ -225,8 +225,8 @@ $reference_label = static function ($entry) {
 					<input type="text" name="date_to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($filters['date_to']) ?>">
 				</div>
 				<div class="col-md-2 d-flex align-items-end gap-2">
-					<button type="submit" class="btn btn-dark w-100"><?= t('Apply') ?></button>
-					<a href="<?= base_url('safe') ?>" class="btn btn-outline-secondary w-100"><?= t('Reset') ?></a>
+					<button type="submit" class="btn btn-dark w-100 btn-icon"><i class="bi bi-search" aria-hidden="true"></i> <?= t('Apply') ?></button>
+					<a href="<?= base_url('safe') ?>" class="btn btn-outline-secondary w-100 btn-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('Reset') ?></a>
 				</div>
 			</div>
 		</form>
@@ -281,7 +281,7 @@ $reference_label = static function ($entry) {
 								<?php if ($links) : ?>
 									<div class="safe-entry-links mt-2 d-flex gap-2 flex-wrap">
 										<?php foreach ($links as $link) : ?>
-											<a href="<?= html_escape($link['url']) ?>" class="btn btn-sm btn-outline-secondary"><?= html_escape($link['label']) ?></a>
+											<a href="<?= html_escape($link['url']) ?>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> <?= html_escape($link['label']) ?></a>
 										<?php endforeach; ?>
 									</div>
 								<?php endif; ?>
@@ -319,8 +319,8 @@ $reference_label = static function ($entry) {
 						<input type="text" name="income_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(shamsi_today()) ?>" required>
 					</div>
 					<div class="d-flex gap-2 justify-content-end">
-						<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
-						<button type="submit" class="btn btn-dark"><?= t('add_income') ?></button>
+						<button type="button" class="btn btn-outline-secondary btn-icon" data-bs-dismiss="modal"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('Close') ?></button>
+						<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('add_income') ?></button>
 					</div>
 				<?= form_close() ?>
 			</div>
@@ -352,8 +352,8 @@ $reference_label = static function ($entry) {
 						</div>
 						<div class="alert alert-warning"><?= t('adjustment_warning') ?></div>
 						<div class="d-flex gap-2 justify-content-end">
-							<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?= t('Close') ?></button>
-							<button type="submit" class="btn btn-dark"><?= t('adjust_balance') ?></button>
+							<button type="button" class="btn btn-outline-secondary btn-icon" data-bs-dismiss="modal"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('Close') ?></button>
+							<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-sliders" aria-hidden="true"></i> <?= t('adjust_balance') ?></button>
 						</div>
 					<?= form_close() ?>
 				</div>

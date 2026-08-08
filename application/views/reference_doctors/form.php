@@ -3,7 +3,7 @@
 		<h1 class="h3 mb-1"><?= html_escape($title) ?></h1>
 		<p class="text-muted mb-0"><?= t('Manage referral sources and linked patients.') ?></p>
 	</div>
-	<a href="<?= base_url('reference_doctors') ?>" class="btn btn-outline-dark"><?= t('Back') ?></a>
+	<a href="<?= base_url('reference_doctors') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
 </div>
 
 <div class="card">
@@ -51,7 +51,7 @@
 				</div>
 			</div>
 			<div class="mt-4">
-				<button type="submit" class="btn btn-dark"><?= t('Save Reference Doctor') ?></button>
+				<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save Reference Doctor') ?></button>
 			</div>
 		<?= form_close() ?>
 	</div>
