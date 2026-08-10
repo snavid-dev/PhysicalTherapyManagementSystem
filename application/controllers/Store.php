@@ -877,6 +877,80 @@ class Store extends Authenticated_Controller
 		return TRUE;
 	}
 
+	// Mirrors reverse_sale_effects(), but undoes a completed refund_sale()
+	// instead of a live sale: destocks what the refund restocked, and pulls
+	// back whatever the refund paid out, so update_sale() can re-apply the
+	// corrected refund via apply_refund_effects() when editing a refunded sale.
+	private function reverse_refund_effects($sale)
+	{
+		$items = $this->Store_model->get_sale_items($sale['id']);
+
+		foreach ($items as $item) {
+			$destocked = $this->Inventory_model->record_movement(
+				$item['variant_id'],
+				$sale['location_id'],
+				'sale_out',
+				-(int) $item['qty'],
+				$this->auth->user_id(),
+				'sale',
+				$sale['id']
+			);
+
+			if (!$destocked) {
+				return FALSE;
+			}
+		}
+
+		if (in_array($sale['payment_method'], array('cash', 'card'), TRUE)) {
+			$this->load->model('Safe_model');
+			if ($this->Safe_model->delete_transaction_by_reference('store_sales', $sale['id'], 'store_refund') === FALSE) {
+				return FALSE;
+			}
+		} elseif (in_array($sale['payment_method'], array('wallet', 'prepayment'), TRUE) && $sale['patient_id']) {
+			$this->load->model('Wallet_model');
+			$this->Wallet_model->deduct($sale['patient_id'], $sale['total'], NULL, 'Reversal for refund edit of sale #' . $sale['id']);
+		}
+		// 'debt': refund_sale() never touched money for a debt sale, so nothing to reverse.
+
+		return TRUE;
+	}
+
+	// Mirrors refund_sale()'s restock + money-back effects, parameterized so
+	// update_sale() can re-apply them with the corrected items/total after
+	// reverse_refund_effects() has undone the original refund.
+	private function apply_refund_effects($sale_id, $location_id, $items, $total, $payment_method, $patient_id)
+	{
+		foreach ($items as $item) {
+			$restocked = $this->Inventory_model->record_movement(
+				$item['variant_id'],
+				$location_id,
+				'return_in',
+				(int) $item['qty'],
+				$this->auth->user_id(),
+				'sale',
+				$sale_id
+			);
+
+			if (!$restocked) {
+				return FALSE;
+			}
+		}
+
+		$note = 'Store refund (edited): sale #' . $sale_id;
+
+		if (in_array($payment_method, array('cash', 'card'), TRUE)) {
+			$this->load->model('Safe_model');
+			$this->Safe_model->log_transaction('out', 'store_refund', $total, $sale_id, 'store_sales', $note, $this->auth->user_id());
+		} elseif (in_array($payment_method, array('wallet', 'prepayment'), TRUE) && $patient_id) {
+			$this->load->model('Wallet_model');
+			$this->Wallet_model->top_up_cash($patient_id, $total, NULL, $note);
+			$this->Wallet_model->recalculate_for_patient($patient_id);
+		}
+		// 'debt': nothing financial to redo, mirrors refund_sale().
+
+		return TRUE;
+	}
+
 	public function delete_sale($sale_id)
 	{
 		$this->require_permission('manage_store');
@@ -920,7 +994,7 @@ class Store extends Authenticated_Controller
 
 		$sale = $this->Store_model->get_sale_by_id($sale_id);
 
-		if (!$sale || $sale['status'] !== 'completed') {
+		if (!$sale || !in_array($sale['status'], array('completed', 'refunded'), TRUE)) {
 			$this->session->set_flashdata('error', t('error_editing_sale'));
 			redirect('store/reports');
 		}
@@ -934,6 +1008,9 @@ class Store extends Authenticated_Controller
 		unset($product);
 		$data['current_section'] = 'store';
 		$data['is_edit'] = TRUE;
+		// A refunded sale's patient/customer/payment method are locked (see
+		// update_sale()) — only the refunded items themselves are editable.
+		$data['is_refund_edit'] = $sale['status'] === 'refunded';
 		$data['sale'] = $sale;
 		$data['items'] = $this->Store_model->get_sale_items($sale_id);
 
@@ -946,47 +1023,64 @@ class Store extends Authenticated_Controller
 
 		$sale = $this->Store_model->get_sale_by_id($sale_id);
 
-		if (!$sale || $sale['status'] !== 'completed') {
+		if (!$sale || !in_array($sale['status'], array('completed', 'refunded'), TRUE)) {
 			$this->session->set_flashdata('error', t('error_editing_sale'));
 			redirect('store/reports');
 		}
+
+		// Editing an already-refunded sale only corrects which items/qty were
+		// refunded. Patient, customer, and payment method stay locked to the
+		// original sale — reverse_refund_effects()/apply_refund_effects() below
+		// only know how to reverse and redo money for that original method, not
+		// migrate it to a different one.
+		$is_refund_edit = $sale['status'] === 'refunded';
 
 		$this->load->model('Safe_model');
 		$this->load->model('Wallet_model');
 
 		$this->db->trans_start();
 
-		if (!$this->reverse_sale_effects($sale)) {
+		$reversed = $is_refund_edit ? $this->reverse_refund_effects($sale) : $this->reverse_sale_effects($sale);
+
+		if (!$reversed) {
 			$this->db->trans_rollback();
 			$this->session->set_flashdata('error', t('error_editing_sale'));
 			redirect('store/edit_sale/' . $sale_id);
 		}
 
-		$patient_id = $this->input->post('patient_id') ? (int) $this->input->post('patient_id') : NULL;
-		$customer_name = trim((string) $this->input->post('customer_name'));
-		$customer_phone = trim((string) $this->input->post('customer_phone'));
-		$payment_method = trim($this->input->post('payment_method'));
+		if ($is_refund_edit) {
+			$patient_id = $sale['patient_id'] ? (int) $sale['patient_id'] : NULL;
+			$customer_name = (string) $sale['customer_name'];
+			$customer_phone = (string) $sale['customer_phone'];
+			$payment_method = $sale['payment_method'];
+		} else {
+			$patient_id = $this->input->post('patient_id') ? (int) $this->input->post('patient_id') : NULL;
+			$customer_name = trim((string) $this->input->post('customer_name'));
+			$customer_phone = trim((string) $this->input->post('customer_phone'));
+			$payment_method = trim($this->input->post('payment_method'));
+
+			if (!in_array($payment_method, array('cash', 'wallet', 'debt'), TRUE)) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('invalid_payment_method'));
+				redirect('store/edit_sale/' . $sale_id);
+			}
+
+			if (!$patient_id && $customer_name === '') {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('customer_name_required'));
+				redirect('store/edit_sale/' . $sale_id);
+			}
+
+			if ($payment_method === 'wallet' && !$patient_id) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('patient_required_for_wallet'));
+				redirect('store/edit_sale/' . $sale_id);
+			}
+		}
+
 		$variants = $this->input->post('variant_id') ?? array();
 		$quantities = $this->input->post('qty') ?? array();
 		$prices = $this->input->post('price') ?? array();
-
-		if (!in_array($payment_method, array('cash', 'wallet', 'debt'), TRUE)) {
-			$this->db->trans_rollback();
-			$this->session->set_flashdata('error', t('invalid_payment_method'));
-			redirect('store/edit_sale/' . $sale_id);
-		}
-
-		if (!$patient_id && $customer_name === '') {
-			$this->db->trans_rollback();
-			$this->session->set_flashdata('error', t('customer_name_required'));
-			redirect('store/edit_sale/' . $sale_id);
-		}
-
-		if ($payment_method === 'wallet' && !$patient_id) {
-			$this->db->trans_rollback();
-			$this->session->set_flashdata('error', t('patient_required_for_wallet'));
-			redirect('store/edit_sale/' . $sale_id);
-		}
 
 		$items = array();
 		$subtotal = 0;
@@ -1002,14 +1096,18 @@ class Store extends Authenticated_Controller
 				$variant = $this->Store_model->get_variant_by_id($vid);
 				if (!$variant) continue;
 
-				// reverse_sale_effects() above already restocked the sale's original
-				// items, so this check is against post-reversal availability — an
-				// unchanged line correctly sees its own qty as available again.
-				$available = $this->Inventory_model->get_stock_level($vid, $sale['location_id']);
-				if (!$available || $available['qty_on_hand'] < $qty) {
-					$this->db->trans_rollback();
-					$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
-					redirect('store/edit_sale/' . $sale_id);
+				if (!$is_refund_edit) {
+					// reverse_sale_effects() above already restocked the sale's original
+					// items, so this check is against post-reversal availability — an
+					// unchanged line correctly sees its own qty as available again.
+					// Not needed for a refund edit: apply_refund_effects() only ever
+					// adds stock back (return_in), so it can never oversell.
+					$available = $this->Inventory_model->get_stock_level($vid, $sale['location_id']);
+					if (!$available || $available['qty_on_hand'] < $qty) {
+						$this->db->trans_rollback();
+						$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+						redirect('store/edit_sale/' . $sale_id);
+					}
 				}
 
 				$line_total = $qty * $price;
@@ -1060,39 +1158,54 @@ class Store extends Authenticated_Controller
 			redirect('store/edit_sale/' . $sale_id);
 		}
 
-		foreach ($items as $item) {
-			$stock_recorded = $this->Inventory_model->record_movement(
-				$item['variant_id'],
-				$sale['location_id'],
-				'sale_out',
-				-$item['qty'],
-				$this->auth->user_id(),
-				'sale',
-				$sale_id
-			);
+		if ($is_refund_edit) {
+			// Store_model::update_sale() unconditionally reopens a debt sale's
+			// debt_status ('open') for the live-edit path — wrong here since a
+			// refunded debt sale never collected anything and was already marked
+			// 'cleared' by refund_sale(). Re-apply mark_sale_refunded() against the
+			// pre-edit $sale snapshot to restore that (a no-op for cash/wallet).
+			$this->Store_model->mark_sale_refunded($sale_id, $sale);
 
-			if (!$stock_recorded) {
+			if (!$this->apply_refund_effects($sale_id, $sale['location_id'], $items, $total, $payment_method, $patient_id)) {
 				$this->db->trans_rollback();
-				$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+				$this->session->set_flashdata('error', t('error_editing_sale'));
 				redirect('store/edit_sale/' . $sale_id);
 			}
-		}
+		} else {
+			foreach ($items as $item) {
+				$stock_recorded = $this->Inventory_model->record_movement(
+					$item['variant_id'],
+					$sale['location_id'],
+					'sale_out',
+					-$item['qty'],
+					$this->auth->user_id(),
+					'sale',
+					$sale_id
+				);
 
-		if ($payment_method === 'cash') {
-			$this->Safe_model->log_transaction(
-				'in',
-				'store_sale',
-				$total,
-				$sale_id,
-				'store_sales',
-				'Store sale (edited): ' . count($items) . ' item(s)',
-				$this->auth->user_id()
-			);
-		} elseif ($payment_method === 'wallet') {
-			$this->Wallet_model->deduct($patient_id, $total, NULL, 'Store purchase (edited)');
-			$this->Wallet_model->recalculate_for_patient($patient_id);
+				if (!$stock_recorded) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+					redirect('store/edit_sale/' . $sale_id);
+				}
+			}
+
+			if ($payment_method === 'cash') {
+				$this->Safe_model->log_transaction(
+					'in',
+					'store_sale',
+					$total,
+					$sale_id,
+					'store_sales',
+					'Store sale (edited): ' . count($items) . ' item(s)',
+					$this->auth->user_id()
+				);
+			} elseif ($payment_method === 'wallet') {
+				$this->Wallet_model->deduct($patient_id, $total, NULL, 'Store purchase (edited)');
+				$this->Wallet_model->recalculate_for_patient($patient_id);
+			}
+			// 'debt': update_sale() already reset debt_status to 'open' via Store_model::update_sale().
 		}
-		// 'debt': update_sale() already reset debt_status to 'open' via Store_model::update_sale().
 
 		$this->db->trans_complete();
 
