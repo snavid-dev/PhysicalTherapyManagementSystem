@@ -32,7 +32,7 @@
 		};
 	</script>
 </head>
-<body data-theme="<?= html_escape($current_theme) ?>" class="<?= $is_rtl ? 'rtl' : 'ltr' ?>">
+<body data-theme="<?= html_escape($current_theme) ?>" data-bs-theme="<?= html_escape($current_theme) ?>" class="<?= $is_rtl ? 'rtl' : 'ltr' ?>">
 <?php $current_section = isset($current_section) ? $current_section : ''; ?>
 <?php if (!empty($auth_user)) : ?>
 <nav class="navbar navbar-expand-lg clinic-nav border-bottom">
