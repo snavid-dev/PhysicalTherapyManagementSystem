@@ -79,6 +79,26 @@ class Turn_model extends CI_Model
 		);
 	}
 
+	/**
+	 * Full (non-paged) rows for a date range, used by the client-side Turns
+	 * list. Callers must keep the range reasonably narrow — see the comment
+	 * on get_datatable() for why this table can't be rendered unbounded.
+	 */
+	public function get_in_range($from, $to)
+	{
+		$this->ensure_schema();
+		$this->apply_datatable_joins();
+
+		return $this->db
+			->select("turns.*, patients.first_name AS patient_first_name, patients.last_name AS patient_last_name, patients.father_name AS patient_father_name, sections.name AS section_name, CONCAT(staff.first_name, ' ', staff.last_name) AS staff_full_name, CONCAT(users.first_name, ' ', users.last_name) AS doctor_full_name", FALSE)
+			->where('turns.turn_date >=', $from)
+			->where('turns.turn_date <=', $to)
+			->order_by('turns.turn_date', 'desc')
+			->order_by('turns.id', 'desc')
+			->get()
+			->result_array();
+	}
+
 	protected function apply_datatable_joins()
 	{
 		$this->db

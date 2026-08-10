@@ -18,8 +18,29 @@ foreach ($debtors as $debtor) {
 		<p class="text-muted mb-0"><?= t('debtors_list_hint') ?></p>
 	</div>
 	<div class="d-flex gap-2">
-		<a href="<?= base_url('reports/debtors/print') ?>" class="btn btn-outline-dark btn-icon" target="_blank" rel="noopener"><i class="bi bi-printer" aria-hidden="true"></i> <?= t('print_register') ?></a>
+		<a href="<?= base_url('reports/debtors/print') . '?' . http_build_query(array('from' => $from, 'to' => $to)) ?>" class="btn btn-outline-dark btn-icon" target="_blank" rel="noopener"><i class="bi bi-printer" aria-hidden="true"></i> <?= t('print_register') ?></a>
 		<a href="<?= base_url('reports') ?>" class="btn btn-outline-dark btn-icon"><i class="bi bi-arrow-left icon-flip-rtl" aria-hidden="true"></i> <?= t('Back') ?></a>
+	</div>
+</div>
+
+<div class="card mb-4">
+	<div class="card-body">
+		<form method="get" action="<?= base_url('reports/debtors') ?>">
+			<div class="row g-3">
+				<div class="col-md-3">
+					<label class="form-label"><?= t('last_visit_from') ?></label>
+					<input type="text" name="from" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($from) ?>">
+				</div>
+				<div class="col-md-3">
+					<label class="form-label"><?= t('last_visit_to') ?></label>
+					<input type="text" name="to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($to) ?>">
+				</div>
+				<div class="col-md-3 d-flex gap-2 align-items-end">
+					<button type="submit" class="btn btn-dark w-100 btn-icon"><i class="bi bi-funnel" aria-hidden="true"></i> <?= t('Apply') ?></button>
+					<a href="<?= base_url('reports/debtors') ?>" class="btn btn-outline-secondary w-100 btn-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('Reset') ?></a>
+				</div>
+			</div>
+		</form>
 	</div>
 </div>
 

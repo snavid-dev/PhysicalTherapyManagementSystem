@@ -5,6 +5,9 @@ foreach ($debtors as $debtor) {
 	$total_debt += (float) ($debtor['open_debt'] ?? 0);
 }
 $today_label = to_shamsi(date('Y-m-d'));
+$from = isset($from) ? trim((string) $from) : '';
+$to = isset($to) ? trim((string) $to) : '';
+$range_label = ($from !== '' || $to !== '') ? trim($from . ' - ' . $to, ' -') : '';
 ?>
 <!DOCTYPE html>
 <html dir="<?= is_rtl_locale() ? 'rtl' : 'ltr' ?>" lang="<?= app_locale() === 'farsi' ? 'fa' : 'en' ?>">
@@ -48,6 +51,9 @@ $today_label = to_shamsi(date('Y-m-d'));
 	<div class="clinic-header">
 		<h2><?= html_escape(t('clinic_name_print')) ?></h2>
 		<p><?= html_escape(t('debtors_list')) ?> &mdash; <?= html_escape($today_label) ?></p>
+		<?php if ($range_label !== '') : ?>
+			<p><?= html_escape(t('Last Visit')) ?>: <?= html_escape($range_label) ?></p>
+		<?php endif; ?>
 	</div>
 
 	<table>

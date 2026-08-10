@@ -25,7 +25,7 @@ class Report_model extends CI_Model
 			->result_array();
 	}
 
-	public function get_debtors()
+	public function get_debtors($from = '', $to = '')
 	{
 		$wallet_table = $this->db->table_exists('patient_wallet');
 		$debt_table = $this->db->table_exists('patient_debts');
@@ -75,6 +75,14 @@ class Report_model extends CI_Model
 			->where('COALESCE(wallet.balance, 0) <', 0, FALSE)
 			->or_where('COALESCE(debts.open_debt, 0) >', 0, FALSE)
 		->group_end();
+
+		if ($from !== '') {
+			$this->db->where('last_turn.last_turn_date >=', $from);
+		}
+
+		if ($to !== '') {
+			$this->db->where('last_turn.last_turn_date <=', $to);
+		}
 
 		return $this->db
 			->order_by('COALESCE(debts.open_debt, 0)', 'desc', FALSE)
