@@ -865,10 +865,22 @@ class Patients extends Authenticated_Controller
 		show_404_if_empty($patient);
 		$wants_json = $this->wants_json_response();
 
+		// Also covers a standalone wallet top-up recorded with no turn/payment link
+		// (debt_payment() routes a payment through here as a "prepayment" when the
+		// patient has no open debt — see normalized_standalone_payments()'s
+		// 'no_turn_payment' kind, which the patient profile lists right alongside
+		// refunds and lets staff manage the same way).
 		$refund = $this->db
 			->where('id', (int) $wallet_transaction_id)
 			->where('patient_id', (int) $patient_id)
-			->where('type', 'refund')
+			->group_start()
+				->where('type', 'refund')
+				->or_group_start()
+					->where('type', 'topup')
+					->where('turn_id IS NULL', NULL, FALSE)
+					->where('payment_id IS NULL', NULL, FALSE)
+				->group_end()
+			->group_end()
 			->get('patient_wallet_transactions')
 			->row_array();
 
@@ -890,10 +902,12 @@ class Patients extends Authenticated_Controller
 			'staff_id' => $staff_id,
 		));
 
+		$safe_source = $refund['type'] === 'refund' ? 'patient_refund' : 'wallet_topup';
+
 		$this->db
 			->where('reference_table', 'patient_wallet_transactions')
 			->where('reference_id', (int) $wallet_transaction_id)
-			->where('source', 'patient_refund')
+			->where('source', $safe_source)
 			->update('safe_transactions', array('section_id' => $section_id, 'staff_id' => $staff_id));
 
 		if (!$wants_json) {
@@ -922,10 +936,18 @@ class Patients extends Authenticated_Controller
 		show_404_if_empty($patient);
 		$wants_json = $this->wants_json_response();
 
+		// See edit_refund() — also covers a standalone no-turn wallet top-up.
 		$refund = $this->db
 			->where('id', (int) $wallet_transaction_id)
 			->where('patient_id', (int) $patient_id)
-			->where('type', 'refund')
+			->group_start()
+				->where('type', 'refund')
+				->or_group_start()
+					->where('type', 'topup')
+					->where('turn_id IS NULL', NULL, FALSE)
+					->where('payment_id IS NULL', NULL, FALSE)
+				->group_end()
+			->group_end()
 			->get('patient_wallet_transactions')
 			->row_array();
 
@@ -933,12 +955,14 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($patient_id, t('Refund not found.'), 404, $wants_json);
 		}
 
+		$safe_source = $refund['type'] === 'refund' ? 'patient_refund' : 'wallet_topup';
+
 		$this->db->trans_begin();
 
 		$this->Wallet_model->ensure_wallet_exists($patient_id);
 		$this->db->query('SELECT id FROM patient_wallet WHERE patient_id = ? FOR UPDATE', array((int) $patient_id));
 
-		$this->Safe_model->delete_transaction_by_reference('patient_wallet_transactions', (int) $wallet_transaction_id, 'patient_refund');
+		$this->Safe_model->delete_transaction_by_reference('patient_wallet_transactions', (int) $wallet_transaction_id, $safe_source);
 		$this->db->where('id', (int) $wallet_transaction_id)->delete('patient_wallet_transactions');
 
 		if ($this->db->trans_status() === FALSE) {

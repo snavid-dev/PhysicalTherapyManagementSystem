@@ -2,6 +2,7 @@
 
 <?php
 $is_edit = !empty($is_edit);
+$is_refund_edit = !empty($is_refund_edit);
 $sale = $sale ?? NULL;
 $items = $items ?? array();
 ?>
@@ -9,7 +10,7 @@ $items = $items ?? array();
 <div class="container-lg my-5">
 	<div class="row mb-4">
 		<div class="col">
-			<h1><?= $is_edit ? t('edit_sale') : t('sell_product') ?></h1>
+			<h1><?= $is_refund_edit ? t('edit_refund') : ($is_edit ? t('edit_sale') : t('sell_product')) ?></h1>
 		</div>
 	</div>
 
@@ -24,6 +25,9 @@ $items = $items ?? array();
 			<?= html_escape($msg) ?>
 			<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 		</div>
+	<?php endif; ?>
+	<?php if ($is_refund_edit): ?>
+		<div class="alert alert-info"><?= t('refund_edit_locked_notice') ?></div>
 	<?php endif; ?>
 
 	<form method="post" id="sale-form" action="<?= site_url($is_edit ? 'store/update_sale/' . $sale['id'] : 'store/sell') ?>">
@@ -65,7 +69,7 @@ $items = $items ?? array();
 					<div class="card-body">
 						<div class="mb-3">
 							<label class="form-label"><?= t('patient') ?></label>
-							<select name="patient_id" id="patient-select" class="form-select s2-select" data-placeholder="<?= html_escape(t('search_patient')) ?>">
+							<select name="patient_id" id="patient-select" class="form-select s2-select" data-placeholder="<?= html_escape(t('search_patient')) ?>" <?= $is_refund_edit ? 'disabled' : '' ?>>
 								<option value=""><?= t('walk_in_customer') ?></option>
 								<?php foreach ($patients as $patient): ?>
 									<?php
@@ -80,11 +84,11 @@ $items = $items ?? array();
 						<div class="row mb-3" id="external-customer-fields">
 							<div class="col-6">
 								<label class="form-label small"><?= t('customer_name') ?></label>
-								<input type="text" name="customer_name" id="customer-name-input" class="form-control" value="<?= $is_edit ? html_escape((string) $sale['customer_name']) : '' ?>">
+								<input type="text" name="customer_name" id="customer-name-input" class="form-control" value="<?= $is_edit ? html_escape((string) $sale['customer_name']) : '' ?>" <?= $is_refund_edit ? 'disabled' : '' ?>>
 							</div>
 							<div class="col-6">
 								<label class="form-label small"><?= t('customer_phone') ?></label>
-								<input type="text" name="customer_phone" class="form-control" value="<?= $is_edit ? html_escape((string) $sale['customer_phone']) : '' ?>">
+								<input type="text" name="customer_phone" class="form-control" value="<?= $is_edit ? html_escape((string) $sale['customer_phone']) : '' ?>" <?= $is_refund_edit ? 'disabled' : '' ?>>
 							</div>
 						</div>
 
@@ -144,10 +148,13 @@ $items = $items ?? array();
 
 						<div class="mb-3">
 							<label class="form-label"><?= t('payment_method') ?></label>
-							<select name="payment_method" id="payment-method-select" class="form-select" required>
+							<select name="payment_method" id="payment-method-select" class="form-select" required <?= $is_refund_edit ? 'disabled' : '' ?>>
 								<option value="cash" <?= (!$is_edit || $sale['payment_method'] === 'cash') ? 'selected' : '' ?>><?= t('cash') ?></option>
 								<option value="wallet" id="pm-option-wallet" <?= ($is_edit && $sale['payment_method'] === 'wallet') ? 'selected' : '' ?>><?= t('wallet') ?></option>
 								<option value="debt" <?= ($is_edit && $sale['payment_method'] === 'debt') ? 'selected' : '' ?>><?= t('debt') ?></option>
+								<?php if ($is_refund_edit && in_array($sale['payment_method'], array('card', 'prepayment'), TRUE)): ?>
+									<option value="<?= html_escape($sale['payment_method']) ?>" selected><?= t($sale['payment_method']) ?></option>
+								<?php endif; ?>
 							</select>
 							<div class="form-text" id="wallet-requires-patient-hint" style="display:none;"><?= t('patient_required_for_wallet') ?></div>
 						</div>

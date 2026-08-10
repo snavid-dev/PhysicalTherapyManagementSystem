@@ -154,6 +154,9 @@
 										<form method="post" action="<?= site_url('store/delete_sale/' . $sale['id']) ?>" class="d-inline" onsubmit="return confirm('<?= t('confirm_delete_sale') ?>');">
 											<button type="submit" class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></button>
 										</form>
+									<?php elseif ($sale['status'] === 'refunded'): ?>
+										<span class="badge bg-secondary"><?= html_escape(t('sale_status_refunded')) ?></span>
+										<a href="<?= site_url('store/edit_sale/' . $sale['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></a>
 									<?php else: ?>
 										<span class="badge bg-secondary"><?= html_escape(t('sale_status_' . $sale['status'])) ?></span>
 									<?php endif; ?>

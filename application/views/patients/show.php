@@ -324,7 +324,10 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 										'refund' => array('bg-danger-subtle text-danger', t('refund')),
 										'no_turn_payment' => array('bg-info-subtle text-info', t('payment_without_turn')),
 									)[$entry['kind']] ?? array('bg-secondary-subtle text-secondary', $entry['kind']);
-									$can_manage_entry = $entry['kind'] !== 'no_turn_payment';
+									// Every kind normalized_standalone_payments() can produce (debt_payment,
+									// refund, no_turn_payment) now has a matching edit/delete controller
+									// action — see edit_refund()/delete_refund(), which also cover the
+									// no-turn-linked wallet top-up case.
 									$edit_url = $entry['edit_kind'] === 'payment'
 										? base_url('patients/' . $patient['id'] . '/payments/' . $entry['id'] . '/edit')
 										: base_url('patients/' . $patient['id'] . '/refunds/' . $entry['id'] . '/edit');
@@ -340,17 +343,15 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 										<td><?= html_escape($entry['staff_name'] ?: '&mdash;') ?></td>
 										<td><?= !empty($entry['note']) ? html_escape($entry['note']) : '&mdash;' ?></td>
 										<td class="text-end">
-											<?php if ($can_manage_entry) : ?>
-												<button type="button" class="btn btn-sm btn-outline-secondary btn-icon standalone-payment-edit-btn"
-													data-edit-url="<?= html_escape($edit_url) ?>"
-													data-note="<?= html_escape((string) $entry['note']) ?>"
-													data-section-id="<?= (int) $entry['section_id'] ?>"
-													data-staff-id="<?= (int) $entry['staff_id'] ?>"
-												><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></button>
-												<form action="<?= html_escape($delete_url) ?>" method="post" class="d-inline" onsubmit="return confirm('<?= html_escape(t('confirm_delete')) ?>');">
-													<button type="submit" class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></button>
-												</form>
-											<?php endif; ?>
+											<button type="button" class="btn btn-sm btn-outline-secondary btn-icon standalone-payment-edit-btn"
+												data-edit-url="<?= html_escape($edit_url) ?>"
+												data-note="<?= html_escape((string) $entry['note']) ?>"
+												data-section-id="<?= (int) $entry['section_id'] ?>"
+												data-staff-id="<?= (int) $entry['staff_id'] ?>"
+											><i class="bi bi-pencil" aria-hidden="true"></i> <?= t('Edit') ?></button>
+											<form action="<?= html_escape($delete_url) ?>" method="post" class="d-inline" onsubmit="return confirm('<?= html_escape(t('confirm_delete')) ?>');">
+												<button type="submit" class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash" aria-hidden="true"></i> <?= t('Delete') ?></button>
+											</form>
 										</td>
 									</tr>
 								<?php endforeach; else : ?>
@@ -430,7 +431,7 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 			</div>
 		</div>
 		<script>
-		(function () {
+		document.addEventListener('DOMContentLoaded', function () {
 			const modalEl = document.getElementById('standalonePaymentEditModal');
 			if (!modalEl) {
 				return;
@@ -444,13 +445,23 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 			document.querySelectorAll('.standalone-payment-edit-btn').forEach(function (button) {
 				button.addEventListener('click', function () {
 					form.action = button.dataset.editUrl;
-					sectionSelect.value = button.dataset.sectionId && button.dataset.sectionId !== '0' ? button.dataset.sectionId : '';
-					staffSelect.value = button.dataset.staffId && button.dataset.staffId !== '0' ? button.dataset.staffId : '';
+					const sectionValue = button.dataset.sectionId && button.dataset.sectionId !== '0' ? button.dataset.sectionId : '';
+					const staffValue = button.dataset.staffId && button.dataset.staffId !== '0' ? button.dataset.staffId : '';
+					// section/staff are s2-select (Select2) — setting .value alone doesn't
+					// refresh the visible widget, so trigger change to sync it (CANIN.md
+					// Select2 rule).
+					if (window.jQuery) {
+						jQuery(sectionSelect).val(sectionValue).trigger('change.select2');
+						jQuery(staffSelect).val(staffValue).trigger('change.select2');
+					} else {
+						sectionSelect.value = sectionValue;
+						staffSelect.value = staffValue;
+					}
 					noteInput.value = button.dataset.note || '';
 					modal.show();
 				});
 			});
-		})();
+		});
 		</script>
 
 		<div class="card mb-4">

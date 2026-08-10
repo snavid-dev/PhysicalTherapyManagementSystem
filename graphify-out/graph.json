@@ -10,7 +10,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_controllers_admin",
-      "community": 96,
+      "community": 429,
       "norm_label": "admin.php"
     },
     {
@@ -20,7 +20,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_controllers_admin_admin",
-      "community": 96,
+      "community": 429,
       "norm_label": "admin"
     },
     {
@@ -30,7 +30,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "ci_controller",
-      "community": 96,
+      "community": 429,
       "norm_label": "ci_controller"
     },
     {
@@ -40,7 +40,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_controllers_admin_admin_index",
-      "community": 96,
+      "community": 429,
       "norm_label": ".index()"
     },
     {
@@ -400,7 +400,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_controllers_login",
-      "community": 96,
+      "community": 429,
       "norm_label": "login.php"
     },
     {
@@ -410,7 +410,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_controllers_login_login",
-      "community": 96,
+      "community": 429,
       "norm_label": "login"
     },
     {
@@ -420,7 +420,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_controllers_login_login_construct",
-      "community": 96,
+      "community": 429,
       "norm_label": ".__construct()"
     },
     {
@@ -430,7 +430,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "application_controllers_login_login_index",
-      "community": 96,
+      "community": 206,
       "norm_label": ".index()"
     },
     {
@@ -637,7 +637,7 @@
       "label": ".delete_refund()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L913",
+      "source_location": "L927",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_delete_refund",
       "community": 11,
@@ -647,7 +647,7 @@
       "label": ".sync_standalone_payment_dimension()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L966",
+      "source_location": "L990",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_sync_standalone_payment_dimension",
       "community": 11,
@@ -657,7 +657,7 @@
       "label": ".edit()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L999",
+      "source_location": "L1023",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_edit",
       "community": 11,
@@ -667,7 +667,7 @@
       "label": ".update()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1009",
+      "source_location": "L1033",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_update",
       "community": 11,
@@ -677,7 +677,7 @@
       "label": ".delete()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1033",
+      "source_location": "L1057",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_delete",
       "community": 11,
@@ -687,7 +687,7 @@
       "label": ".form()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1048",
+      "source_location": "L1072",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_form",
       "community": 11,
@@ -697,7 +697,7 @@
       "label": ".validate_form()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1062",
+      "source_location": "L1086",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_validate_form",
       "community": 11,
@@ -707,7 +707,7 @@
       "label": ".patient_payload()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1072",
+      "source_location": "L1096",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_patient_payload",
       "community": 11,
@@ -717,7 +717,7 @@
       "label": ".diagnosis_ids_from_post()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1091",
+      "source_location": "L1115",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_diagnosis_ids_from_post",
       "community": 11,
@@ -727,7 +727,7 @@
       "label": ".null_if_empty()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1107",
+      "source_location": "L1131",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_null_if_empty",
       "community": 11,
@@ -737,7 +737,7 @@
       "label": ".patient_option_payload()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1113",
+      "source_location": "L1137",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_patient_option_payload",
       "community": 11,
@@ -747,7 +747,7 @@
       "label": ".patient_validation_errors()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1137",
+      "source_location": "L1161",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_patient_validation_errors",
       "community": 11,
@@ -757,7 +757,7 @@
       "label": ".json_validation_error()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1155",
+      "source_location": "L1179",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_json_validation_error",
       "community": 11,
@@ -767,7 +767,7 @@
       "label": ".json_error()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1181",
+      "source_location": "L1205",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_json_error",
       "community": 11,
@@ -777,7 +777,7 @@
       "label": ".wants_json_response()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1192",
+      "source_location": "L1216",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_wants_json_response",
       "community": 11,
@@ -787,7 +787,7 @@
       "label": ".respond_wallet_topup_error()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1198",
+      "source_location": "L1222",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_respond_wallet_topup_error",
       "community": 11,
@@ -797,7 +797,7 @@
       "label": ".normalized_wallet_transactions()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1208",
+      "source_location": "L1232",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_normalized_wallet_transactions",
       "community": 11,
@@ -807,7 +807,7 @@
       "label": ".normalize_wallet_transactions_rows()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1213",
+      "source_location": "L1237",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_normalize_wallet_transactions_rows",
       "community": 11,
@@ -817,7 +817,7 @@
       "label": ".normalized_open_debts()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1229",
+      "source_location": "L1253",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_normalized_open_debts",
       "community": 11,
@@ -827,7 +827,7 @@
       "label": ".normalize_open_debts_rows()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1234",
+      "source_location": "L1258",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_normalize_open_debts_rows",
       "community": 11,
@@ -837,7 +837,7 @@
       "label": ".financial_profile_payload()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1249",
+      "source_location": "L1273",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_financial_profile_payload",
       "community": 11,
@@ -847,7 +847,7 @@
       "label": ".normalized_discounts()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1270",
+      "source_location": "L1294",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_normalized_discounts",
       "community": 11,
@@ -857,7 +857,7 @@
       "label": ".respond_discount_error()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1302",
+      "source_location": "L1326",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_respond_discount_error",
       "community": 11,
@@ -867,7 +867,7 @@
       "label": ".build_financial_summary()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1319",
+      "source_location": "L1343",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_build_financial_summary",
       "community": 11,
@@ -877,7 +877,7 @@
       "label": ".build_financial_timeline()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1382",
+      "source_location": "L1406",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_build_financial_timeline",
       "community": 11,
@@ -887,7 +887,7 @@
       "label": ".record_standalone_debt_payment()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1466",
+      "source_location": "L1490",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_record_standalone_debt_payment",
       "community": 11,
@@ -897,7 +897,7 @@
       "label": ".normalized_standalone_payments()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1581",
+      "source_location": "L1605",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_normalized_standalone_payments",
       "community": 11,
@@ -907,7 +907,7 @@
       "label": ".payment_dimension_from_post()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1672",
+      "source_location": "L1696",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_payment_dimension_from_post",
       "community": 11,
@@ -917,7 +917,7 @@
       "label": ".payment_datetime_from_date()",
       "file_type": "code",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1688",
+      "source_location": "L1712",
       "_origin": "ast",
       "id": "application_controllers_patients_patients_payment_datetime_from_date",
       "community": 11,
@@ -1450,7 +1450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_controllers_roles",
-      "community": 88,
+      "community": 21,
       "norm_label": "roles.php"
     },
     {
@@ -1460,7 +1460,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_controllers_roles_roles",
-      "community": 88,
+      "community": 21,
       "norm_label": "roles"
     },
     {
@@ -1470,7 +1470,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_construct",
-      "community": 88,
+      "community": 21,
       "norm_label": ".__construct()"
     },
     {
@@ -1480,7 +1480,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_index",
-      "community": 88,
+      "community": 21,
       "norm_label": ".index()"
     },
     {
@@ -1490,7 +1490,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_create",
-      "community": 88,
+      "community": 21,
       "norm_label": ".create()"
     },
     {
@@ -1500,7 +1500,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_store",
-      "community": 88,
+      "community": 21,
       "norm_label": ".store()"
     },
     {
@@ -1510,7 +1510,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_edit",
-      "community": 88,
+      "community": 21,
       "norm_label": ".edit()"
     },
     {
@@ -1520,7 +1520,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_update",
-      "community": 88,
+      "community": 21,
       "norm_label": ".update()"
     },
     {
@@ -1540,7 +1540,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_form",
-      "community": 88,
+      "community": 21,
       "norm_label": ".form()"
     },
     {
@@ -1550,7 +1550,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_validate_form",
-      "community": 88,
+      "community": 21,
       "norm_label": ".validate_form()"
     },
     {
@@ -1560,7 +1560,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "application_controllers_roles_roles_role_payload",
-      "community": 88,
+      "community": 21,
       "norm_label": ".role_payload()"
     },
     {
@@ -1840,7 +1840,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "application_controllers_sections_sections_delete",
-      "community": 33,
+      "community": 82,
       "norm_label": ".delete()"
     },
     {
@@ -2374,10 +2374,30 @@
       "norm_label": ".reverse_sale_effects()"
     },
     {
+      "label": ".reverse_refund_effects()",
+      "file_type": "code",
+      "source_file": "application/controllers/Store.php",
+      "source_location": "L884",
+      "_origin": "ast",
+      "id": "application_controllers_store_store_reverse_refund_effects",
+      "community": 33,
+      "norm_label": ".reverse_refund_effects()"
+    },
+    {
+      "label": ".apply_refund_effects()",
+      "file_type": "code",
+      "source_file": "application/controllers/Store.php",
+      "source_location": "L921",
+      "_origin": "ast",
+      "id": "application_controllers_store_store_apply_refund_effects",
+      "community": 33,
+      "norm_label": ".apply_refund_effects()"
+    },
+    {
       "label": ".delete_sale()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L880",
+      "source_location": "L954",
       "_origin": "ast",
       "id": "application_controllers_store_store_delete_sale",
       "community": 33,
@@ -2387,7 +2407,7 @@
       "label": ".edit_sale()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L917",
+      "source_location": "L991",
       "_origin": "ast",
       "id": "application_controllers_store_store_edit_sale",
       "community": 33,
@@ -2397,7 +2417,7 @@
       "label": ".update_sale()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L943",
+      "source_location": "L1020",
       "_origin": "ast",
       "id": "application_controllers_store_store_update_sale",
       "community": 33,
@@ -2407,7 +2427,7 @@
       "label": ".reports()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1109",
+      "source_location": "L1222",
       "_origin": "ast",
       "id": "application_controllers_store_store_reports",
       "community": 33,
@@ -2417,7 +2437,7 @@
       "label": ".bulk_sell()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1179",
+      "source_location": "L1292",
       "_origin": "ast",
       "id": "application_controllers_store_store_bulk_sell",
       "community": 33,
@@ -2427,7 +2447,7 @@
       "label": ".sale_batches()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1252",
+      "source_location": "L1365",
       "_origin": "ast",
       "id": "application_controllers_store_store_sale_batches",
       "community": 33,
@@ -2437,7 +2457,7 @@
       "label": ".view_sale_batch()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1262",
+      "source_location": "L1375",
       "_origin": "ast",
       "id": "application_controllers_store_store_view_sale_batch",
       "community": 33,
@@ -2447,7 +2467,7 @@
       "label": ".approve_sale_batch()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1280",
+      "source_location": "L1393",
       "_origin": "ast",
       "id": "application_controllers_store_store_approve_sale_batch",
       "community": 33,
@@ -2457,7 +2477,7 @@
       "label": ".suppliers()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1436",
+      "source_location": "L1549",
       "_origin": "ast",
       "id": "application_controllers_store_store_suppliers",
       "community": 33,
@@ -2467,7 +2487,7 @@
       "label": ".create_supplier()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1444",
+      "source_location": "L1557",
       "_origin": "ast",
       "id": "application_controllers_store_store_create_supplier",
       "community": 33,
@@ -2477,7 +2497,7 @@
       "label": ".edit_supplier()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1470",
+      "source_location": "L1583",
       "_origin": "ast",
       "id": "application_controllers_store_store_edit_supplier",
       "community": 33,
@@ -2487,7 +2507,7 @@
       "label": ".receive_stock()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1502",
+      "source_location": "L1615",
       "_origin": "ast",
       "id": "application_controllers_store_store_receive_stock",
       "community": 33,
@@ -2497,7 +2517,7 @@
       "label": ".stock_receipts()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1574",
+      "source_location": "L1687",
       "_origin": "ast",
       "id": "application_controllers_store_store_stock_receipts",
       "community": 33,
@@ -2507,7 +2527,7 @@
       "label": ".view_stock_receipt()",
       "file_type": "code",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1581",
+      "source_location": "L1694",
       "_origin": "ast",
       "id": "application_controllers_store_store_view_stock_receipt",
       "community": 33,
@@ -2660,7 +2680,7 @@
       "source_location": "L788",
       "_origin": "ast",
       "id": "application_controllers_turns_turns_delete",
-      "community": 27,
+      "community": 33,
       "norm_label": ".delete()"
     },
     {
@@ -3000,7 +3020,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "application_controllers_users_users_delete",
-      "community": 33,
+      "community": 83,
       "norm_label": ".delete()"
     },
     {
@@ -3050,7 +3070,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_core_my_controller",
-      "community": 96,
+      "community": 21,
       "norm_label": "my_controller.php"
     },
     {
@@ -3070,7 +3090,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller",
-      "community": 96,
+      "community": 429,
       "norm_label": "base_controller"
     },
     {
@@ -3080,7 +3100,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_construct",
-      "community": 96,
+      "community": 429,
       "norm_label": ".__construct()"
     },
     {
@@ -3090,7 +3110,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_bootstrap_schema_once",
-      "community": 96,
+      "community": 429,
       "norm_label": ".bootstrap_schema_once()"
     },
     {
@@ -3100,7 +3120,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_boot_preferences",
-      "community": 96,
+      "community": 429,
       "norm_label": ".boot_preferences()"
     },
     {
@@ -3110,7 +3130,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_render",
-      "community": 96,
+      "community": 206,
       "norm_label": ".render()"
     },
     {
@@ -3120,7 +3140,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_gregorian_date_from_shamsi",
-      "community": 96,
+      "community": 429,
       "norm_label": ".gregorian_date_from_shamsi()"
     },
     {
@@ -3130,7 +3150,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_gregorian_month_from_shamsi",
-      "community": 96,
+      "community": 429,
       "norm_label": ".gregorian_month_from_shamsi()"
     },
     {
@@ -3140,7 +3160,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_is_valid_shamsi_date_input",
-      "community": 96,
+      "community": 429,
       "norm_label": ".is_valid_shamsi_date_input()"
     },
     {
@@ -3150,7 +3170,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_is_valid_shamsi_month_input",
-      "community": 96,
+      "community": 429,
       "norm_label": ".is_valid_shamsi_month_input()"
     },
     {
@@ -3190,7 +3210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_helpers_app_helper",
-      "community": 96,
+      "community": 206,
       "norm_label": "app_helper.php"
     },
     {
@@ -3200,7 +3220,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "application_helpers_app_helper_app_locale",
-      "community": 96,
+      "community": 206,
       "norm_label": "app_locale()"
     },
     {
@@ -3210,7 +3230,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "application_helpers_app_helper_app_theme",
-      "community": 96,
+      "community": 206,
       "norm_label": "app_theme()"
     },
     {
@@ -3220,7 +3240,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "application_helpers_app_helper_is_rtl_locale",
-      "community": 96,
+      "community": 206,
       "norm_label": "is_rtl_locale()"
     },
     {
@@ -3240,7 +3260,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "application_helpers_app_helper_format_number",
-      "community": 96,
+      "community": 206,
       "norm_label": "format_number()"
     },
     {
@@ -3250,7 +3270,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "application_helpers_app_helper_format_amount",
-      "community": 96,
+      "community": 206,
       "norm_label": "format_amount()"
     },
     {
@@ -3280,7 +3300,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_turn_cash_reversal_note",
-      "community": 96,
+      "community": 206,
       "norm_label": "safe_turn_cash_reversal_note()"
     },
     {
@@ -3290,7 +3310,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_turn_wallet_topup_reversal_note",
-      "community": 96,
+      "community": 206,
       "norm_label": "safe_turn_wallet_topup_reversal_note()"
     },
     {
@@ -3310,7 +3330,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_patient_wallet_topup_note",
-      "community": 96,
+      "community": 206,
       "norm_label": "safe_patient_wallet_topup_note()"
     },
     {
@@ -3320,7 +3340,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_salary_payment_note",
-      "community": 96,
+      "community": 206,
       "norm_label": "safe_salary_payment_note()"
     },
     {
@@ -3330,7 +3350,7 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_reference_label",
-      "community": 15,
+      "community": 206,
       "norm_label": "safe_reference_label()"
     },
     {
@@ -3340,7 +3360,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "application_helpers_app_helper_to_shamsi",
-      "community": 96,
+      "community": 206,
       "norm_label": "to_shamsi()"
     },
     {
@@ -3350,7 +3370,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "application_helpers_app_helper_to_gregorian",
-      "community": 96,
+      "community": 206,
       "norm_label": "to_gregorian()"
     },
     {
@@ -3360,7 +3380,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "application_helpers_app_helper_shamsi_today",
-      "community": 96,
+      "community": 206,
       "norm_label": "shamsi_today()"
     },
     {
@@ -3370,7 +3390,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "application_helpers_app_helper_shamsi_now",
-      "community": 96,
+      "community": 206,
       "norm_label": "shamsi_now()"
     },
     {
@@ -3380,7 +3400,7 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "application_helpers_app_helper_shamsi_month_range",
-      "community": 96,
+      "community": 206,
       "norm_label": "shamsi_month_range()"
     },
     {
@@ -3390,7 +3410,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "application_helpers_app_helper_gregorian_month_to_shamsi",
-      "community": 96,
+      "community": 206,
       "norm_label": "gregorian_month_to_shamsi()"
     },
     {
@@ -3400,7 +3420,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "application_helpers_app_helper_shamsi_month_to_gregorian",
-      "community": 96,
+      "community": 206,
       "norm_label": "shamsi_month_to_gregorian()"
     },
     {
@@ -8730,7 +8750,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_delete_transaction_by_reference",
-      "community": 96,
+      "community": 423,
       "norm_label": ".delete_transaction_by_reference()"
     },
     {
@@ -8740,7 +8760,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_delete_transactions_for_patient",
-      "community": 96,
+      "community": 423,
       "norm_label": ".delete_transactions_for_patient()"
     },
     {
@@ -8750,7 +8770,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_get_current_balance",
-      "community": 96,
+      "community": 423,
       "norm_label": ".get_current_balance()"
     },
     {
@@ -8760,7 +8780,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_get_latest_transaction",
-      "community": 96,
+      "community": 423,
       "norm_label": ".get_latest_transaction()"
     },
     {
@@ -8770,7 +8790,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_log_transaction",
-      "community": 96,
+      "community": 423,
       "norm_label": ".log_transaction()"
     },
     {
@@ -8780,7 +8800,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_sync_reference_transaction",
-      "community": 96,
+      "community": 423,
       "norm_label": ".sync_reference_transaction()"
     },
     {
@@ -8790,7 +8810,7 @@
       "source_location": "L223",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_sync_turn_safe_entries",
-      "community": 96,
+      "community": 423,
       "norm_label": ".sync_turn_safe_entries()"
     },
     {
@@ -8800,7 +8820,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_upsert_turn_safe_row",
-      "community": 96,
+      "community": 423,
       "norm_label": ".upsert_turn_safe_row()"
     },
     {
@@ -8810,7 +8830,7 @@
       "source_location": "L333",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_reverse_turn_transactions",
-      "community": 96,
+      "community": 206,
       "norm_label": ".reverse_turn_transactions()"
     },
     {
@@ -8820,7 +8840,7 @@
       "source_location": "L393",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_adjust_balance",
-      "community": 96,
+      "community": 423,
       "norm_label": ".adjust_balance()"
     },
     {
@@ -8880,7 +8900,7 @@
       "source_location": "L597",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_ensure_schema",
-      "community": 96,
+      "community": 423,
       "norm_label": ".ensure_schema()"
     },
     {
@@ -8900,7 +8920,7 @@
       "source_location": "L689",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_ensure_reference_index",
-      "community": 96,
+      "community": 423,
       "norm_label": ".ensure_reference_index()"
     },
     {
@@ -9000,7 +9020,7 @@
       "source_location": "L858",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_cleanup_deleted_reference_transactions",
-      "community": 96,
+      "community": 423,
       "norm_label": ".cleanup_deleted_reference_transactions()"
     },
     {
@@ -9060,7 +9080,7 @@
       "source_location": "L1079",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_legacy_salary_events",
-      "community": 96,
+      "community": 206,
       "norm_label": ".legacy_salary_events()"
     },
     {
@@ -9070,7 +9090,7 @@
       "source_location": "L1112",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_insert_transaction",
-      "community": 96,
+      "community": 423,
       "norm_label": ".insert_transaction()"
     },
     {
@@ -9080,7 +9100,7 @@
       "source_location": "L1180",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_delete_transactions_by_reference",
-      "community": 96,
+      "community": 423,
       "norm_label": ".delete_transactions_by_reference()"
     },
     {
@@ -9090,7 +9110,7 @@
       "source_location": "L1211",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_delete_orphaned_transactions_for_table",
-      "community": 96,
+      "community": 423,
       "norm_label": ".delete_orphaned_transactions_for_table()"
     },
     {
@@ -9100,7 +9120,7 @@
       "source_location": "L1243",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_transaction_exists",
-      "community": 96,
+      "community": 423,
       "norm_label": ".transaction_exists()"
     },
     {
@@ -9110,7 +9130,7 @@
       "source_location": "L1252",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_recalculate_balances",
-      "community": 96,
+      "community": 423,
       "norm_label": ".recalculate_balances()"
     },
     {
@@ -9190,7 +9210,7 @@
       "source_location": "L1391",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_is_valid_datetime",
-      "community": 96,
+      "community": 423,
       "norm_label": ".is_valid_datetime()"
     },
     {
@@ -9200,7 +9220,7 @@
       "source_location": "L1397",
       "_origin": "ast",
       "id": "application_models_safe_model_safe_model_null_if_empty",
-      "community": 96,
+      "community": 423,
       "norm_label": ".null_if_empty()"
     },
     {
@@ -13370,7 +13390,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "system_core_common_is_really_writable",
-      "community": 40,
+      "community": 88,
       "norm_label": "is_really_writable()"
     },
     {
@@ -13420,7 +13440,7 @@
       "source_location": "L266",
       "_origin": "ast",
       "id": "system_core_common_config_item",
-      "community": 437,
+      "community": 424,
       "norm_label": "config_item()"
     },
     {
@@ -13430,7 +13450,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "system_core_common_get_mimes",
-      "community": 437,
+      "community": 435,
       "norm_label": "get_mimes()"
     },
     {
@@ -13450,7 +13470,7 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "system_core_common_is_cli",
-      "community": 437,
+      "community": 424,
       "norm_label": "is_cli()"
     },
     {
@@ -13480,7 +13500,7 @@
       "source_location": "L415",
       "_origin": "ast",
       "id": "system_core_common_log_message",
-      "community": 19,
+      "community": 427,
       "norm_label": "log_message()"
     },
     {
@@ -13530,7 +13550,7 @@
       "source_location": "L645",
       "_origin": "ast",
       "id": "system_core_common_remove_invisible_characters",
-      "community": 22,
+      "community": 177,
       "norm_label": "remove_invisible_characters()"
     },
     {
@@ -13560,7 +13580,7 @@
       "source_location": "L756",
       "_origin": "ast",
       "id": "system_core_common_function_usable",
-      "community": 1,
+      "community": 441,
       "norm_label": "function_usable()"
     },
     {
@@ -13720,7 +13740,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_core_exceptions",
-      "community": 437,
+      "community": 424,
       "norm_label": "exceptions.php"
     },
     {
@@ -13730,7 +13750,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions",
-      "community": 437,
+      "community": 424,
       "norm_label": "ci_exceptions"
     },
     {
@@ -13740,7 +13760,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_construct",
-      "community": 437,
+      "community": 424,
       "norm_label": ".__construct()"
     },
     {
@@ -13750,7 +13770,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_log_exception",
-      "community": 437,
+      "community": 424,
       "norm_label": ".log_exception()"
     },
     {
@@ -13760,7 +13780,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_show_404",
-      "community": 437,
+      "community": 424,
       "norm_label": ".show_404()"
     },
     {
@@ -13770,7 +13790,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_show_error",
-      "community": 437,
+      "community": 424,
       "norm_label": ".show_error()"
     },
     {
@@ -13780,7 +13800,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_show_exception",
-      "community": 437,
+      "community": 424,
       "norm_label": ".show_exception()"
     },
     {
@@ -13790,7 +13810,7 @@
       "source_location": "L222",
       "_origin": "ast",
       "id": "system_core_exceptions_ci_exceptions_show_php_error",
-      "community": 437,
+      "community": 424,
       "norm_label": ".show_php_error()"
     },
     {
@@ -13980,7 +14000,7 @@
       "source_location": "L476",
       "_origin": "ast",
       "id": "system_core_input_ci_input_set_cookie",
-      "community": 41,
+      "community": 424,
       "norm_label": ".set_cookie()"
     },
     {
@@ -14060,7 +14080,7 @@
       "source_location": "L773",
       "_origin": "ast",
       "id": "system_core_input_ci_input_is_cli_request",
-      "community": 41,
+      "community": 424,
       "norm_label": ".is_cli_request()"
     },
     {
@@ -14080,7 +14100,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_core_lang",
-      "community": 19,
+      "community": 427,
       "norm_label": "lang.php"
     },
     {
@@ -14090,7 +14110,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_core_lang_ci_lang",
-      "community": 19,
+      "community": 427,
       "norm_label": "ci_lang"
     },
     {
@@ -14100,7 +14120,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "system_core_lang_ci_lang_construct",
-      "community": 19,
+      "community": 427,
       "norm_label": ".__construct()"
     },
     {
@@ -14110,7 +14130,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "system_core_lang_ci_lang_load",
-      "community": 437,
+      "community": 427,
       "norm_label": ".load()"
     },
     {
@@ -14120,7 +14140,7 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "system_core_lang_ci_lang_line",
-      "community": 19,
+      "community": 427,
       "norm_label": ".line()"
     },
     {
@@ -14460,7 +14480,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "system_core_log_ci_log_construct",
-      "community": 40,
+      "community": 437,
       "norm_label": ".__construct()"
     },
     {
@@ -14570,7 +14590,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "system_core_output_ci_output_construct",
-      "community": 437,
+      "community": 435,
       "norm_label": ".__construct()"
     },
     {
@@ -14720,7 +14740,7 @@
       "source_location": "L663",
       "_origin": "ast",
       "id": "system_core_output_ci_output_strlen",
-      "community": 13,
+      "community": 40,
       "norm_label": ".strlen()"
     },
     {
@@ -15020,7 +15040,7 @@
       "source_location": "L657",
       "_origin": "ast",
       "id": "system_core_security_ci_security_sanitize_filename",
-      "community": 22,
+      "community": 177,
       "norm_label": ".sanitize_filename()"
     },
     {
@@ -15410,7 +15430,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "system_core_utf8_ci_utf8_safe_ascii_for_xml",
-      "community": 22,
+      "community": 177,
       "norm_label": ".safe_ascii_for_xml()"
     },
     {
@@ -15550,7 +15570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_database_db_cache",
-      "community": 1,
+      "community": 88,
       "norm_label": "db_cache.php"
     },
     {
@@ -15560,7 +15580,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache",
-      "community": 1,
+      "community": 88,
       "norm_label": "ci_db_cache"
     },
     {
@@ -15570,7 +15590,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_construct",
-      "community": 1,
+      "community": 88,
       "norm_label": ".__construct()"
     },
     {
@@ -15580,7 +15600,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_check_path",
-      "community": 1,
+      "community": 88,
       "norm_label": ".check_path()"
     },
     {
@@ -15590,7 +15610,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_read",
-      "community": 1,
+      "community": 88,
       "norm_label": ".read()"
     },
     {
@@ -15600,7 +15620,7 @@
       "source_location": "L159",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_write",
-      "community": 1,
+      "community": 88,
       "norm_label": ".write()"
     },
     {
@@ -15610,7 +15630,7 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_delete",
-      "community": 1,
+      "community": 88,
       "norm_label": ".delete()"
     },
     {
@@ -15620,7 +15640,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_delete_all",
-      "community": 1,
+      "community": 88,
       "norm_label": ".delete_all()"
     },
     {
@@ -24230,7 +24250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_captcha_helper",
-      "community": 40,
+      "community": 88,
       "norm_label": "captcha_helper.php"
     },
     {
@@ -24240,7 +24260,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "system_helpers_captcha_helper_create_captcha",
-      "community": 40,
+      "community": 88,
       "norm_label": "create_captcha()"
     },
     {
@@ -24510,7 +24530,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_file_helper",
-      "community": 1,
+      "community": 435,
       "norm_label": "file_helper.php"
     },
     {
@@ -24520,7 +24540,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "system_helpers_file_helper_read_file",
-      "community": 1,
+      "community": 435,
       "norm_label": "read_file()"
     },
     {
@@ -24530,7 +24550,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "system_helpers_file_helper_write_file",
-      "community": 1,
+      "community": 88,
       "norm_label": "write_file()"
     },
     {
@@ -24540,7 +24560,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "system_helpers_file_helper_delete_files",
-      "community": 1,
+      "community": 88,
       "norm_label": "delete_files()"
     },
     {
@@ -24550,7 +24570,7 @@
       "source_location": "L164",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_filenames",
-      "community": 1,
+      "community": 435,
       "norm_label": "get_filenames()"
     },
     {
@@ -24560,7 +24580,7 @@
       "source_location": "L207",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_dir_file_info",
-      "community": 1,
+      "community": 435,
       "norm_label": "get_dir_file_info()"
     },
     {
@@ -24570,7 +24590,7 @@
       "source_location": "L252",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_file_info",
-      "community": 1,
+      "community": 435,
       "norm_label": "get_file_info()"
     },
     {
@@ -24580,7 +24600,7 @@
       "source_location": "L310",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_mime_by_extension",
-      "community": 437,
+      "community": 435,
       "norm_label": "get_mime_by_extension()"
     },
     {
@@ -24590,7 +24610,7 @@
       "source_location": "L346",
       "_origin": "ast",
       "id": "system_helpers_file_helper_symbolic_permissions",
-      "community": 1,
+      "community": 435,
       "norm_label": "symbolic_permissions()"
     },
     {
@@ -24600,7 +24620,7 @@
       "source_location": "L397",
       "_origin": "ast",
       "id": "system_helpers_file_helper_octal_permissions",
-      "community": 1,
+      "community": 435,
       "norm_label": "octal_permissions()"
     },
     {
@@ -26160,7 +26180,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file",
-      "community": 1,
+      "community": 88,
       "norm_label": "cache_file.php"
     },
     {
@@ -26170,7 +26190,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file",
-      "community": 1,
+      "community": 88,
       "norm_label": "ci_cache_file"
     },
     {
@@ -26180,7 +26200,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_construct",
-      "community": 1,
+      "community": 88,
       "norm_label": ".__construct()"
     },
     {
@@ -26190,7 +26210,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_get",
-      "community": 1,
+      "community": 88,
       "norm_label": ".get()"
     },
     {
@@ -26200,7 +26220,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_delete",
-      "community": 1,
+      "community": 88,
       "norm_label": ".delete()"
     },
     {
@@ -26210,7 +26230,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_increment",
-      "community": 1,
+      "community": 88,
       "norm_label": ".increment()"
     },
     {
@@ -26220,7 +26240,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_save",
-      "community": 1,
+      "community": 88,
       "norm_label": ".save()"
     },
     {
@@ -26230,7 +26250,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_decrement",
-      "community": 1,
+      "community": 88,
       "norm_label": ".decrement()"
     },
     {
@@ -26240,7 +26260,7 @@
       "source_location": "L209",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_clean",
-      "community": 1,
+      "community": 88,
       "norm_label": ".clean()"
     },
     {
@@ -26250,7 +26270,7 @@
       "source_location": "L224",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_cache_info",
-      "community": 1,
+      "community": 435,
       "norm_label": ".cache_info()"
     },
     {
@@ -26260,7 +26280,7 @@
       "source_location": "L237",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_get_metadata",
-      "community": 1,
+      "community": 88,
       "norm_label": ".get_metadata()"
     },
     {
@@ -26270,7 +26290,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_is_supported",
-      "community": 1,
+      "community": 88,
       "norm_label": ".is_supported()"
     },
     {
@@ -27900,7 +27920,7 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "system_libraries_encryption_ci_encryption_strlen",
-      "community": 13,
+      "community": 52,
       "norm_label": ".strlen()"
     },
     {
@@ -28620,7 +28640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_ftp",
-      "community": 1,
+      "community": 422,
       "norm_label": "ftp.php"
     },
     {
@@ -28630,7 +28650,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp",
-      "community": 1,
+      "community": 422,
       "norm_label": "ci_ftp"
     },
     {
@@ -28640,7 +28660,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_construct",
-      "community": 1,
+      "community": 422,
       "norm_label": ".__construct()"
     },
     {
@@ -28650,7 +28670,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_initialize",
-      "community": 1,
+      "community": 422,
       "norm_label": ".initialize()"
     },
     {
@@ -28660,7 +28680,7 @@
       "source_location": "L147",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_connect",
-      "community": 1,
+      "community": 422,
       "norm_label": ".connect()"
     },
     {
@@ -28670,7 +28690,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_error",
-      "community": 1,
+      "community": 422,
       "norm_label": "._error()"
     },
     {
@@ -28680,7 +28700,7 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_login",
-      "community": 1,
+      "community": 422,
       "norm_label": "._login()"
     },
     {
@@ -28690,7 +28710,7 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_download",
-      "community": 1,
+      "community": 422,
       "norm_label": ".download()"
     },
     {
@@ -28700,7 +28720,7 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_is_conn",
-      "community": 1,
+      "community": 422,
       "norm_label": "._is_conn()"
     },
     {
@@ -28710,7 +28730,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_getext",
-      "community": 1,
+      "community": 422,
       "norm_label": "._getext()"
     },
     {
@@ -28720,7 +28740,7 @@
       "source_location": "L285",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_settype",
-      "community": 1,
+      "community": 422,
       "norm_label": "._settype()"
     },
     {
@@ -28730,7 +28750,7 @@
       "source_location": "L301",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_move",
-      "community": 1,
+      "community": 422,
       "norm_label": ".move()"
     },
     {
@@ -28740,7 +28760,7 @@
       "source_location": "L316",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_rename",
-      "community": 1,
+      "community": 422,
       "norm_label": ".rename()"
     },
     {
@@ -28750,7 +28770,7 @@
       "source_location": "L343",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_delete_file",
-      "community": 1,
+      "community": 422,
       "norm_label": ".delete_file()"
     },
     {
@@ -28760,7 +28780,7 @@
       "source_location": "L371",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_delete_dir",
-      "community": 1,
+      "community": 422,
       "norm_label": ".delete_dir()"
     },
     {
@@ -28770,7 +28790,7 @@
       "source_location": "L410",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_list_files",
-      "community": 1,
+      "community": 422,
       "norm_label": ".list_files()"
     },
     {
@@ -28780,7 +28800,7 @@
       "source_location": "L431",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_mirror",
-      "community": 1,
+      "community": 422,
       "norm_label": ".mirror()"
     },
     {
@@ -28790,7 +28810,7 @@
       "source_location": "L478",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_changedir",
-      "community": 1,
+      "community": 422,
       "norm_label": ".changedir()"
     },
     {
@@ -28800,7 +28820,7 @@
       "source_location": "L506",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_mkdir",
-      "community": 1,
+      "community": 422,
       "norm_label": ".mkdir()"
     },
     {
@@ -28810,7 +28830,7 @@
       "source_location": "L539",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_chmod",
-      "community": 1,
+      "community": 441,
       "norm_label": ".chmod()"
     },
     {
@@ -28820,7 +28840,7 @@
       "source_location": "L567",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_upload",
-      "community": 1,
+      "community": 422,
       "norm_label": ".upload()"
     },
     {
@@ -28830,7 +28850,7 @@
       "source_location": "L612",
       "_origin": "ast",
       "id": "system_libraries_ftp_ci_ftp_close",
-      "community": 1,
+      "community": 422,
       "norm_label": ".close()"
     },
     {
@@ -29030,7 +29050,7 @@
       "source_location": "L1195",
       "_origin": "ast",
       "id": "system_libraries_image_lib_ci_image_lib_image_process_imagemagick",
-      "community": 1,
+      "community": 441,
       "norm_label": ".image_process_imagemagick()"
     },
     {
@@ -29040,7 +29060,7 @@
       "source_location": "L1254",
       "_origin": "ast",
       "id": "system_libraries_image_lib_ci_image_lib_image_process_netpbm",
-      "community": 1,
+      "community": 441,
       "norm_label": ".image_process_netpbm()"
     },
     {
@@ -30360,7 +30380,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_construct",
-      "community": 16,
+      "community": 424,
       "norm_label": ".__construct()"
     },
     {
@@ -30370,7 +30390,7 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_ci_load_classes",
-      "community": 16,
+      "community": 424,
       "norm_label": "._ci_load_classes()"
     },
     {
@@ -30380,7 +30400,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_configure",
-      "community": 16,
+      "community": 424,
       "norm_label": "._configure()"
     },
     {
@@ -30390,7 +30410,7 @@
       "source_location": "L301",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_configure_sid_length",
-      "community": 16,
+      "community": 424,
       "norm_label": "._configure_sid_length()"
     },
     {
@@ -30400,7 +30420,7 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_sess_regenerate",
-      "community": 16,
+      "community": 424,
       "norm_label": ".sess_regenerate()"
     },
     {
@@ -30410,7 +30430,7 @@
       "source_location": "L373",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_ci_init_vars",
-      "community": 16,
+      "community": 424,
       "norm_label": "._ci_init_vars()"
     },
     {
@@ -31020,7 +31040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver",
-      "community": 19,
+      "community": 432,
       "norm_label": "session_memcached_driver.php"
     },
     {
@@ -31030,7 +31050,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver",
-      "community": 19,
+      "community": 432,
       "norm_label": "ci_session_memcached_driver"
     },
     {
@@ -31040,7 +31060,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_construct",
-      "community": 19,
+      "community": 432,
       "norm_label": ".__construct()"
     },
     {
@@ -31050,7 +31070,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_open",
-      "community": 19,
+      "community": 432,
       "norm_label": ".open()"
     },
     {
@@ -31060,7 +31080,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_read",
-      "community": 19,
+      "community": 432,
       "norm_label": ".read()"
     },
     {
@@ -31070,7 +31090,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_get_lock",
-      "community": 19,
+      "community": 432,
       "norm_label": "._get_lock()"
     },
     {
@@ -31080,7 +31100,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_write",
-      "community": 19,
+      "community": 432,
       "norm_label": ".write()"
     },
     {
@@ -31090,7 +31110,7 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_release_lock",
-      "community": 19,
+      "community": 432,
       "norm_label": "._release_lock()"
     },
     {
@@ -31100,7 +31120,7 @@
       "source_location": "L299",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_close",
-      "community": 19,
+      "community": 432,
       "norm_label": ".close()"
     },
     {
@@ -31110,7 +31130,7 @@
       "source_location": "L324",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_destroy",
-      "community": 19,
+      "community": 432,
       "norm_label": ".destroy()"
     },
     {
@@ -31120,7 +31140,7 @@
       "source_location": "L345",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_gc",
-      "community": 19,
+      "community": 432,
       "norm_label": ".gc()"
     },
     {
@@ -31130,7 +31150,7 @@
       "source_location": "L362",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_validatesessionid",
-      "community": 19,
+      "community": 432,
       "norm_label": ".validatesessionid()"
     },
     {
@@ -31140,7 +31160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver",
-      "community": 19,
+      "community": 427,
       "norm_label": "session_redis_driver.php"
     },
     {
@@ -31150,7 +31170,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver",
-      "community": 19,
+      "community": 427,
       "norm_label": "ci_session_redis_driver"
     },
     {
@@ -31160,7 +31180,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_construct",
-      "community": 19,
+      "community": 427,
       "norm_label": ".__construct()"
     },
     {
@@ -31170,7 +31190,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_open",
-      "community": 19,
+      "community": 427,
       "norm_label": ".open()"
     },
     {
@@ -31180,7 +31200,7 @@
       "source_location": "L195",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_read",
-      "community": 19,
+      "community": 427,
       "norm_label": ".read()"
     },
     {
@@ -31190,7 +31210,7 @@
       "source_location": "L224",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_get_lock",
-      "community": 19,
+      "community": 427,
       "norm_label": "._get_lock()"
     },
     {
@@ -31200,7 +31220,7 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_write",
-      "community": 19,
+      "community": 427,
       "norm_label": ".write()"
     },
     {
@@ -31210,7 +31230,7 @@
       "source_location": "L316",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_release_lock",
-      "community": 19,
+      "community": 427,
       "norm_label": "._release_lock()"
     },
     {
@@ -31220,7 +31240,7 @@
       "source_location": "L340",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_close",
-      "community": 19,
+      "community": 427,
       "norm_label": ".close()"
     },
     {
@@ -31230,7 +31250,7 @@
       "source_location": "L371",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_destroy",
-      "community": 19,
+      "community": 427,
       "norm_label": ".destroy()"
     },
     {
@@ -31240,7 +31260,7 @@
       "source_location": "L395",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_gc",
-      "community": 19,
+      "community": 427,
       "norm_label": ".gc()"
     },
     {
@@ -31250,7 +31270,7 @@
       "source_location": "L412",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_redis_driver_ci_session_redis_driver_validatesessionid",
-      "community": 19,
+      "community": 427,
       "norm_label": ".validatesessionid()"
     },
     {
@@ -33100,7 +33120,7 @@
       "source_location": "L347",
       "_origin": "ast",
       "id": "system_libraries_zip_ci_zip_substr",
-      "community": 50,
+      "community": 13,
       "norm_label": ".substr()"
     },
     {
@@ -33180,7 +33200,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "canin_1_project_story",
-      "community": 39,
+      "community": 439,
       "norm_label": "1. project story"
     },
     {
@@ -33190,7 +33210,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "canin_original_story",
-      "community": 39,
+      "community": 439,
       "norm_label": "original story"
     },
     {
@@ -33200,7 +33220,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "canin_current_story",
-      "community": 39,
+      "community": 439,
       "norm_label": "current story"
     },
     {
@@ -33210,7 +33230,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "canin_what_this_means_for_future_changes",
-      "community": 39,
+      "community": 439,
       "norm_label": "what this means for future changes"
     },
     {
@@ -38407,7 +38427,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1319",
+      "source_location": "L1343",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_build_financial_summary",
@@ -38417,7 +38437,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1382",
+      "source_location": "L1406",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_build_financial_timeline",
@@ -38467,7 +38487,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1033",
+      "source_location": "L1057",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_delete",
@@ -38497,7 +38517,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L913",
+      "source_location": "L927",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_delete_refund",
@@ -38507,7 +38527,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1091",
+      "source_location": "L1115",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_diagnosis_ids_from_post",
@@ -38517,7 +38537,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L999",
+      "source_location": "L1023",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_edit",
@@ -38547,7 +38567,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1249",
+      "source_location": "L1273",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_financial_profile_payload",
@@ -38557,7 +38577,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1048",
+      "source_location": "L1072",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_form",
@@ -38577,7 +38597,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1181",
+      "source_location": "L1205",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_json_error",
@@ -38587,7 +38607,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1155",
+      "source_location": "L1179",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_json_validation_error",
@@ -38597,7 +38617,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1234",
+      "source_location": "L1258",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_normalize_open_debts_rows",
@@ -38607,7 +38627,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1213",
+      "source_location": "L1237",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_normalize_wallet_transactions_rows",
@@ -38617,7 +38637,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1270",
+      "source_location": "L1294",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_normalized_discounts",
@@ -38627,7 +38647,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1229",
+      "source_location": "L1253",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_normalized_open_debts",
@@ -38637,7 +38657,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1581",
+      "source_location": "L1605",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_normalized_standalone_payments",
@@ -38647,7 +38667,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1208",
+      "source_location": "L1232",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_normalized_wallet_transactions",
@@ -38657,7 +38677,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1107",
+      "source_location": "L1131",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_null_if_empty",
@@ -38667,7 +38687,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1113",
+      "source_location": "L1137",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_patient_option_payload",
@@ -38677,7 +38697,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1072",
+      "source_location": "L1096",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_patient_payload",
@@ -38697,7 +38717,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1137",
+      "source_location": "L1161",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_patient_validation_errors",
@@ -38707,7 +38727,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1688",
+      "source_location": "L1712",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_payment_datetime_from_date",
@@ -38717,7 +38737,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1672",
+      "source_location": "L1696",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_payment_dimension_from_post",
@@ -38727,7 +38747,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1466",
+      "source_location": "L1490",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_record_standalone_debt_payment",
@@ -38747,7 +38767,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1302",
+      "source_location": "L1326",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_respond_discount_error",
@@ -38757,7 +38777,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1198",
+      "source_location": "L1222",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_respond_wallet_topup_error",
@@ -38787,7 +38807,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L966",
+      "source_location": "L990",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_sync_standalone_payment_dimension",
@@ -38797,7 +38817,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1009",
+      "source_location": "L1033",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_update",
@@ -38807,7 +38827,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1062",
+      "source_location": "L1086",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_validate_form",
@@ -38847,7 +38867,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1192",
+      "source_location": "L1216",
       "weight": 1.0,
       "source": "application_controllers_patients_patients",
       "target": "application_controllers_patients_patients_wants_json_response",
@@ -39935,7 +39955,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L906",
+      "source_location": "L920",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit_refund",
       "target": "application_controllers_patients_patients_financial_profile_payload",
@@ -39946,7 +39966,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L909",
+      "source_location": "L923",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit_refund",
       "target": "application_controllers_patients_patients_normalized_standalone_payments",
@@ -39957,7 +39977,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L885",
+      "source_location": "L897",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit_refund",
       "target": "application_controllers_patients_patients_null_if_empty",
@@ -39968,7 +39988,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L879",
+      "source_location": "L891",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit_refund",
       "target": "application_controllers_patients_patients_payment_dimension_from_post",
@@ -39979,7 +39999,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L876",
+      "source_location": "L888",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit_refund",
       "target": "application_controllers_patients_patients_respond_wallet_topup_error",
@@ -39990,7 +40010,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L887",
+      "source_location": "L899",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit_refund",
       "target": "application_controllers_patients_patients_update",
@@ -40024,7 +40044,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L876",
+      "source_location": "L888",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit_refund",
       "target": "application_helpers_app_helper_t"
@@ -40035,7 +40055,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L901",
+      "source_location": "L915",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit_refund",
       "target": "system_helpers_url_helper_redirect"
@@ -40045,7 +40065,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L942",
+      "source_location": "L966",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete_refund",
       "target": "application_controllers_patients_patients_delete",
@@ -40056,7 +40076,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L959",
+      "source_location": "L983",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete_refund",
       "target": "application_controllers_patients_patients_financial_profile_payload",
@@ -40067,7 +40087,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L962",
+      "source_location": "L986",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete_refund",
       "target": "application_controllers_patients_patients_normalized_standalone_payments",
@@ -40078,7 +40098,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L933",
+      "source_location": "L955",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete_refund",
       "target": "application_controllers_patients_patients_respond_wallet_topup_error",
@@ -40089,7 +40109,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L923",
+      "source_location": "L937",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete_refund",
       "target": "application_controllers_patients_patients_wants_json_response",
@@ -40101,7 +40121,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L922",
+      "source_location": "L936",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete_refund",
       "target": "application_core_my_controller_show_404_if_empty"
@@ -40112,7 +40132,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L933",
+      "source_location": "L955",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete_refund",
       "target": "application_helpers_app_helper_t"
@@ -40123,7 +40143,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L954",
+      "source_location": "L978",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete_refund",
       "target": "system_helpers_url_helper_redirect"
@@ -40133,7 +40153,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L968",
+      "source_location": "L992",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_sync_standalone_payment_dimension",
       "target": "application_controllers_patients_patients_update",
@@ -40144,7 +40164,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1006",
+      "source_location": "L1030",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit",
       "target": "application_controllers_patients_patients_form",
@@ -40156,7 +40176,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1003",
+      "source_location": "L1027",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit",
       "target": "application_core_my_controller_show_404_if_empty"
@@ -40167,7 +40187,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1005",
+      "source_location": "L1029",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_edit",
       "target": "system_core_compat_standard_array_column"
@@ -40177,7 +40197,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1017",
+      "source_location": "L1041",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_update",
       "target": "application_controllers_patients_patients_diagnosis_ids_from_post",
@@ -40188,7 +40208,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1017",
+      "source_location": "L1041",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_update",
       "target": "application_controllers_patients_patients_form",
@@ -40199,7 +40219,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1020",
+      "source_location": "L1044",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_update",
       "target": "application_controllers_patients_patients_patient_payload",
@@ -40210,7 +40230,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1014",
+      "source_location": "L1038",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_update",
       "target": "application_controllers_patients_patients_validate_form",
@@ -40222,41 +40242,41 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1013",
-      "weight": 1.0,
-      "source": "application_controllers_patients_patients_update",
-      "target": "application_core_my_controller_show_404_if_empty"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "application/controllers/Patients.php",
-      "source_location": "L1029",
-      "weight": 1.0,
-      "source": "application_controllers_patients_patients_update",
-      "target": "application_helpers_app_helper_t"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "application/controllers/Patients.php",
-      "source_location": "L1030",
-      "weight": 1.0,
-      "source": "application_controllers_patients_patients_update",
-      "target": "system_helpers_url_helper_redirect"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "application/controllers/Patients.php",
       "source_location": "L1037",
       "weight": 1.0,
+      "source": "application_controllers_patients_patients_update",
+      "target": "application_core_my_controller_show_404_if_empty"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "application/controllers/Patients.php",
+      "source_location": "L1053",
+      "weight": 1.0,
+      "source": "application_controllers_patients_patients_update",
+      "target": "application_helpers_app_helper_t"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "application/controllers/Patients.php",
+      "source_location": "L1054",
+      "weight": 1.0,
+      "source": "application_controllers_patients_patients_update",
+      "target": "system_helpers_url_helper_redirect"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "application/controllers/Patients.php",
+      "source_location": "L1061",
+      "weight": 1.0,
       "source": "application_controllers_patients_patients_delete",
       "target": "application_core_my_controller_show_404_if_empty"
     },
@@ -40266,7 +40286,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1040",
+      "source_location": "L1064",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete",
       "target": "application_helpers_app_helper_t"
@@ -40277,7 +40297,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1041",
+      "source_location": "L1065",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_delete",
       "target": "system_helpers_url_helper_redirect"
@@ -40288,7 +40308,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1051",
+      "source_location": "L1075",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_form",
       "target": "application_helpers_app_helper_t"
@@ -40298,7 +40318,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1079",
+      "source_location": "L1103",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_patient_payload",
       "target": "application_controllers_patients_patients_null_if_empty",
@@ -40310,7 +40330,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1143",
+      "source_location": "L1167",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_patient_validation_errors",
       "target": "system_helpers_form_helper_form_error"
@@ -40321,7 +40341,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1168",
+      "source_location": "L1192",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_json_validation_error",
       "target": "application_helpers_app_helper_t"
@@ -40331,7 +40351,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1201",
+      "source_location": "L1225",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_respond_wallet_topup_error",
       "target": "application_controllers_patients_patients_json_error",
@@ -40343,7 +40363,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1205",
+      "source_location": "L1229",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_respond_wallet_topup_error",
       "target": "system_helpers_url_helper_redirect"
@@ -40353,7 +40373,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1210",
+      "source_location": "L1234",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_normalized_wallet_transactions",
       "target": "application_controllers_patients_patients_normalize_wallet_transactions_rows",
@@ -40364,7 +40384,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1262",
+      "source_location": "L1286",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_financial_profile_payload",
       "target": "application_controllers_patients_patients_normalize_wallet_transactions_rows",
@@ -40375,7 +40395,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1231",
+      "source_location": "L1255",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_normalized_open_debts",
       "target": "application_controllers_patients_patients_normalize_open_debts_rows",
@@ -40386,7 +40406,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1263",
+      "source_location": "L1287",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_financial_profile_payload",
       "target": "application_controllers_patients_patients_normalize_open_debts_rows",
@@ -40398,7 +40418,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1242",
+      "source_location": "L1266",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_normalize_open_debts_rows",
       "target": "application_helpers_app_helper_t"
@@ -40408,7 +40428,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1265",
+      "source_location": "L1289",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_financial_profile_payload",
       "target": "application_controllers_patients_patients_build_financial_summary",
@@ -40419,7 +40439,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1266",
+      "source_location": "L1290",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_financial_profile_payload",
       "target": "application_controllers_patients_patients_build_financial_timeline",
@@ -40431,7 +40451,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1291",
+      "source_location": "L1315",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_normalized_discounts",
       "target": "application_helpers_app_helper_t"
@@ -40441,7 +40461,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1315",
+      "source_location": "L1339",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_respond_discount_error",
       "target": "application_controllers_patients_patients_normalized_discounts",
@@ -40453,7 +40473,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1306",
+      "source_location": "L1330",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_respond_discount_error",
       "target": "system_helpers_url_helper_redirect"
@@ -40464,7 +40484,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1437",
+      "source_location": "L1461",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_build_financial_timeline",
       "target": "application_helpers_app_helper_format_amount"
@@ -40475,7 +40495,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1415",
+      "source_location": "L1439",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_build_financial_timeline",
       "target": "application_helpers_app_helper_t"
@@ -40485,7 +40505,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1499",
+      "source_location": "L1523",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_record_standalone_debt_payment",
       "target": "application_controllers_patients_patients_payment_datetime_from_date",
@@ -40497,7 +40517,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1526",
+      "source_location": "L1550",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_record_standalone_debt_payment",
       "target": "application_helpers_app_helper_safe_patient_payment_note"
@@ -40508,7 +40528,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1607",
+      "source_location": "L1631",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_normalized_standalone_payments",
       "target": "application_helpers_app_helper_t"
@@ -40519,7 +40539,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Patients.php",
-      "source_location": "L1678",
+      "source_location": "L1702",
       "weight": 1.0,
       "source": "application_controllers_patients_patients_payment_dimension_from_post",
       "target": "application_helpers_app_helper_t"
@@ -43917,6 +43937,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
+      "source_location": "L921",
+      "weight": 1.0,
+      "source": "application_controllers_store_store",
+      "target": "application_controllers_store_store_apply_refund_effects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/controllers/Store.php",
       "source_location": "L406",
       "weight": 1.0,
       "source": "application_controllers_store_store",
@@ -43927,7 +43957,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1280",
+      "source_location": "L1393",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_approve_sale_batch",
@@ -43937,7 +43967,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1179",
+      "source_location": "L1292",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_bulk_sell",
@@ -44007,7 +44037,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1444",
+      "source_location": "L1557",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_create_supplier",
@@ -44037,7 +44067,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L880",
+      "source_location": "L954",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_delete_sale",
@@ -44067,7 +44097,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L917",
+      "source_location": "L991",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_edit_sale",
@@ -44077,7 +44107,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1470",
+      "source_location": "L1583",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_edit_supplier",
@@ -44137,7 +44167,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1502",
+      "source_location": "L1615",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_receive_stock",
@@ -44157,7 +44187,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1109",
+      "source_location": "L1222",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_reports",
@@ -44177,6 +44207,16 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
+      "source_location": "L884",
+      "weight": 1.0,
+      "source": "application_controllers_store_store",
+      "target": "application_controllers_store_store_reverse_refund_effects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/controllers/Store.php",
       "source_location": "L846",
       "weight": 1.0,
       "source": "application_controllers_store_store",
@@ -44187,7 +44227,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1252",
+      "source_location": "L1365",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_sale_batches",
@@ -44227,7 +44267,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1574",
+      "source_location": "L1687",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_stock_receipts",
@@ -44237,7 +44277,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1436",
+      "source_location": "L1549",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_suppliers",
@@ -44247,7 +44287,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L943",
+      "source_location": "L1020",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_update_sale",
@@ -44277,7 +44317,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1262",
+      "source_location": "L1375",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_view_sale_batch",
@@ -44287,7 +44327,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1581",
+      "source_location": "L1694",
       "weight": 1.0,
       "source": "application_controllers_store_store",
       "target": "application_controllers_store_store_view_stock_receipt",
@@ -44627,7 +44667,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L893",
+      "source_location": "L967",
       "weight": 1.0,
       "source": "application_controllers_store_store_delete_sale",
       "target": "application_controllers_store_store_reverse_sale_effects",
@@ -44638,7 +44678,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Store.php",
-      "source_location": "L959",
+      "source_location": "L1043",
       "weight": 1.0,
       "source": "application_controllers_store_store_update_sale",
       "target": "application_controllers_store_store_reverse_sale_effects",
@@ -44647,10 +44687,32 @@
     {
       "relation": "calls",
       "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "application/controllers/Store.php",
+      "source_location": "L1043",
+      "weight": 1.0,
+      "source": "application_controllers_store_store_update_sale",
+      "target": "application_controllers_store_store_reverse_refund_effects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "application/controllers/Store.php",
+      "source_location": "L1169",
+      "weight": 1.0,
+      "source": "application_controllers_store_store_update_sale",
+      "target": "application_controllers_store_store_apply_refund_effects",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L887",
+      "source_location": "L961",
       "weight": 1.0,
       "source": "application_controllers_store_store_delete_sale",
       "target": "application_helpers_app_helper_t"
@@ -44661,7 +44723,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L888",
+      "source_location": "L962",
       "weight": 1.0,
       "source": "application_controllers_store_store_delete_sale",
       "target": "system_helpers_url_helper_redirect"
@@ -44672,7 +44734,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L924",
+      "source_location": "L998",
       "weight": 1.0,
       "source": "application_controllers_store_store_edit_sale",
       "target": "application_helpers_app_helper_t"
@@ -44683,7 +44745,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L925",
+      "source_location": "L999",
       "weight": 1.0,
       "source": "application_controllers_store_store_edit_sale",
       "target": "system_helpers_url_helper_redirect"
@@ -44694,7 +44756,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L950",
+      "source_location": "L1027",
       "weight": 1.0,
       "source": "application_controllers_store_store_update_sale",
       "target": "application_helpers_app_helper_t"
@@ -44705,7 +44767,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L951",
+      "source_location": "L1028",
       "weight": 1.0,
       "source": "application_controllers_store_store_update_sale",
       "target": "system_helpers_url_helper_redirect"
@@ -44716,7 +44778,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1235",
+      "source_location": "L1348",
       "weight": 1.0,
       "source": "application_controllers_store_store_bulk_sell",
       "target": "application_helpers_app_helper_t"
@@ -44727,7 +44789,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1236",
+      "source_location": "L1349",
       "weight": 1.0,
       "source": "application_controllers_store_store_bulk_sell",
       "target": "system_helpers_url_helper_redirect"
@@ -44738,7 +44800,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1297",
+      "source_location": "L1410",
       "weight": 1.0,
       "source": "application_controllers_store_store_approve_sale_batch",
       "target": "application_helpers_app_helper_t"
@@ -44749,7 +44811,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1298",
+      "source_location": "L1411",
       "weight": 1.0,
       "source": "application_controllers_store_store_approve_sale_batch",
       "target": "system_helpers_url_helper_redirect"
@@ -44760,7 +44822,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1451",
+      "source_location": "L1564",
       "weight": 1.0,
       "source": "application_controllers_store_store_create_supplier",
       "target": "application_helpers_app_helper_t"
@@ -44771,7 +44833,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1452",
+      "source_location": "L1565",
       "weight": 1.0,
       "source": "application_controllers_store_store_create_supplier",
       "target": "system_helpers_url_helper_redirect"
@@ -44782,7 +44844,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1484",
+      "source_location": "L1597",
       "weight": 1.0,
       "source": "application_controllers_store_store_edit_supplier",
       "target": "application_helpers_app_helper_t"
@@ -44793,7 +44855,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1485",
+      "source_location": "L1598",
       "weight": 1.0,
       "source": "application_controllers_store_store_edit_supplier",
       "target": "system_helpers_url_helper_redirect"
@@ -44804,7 +44866,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1539",
+      "source_location": "L1652",
       "weight": 1.0,
       "source": "application_controllers_store_store_receive_stock",
       "target": "application_helpers_app_helper_t"
@@ -44815,7 +44877,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Store.php",
-      "source_location": "L1540",
+      "source_location": "L1653",
       "weight": 1.0,
       "source": "application_controllers_store_store_receive_stock",
       "target": "system_helpers_url_helper_redirect"
@@ -94365,5 +94427,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "49c624a7f7d85efc664c79c3cc8bad6da437b58c"
+  "built_at_commit": "38a6a464b85d6bbedaf9ded5b027e4050d7010c5"
 }
