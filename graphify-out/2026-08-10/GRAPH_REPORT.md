@@ -1,11 +1,11 @@
 # Graph Report - test-navid.cyborgtech.co  (2026-08-10)
 
 ## Corpus Check
-- 431 files · ~2,595,667 words
+- 431 files · ~2,595,699 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3728 nodes · 5497 edges · 438 communities (285 shown, 153 thin omitted)
+- 3728 nodes · 5497 edges · 437 communities (284 shown, 153 thin omitted)
 - Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 610 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -210,7 +210,6 @@
 - [[_COMMUNITY_smiley_helper.php|smiley_helper.php]]
 - [[_COMMUNITY_Migration_Add_roles_permissions|Migration_Add_roles_permissions]]
 - [[_COMMUNITY_select2-init.js|select2-init.js]]
-- [[_COMMUNITY_1. Project Story|1. Project Story]]
 - [[_COMMUNITY_CI_Model|CI_Model]]
 - [[_COMMUNITY_CI_DB_cubrid_utility|CI_DB_cubrid_utility]]
 - [[_COMMUNITY_.run|.run]]
@@ -261,7 +260,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (438 total, 153 thin omitted)
+## Communities (437 total, 153 thin omitted)
 
 ### Community 1 - "CI_Image_lib"
 Cohesion: 0.05
@@ -288,8 +287,8 @@ Cohesion: 0.14
 Nodes (24): safe_reference_label(), html_escape(), _attributes_to_string(), form_button(), form_checkbox(), form_dropdown(), form_error(), form_fieldset() (+16 more)
 
 ### Community 19 - "log_message"
-Cohesion: 0.11
-Nodes (4): log_message(), CI_Lang, CI_Session_files_driver, CI_Session_memcached_driver
+Cohesion: 0.12
+Nodes (4): log_message(), CI_Lang, CI_Session_files_driver, CI_Session_redis_driver
 
 ### Community 22 - "CI_Security"
 Cohesion: 0.11
@@ -304,8 +303,8 @@ Cohesion: 0.13
 Nodes (3): Reports, Salaries, t()
 
 ### Community 39 - "CANIN Project Story And AI Agent Guide"
-Cohesion: 0.09
-Nodes (22): 10. Module Overview, 28. Database Story, 2. Tech Stack, 30. Global Change Process For Any Module, 31. Module-Specific Change Matrix, 34. Language And Content Rules, 35. Responsive Rules, 36. Validation Checklist Before Finishing Any Change (+14 more)
+Cohesion: 0.07
+Nodes (26): 10. Module Overview, 1. Project Story, 28. Database Story, 2. Tech Stack, 30. Global Change Process For Any Module, 31. Module-Specific Change Matrix, 34. Language And Content Rules, 35. Responsive Rules (+18 more)
 
 ### Community 40 - "CI_Output"
 Cohesion: 0.13
@@ -313,7 +312,7 @@ Nodes (3): is_really_writable(), CI_Output, create_captcha()
 
 ### Community 49 - "CI_Session_database_driver"
 Cohesion: 0.09
-Nodes (4): SessionHandlerInterface, CI_Session_database_driver, CI_Session_redis_driver, CI_Session_driver
+Nodes (4): SessionHandlerInterface, CI_Session_database_driver, CI_Session_memcached_driver, CI_Session_driver
 
 ### Community 50 - "CI_Zip"
 Cohesion: 0.15
@@ -498,10 +497,6 @@ Nodes (3): get_clickable_smileys(), _get_smiley_array(), parse_smileys()
 ### Community 205 - "select2-init.js"
 Cohesion: 0.83
 Nodes (3): bindSelect2NativeChange(), getSelect2Lang(), initSelect2()
-
-### Community 206 - "1. Project Story"
-Cohesion: 0.50
-Nodes (4): 1. Project Story, Current Story, Original Story, What This Means For Future Changes
 
 ### Community 407 - "Store Module Build Log"
 Cohesion: 0.22

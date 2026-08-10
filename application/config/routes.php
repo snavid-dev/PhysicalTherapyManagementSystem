@@ -68,7 +68,6 @@ $route['roles/(:num)/update'] = 'Roles/update/$1';
 $route['roles/(:num)/delete'] = 'Roles/delete/$1';
 
 $route['turns'] = 'Turns/index';
-$route['turns/datatable'] = 'Turns/datatable';
 $route['turns/create'] = 'Turns/create';
 $route['turns/bulk'] = 'Turns/bulk_create';
 $route['turns/bulk/store'] = 'Turns/bulk_store';

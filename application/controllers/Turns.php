@@ -21,98 +21,57 @@ class Turns extends Authenticated_Controller
 	{
 		$this->require_permission('manage_turns');
 
-		// Rows are loaded on demand via the server-side DataTables endpoint
-		// (turns/datatable) so the page no longer renders every turn up front.
+		// Client-side DataTable, but scoped to a date range: the turns table can
+		// grow into the tens of thousands of rows (see Turn_model::get_datatable's
+		// history), so an unbounded "show everything" load would freeze the page
+		// again. Default to today only; the user can widen the range.
+		$default_from = date('Y-m-d');
+		$default_to = date('Y-m-d');
+
+		$from_input = trim((string) $this->input->get('from', TRUE));
+		$to_input = trim((string) $this->input->get('to', TRUE));
+
+		$from = $from_input !== '' ? $this->gregorian_date_from_shamsi($from_input) : $default_from;
+		$to = $to_input !== '' ? $this->gregorian_date_from_shamsi($to_input) : $default_to;
+
+		if ($from === '' || $to === '' || $from > $to) {
+			$from = $default_from;
+			$to = $default_to;
+		}
+
+		$from_input = $from_input !== '' && to_gregorian($from_input) !== '' ? $from_input : to_shamsi($default_from);
+		$to_input = $to_input !== '' && to_gregorian($to_input) !== '' ? $to_input : to_shamsi($default_to);
+
+		$turns = array_map(array($this, 'decorate_turn_row'), $this->Turn_model->get_in_range($from, $to));
+
 		$this->render('turns/index', array(
 			'title' => t('Turns'),
 			'current_section' => 'turns',
-			'datatable_url' => base_url('turns/datatable'),
+			'turns' => $turns,
+			'from' => $from_input,
+			'to' => $to_input,
 		));
 	}
 
-	public function datatable()
-	{
-		$this->require_permission('manage_turns');
-
-		$draw = (int) $this->input->get('draw');
-		$start = (int) $this->input->get('start');
-		$length = (int) $this->input->get('length');
-
-		if ($length <= 0) {
-			$length = 25;
-		}
-
-		$search = $this->input->get('search');
-		$search_value = is_array($search) ? trim((string) ($search['value'] ?? '')) : '';
-
-		$order = $this->input->get('order');
-		$order_col = 0;
-		$order_dir = 'desc';
-
-		if (is_array($order) && isset($order[0]) && is_array($order[0])) {
-			$order_col = (int) ($order[0]['column'] ?? 0);
-			$order_dir = (string) ($order[0]['dir'] ?? 'desc');
-		}
-
-		$result = $this->Turn_model->get_datatable(array(
-			'start' => $start,
-			'length' => $length,
-			'search' => $search_value,
-			'order_col' => $order_col,
-			'order_dir' => $order_dir,
-		));
-
-		$rows = array();
-		foreach ($result['data'] as $turn) {
-			$rows[] = $this->turn_row_for_datatable($turn);
-		}
-
-		return $this->output
-			->set_content_type('application/json')
-			->set_output(json_encode(array(
-				'draw' => $draw,
-				'recordsTotal' => (int) $result['records_total'],
-				'recordsFiltered' => (int) $result['records_filtered'],
-				'data' => $rows,
-			)));
-	}
-
-	protected function turn_row_for_datatable($turn)
+	protected function decorate_turn_row($turn)
 	{
 		$first_name = trim((string) ($turn['patient_first_name'] ?? ''));
 		$last_name = trim((string) ($turn['patient_last_name'] ?? ''));
 		$father_name = trim((string) ($turn['patient_father_name'] ?? ''));
 
-		$patient_name = ($last_name !== '' && $last_name !== '-') ? trim($first_name . ' ' . $last_name) : $first_name;
+		$turn['patient_name'] = ($last_name !== '' && $last_name !== '-') ? trim($first_name . ' ' . $last_name) : $first_name;
 
 		if ($last_name !== '' && $last_name !== '-') {
-			$family_name = $last_name;
+			$turn['family_name'] = $last_name;
 		} elseif ($father_name !== '' && $father_name !== '-') {
-			$family_name = $father_name;
+			$turn['family_name'] = $father_name;
 		} else {
-			$family_name = NULL;
+			$turn['family_name'] = NULL;
 		}
 
-		$staff_name = !empty($turn['staff_full_name']) ? trim((string) $turn['staff_full_name']) : trim((string) ($turn['doctor_full_name'] ?? ''));
-		$id = (int) $turn['id'];
+		$turn['staff_name'] = !empty($turn['staff_full_name']) ? trim((string) $turn['staff_full_name']) : trim((string) ($turn['doctor_full_name'] ?? ''));
 
-		$actions = '<div class="d-flex gap-2 justify-content-end flex-wrap">'
-			. '<a href="' . base_url('turns/' . $id . '/edit') . '" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-pencil" aria-hidden="true"></i> ' . html_escape(t('Edit')) . '</a>'
-			. '<a href="' . base_url('turns/' . $id . '/delete') . '" class="btn btn-sm btn-outline-danger btn-icon" onclick="return confirm(\'' . html_escape(t('Delete this turn?')) . '\')"><i class="bi bi-trash" aria-hidden="true"></i> ' . html_escape(t('Delete')) . '</a>'
-			. '</div>';
-
-		return array(
-			'#' . $id,
-			html_escape(to_shamsi($turn['turn_date'])),
-			!empty($turn['turn_number']) ? format_number($turn['turn_number']) : '&mdash;',
-			html_escape($patient_name),
-			$family_name !== NULL ? html_escape($family_name) : '&mdash;',
-			!empty($turn['section_name']) ? html_escape(t($turn['section_name'])) : '&mdash;',
-			$staff_name !== '' ? html_escape($staff_name) : '&mdash;',
-			format_amount($turn['fee'] ?? 0),
-			html_escape(t($turn['payment_type'] ?? 'cash')),
-			$actions,
-		);
+		return $turn;
 	}
 
 	public function create()

@@ -71,10 +71,15 @@ class Reports extends Authenticated_Controller
 	{
 		$this->require_permission('view_reports');
 
+		$filters = $this->debtors_filters();
+		$query_filters = $this->debtors_query_filters($filters);
+
 		$this->render('reports/debtors', array(
 			'title' => t('debtors_list'),
 			'current_section' => 'reports',
-			'debtors' => $this->Report_model->get_debtors(),
+			'debtors' => $this->Report_model->get_debtors($query_filters['from'], $query_filters['to']),
+			'from' => $filters['from'],
+			'to' => $filters['to'],
 		));
 	}
 
@@ -82,10 +87,31 @@ class Reports extends Authenticated_Controller
 	{
 		$this->require_permission('view_reports');
 
+		$filters = $this->debtors_filters();
+		$query_filters = $this->debtors_query_filters($filters);
+
 		$this->load->view('reports/debtors_print', array(
 			'title' => t('debtors_list'),
-			'debtors' => $this->Report_model->get_debtors(),
+			'debtors' => $this->Report_model->get_debtors($query_filters['from'], $query_filters['to']),
+			'from' => $filters['from'],
+			'to' => $filters['to'],
 		));
+	}
+
+	protected function debtors_filters()
+	{
+		return array(
+			'from' => trim((string) $this->input->get('from', TRUE)),
+			'to' => trim((string) $this->input->get('to', TRUE)),
+		);
+	}
+
+	protected function debtors_query_filters($filters)
+	{
+		return array(
+			'from' => $filters['from'] !== '' ? $this->gregorian_date_from_shamsi($filters['from']) : '',
+			'to' => $filters['to'] !== '' ? $this->gregorian_date_from_shamsi($filters['to']) : '',
+		);
 	}
 
 	public function new_patients()
