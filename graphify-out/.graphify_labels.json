@@ -205,7 +205,6 @@
   "203": "Migration_Add_roles_permissions",
   "204": ".calculate_available_time_slots",
   "205": "select2-init.js",
-  "206": "1. Project Story",
   "207": "CI_Model",
   "208": "CI_DB_cubrid_utility",
   "209": "array_helper.php",
@@ -421,7 +420,6 @@
   "419": "suppliers.php",
   "420": "view_stock_receipt.php",
   "421": "CI_FTP",
-  "422": ".ensure_schema",
   "423": "Base_Controller",
   "424": "CI_DB_Cache",
   "425": "Xmlrpc.php",
@@ -434,8 +432,8 @@
   "432": "cookie_helper.php",
   "433": "tooltip-init.js",
   "434": ".create_stock_receipt",
-  "435": ".sync_historical_transactions",
   "436": "CI_Log",
   "437": "config_item",
-  "438": "Permission_model"
+  "438": "Permission_model",
+  "440": "view_sale_batch.php"
 }

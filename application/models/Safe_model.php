@@ -572,6 +572,8 @@ class Safe_model extends CI_Model
 			'expense',
 			'salary_payment',
 			'wallet_refund',
+			'store_sale',
+			'store_refund',
 			'adjustment',
 		);
 

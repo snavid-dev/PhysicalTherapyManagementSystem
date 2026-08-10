@@ -774,14 +774,14 @@ class Wallet_model extends CI_Model
 					PRIMARY KEY (`id`),
 					KEY `patient_wallet_transactions_patient_id_index` (`patient_id`),
 					KEY `patient_wallet_transactions_turn_id_index` (`turn_id`),
-					CONSTRAINT `patient_wallet_transactions_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
-					CONSTRAINT `patient_wallet_transactions_turn_fk` FOREIGN KEY (`turn_id`) REFERENCES `turns` (`id`) ON DELETE SET NULL
+					CONSTRAINT `patient_wallet_transactions_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 			");
 		}
 
 		$this->ensure_fund_type_column();
 		$this->ensure_type_enum();
+		$this->ensure_turn_fk_removed();
 
 		if (!$this->db->field_exists('section_id', 'patient_wallet_transactions')) {
 			$this->db->query("ALTER TABLE `patient_wallet_transactions` ADD COLUMN `section_id` int unsigned DEFAULT NULL AFTER `turn_id`");
@@ -796,6 +796,31 @@ class Wallet_model extends CI_Model
 		}
 
 		$this->schema_ready = TRUE;
+	}
+
+	/**
+	 * turn_id is a soft historical reference, not a live relation (same pattern
+	 * as Safe_model's reference_id/reference_table): deleting a turn reverses its
+	 * wallet effect but must not sever the ledger row's link to it. The original
+	 * `ON DELETE SET NULL` FK did exactly that — Turns::delete() hard-deletes the
+	 * turn, the FK cascade nulled turn_id on every transaction that referenced it
+	 * (including the reversal itself), while `note` kept saying "for turn #X"
+	 * forever. Those orphaned rows then looked like unlinked manual top-ups.
+	 * Self-healing so existing deployments drop the FK the next time
+	 * ensure_schema() runs — no manual migration needed.
+	 */
+	protected function ensure_turn_fk_removed()
+	{
+		$constraint = $this->db->query("
+			SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
+			WHERE CONSTRAINT_SCHEMA = DATABASE()
+			AND TABLE_NAME = 'patient_wallet_transactions'
+			AND CONSTRAINT_NAME = 'patient_wallet_transactions_turn_fk'
+		")->row_array();
+
+		if ($constraint) {
+			$this->db->query("ALTER TABLE `patient_wallet_transactions` DROP FOREIGN KEY `patient_wallet_transactions_turn_fk`");
+		}
 	}
 
 	protected function ensure_type_enum()

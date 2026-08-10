@@ -54,7 +54,9 @@
 							<td><?= html_escape(to_shamsi($batch['created_at'])) ?></td>
 							<td>
 								<?php if ($batch['status'] === 'pending' && $this->auth->has_permission('approve_store_sale_batch')): ?>
-									<a href="<?= site_url('store/approve_sale_batch/' . $batch['id']) ?>" class="btn btn-sm btn-outline-warning btn-icon"><i class="bi bi-check-circle" aria-hidden="true"></i> <?= t('approve') ?></a>
+									<a href="<?= site_url('store/approve_sale_batch/' . $batch['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-eye" aria-hidden="true"></i> <?= t('view') ?></a>
+								<?php else: ?>
+									<a href="<?= site_url('store/view_sale_batch/' . $batch['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-eye" aria-hidden="true"></i> <?= t('view') ?></a>
 								<?php endif; ?>
 							</td>
 						</tr>

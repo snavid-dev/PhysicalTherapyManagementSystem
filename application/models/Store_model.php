@@ -65,7 +65,11 @@ class Store_model extends CI_Model
 	public function get_product_by_id($product_id)
 	{
 		return $this->db
-			->get_where('store_products', array('id' => (int) $product_id))
+			->select('store_products.*, store_product_categories.name as category_name')
+			->from('store_products')
+			->join('store_product_categories', 'store_products.category_id = store_product_categories.id')
+			->where('store_products.id', (int) $product_id)
+			->get()
 			->row_array();
 	}
 
@@ -364,6 +368,48 @@ class Store_model extends CI_Model
 			));
 	}
 
+	public function update_sale($sale_id, $patient_id, $subtotal, $discount, $tax, $total, $payment_method, $items, $customer_name = NULL, $customer_phone = NULL)
+	{
+		$this->db->trans_start();
+
+		$sale_id = (int) $sale_id;
+		$payment_method = trim($payment_method);
+
+		$this->db
+			->where('id', $sale_id)
+			->update('store_sales', array(
+				'patient_id' => $patient_id ? (int) $patient_id : NULL,
+				'customer_name' => $customer_name ? trim($customer_name) : NULL,
+				'customer_phone' => $customer_phone ? trim($customer_phone) : NULL,
+				'subtotal' => round((float) $subtotal, 2),
+				'discount' => round((float) $discount, 2),
+				'tax' => round((float) $tax, 2),
+				'total' => round((float) $total, 2),
+				'payment_method' => $payment_method,
+				'debt_status' => $payment_method === 'debt' ? 'open' : 'none',
+				'debt_cleared_at' => NULL,
+				'debt_cleared_by' => NULL,
+			));
+
+		$this->db->where('sale_id', $sale_id)->delete('store_sale_items');
+
+		foreach ($items as $item) {
+			$this->db->insert('store_sale_items', array(
+				'sale_id' => $sale_id,
+				'variant_id' => (int) $item['variant_id'],
+				'qty' => (int) $item['qty'],
+				'unit_price' => round((float) $item['unit_price'], 2),
+				'discount' => round((float) ($item['discount'] ?? 0), 2),
+				'line_total' => round((float) $item['line_total'], 2),
+				'unit_cost_at_sale' => round((float) $item['unit_cost_at_sale'], 2)
+			));
+		}
+
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+	}
+
 	public function count_open_debts()
 	{
 		return $this->db
@@ -510,9 +556,10 @@ class Store_model extends CI_Model
 	public function get_sale_batch_by_id($batch_id)
 	{
 		return $this->db
-			->select('store_sale_batches.*, users.first_name, users.last_name')
+			->select('store_sale_batches.*, users.first_name, users.last_name, approved_users.first_name as approver_first, approved_users.last_name as approver_last')
 			->from('store_sale_batches')
 			->join('users', 'store_sale_batches.created_by = users.id')
+			->join('users as approved_users', 'store_sale_batches.approved_by = approved_users.id', 'left')
 			->where('store_sale_batches.id', (int) $batch_id)
 			->get()
 			->row_array();
