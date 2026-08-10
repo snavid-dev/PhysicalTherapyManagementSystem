@@ -481,6 +481,7 @@ CREATE TABLE `stock_movements` (
 	PRIMARY KEY (`id`),
 	KEY `stock_movements_variant_id_index` (`variant_id`),
 	KEY `stock_movements_location_id_index` (`location_id`),
+	KEY `stock_movements_variant_location_index` (`variant_id`, `location_id`),
 	KEY `stock_movements_type_index` (`type`),
 	KEY `stock_movements_created_by_index` (`created_by`),
 	KEY `stock_movements_created_at_index` (`created_at`),
