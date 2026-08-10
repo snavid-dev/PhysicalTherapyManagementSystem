@@ -3,6 +3,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Inventory_model extends CI_Model
 {
+	protected $movement_index_ready = FALSE;
+
+	// recompute_stock_level() filters stock_movements by (variant_id, location_id);
+	// without a composite index that's a scan over every row for that variant
+	// across all locations. Self-healing so existing deployments pick it up
+	// without a manual migration — same pattern as Safe_model::ensure_reference_index().
+	protected function ensure_movement_index()
+	{
+		if ($this->movement_index_ready) {
+			return;
+		}
+		$this->movement_index_ready = TRUE;
+
+		$exists = $this->db
+			->query("
+				SELECT 1 FROM information_schema.STATISTICS
+				WHERE TABLE_SCHEMA = DATABASE()
+				AND TABLE_NAME = 'stock_movements'
+				AND INDEX_NAME = 'stock_movements_variant_location_index'
+				LIMIT 1
+			")
+			->num_rows() > 0;
+
+		if ($exists) {
+			return;
+		}
+
+		$this->db->query("
+			ALTER TABLE `stock_movements`
+			ADD INDEX `stock_movements_variant_location_index` (`variant_id`, `location_id`)
+		");
+	}
+
 	public function get_locations()
 	{
 		return $this->db
@@ -51,6 +84,8 @@ class Inventory_model extends CI_Model
 
 	public function recompute_stock_level($variant_id, $location_id)
 	{
+		$this->ensure_movement_index();
+
 		$variant_id = (int) $variant_id;
 		$location_id = (int) $location_id;
 
@@ -108,14 +143,24 @@ class Inventory_model extends CI_Model
 			array($variant_id, $location_id, date('Y-m-d H:i:s'))
 		);
 
-		// Lock this variant+location's stock row before recomputing, so two
+		// Lock this variant+location's stock row before adjusting it, so two
 		// concurrent movements (e.g. two sales of the last units) can't both pass
 		// a stale availability check upstream and both get recorded as if they
-		// succeeded.
-		$this->db->query(
-			'SELECT id FROM stock_levels WHERE variant_id = ? AND location_id = ? FOR UPDATE',
+		// succeeded. Reading qty_on_hand here (rather than re-summing all of
+		// stock_movements) keeps this an O(1) update regardless of how long the
+		// product's movement history has grown — a full-history SUM on every
+		// single sale line item is what made checkout slow down as the ledger grew.
+		$current = $this->db->query(
+			'SELECT qty_on_hand FROM stock_levels WHERE variant_id = ? AND location_id = ? FOR UPDATE',
 			array($variant_id, $location_id)
-		);
+		)->row_array();
+
+		$new_qty = (int) $current['qty_on_hand'] + $qty;
+
+		if ($new_qty < 0) {
+			$this->db->trans_rollback();
+			return FALSE;
+		}
 
 		$this->db->insert('stock_movements', array(
 			'variant_id' => $variant_id,
@@ -130,13 +175,19 @@ class Inventory_model extends CI_Model
 			'created_at' => date('Y-m-d H:i:s')
 		));
 
-		$recomputed = $this->recompute_stock_level($variant_id, $location_id);
+		$this->db
+			->where('variant_id', $variant_id)
+			->where('location_id', $location_id)
+			->update('stock_levels', array(
+				'qty_on_hand' => $new_qty,
+				'updated_at' => date('Y-m-d H:i:s')
+			));
 
-		if ($recomputed === FALSE || $this->db->trans_status() === FALSE) {
-			// Negative resulting stock (or any other failure) must reject the
-			// whole movement — previously this left stock_movements already
-			// inserted while stock_levels silently kept its stale value, with no
-			// error surfaced anywhere and no caller checking the return value.
+		if ($this->db->trans_status() === FALSE) {
+			// Any other failure must reject the whole movement — previously this
+			// left stock_movements already inserted while stock_levels silently
+			// kept its stale value, with no error surfaced anywhere and no caller
+			// checking the return value.
 			$this->db->trans_rollback();
 			return FALSE;
 		}
