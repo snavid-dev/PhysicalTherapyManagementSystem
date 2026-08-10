@@ -13,8 +13,19 @@ class Safe extends Authenticated_Controller
 	public function index()
 	{
 		$filters = $this->safe_filters();
+		$query_filters = $this->safe_query_filters($filters);
 		$today = date('Y-m-d');
 		$month_start = date('Y-m-01');
+
+		// "Today"/"This Month" are fixed reference points, but the ledger below
+		// is filterable by date — without this, filtering to e.g. yesterday only
+		// changes the list, not the totals above it, so a same-day-only figure
+		// like a refund reads as "not counted" even though it always summed
+		// correctly; the reader was just looking at the wrong period's card.
+		$filtered_summary = $this->Safe_model->get_summary(
+			$query_filters['date_from'] !== '' ? $query_filters['date_from'] : $month_start,
+			$query_filters['date_to'] !== '' ? $query_filters['date_to'] : $today
+		);
 
 		$this->render('safe/index', array(
 			'title' => t('safe'),
@@ -23,7 +34,8 @@ class Safe extends Authenticated_Controller
 			'latest_transaction' => $this->Safe_model->get_latest_transaction(),
 			'today_summary' => $this->Safe_model->get_summary($today, $today),
 			'month_summary' => $this->Safe_model->get_summary($month_start, $today),
-			'ledger' => $this->Safe_model->get_ledger($this->safe_query_filters($filters)),
+			'filtered_summary' => $filtered_summary,
+			'ledger' => $this->Safe_model->get_ledger($query_filters),
 			'filters' => $filters,
 		));
 	}

@@ -190,6 +190,20 @@ class Store extends Authenticated_Controller
 		$this->render('store/product_form', $data);
 	}
 
+	public function view_product($product_id)
+	{
+		$data['product'] = $this->Store_model->get_product_by_id($product_id);
+
+		if (!$data['product']) {
+			show_404();
+		}
+
+		$data['variants'] = $this->Store_model->get_variants_by_product($product_id);
+		$data['current_section'] = 'store';
+
+		$this->render('store/product_show', $data);
+	}
+
 	public function create_variant($product_id)
 	{
 		$this->require_permission('manage_store');
@@ -306,6 +320,24 @@ class Store extends Authenticated_Controller
 		$data['requisitions'] = $this->Store_model->get_requisitions();
 		$data['current_section'] = 'store';
 		$this->render('store/requisitions', $data);
+	}
+
+	// Read-only detail page — approve_requisition()/receive_requisition() only
+	// accept 'pending'/'in_transit' requisitions and redirect away otherwise, so
+	// once a requisition is approved/rejected/received there was previously no
+	// page left that could show what was in it.
+	public function view_requisition($requisition_id)
+	{
+		$data['requisition'] = $this->Store_model->get_requisition_by_id($requisition_id);
+
+		if (!$data['requisition']) {
+			show_404();
+		}
+
+		$data['items'] = $this->Store_model->get_requisition_items($requisition_id);
+		$data['current_section'] = 'store';
+
+		$this->render('store/view_requisition', $data);
 	}
 
 	public function create_requisition()
@@ -805,6 +837,274 @@ class Store extends Authenticated_Controller
 		redirect('store/reports');
 	}
 
+	// Shared by delete_sale() and update_sale(): restocks every line item and
+	// reverses whatever money effect the sale had, exactly like refund_sale()
+	// — except cash/card use a hard delete of the safe row (delete_transaction_by_reference)
+	// instead of a compensating 'out' entry, since both callers are about to either
+	// remove the sale entirely or immediately re-apply corrected amounts, not
+	// leave an audit trail of "this got refunded".
+	private function reverse_sale_effects($sale)
+	{
+		$items = $this->Store_model->get_sale_items($sale['id']);
+
+		foreach ($items as $item) {
+			$restocked = $this->Inventory_model->record_movement(
+				$item['variant_id'],
+				$sale['location_id'],
+				'return_in',
+				(int) $item['qty'],
+				$this->auth->user_id(),
+				'sale',
+				$sale['id']
+			);
+
+			if (!$restocked) {
+				return FALSE;
+			}
+		}
+
+		if (in_array($sale['payment_method'], array('cash', 'card'), TRUE)) {
+			$this->load->model('Safe_model');
+			if ($this->Safe_model->delete_transaction_by_reference('store_sales', $sale['id'], 'store_sale') === FALSE) {
+				return FALSE;
+			}
+		} elseif (in_array($sale['payment_method'], array('wallet', 'prepayment'), TRUE) && $sale['patient_id']) {
+			$this->load->model('Wallet_model');
+			$this->Wallet_model->top_up_cash($sale['patient_id'], $sale['total'], NULL, 'Reversal for sale #' . $sale['id']);
+		}
+		// 'debt': nothing financial was ever collected, so nothing to reverse.
+
+		return TRUE;
+	}
+
+	public function delete_sale($sale_id)
+	{
+		$this->require_permission('manage_store');
+
+		$sale = $this->Store_model->get_sale_by_id($sale_id);
+
+		if (!$sale || $sale['status'] !== 'completed') {
+			$this->session->set_flashdata('error', t('error_deleting_sale'));
+			redirect('store/reports');
+		}
+
+		$this->db->trans_start();
+
+		if (!$this->reverse_sale_effects($sale)) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('error_deleting_sale'));
+			redirect('store/reports');
+		}
+
+		$this->db->delete('store_sales', array('id' => (int) $sale_id));
+
+		$this->db->trans_complete();
+
+		if (!$this->db->trans_status()) {
+			$this->session->set_flashdata('error', t('error_deleting_sale'));
+			redirect('store/reports');
+		}
+
+		if (in_array($sale['payment_method'], array('wallet', 'prepayment'), TRUE) && $sale['patient_id']) {
+			$this->load->model('Wallet_model');
+			$this->Wallet_model->recalculate_for_patient($sale['patient_id']);
+		}
+
+		$this->session->set_flashdata('success', t('sale_deleted_success'));
+		redirect('store/reports');
+	}
+
+	public function edit_sale($sale_id)
+	{
+		$this->require_permission('manage_store');
+
+		$sale = $this->Store_model->get_sale_by_id($sale_id);
+
+		if (!$sale || $sale['status'] !== 'completed') {
+			$this->session->set_flashdata('error', t('error_editing_sale'));
+			redirect('store/reports');
+		}
+
+		$this->load->model('Patient_model');
+		$data['patients'] = $this->Patient_model->all();
+		$data['products'] = $this->Store_model->get_all_products();
+		foreach ($data['products'] as &$product) {
+			$product['variants'] = $this->Store_model->get_variants_by_product($product['id']);
+		}
+		unset($product);
+		$data['current_section'] = 'store';
+		$data['is_edit'] = TRUE;
+		$data['sale'] = $sale;
+		$data['items'] = $this->Store_model->get_sale_items($sale_id);
+
+		$this->render('store/sell', $data);
+	}
+
+	public function update_sale($sale_id)
+	{
+		$this->require_permission('manage_store');
+
+		$sale = $this->Store_model->get_sale_by_id($sale_id);
+
+		if (!$sale || $sale['status'] !== 'completed') {
+			$this->session->set_flashdata('error', t('error_editing_sale'));
+			redirect('store/reports');
+		}
+
+		$this->load->model('Safe_model');
+		$this->load->model('Wallet_model');
+
+		$this->db->trans_start();
+
+		if (!$this->reverse_sale_effects($sale)) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('error_editing_sale'));
+			redirect('store/edit_sale/' . $sale_id);
+		}
+
+		$patient_id = $this->input->post('patient_id') ? (int) $this->input->post('patient_id') : NULL;
+		$customer_name = trim((string) $this->input->post('customer_name'));
+		$customer_phone = trim((string) $this->input->post('customer_phone'));
+		$payment_method = trim($this->input->post('payment_method'));
+		$variants = $this->input->post('variant_id') ?? array();
+		$quantities = $this->input->post('qty') ?? array();
+		$prices = $this->input->post('price') ?? array();
+
+		if (!in_array($payment_method, array('cash', 'wallet', 'debt'), TRUE)) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('invalid_payment_method'));
+			redirect('store/edit_sale/' . $sale_id);
+		}
+
+		if (!$patient_id && $customer_name === '') {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('customer_name_required'));
+			redirect('store/edit_sale/' . $sale_id);
+		}
+
+		if ($payment_method === 'wallet' && !$patient_id) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('patient_required_for_wallet'));
+			redirect('store/edit_sale/' . $sale_id);
+		}
+
+		$items = array();
+		$subtotal = 0;
+
+		foreach ($variants as $k => $vid) {
+			if (!empty($vid) && isset($quantities[$k], $prices[$k])) {
+				$vid = (int) $vid;
+				$qty = (int) $quantities[$k];
+				$price = round((float) $prices[$k], 2);
+
+				if ($qty <= 0 || $price < 0) continue;
+
+				$variant = $this->Store_model->get_variant_by_id($vid);
+				if (!$variant) continue;
+
+				// reverse_sale_effects() above already restocked the sale's original
+				// items, so this check is against post-reversal availability — an
+				// unchanged line correctly sees its own qty as available again.
+				$available = $this->Inventory_model->get_stock_level($vid, $sale['location_id']);
+				if (!$available || $available['qty_on_hand'] < $qty) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+					redirect('store/edit_sale/' . $sale_id);
+				}
+
+				$line_total = $qty * $price;
+				$items[] = array(
+					'variant_id' => $vid,
+					'qty' => $qty,
+					'unit_price' => $price,
+					'line_total' => $line_total,
+					'unit_cost_at_sale' => $variant['cost_price']
+				);
+
+				$subtotal += $line_total;
+			}
+		}
+
+		if (empty($items)) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('cart_empty'));
+			redirect('store/edit_sale/' . $sale_id);
+		}
+
+		$discount = round((float) $this->input->post('discount'), 2);
+		$tax = round((float) $this->input->post('tax'), 2);
+		$total = $subtotal - $discount + $tax;
+
+		if ($total <= 0) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('invalid_sale_amount'));
+			redirect('store/edit_sale/' . $sale_id);
+		}
+
+		$updated = $this->Store_model->update_sale(
+			$sale_id,
+			$patient_id,
+			$subtotal,
+			$discount,
+			$tax,
+			$total,
+			$payment_method,
+			$items,
+			$patient_id ? NULL : $customer_name,
+			$patient_id ? NULL : $customer_phone
+		);
+
+		if (!$updated) {
+			$this->db->trans_rollback();
+			$this->session->set_flashdata('error', t('error_editing_sale'));
+			redirect('store/edit_sale/' . $sale_id);
+		}
+
+		foreach ($items as $item) {
+			$stock_recorded = $this->Inventory_model->record_movement(
+				$item['variant_id'],
+				$sale['location_id'],
+				'sale_out',
+				-$item['qty'],
+				$this->auth->user_id(),
+				'sale',
+				$sale_id
+			);
+
+			if (!$stock_recorded) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', t('insufficient_front_desk_stock'));
+				redirect('store/edit_sale/' . $sale_id);
+			}
+		}
+
+		if ($payment_method === 'cash') {
+			$this->Safe_model->log_transaction(
+				'in',
+				'store_sale',
+				$total,
+				$sale_id,
+				'store_sales',
+				'Store sale (edited): ' . count($items) . ' item(s)',
+				$this->auth->user_id()
+			);
+		} elseif ($payment_method === 'wallet') {
+			$this->Wallet_model->deduct($patient_id, $total, NULL, 'Store purchase (edited)');
+			$this->Wallet_model->recalculate_for_patient($patient_id);
+		}
+		// 'debt': update_sale() already reset debt_status to 'open' via Store_model::update_sale().
+
+		$this->db->trans_complete();
+
+		if ($this->db->trans_status()) {
+			$this->session->set_flashdata('success', t('sale_updated_success'));
+			redirect('store/receipt/' . $sale_id);
+		} else {
+			$this->session->set_flashdata('error', t('error_editing_sale'));
+			redirect('store/edit_sale/' . $sale_id);
+		}
+	}
+
 	// ===== Reports =====
 	public function reports()
 	{
@@ -954,6 +1254,27 @@ class Store extends Authenticated_Controller
 		$data['batches'] = $this->Store_model->get_sale_batches();
 		$data['current_section'] = 'store';
 		$this->render('store/sale_batches', $data);
+	}
+
+	// Read-only detail page — approve_sale_batch() only accepts 'pending' batches
+	// and redirects away otherwise, so once a batch is approved/rejected there
+	// was previously no page left that could show what was in it.
+	public function view_sale_batch($batch_id)
+	{
+		$data['batch'] = $this->Store_model->get_sale_batch_by_id($batch_id);
+
+		if (!$data['batch']) {
+			show_404();
+		}
+
+		$data['customers'] = $this->Store_model->get_batch_customers($batch_id);
+		foreach ($data['customers'] as &$customer) {
+			$customer['items'] = $this->Store_model->get_batch_items($customer['id']);
+		}
+		unset($customer);
+		$data['current_section'] = 'store';
+
+		$this->render('store/view_sale_batch', $data);
 	}
 
 	public function approve_sale_batch($batch_id)

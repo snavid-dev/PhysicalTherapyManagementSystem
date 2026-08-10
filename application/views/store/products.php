@@ -30,28 +30,25 @@
 		<div class="alert alert-info"><?= t('no_products_found') ?></div>
 	<?php else: ?>
 		<div class="table-responsive">
-			<table class="table table-hover dt-table">
+			<table class="table table-hover table-sm dt-table">
 				<thead class="table-light">
 					<tr>
 						<th><?= t('Name') ?></th>
-						<th><?= t('category') ?></th>
-						<th><?= t('brand') ?></th>
-						<th><?= t('unit') ?></th>
-						<th><?= t('variants') ?></th>
 						<th><?= t('Actions') ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach ($products as $product): ?>
 						<tr>
-							<td><?= html_escape($product['name']) ?></td>
-							<td><?= html_escape($product['category_name']) ?></td>
-							<td><?= html_escape($product['brand'] ?: '—') ?></td>
-							<td><?= html_escape($product['unit']) ?></td>
 							<td>
-								<a href="<?= site_url('store/edit_product/' . $product['id']) ?>">
-									<?= count($this->Store_model->get_variants_by_product($product['id'])) ?>
-								</a>
+								<a href="<?= site_url('store/view_product/' . $product['id']) ?>" class="text-decoration-none"><?= html_escape($product['name']) ?></a>
+								<div class="small text-muted">
+									<?= html_escape(implode(' · ', array_filter(array(
+										$product['category_name'],
+										$product['brand'],
+										$product['unit'],
+									)))) ?>
+								</div>
 							</td>
 							<td>
 								<?php if ($this->auth->has_permission('manage_store')): ?>

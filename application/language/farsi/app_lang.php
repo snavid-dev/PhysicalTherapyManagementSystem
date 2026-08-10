@@ -652,6 +652,7 @@ $lang = array(
 	'total_in' => 'مجموع ورودی',
 	'total_out' => 'مجموع خروجی',
 	'net' => 'خالص',
+	'selected_period_total' => 'مجموع دوره انتخاب شده',
 	'source_turn_cash' => 'نقد نوبت',
 	'source_wallet_topup' => 'شارژ کیف پول',
 	'source_patient_payment' => 'پرداخت مریض',
@@ -756,6 +757,8 @@ $lang = array(
 	'payment_date' => 'تاریخ پرداخت',
 	'source_patient_debt_payment' => 'پرداخت مستقل بدهی',
 	'source_patient_refund' => 'مستردی به مریض',
+	'source_store_sale' => 'فروش دکان',
+	'source_store_refund' => 'مستردی دکان',
 	'debt_type' => 'نوع بدهی',
 	'debt_type_auto_settleable' => 'تسویه خودکار',
 	'debt_type_manual_only' => 'فقط دستی',
@@ -844,6 +847,7 @@ $lang = array(
 	'to_location' => 'به مکان',
 	'request_to_location' => 'درخواست به مکان',
 	'requested_by' => 'درخواست شده توسط',
+	'approved_by' => 'تایید شده توسط',
 	'line_items' => 'اقلام',
 	'warehouse_available' => 'موجود انبار',
 	'add_line' => '+ افزودن اقلام',
@@ -958,6 +962,7 @@ $lang = array(
 	'confirm_delete' => 'آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟',
 	'search_product' => 'جستجوی محصولات...',
 	'add_item_manually' => 'افزودن دستی اقلام',
+	'no_variants_found' => 'هنوز هیچ گونه‌ای وجود ندارد — یکی اضافه کنید.',
 
 	// فروش گروهی / دسته‌های فروش
 	'bulk_sell' => 'فروش گروهی',
@@ -989,6 +994,12 @@ $lang = array(
 	'sale_status_completed' => 'تکمیل شده',
 	'sale_status_refunded' => 'مسترد شده',
 	'sale_status_partially_refunded' => 'جزئاً مسترد شده',
+	'edit_sale' => 'ویرایش فروش',
+	'sale_updated_success' => 'فروش با موفقیت به‌روزرسانی شد',
+	'error_editing_sale' => 'خطا در ویرایش فروش',
+	'sale_deleted_success' => 'فروش با موفقیت حذف شد',
+	'error_deleting_sale' => 'خطا در حذف فروش',
+	'confirm_delete_sale' => 'این فروش حذف شود؟ کالاها به انبار بازمی‌گردند و پرداخت به‌طور دائمی معکوس می‌شود.',
 
 	// گزارش‌های فروشگاه
 	'store_reports' => 'گزارش‌های فروشگاه',

@@ -56,9 +56,11 @@
 							<td><?= html_escape(to_shamsi($req['created_at'])) ?></td>
 							<td>
 								<?php if ($req['status'] === 'pending' && $this->auth->has_permission('approve_store_requisition')): ?>
-									<a href="<?= site_url('store/approve_requisition/' . $req['id']) ?>" class="btn btn-sm btn-outline-warning btn-icon"><i class="bi bi-check-circle" aria-hidden="true"></i> <?= t('approve') ?></a>
+									<a href="<?= site_url('store/approve_requisition/' . $req['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-eye" aria-hidden="true"></i> <?= t('view') ?></a>
 								<?php elseif ($req['status'] === 'in_transit' && $this->auth->has_permission('manage_store')): ?>
-									<a href="<?= site_url('store/receive_requisition/' . $req['id']) ?>" class="btn btn-sm btn-outline-success btn-icon"><i class="bi bi-box-seam" aria-hidden="true"></i> <?= t('receive') ?></a>
+									<a href="<?= site_url('store/receive_requisition/' . $req['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-eye" aria-hidden="true"></i> <?= t('view') ?></a>
+								<?php else: ?>
+									<a href="<?= site_url('store/view_requisition/' . $req['id']) ?>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-eye" aria-hidden="true"></i> <?= t('view') ?></a>
 								<?php endif; ?>
 							</td>
 						</tr>

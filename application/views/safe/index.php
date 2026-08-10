@@ -15,10 +15,14 @@ $source_labels = array(
 	'turn_cash' => t('source_turn_cash'),
 	'wallet_topup' => t('source_wallet_topup'),
 	'patient_payment' => t('source_patient_payment'),
+	'patient_debt_payment' => t('source_patient_debt_payment'),
+	'patient_refund' => t('source_patient_refund'),
 	'other_income' => t('source_other_income'),
 	'expense' => t('source_expense'),
 	'salary_payment' => t('source_salary'),
 	'wallet_refund' => t('source_wallet_refund'),
+	'store_sale' => t('source_store_sale'),
+	'store_refund' => t('source_store_refund'),
 	'adjustment' => t('source_adjustment'),
 );
 
@@ -238,6 +242,14 @@ $reference_label = static function ($entry) {
 		<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
 			<h2 class="h5 mb-0"><?= t('Ledger') ?></h2>
 			<div class="text-muted"><?= t('safe_balance') ?>: <strong><?= format_number($current_balance, 2) ?></strong></div>
+		</div>
+		<div class="text-muted small mb-3">
+			<?= t('selected_period_total') ?>:
+			<span class="safe-summary-value--in"><?= t('total_in') ?> <strong><?= format_number($filtered_summary['total_in'], 2) ?></strong></span>
+			&middot;
+			<span class="safe-summary-value--out"><?= t('total_out') ?> <strong><?= format_number($filtered_summary['total_out'], 2) ?></strong></span>
+			&middot;
+			<?= t('net') ?> <strong><?= format_number($filtered_summary['net'], 2) ?></strong>
 		</div>
 		<p class="text-muted small mb-3"><?= t('balance_sort_note') ?></p>
 		<div class="table-responsive">

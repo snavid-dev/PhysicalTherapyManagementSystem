@@ -1,9 +1,15 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
+<?php
+$is_edit = !empty($is_edit);
+$sale = $sale ?? NULL;
+$items = $items ?? array();
+?>
+
 <div class="container-lg my-5">
 	<div class="row mb-4">
 		<div class="col">
-			<h1><?= t('sell_product') ?></h1>
+			<h1><?= $is_edit ? t('edit_sale') : t('sell_product') ?></h1>
 		</div>
 	</div>
 
@@ -20,7 +26,7 @@
 		</div>
 	<?php endif; ?>
 
-	<form method="post" id="sale-form">
+	<form method="post" id="sale-form" action="<?= site_url($is_edit ? 'store/update_sale/' . $sale['id'] : 'store/sell') ?>">
 		<div class="row">
 			<div class="col-lg-5 order-lg-2 mb-4 mb-lg-0">
 				<div class="card">
@@ -66,7 +72,7 @@
 										$last_or_father = $patient['last_name'] ?: ($patient['father_name'] ?? '');
 										$patient_name = trim($patient['first_name'] . ' ' . $last_or_father);
 									?>
-									<option value="<?= (int) $patient['id'] ?>"><?= html_escape($patient_name) ?></option>
+									<option value="<?= (int) $patient['id'] ?>" <?= ($is_edit && (int) $sale['patient_id'] === (int) $patient['id']) ? 'selected' : '' ?>><?= html_escape($patient_name) ?></option>
 								<?php endforeach; ?>
 							</select>
 						</div>
@@ -74,11 +80,11 @@
 						<div class="row mb-3" id="external-customer-fields">
 							<div class="col-6">
 								<label class="form-label small"><?= t('customer_name') ?></label>
-								<input type="text" name="customer_name" id="customer-name-input" class="form-control">
+								<input type="text" name="customer_name" id="customer-name-input" class="form-control" value="<?= $is_edit ? html_escape((string) $sale['customer_name']) : '' ?>">
 							</div>
 							<div class="col-6">
 								<label class="form-label small"><?= t('customer_phone') ?></label>
-								<input type="text" name="customer_phone" class="form-control">
+								<input type="text" name="customer_phone" class="form-control" value="<?= $is_edit ? html_escape((string) $sale['customer_phone']) : '' ?>">
 							</div>
 						</div>
 
@@ -124,11 +130,11 @@
 							</div>
 							<div class="col-6 col-md-3">
 								<label class="form-label small"><?= t('discount') ?></label>
-								<input type="number" name="discount" class="form-control" step="0.01" value="0" id="discount-input">
+								<input type="number" name="discount" class="form-control" step="0.01" value="<?= $is_edit ? html_escape($sale['discount']) : '0' ?>" id="discount-input">
 							</div>
 							<div class="col-6 col-md-3">
 								<label class="form-label small"><?= t('tax') ?></label>
-								<input type="number" name="tax" class="form-control" step="0.01" value="0" id="tax-input">
+								<input type="number" name="tax" class="form-control" step="0.01" value="<?= $is_edit ? html_escape($sale['tax']) : '0' ?>" id="tax-input">
 							</div>
 							<div class="col-6 col-md-3">
 								<label class="form-label small fw-semibold"><?= t('total') ?></label>
@@ -139,14 +145,14 @@
 						<div class="mb-3">
 							<label class="form-label"><?= t('payment_method') ?></label>
 							<select name="payment_method" id="payment-method-select" class="form-select" required>
-								<option value="cash"><?= t('cash') ?></option>
-								<option value="wallet" id="pm-option-wallet"><?= t('wallet') ?></option>
-								<option value="debt"><?= t('debt') ?></option>
+								<option value="cash" <?= (!$is_edit || $sale['payment_method'] === 'cash') ? 'selected' : '' ?>><?= t('cash') ?></option>
+								<option value="wallet" id="pm-option-wallet" <?= ($is_edit && $sale['payment_method'] === 'wallet') ? 'selected' : '' ?>><?= t('wallet') ?></option>
+								<option value="debt" <?= ($is_edit && $sale['payment_method'] === 'debt') ? 'selected' : '' ?>><?= t('debt') ?></option>
 							</select>
 							<div class="form-text" id="wallet-requires-patient-hint" style="display:none;"><?= t('patient_required_for_wallet') ?></div>
 						</div>
 
-						<button type="submit" class="btn btn-primary btn-lg w-100 btn-icon" id="complete-sale-btn" disabled><i class="bi bi-cart" aria-hidden="true"></i> <?= t('complete_sale') ?></button>
+						<button type="submit" class="btn btn-primary btn-lg w-100 btn-icon" id="complete-sale-btn" disabled><i class="bi bi-cart" aria-hidden="true"></i> <?= $is_edit ? t('save') : t('complete_sale') ?></button>
 					</div>
 				</div>
 			</div>
@@ -205,11 +211,13 @@ document.addEventListener('DOMContentLoaded', function () {
 		completeBtn.disabled = cartItems.querySelectorAll('.item-row').length === 0;
 	}
 
-	function addToCart(variantId, name, price) {
+	function addToCart(variantId, name, price, qty) {
+		qty = qty || 1;
+
 		const existing = cartItems.querySelector('.item-row[data-variant-id="' + variantId + '"]');
 		if (existing) {
 			const qtyInput = existing.querySelector('.qty-input');
-			qtyInput.value = parseInt(qtyInput.value, 10) + 1;
+			qtyInput.value = parseInt(qtyInput.value, 10) + qty;
 			calculateTotals();
 			return;
 		}
@@ -226,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				'<input type="hidden" name="variant_id[]" value="' + variantId + '">' +
 				name +
 			'</td>' +
-			'<td><input type="number" name="qty[]" class="form-control form-control-sm qty-input" min="1" value="1" required></td>' +
+			'<td><input type="number" name="qty[]" class="form-control form-control-sm qty-input" min="1" value="' + qty + '" required></td>' +
 			'<td><input type="number" name="price[]" class="form-control form-control-sm price-input" step="0.01" value="' + price.toFixed(2) + '" required></td>' +
 			'<td class="line-total">0.00</td>' +
 			'<td><button type="button" class="btn btn-sm btn-outline-danger remove-item-btn" aria-label="<?= html_escape(t('remove')) ?>"><i class="bi bi-trash" aria-hidden="true"></i></button></td>';
@@ -250,6 +258,20 @@ document.addEventListener('DOMContentLoaded', function () {
 			addToCart(btn.dataset.variantId, btn.dataset.name, parseFloat(btn.dataset.price));
 		});
 	});
+
+	<?php if ($is_edit): ?>
+	const initialCart = <?= json_encode(array_map(function ($item) {
+		return array(
+			'variant_id' => (int) $item['variant_id'],
+			'name' => $item['product_name'] . ' — ' . $item['variant_label'],
+			'price' => (float) $item['unit_price'],
+			'qty' => (int) $item['qty'],
+		);
+	}, $items)) ?>;
+	initialCart.forEach(function (item) {
+		addToCart(item.variant_id, item.name, item.price, item.qty);
+	});
+	<?php endif; ?>
 
 	const manualSelect = document.getElementById('manual-variant-select');
 	if (window.jQuery) {

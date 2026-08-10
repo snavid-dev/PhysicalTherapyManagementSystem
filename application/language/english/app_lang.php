@@ -652,6 +652,7 @@ $lang = array(
 	'total_in' => 'Total In',
 	'total_out' => 'Total Out',
 	'net' => 'Net',
+	'selected_period_total' => 'Selected period total',
 	'source_turn_cash' => 'Turn Cash',
 	'source_wallet_topup' => 'Wallet Top-up',
 	'source_patient_payment' => 'Patient Payment',
@@ -756,6 +757,8 @@ $lang = array(
 	'payment_date' => 'Payment Date',
 	'source_patient_debt_payment' => 'Standalone Debt Payment',
 	'source_patient_refund' => 'Patient Refund',
+	'source_store_sale' => 'Store Sale',
+	'source_store_refund' => 'Store Refund',
 	'debt_type' => 'Debt Type',
 	'debt_type_auto_settleable' => 'Auto-Settleable',
 	'debt_type_manual_only' => 'Manual Only',
@@ -844,6 +847,7 @@ $lang = array(
 	'to_location' => 'To Location',
 	'request_to_location' => 'Request to Location',
 	'requested_by' => 'Requested By',
+	'approved_by' => 'Approved By',
 	'line_items' => 'Line Items',
 	'warehouse_available' => 'Warehouse Available',
 	'add_line' => '+ Add Line',
@@ -958,6 +962,7 @@ $lang = array(
 	'confirm_delete' => 'Are you sure you want to delete this?',
 	'search_product' => 'Search products...',
 	'add_item_manually' => 'Add item manually',
+	'no_variants_found' => 'No variants yet — add one to get started.',
 
 	// Bulk sell / sale batches
 	'bulk_sell' => 'Bulk Sell',
@@ -989,6 +994,12 @@ $lang = array(
 	'sale_status_completed' => 'Completed',
 	'sale_status_refunded' => 'Refunded',
 	'sale_status_partially_refunded' => 'Partially Refunded',
+	'edit_sale' => 'Edit Sale',
+	'sale_updated_success' => 'Sale updated successfully',
+	'error_editing_sale' => 'Error editing sale',
+	'sale_deleted_success' => 'Sale deleted successfully',
+	'error_deleting_sale' => 'Error deleting sale',
+	'confirm_delete_sale' => 'Delete this sale? This restocks the items and reverses the payment permanently.',
 
 	// Store reports
 	'store_reports' => 'Store Reports',

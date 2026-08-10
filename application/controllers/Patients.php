@@ -1498,6 +1498,8 @@ class Patients extends Authenticated_Controller
 
 		$payment_datetime = $this->payment_datetime_from_date($payment_date);
 
+		$wallet_topup_transaction_id = NULL;
+
 		if ($leftover > 0) {
 			$top_up_result = $this->Wallet_model->top_up_cash(
 				$patient_id,
@@ -1511,6 +1513,12 @@ class Patients extends Authenticated_Controller
 			if ($top_up_result === FALSE) {
 				return FALSE;
 			}
+
+			// Capture the row we just inserted directly — $payment_datetime can be
+			// backdated (staff recording a past payment), so picking the patient's
+			// "latest" transaction by created_at further down would grab whatever
+			// unrelated, more-recent transaction that patient has instead of this one.
+			$wallet_topup_transaction_id = (int) $this->db->insert_id();
 		}
 
 		$safe_note = trim((string) $note);
@@ -1542,9 +1550,8 @@ class Patients extends Authenticated_Controller
 		}
 
 		if ($leftover > 0) {
-			$latest_wallet_tx = $this->Wallet_model->get_transactions((int) $patient_id, 1);
-			$wallet_ref = !empty($latest_wallet_tx[0]['id']) ? (int) $latest_wallet_tx[0]['id'] : $payment_id;
-			$wallet_ref_table = !empty($latest_wallet_tx[0]['id']) ? 'patient_wallet_transactions' : 'payments';
+			$wallet_ref = !empty($wallet_topup_transaction_id) ? $wallet_topup_transaction_id : $payment_id;
+			$wallet_ref_table = !empty($wallet_topup_transaction_id) ? 'patient_wallet_transactions' : 'payments';
 
 			$safe_logged = $this->Safe_model->log_transaction(
 				'in',
