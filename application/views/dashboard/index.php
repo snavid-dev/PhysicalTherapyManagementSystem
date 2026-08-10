@@ -141,7 +141,7 @@
 								<?php foreach ($turns_by_section as $row) : ?>
 									<tr>
 										<td><?= !empty($row['section_name']) ? html_escape(t($row['section_name'])) : '&mdash;' ?></td>
-										<td class="text-end"><span class="badge rounded-pill bg-dark-subtle text-dark"><?= (int) $row['turn_count'] ?></span></td>
+										<td class="text-end"><span class="badge rounded-pill bg-dark-subtle text-dark-emphasis"><?= (int) $row['turn_count'] ?></span></td>
 									</tr>
 								<?php endforeach; ?>
 								</tbody>

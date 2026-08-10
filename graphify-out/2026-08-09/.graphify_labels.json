@@ -435,7 +435,5 @@
   "433": "tooltip-init.js",
   "434": ".create_stock_receipt",
   "435": ".sync_historical_transactions",
-  "436": "CI_Log",
-  "437": "config_item",
-  "438": "Permission_model"
+  "436": "CI_Log"
 }
