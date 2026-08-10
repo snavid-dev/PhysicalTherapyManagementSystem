@@ -1,7 +1,7 @@
 # Graph Report - test-navid.cyborgtech.co  (2026-08-10)
 
 ## Corpus Check
-- 431 files · ~2,597,114 words
+- 431 files · ~2,597,242 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `523033a2`
+- Built from commit: `6fa5f6ce`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -228,16 +228,16 @@
 - [[_COMMUNITY_Store Module Build Log|Store Module Build Log]]
 - [[_COMMUNITY_CI_FTP|CI_FTP]]
 - [[_COMMUNITY_CI_FTP|CI_FTP]]
-- [[_COMMUNITY_CI_FTP|CI_FTP]]
-- [[_COMMUNITY_.ensure_schema|.ensure_schema]]
+- [[_COMMUNITY_CI_Cache_file|CI_Cache_file]]
+- [[_COMMUNITY_CI_DB_Cache|CI_DB_Cache]]
 - [[_COMMUNITY_config_item|config_item]]
-- [[_COMMUNITY_Xmlrpc.php|Xmlrpc.php]]
+- [[_COMMUNITY_file_helper.php|file_helper.php]]
 - [[_COMMUNITY_27. Module Store|27. Module: Store]]
 - [[_COMMUNITY_log_message|log_message]]
 - [[_COMMUNITY_24. Module Staff|24. Module: Staff]]
-- [[_COMMUNITY_CI_Session_memcached_driver|CI_Session_memcached_driver]]
-- [[_COMMUNITY_file_helper.php|file_helper.php]]
-- [[_COMMUNITY_config_item|config_item]]
+- [[_COMMUNITY_Xmlrpc.php|Xmlrpc.php]]
+- [[_COMMUNITY_get_mimes|get_mimes]]
+- [[_COMMUNITY_is_really_writable|is_really_writable]]
 - [[_COMMUNITY_1. Project Story|1. Project Story]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -293,13 +293,13 @@ Nodes (9): hash_equals(), hash_pbkdf2(), mb_strlen(), mb_strpos(), mb_substr(), 
 Cohesion: 0.14
 Nodes (24): safe_reference_label(), html_escape(), _attributes_to_string(), form_button(), form_checkbox(), form_dropdown(), form_error(), form_fieldset() (+16 more)
 
+### Community 21 - "config_item"
+Cohesion: 0.16
+Nodes (3): Dashboard, Roles, Authenticated_Controller
+
 ### Community 27 - "Authenticated_Controller"
 Cohesion: 0.10
 Nodes (3): Turns, safe_turn_cash_note(), safe_turn_wallet_topup_note()
-
-### Community 28 - "t"
-Cohesion: 0.12
-Nodes (3): Dashboard, Reports, Authenticated_Controller
 
 ### Community 33 - "app_helper.php"
 Cohesion: 0.07
@@ -348,6 +348,10 @@ Nodes (15): Controller Layer, Frontend Views, Language System, Manual Verificati
 ### Community 79 - "AI Agent Guide"
 Cohesion: 0.14
 Nodes (13): Active Application Structure, Adding a New Feature, AI Agent Guide, Architectural Rules, Authentication and Permissions, Database Rules, Legacy Code Policy, Output Expectations for Future Agents (+5 more)
+
+### Community 88 - "Roles"
+Cohesion: 0.33
+Nodes (10): Array, _error_handler(), _exception_handler(), get_config(), is_loaded(), load_class(), set_status_header(), show_404() (+2 more)
 
 ### Community 96 - "CI_Session_memcached_driver"
 Cohesion: 0.05
@@ -509,10 +513,6 @@ Nodes (4): log_message(), CI_Lang, CI_Session_files_driver, CI_Session_redis_dri
 Cohesion: 0.25
 Nodes (8): 24. Module: Staff, AI prompt example for this module, Common risky changes, Common safe changes, If you want to change this module, Main files, Purpose, What it currently does
 
-### Community 437 - "config_item"
-Cohesion: 0.33
-Nodes (10): Array, _error_handler(), _exception_handler(), get_config(), is_loaded(), load_class(), set_status_header(), show_404() (+2 more)
-
 ### Community 439 - "1. Project Story"
 Cohesion: 0.50
 Nodes (4): 1. Project Story, Current Story, Original Story, What This Means For Future Changes
@@ -525,11 +525,11 @@ Nodes (4): 1. Project Story, Current Story, Original Story, What This Means For 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `log_message()` connect `log_message` to `CI_Image_lib`, `CI_Email`, `date_helper.php`, `CI_Jquery`, `CI_Javascript`, `CI_Driver`, `CI_Form_validation`, `mb_strlen`, `CI_Loader`, `CI_Upload`, `Wallet_model`, `log_message`, `CI_DB_driver`, `CI_Security`, `CI_User_agent`, `CI_DB_forge`, `CI_Parser`, `CI_DB_oci8_driver`, `CI_FTP`, `CI_FTP`, `CI_DB_mssql_driver`, `config_item`, `CI_Input`, `CI_Output`, `CI_DB_mysql_driver`, `CI_URI`, `CI_Pagination`, `CI_DB_mysqli_driver`, `CI_Encrypt`, `CI_Controller`, `CI_Utf8`, `CI_DB_sqlite_driver`, `CI_Session_database_driver`, `CI_Encryption`, `Debt_model`, `config_item`, `CI_Session_memcached_driver`, `CI_Zip`, `CI_DB_sqlite3_driver`, `CI_Trackback`, `.query`, `CI_Table`, `CI_DB_pdo_driver`, `CI_Cart`, `CI_Unit_test`, `CI_Xmlrpcs`, `CI_Router`, `CI_DB_utility`, `CI_DB_pdo_mysql_driver`, `CI_Cache_memcached`, `CI_Cache_redis`, `CI_Xmlrpc`, `CI_DB_pdo_dblib_driver`, `CI_Cache`, `CI_Cache_apc`, `CI_Cache_wincache`, `CI_Migration`, `CI_Config`?**
+- **Why does `log_message()` connect `log_message` to `CI_Image_lib`, `CI_Email`, `date_helper.php`, `CI_Jquery`, `CI_Javascript`, `CI_Driver`, `CI_Form_validation`, `mb_strlen`, `CI_Loader`, `CI_Upload`, `Wallet_model`, `log_message`, `CI_DB_driver`, `CI_Security`, `CI_User_agent`, `CI_DB_forge`, `CI_Parser`, `CI_DB_oci8_driver`, `CI_FTP`, `CI_DB_mssql_driver`, `CI_DB_Cache`, `config_item`, `CI_Input`, `CI_Output`, `CI_DB_mysql_driver`, `CI_URI`, `CI_Pagination`, `CI_DB_mysqli_driver`, `CI_Encrypt`, `CI_Controller`, `get_mimes`, `CI_Utf8`, `CI_DB_sqlite_driver`, `CI_Encryption`, `Debt_model`, `CI_Session_database_driver`, `CI_Zip`, `CI_DB_sqlite3_driver`, `CI_Trackback`, `.query`, `CI_Table`, `CI_DB_pdo_driver`, `CI_Cart`, `CI_Unit_test`, `CI_Xmlrpcs`, `CI_Router`, `CI_DB_utility`, `CI_DB_pdo_mysql_driver`, `CI_Cache_memcached`, `CI_Cache_redis`, `CI_Xmlrpc`, `Roles`, `CI_DB_pdo_dblib_driver`, `CI_Cache`, `CI_Cache_apc`, `CI_Cache_wincache`, `CI_Migration`, `CI_Config`?**
   _High betweenness centrality (0.366) - this node is a cross-community bridge._
-- **Why does `t()` connect `app_helper.php` to `CI_Session_memcached_driver`, `redirect`, `Authenticated_Controller`, `show_404_if_empty`, `Reference_doctors`, `app_helper.php`, `form_helper.php`, `Sections`, `Staff`, `Users`, `config_item`, `Expenses`, `t`, `Xmlrpc.php`, `array_column`?**
+- **Why does `t()` connect `app_helper.php` to `CI_Session_memcached_driver`, `redirect`, `Authenticated_Controller`, `show_404_if_empty`, `t`, `app_helper.php`, `form_helper.php`, `Sections`, `Staff`, `Users`, `config_item`, `Expenses`, `Reference_doctors`, `Xmlrpc.php`, `array_column`?**
   _High betweenness centrality (0.099) - this node is a cross-community bridge._
-- **Why does `html_escape()` connect `form_helper.php` to `config_item`, `show_404_if_empty`, `config_item`?**
+- **Why does `html_escape()` connect `form_helper.php` to `Roles`, `show_404_if_empty`, `config_item`?**
   _High betweenness centrality (0.093) - this node is a cross-community bridge._
 - **Are the 142 inferred relationships involving `t()` (e.g. with `.index()` and `.delete()`) actually correct?**
   _`t()` has 142 INFERRED edges - model-reasoned connections that need verification._
