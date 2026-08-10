@@ -10,7 +10,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_controllers_admin",
-      "community": 429,
+      "community": 136,
       "norm_label": "admin.php"
     },
     {
@@ -20,7 +20,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_controllers_admin_admin",
-      "community": 429,
+      "community": 136,
       "norm_label": "admin"
     },
     {
@@ -30,7 +30,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "ci_controller",
-      "community": 429,
+      "community": 136,
       "norm_label": "ci_controller"
     },
     {
@@ -40,7 +40,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_controllers_admin_admin_index",
-      "community": 429,
+      "community": 136,
       "norm_label": ".index()"
     },
     {
@@ -50,7 +50,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_controllers_dashboard",
-      "community": 21,
+      "community": 206,
       "norm_label": "dashboard.php"
     },
     {
@@ -60,7 +60,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_controllers_dashboard_dashboard",
-      "community": 21,
+      "community": 206,
       "norm_label": "dashboard"
     },
     {
@@ -70,7 +70,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_controllers_dashboard_dashboard_construct",
-      "community": 21,
+      "community": 206,
       "norm_label": ".__construct()"
     },
     {
@@ -80,8 +80,28 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "application_controllers_dashboard_dashboard_index",
-      "community": 21,
+      "community": 206,
       "norm_label": ".index()"
+    },
+    {
+      "label": ".turns_by_section()",
+      "file_type": "code",
+      "source_file": "application/controllers/Dashboard.php",
+      "source_location": "L63",
+      "_origin": "ast",
+      "id": "application_controllers_dashboard_dashboard_turns_by_section",
+      "community": 206,
+      "norm_label": ".turns_by_section()"
+    },
+    {
+      "label": ".json_error()",
+      "file_type": "code",
+      "source_file": "application/controllers/Dashboard.php",
+      "source_location": "L92",
+      "_origin": "ast",
+      "id": "application_controllers_dashboard_dashboard_json_error",
+      "community": 206,
+      "norm_label": ".json_error()"
     },
     {
       "label": "Expenses.php",
@@ -400,7 +420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_controllers_login",
-      "community": 429,
+      "community": 136,
       "norm_label": "login.php"
     },
     {
@@ -410,7 +430,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_controllers_login_login",
-      "community": 429,
+      "community": 136,
       "norm_label": "login"
     },
     {
@@ -420,7 +440,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_controllers_login_login_construct",
-      "community": 429,
+      "community": 136,
       "norm_label": ".__construct()"
     },
     {
@@ -430,7 +450,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "application_controllers_login_login_index",
-      "community": 206,
+      "community": 88,
       "norm_label": ".index()"
     },
     {
@@ -1570,7 +1590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_controllers_safe",
-      "community": 21,
+      "community": 206,
       "norm_label": "safe.php"
     },
     {
@@ -1580,7 +1600,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_controllers_safe_safe",
-      "community": 21,
+      "community": 206,
       "norm_label": "safe"
     },
     {
@@ -1590,7 +1610,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_controllers_safe_safe_construct",
-      "community": 21,
+      "community": 206,
       "norm_label": ".__construct()"
     },
     {
@@ -1600,7 +1620,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "application_controllers_safe_safe_index",
-      "community": 21,
+      "community": 206,
       "norm_label": ".index()"
     },
     {
@@ -1630,7 +1650,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "application_controllers_safe_safe_safe_filters",
-      "community": 21,
+      "community": 206,
       "norm_label": ".safe_filters()"
     },
     {
@@ -1640,7 +1660,7 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "application_controllers_safe_safe_safe_query_filters",
-      "community": 21,
+      "community": 206,
       "norm_label": ".safe_query_filters()"
     },
     {
@@ -1840,7 +1860,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "application_controllers_sections_sections_delete",
-      "community": 82,
+      "community": 33,
       "norm_label": ".delete()"
     },
     {
@@ -3070,7 +3090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_core_my_controller",
-      "community": 21,
+      "community": 206,
       "norm_label": "my_controller.php"
     },
     {
@@ -3090,7 +3110,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller",
-      "community": 429,
+      "community": 136,
       "norm_label": "base_controller"
     },
     {
@@ -3100,7 +3120,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_construct",
-      "community": 429,
+      "community": 136,
       "norm_label": ".__construct()"
     },
     {
@@ -3110,7 +3130,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_bootstrap_schema_once",
-      "community": 429,
+      "community": 136,
       "norm_label": ".bootstrap_schema_once()"
     },
     {
@@ -3120,7 +3140,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_boot_preferences",
-      "community": 429,
+      "community": 136,
       "norm_label": ".boot_preferences()"
     },
     {
@@ -3130,7 +3150,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_render",
-      "community": 206,
+      "community": 88,
       "norm_label": ".render()"
     },
     {
@@ -3140,7 +3160,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_gregorian_date_from_shamsi",
-      "community": 429,
+      "community": 136,
       "norm_label": ".gregorian_date_from_shamsi()"
     },
     {
@@ -3150,7 +3170,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_gregorian_month_from_shamsi",
-      "community": 429,
+      "community": 136,
       "norm_label": ".gregorian_month_from_shamsi()"
     },
     {
@@ -3160,7 +3180,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_is_valid_shamsi_date_input",
-      "community": 429,
+      "community": 136,
       "norm_label": ".is_valid_shamsi_date_input()"
     },
     {
@@ -3170,7 +3190,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "application_core_my_controller_base_controller_is_valid_shamsi_month_input",
-      "community": 429,
+      "community": 136,
       "norm_label": ".is_valid_shamsi_month_input()"
     },
     {
@@ -3180,7 +3200,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "application_core_my_controller_authenticated_controller",
-      "community": 21,
+      "community": 206,
       "norm_label": "authenticated_controller"
     },
     {
@@ -3190,7 +3210,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "application_core_my_controller_authenticated_controller_construct",
-      "community": 21,
+      "community": 206,
       "norm_label": ".__construct()"
     },
     {
@@ -3200,7 +3220,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "application_core_my_controller_authenticated_controller_require_permission",
-      "community": 21,
+      "community": 206,
       "norm_label": ".require_permission()"
     },
     {
@@ -3210,7 +3230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_helpers_app_helper",
-      "community": 206,
+      "community": 88,
       "norm_label": "app_helper.php"
     },
     {
@@ -3220,7 +3240,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "application_helpers_app_helper_app_locale",
-      "community": 206,
+      "community": 88,
       "norm_label": "app_locale()"
     },
     {
@@ -3230,7 +3250,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "application_helpers_app_helper_app_theme",
-      "community": 206,
+      "community": 88,
       "norm_label": "app_theme()"
     },
     {
@@ -3240,7 +3260,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "application_helpers_app_helper_is_rtl_locale",
-      "community": 206,
+      "community": 88,
       "norm_label": "is_rtl_locale()"
     },
     {
@@ -3260,7 +3280,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "application_helpers_app_helper_format_number",
-      "community": 206,
+      "community": 88,
       "norm_label": "format_number()"
     },
     {
@@ -3270,7 +3290,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "application_helpers_app_helper_format_amount",
-      "community": 206,
+      "community": 88,
       "norm_label": "format_amount()"
     },
     {
@@ -3280,7 +3300,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_turn_cash_note",
-      "community": 206,
+      "community": 88,
       "norm_label": "safe_turn_cash_note()"
     },
     {
@@ -3290,7 +3310,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_turn_wallet_topup_note",
-      "community": 206,
+      "community": 27,
       "norm_label": "safe_turn_wallet_topup_note()"
     },
     {
@@ -3300,7 +3320,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_turn_cash_reversal_note",
-      "community": 206,
+      "community": 88,
       "norm_label": "safe_turn_cash_reversal_note()"
     },
     {
@@ -3310,7 +3330,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_turn_wallet_topup_reversal_note",
-      "community": 206,
+      "community": 88,
       "norm_label": "safe_turn_wallet_topup_reversal_note()"
     },
     {
@@ -3320,7 +3340,7 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_patient_payment_note",
-      "community": 206,
+      "community": 11,
       "norm_label": "safe_patient_payment_note()"
     },
     {
@@ -3330,7 +3350,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_patient_wallet_topup_note",
-      "community": 206,
+      "community": 11,
       "norm_label": "safe_patient_wallet_topup_note()"
     },
     {
@@ -3340,7 +3360,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_salary_payment_note",
-      "community": 206,
+      "community": 88,
       "norm_label": "safe_salary_payment_note()"
     },
     {
@@ -3350,7 +3370,7 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "application_helpers_app_helper_safe_reference_label",
-      "community": 206,
+      "community": 15,
       "norm_label": "safe_reference_label()"
     },
     {
@@ -3360,7 +3380,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "application_helpers_app_helper_to_shamsi",
-      "community": 206,
+      "community": 88,
       "norm_label": "to_shamsi()"
     },
     {
@@ -3370,7 +3390,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "application_helpers_app_helper_to_gregorian",
-      "community": 206,
+      "community": 88,
       "norm_label": "to_gregorian()"
     },
     {
@@ -3380,7 +3400,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "application_helpers_app_helper_shamsi_today",
-      "community": 206,
+      "community": 88,
       "norm_label": "shamsi_today()"
     },
     {
@@ -3390,7 +3410,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "application_helpers_app_helper_shamsi_now",
-      "community": 206,
+      "community": 88,
       "norm_label": "shamsi_now()"
     },
     {
@@ -3400,7 +3420,7 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "application_helpers_app_helper_shamsi_month_range",
-      "community": 206,
+      "community": 88,
       "norm_label": "shamsi_month_range()"
     },
     {
@@ -3410,7 +3430,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "application_helpers_app_helper_gregorian_month_to_shamsi",
-      "community": 206,
+      "community": 88,
       "norm_label": "gregorian_month_to_shamsi()"
     },
     {
@@ -3420,7 +3440,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "application_helpers_app_helper_shamsi_month_to_gregorian",
-      "community": 206,
+      "community": 88,
       "norm_label": "shamsi_month_to_gregorian()"
     },
     {
@@ -6964,14 +6984,14 @@
       "norm_label": ".get_safe_balance()"
     },
     {
-      "label": ".turns_by_section_today()",
+      "label": ".turns_by_section()",
       "file_type": "code",
       "source_file": "application/models/Dashboard_model.php",
       "source_location": "L26",
       "_origin": "ast",
-      "id": "application_models_dashboard_model_dashboard_model_turns_by_section_today",
+      "id": "application_models_dashboard_model_dashboard_model_turns_by_section",
       "community": 211,
-      "norm_label": ".turns_by_section_today()"
+      "norm_label": ".turns_by_section()"
     },
     {
       "label": ".open_debt_summary()",
@@ -7724,10 +7744,20 @@
       "norm_label": "inventory_model"
     },
     {
+      "label": ".ensure_movement_index()",
+      "file_type": "code",
+      "source_file": "application/models/Inventory_model.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "application_models_inventory_model_inventory_model_ensure_movement_index",
+      "community": 171,
+      "norm_label": ".ensure_movement_index()"
+    },
+    {
       "label": ".get_locations()",
       "file_type": "code",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L6",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "application_models_inventory_model_inventory_model_get_locations",
       "community": 171,
@@ -7737,7 +7767,7 @@
       "label": ".get_location_by_id()",
       "file_type": "code",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L15",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "application_models_inventory_model_inventory_model_get_location_by_id",
       "community": 171,
@@ -7747,7 +7777,7 @@
       "label": ".get_stock_level()",
       "file_type": "code",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L22",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "application_models_inventory_model_inventory_model_get_stock_level",
       "community": 171,
@@ -7757,7 +7787,7 @@
       "label": ".get_all_stock_levels()",
       "file_type": "code",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L32",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "application_models_inventory_model_inventory_model_get_all_stock_levels",
       "community": 171,
@@ -7767,7 +7797,7 @@
       "label": ".recompute_stock_level()",
       "file_type": "code",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L52",
+      "source_location": "L85",
       "_origin": "ast",
       "id": "application_models_inventory_model_inventory_model_recompute_stock_level",
       "community": 171,
@@ -7777,7 +7807,7 @@
       "label": ".record_movement()",
       "file_type": "code",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L94",
+      "source_location": "L129",
       "_origin": "ast",
       "id": "application_models_inventory_model_inventory_model_record_movement",
       "community": 171,
@@ -7787,7 +7817,7 @@
       "label": ".get_movements()",
       "file_type": "code",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L164",
+      "source_location": "L199",
       "_origin": "ast",
       "id": "application_models_inventory_model_inventory_model_get_movements",
       "community": 171,
@@ -7797,7 +7827,7 @@
       "label": ".validate_stock_available()",
       "file_type": "code",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L188",
+      "source_location": "L223",
       "_origin": "ast",
       "id": "application_models_inventory_model_inventory_model_validate_stock_available",
       "community": 171,
@@ -13370,7 +13400,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_core_common",
-      "community": 437,
+      "community": 424,
       "norm_label": "common.php"
     },
     {
@@ -13380,7 +13410,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "system_core_common_is_php",
-      "community": 3,
+      "community": 424,
       "norm_label": "is_php()"
     },
     {
@@ -13390,7 +13420,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "system_core_common_is_really_writable",
-      "community": 423,
+      "community": 424,
       "norm_label": "is_really_writable()"
     },
     {
@@ -13400,7 +13430,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "system_core_common_load_class",
-      "community": 437,
+      "community": 424,
       "norm_label": "load_class()"
     },
     {
@@ -13410,7 +13440,7 @@
       "source_location": "L195",
       "_origin": "ast",
       "id": "system_core_common_is_loaded",
-      "community": 437,
+      "community": 424,
       "norm_label": "is_loaded()"
     },
     {
@@ -13420,7 +13450,7 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "system_core_common_get_config",
-      "community": 437,
+      "community": 424,
       "norm_label": "get_config()"
     },
     {
@@ -13430,7 +13460,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "array",
-      "community": 437,
+      "community": 424,
       "norm_label": "array"
     },
     {
@@ -13450,7 +13480,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "system_core_common_get_mimes",
-      "community": 422,
+      "community": 424,
       "norm_label": "get_mimes()"
     },
     {
@@ -13480,7 +13510,7 @@
       "source_location": "L364",
       "_origin": "ast",
       "id": "system_core_common_show_error",
-      "community": 437,
+      "community": 424,
       "norm_label": "show_error()"
     },
     {
@@ -13490,7 +13520,7 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "system_core_common_show_404",
-      "community": 437,
+      "community": 424,
       "norm_label": "show_404()"
     },
     {
@@ -13510,7 +13540,7 @@
       "source_location": "L438",
       "_origin": "ast",
       "id": "system_core_common_set_status_header",
-      "community": 437,
+      "community": 424,
       "norm_label": "set_status_header()"
     },
     {
@@ -13520,7 +13550,7 @@
       "source_location": "L541",
       "_origin": "ast",
       "id": "system_core_common_error_handler",
-      "community": 437,
+      "community": 424,
       "norm_label": "_error_handler()"
     },
     {
@@ -13530,7 +13560,7 @@
       "source_location": "L591",
       "_origin": "ast",
       "id": "system_core_common_exception_handler",
-      "community": 437,
+      "community": 424,
       "norm_label": "_exception_handler()"
     },
     {
@@ -13540,7 +13570,7 @@
       "source_location": "L622",
       "_origin": "ast",
       "id": "system_core_common_shutdown_handler",
-      "community": 437,
+      "community": 424,
       "norm_label": "_shutdown_handler()"
     },
     {
@@ -13550,7 +13580,7 @@
       "source_location": "L645",
       "_origin": "ast",
       "id": "system_core_common_remove_invisible_characters",
-      "community": 177,
+      "community": 22,
       "norm_label": "remove_invisible_characters()"
     },
     {
@@ -14480,7 +14510,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "system_core_log_ci_log_construct",
-      "community": 437,
+      "community": 424,
       "norm_label": ".__construct()"
     },
     {
@@ -14590,7 +14620,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "system_core_output_ci_output_construct",
-      "community": 422,
+      "community": 424,
       "norm_label": ".__construct()"
     },
     {
@@ -14740,7 +14770,7 @@
       "source_location": "L663",
       "_origin": "ast",
       "id": "system_core_output_ci_output_strlen",
-      "community": 40,
+      "community": 13,
       "norm_label": ".strlen()"
     },
     {
@@ -15040,7 +15070,7 @@
       "source_location": "L657",
       "_origin": "ast",
       "id": "system_core_security_ci_security_sanitize_filename",
-      "community": 177,
+      "community": 22,
       "norm_label": ".sanitize_filename()"
     },
     {
@@ -15430,7 +15460,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "system_core_utf8_ci_utf8_safe_ascii_for_xml",
-      "community": 177,
+      "community": 22,
       "norm_label": ".safe_ascii_for_xml()"
     },
     {
@@ -15500,7 +15530,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "system_core_compat_mbstring_mb_strpos",
-      "community": 13,
+      "community": 424,
       "norm_label": "mb_strpos()"
     },
     {
@@ -15570,7 +15600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_database_db_cache",
-      "community": 136,
+      "community": 1,
       "norm_label": "db_cache.php"
     },
     {
@@ -15580,7 +15610,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache",
-      "community": 136,
+      "community": 1,
       "norm_label": "ci_db_cache"
     },
     {
@@ -15590,7 +15620,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_construct",
-      "community": 136,
+      "community": 1,
       "norm_label": ".__construct()"
     },
     {
@@ -15600,7 +15630,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_check_path",
-      "community": 136,
+      "community": 1,
       "norm_label": ".check_path()"
     },
     {
@@ -15610,7 +15640,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_read",
-      "community": 136,
+      "community": 1,
       "norm_label": ".read()"
     },
     {
@@ -15630,7 +15660,7 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_delete",
-      "community": 136,
+      "community": 1,
       "norm_label": ".delete()"
     },
     {
@@ -15640,7 +15670,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_delete_all",
-      "community": 136,
+      "community": 1,
       "norm_label": ".delete_all()"
     },
     {
@@ -19310,7 +19340,7 @@
       "source_location": "L399",
       "_origin": "ast",
       "id": "system_database_drivers_mysqli_mysqli_driver_ci_db_mysqli_driver_trans_begin",
-      "community": 3,
+      "community": 46,
       "norm_label": "._trans_begin()"
     },
     {
@@ -24250,7 +24280,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_captcha_helper",
-      "community": 423,
+      "community": 424,
       "norm_label": "captcha_helper.php"
     },
     {
@@ -24260,7 +24290,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "system_helpers_captcha_helper_create_captcha",
-      "community": 423,
+      "community": 424,
       "norm_label": "create_captcha()"
     },
     {
@@ -24530,7 +24560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_file_helper",
-      "community": 435,
+      "community": 1,
       "norm_label": "file_helper.php"
     },
     {
@@ -24540,7 +24570,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "system_helpers_file_helper_read_file",
-      "community": 435,
+      "community": 1,
       "norm_label": "read_file()"
     },
     {
@@ -24550,7 +24580,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "system_helpers_file_helper_write_file",
-      "community": 88,
+      "community": 1,
       "norm_label": "write_file()"
     },
     {
@@ -24560,7 +24590,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "system_helpers_file_helper_delete_files",
-      "community": 136,
+      "community": 1,
       "norm_label": "delete_files()"
     },
     {
@@ -24570,7 +24600,7 @@
       "source_location": "L164",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_filenames",
-      "community": 435,
+      "community": 1,
       "norm_label": "get_filenames()"
     },
     {
@@ -24580,7 +24610,7 @@
       "source_location": "L207",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_dir_file_info",
-      "community": 435,
+      "community": 1,
       "norm_label": "get_dir_file_info()"
     },
     {
@@ -24590,7 +24620,7 @@
       "source_location": "L252",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_file_info",
-      "community": 435,
+      "community": 1,
       "norm_label": "get_file_info()"
     },
     {
@@ -24600,7 +24630,7 @@
       "source_location": "L310",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_mime_by_extension",
-      "community": 422,
+      "community": 1,
       "norm_label": "get_mime_by_extension()"
     },
     {
@@ -24610,7 +24640,7 @@
       "source_location": "L346",
       "_origin": "ast",
       "id": "system_helpers_file_helper_symbolic_permissions",
-      "community": 435,
+      "community": 1,
       "norm_label": "symbolic_permissions()"
     },
     {
@@ -24620,7 +24650,7 @@
       "source_location": "L397",
       "_origin": "ast",
       "id": "system_helpers_file_helper_octal_permissions",
-      "community": 435,
+      "community": 1,
       "norm_label": "octal_permissions()"
     },
     {
@@ -26180,7 +26210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file",
-      "community": 88,
+      "community": 1,
       "norm_label": "cache_file.php"
     },
     {
@@ -26190,7 +26220,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file",
-      "community": 88,
+      "community": 1,
       "norm_label": "ci_cache_file"
     },
     {
@@ -26200,7 +26230,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_construct",
-      "community": 88,
+      "community": 1,
       "norm_label": ".__construct()"
     },
     {
@@ -26210,7 +26240,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_get",
-      "community": 88,
+      "community": 1,
       "norm_label": ".get()"
     },
     {
@@ -26220,7 +26250,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_delete",
-      "community": 88,
+      "community": 1,
       "norm_label": ".delete()"
     },
     {
@@ -26230,7 +26260,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_increment",
-      "community": 88,
+      "community": 1,
       "norm_label": ".increment()"
     },
     {
@@ -26240,7 +26270,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_save",
-      "community": 88,
+      "community": 1,
       "norm_label": ".save()"
     },
     {
@@ -26250,7 +26280,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_decrement",
-      "community": 88,
+      "community": 1,
       "norm_label": ".decrement()"
     },
     {
@@ -26260,7 +26290,7 @@
       "source_location": "L209",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_clean",
-      "community": 136,
+      "community": 1,
       "norm_label": ".clean()"
     },
     {
@@ -26270,7 +26300,7 @@
       "source_location": "L224",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_cache_info",
-      "community": 435,
+      "community": 1,
       "norm_label": ".cache_info()"
     },
     {
@@ -26280,7 +26310,7 @@
       "source_location": "L237",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_get_metadata",
-      "community": 88,
+      "community": 1,
       "norm_label": ".get_metadata()"
     },
     {
@@ -26290,7 +26320,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_is_supported",
-      "community": 423,
+      "community": 1,
       "norm_label": ".is_supported()"
     },
     {
@@ -26940,7 +26970,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_driver",
-      "community": 109,
+      "community": 19,
       "norm_label": "driver.php"
     },
     {
@@ -26950,7 +26980,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "system_libraries_driver_ci_driver_library",
-      "community": 109,
+      "community": 19,
       "norm_label": "ci_driver_library"
     },
     {
@@ -26960,7 +26990,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "system_libraries_driver_ci_driver_library_get",
-      "community": 109,
+      "community": 19,
       "norm_label": ".__get()"
     },
     {
@@ -26970,7 +27000,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "system_libraries_driver_ci_driver_library_load_driver",
-      "community": 109,
+      "community": 19,
       "norm_label": ".load_driver()"
     },
     {
@@ -26980,7 +27010,7 @@
       "source_location": "L195",
       "_origin": "ast",
       "id": "system_libraries_driver_ci_driver",
-      "community": 109,
+      "community": 19,
       "norm_label": "ci_driver"
     },
     {
@@ -26990,7 +27020,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "system_libraries_driver_ci_driver_decorate",
-      "community": 109,
+      "community": 19,
       "norm_label": ".decorate()"
     },
     {
@@ -27000,7 +27030,7 @@
       "source_location": "L273",
       "_origin": "ast",
       "id": "system_libraries_driver_ci_driver_call",
-      "community": 109,
+      "community": 19,
       "norm_label": ".__call()"
     },
     {
@@ -27010,7 +27040,7 @@
       "source_location": "L292",
       "_origin": "ast",
       "id": "system_libraries_driver_ci_driver_get",
-      "community": 109,
+      "community": 19,
       "norm_label": ".__get()"
     },
     {
@@ -27020,7 +27050,7 @@
       "source_location": "L310",
       "_origin": "ast",
       "id": "system_libraries_driver_ci_driver_set",
-      "community": 109,
+      "community": 19,
       "norm_label": ".__set()"
     },
     {
@@ -27050,7 +27080,7 @@
       "source_location": "L353",
       "_origin": "ast",
       "id": "system_libraries_email_ci_email_construct",
-      "community": 3,
+      "community": 424,
       "norm_label": ".__construct()"
     },
     {
@@ -27900,7 +27930,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "system_libraries_encryption_ci_encryption_construct",
-      "community": 52,
+      "community": 427,
       "norm_label": ".__construct()"
     },
     {
@@ -27910,7 +27940,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "system_libraries_encryption_ci_encryption_initialize",
-      "community": 52,
+      "community": 427,
       "norm_label": ".initialize()"
     },
     {
@@ -27920,7 +27950,7 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "system_libraries_encryption_ci_encryption_strlen",
-      "community": 52,
+      "community": 13,
       "norm_label": ".strlen()"
     },
     {
@@ -28400,7 +28430,7 @@
       "source_location": "L1056",
       "_origin": "ast",
       "id": "system_libraries_form_validation_ci_form_validation_valid_url",
-      "community": 3,
+      "community": 12,
       "norm_label": ".valid_url()"
     },
     {
@@ -30380,7 +30410,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_construct",
-      "community": 424,
+      "community": 16,
       "norm_label": ".__construct()"
     },
     {
@@ -30390,7 +30420,7 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_ci_load_classes",
-      "community": 424,
+      "community": 16,
       "norm_label": "._ci_load_classes()"
     },
     {
@@ -30400,7 +30430,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_configure",
-      "community": 424,
+      "community": 16,
       "norm_label": "._configure()"
     },
     {
@@ -30410,7 +30440,7 @@
       "source_location": "L301",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_configure_sid_length",
-      "community": 424,
+      "community": 16,
       "norm_label": "._configure_sid_length()"
     },
     {
@@ -30420,7 +30450,7 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_sess_regenerate",
-      "community": 424,
+      "community": 16,
       "norm_label": ".sess_regenerate()"
     },
     {
@@ -30430,7 +30460,7 @@
       "source_location": "L373",
       "_origin": "ast",
       "id": "system_libraries_session_session_ci_session_ci_init_vars",
-      "community": 424,
+      "community": 16,
       "norm_label": "._ci_init_vars()"
     },
     {
@@ -30730,7 +30760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver",
-      "community": 49,
+      "community": 427,
       "norm_label": "session_driver.php"
     },
     {
@@ -30740,7 +30770,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver",
-      "community": 49,
+      "community": 427,
       "norm_label": "ci_session_driver"
     },
     {
@@ -30750,7 +30780,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "sessionhandlerinterface",
-      "community": 49,
+      "community": 427,
       "norm_label": "sessionhandlerinterface"
     },
     {
@@ -30760,7 +30790,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_construct",
-      "community": 3,
+      "community": 424,
       "norm_label": ".__construct()"
     },
     {
@@ -30770,7 +30800,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_php5_validate_id",
-      "community": 49,
+      "community": 427,
       "norm_label": ".php5_validate_id()"
     },
     {
@@ -30780,7 +30810,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_cookie_destroy",
-      "community": 49,
+      "community": 427,
       "norm_label": "._cookie_destroy()"
     },
     {
@@ -30790,7 +30820,7 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_get_lock",
-      "community": 49,
+      "community": 427,
       "norm_label": "._get_lock()"
     },
     {
@@ -30800,7 +30830,7 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "system_libraries_session_session_driver_ci_session_driver_release_lock",
-      "community": 49,
+      "community": 427,
       "norm_label": "._release_lock()"
     },
     {
@@ -30930,7 +30960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver",
-      "community": 19,
+      "community": 427,
       "norm_label": "session_files_driver.php"
     },
     {
@@ -30940,7 +30970,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver",
-      "community": 19,
+      "community": 427,
       "norm_label": "ci_session_files_driver"
     },
     {
@@ -30950,7 +30980,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_construct",
-      "community": 19,
+      "community": 427,
       "norm_label": ".__construct()"
     },
     {
@@ -30960,7 +30990,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_open",
-      "community": 19,
+      "community": 427,
       "norm_label": ".open()"
     },
     {
@@ -30970,7 +31000,7 @@
       "source_location": "L158",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_write",
-      "community": 19,
+      "community": 427,
       "norm_label": ".write()"
     },
     {
@@ -30980,7 +31010,7 @@
       "source_location": "L206",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_close",
-      "community": 19,
+      "community": 427,
       "norm_label": ".close()"
     },
     {
@@ -30990,7 +31020,7 @@
       "source_location": "L228",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_read",
-      "community": 19,
+      "community": 427,
       "norm_label": ".read()"
     },
     {
@@ -31000,7 +31030,7 @@
       "source_location": "L285",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_strlen",
-      "community": 19,
+      "community": 16,
       "norm_label": ".strlen()"
     },
     {
@@ -31010,7 +31040,7 @@
       "source_location": "L302",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_destroy",
-      "community": 19,
+      "community": 427,
       "norm_label": ".destroy()"
     },
     {
@@ -31020,7 +31050,7 @@
       "source_location": "L338",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_gc",
-      "community": 19,
+      "community": 427,
       "norm_label": ".gc()"
     },
     {
@@ -31030,7 +31060,7 @@
       "source_location": "L384",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_files_driver_ci_session_files_driver_validatesessionid",
-      "community": 19,
+      "community": 427,
       "norm_label": ".validatesessionid()"
     },
     {
@@ -31040,7 +31070,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver",
-      "community": 432,
+      "community": 427,
       "norm_label": "session_memcached_driver.php"
     },
     {
@@ -31050,7 +31080,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver",
-      "community": 432,
+      "community": 427,
       "norm_label": "ci_session_memcached_driver"
     },
     {
@@ -31060,7 +31090,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_construct",
-      "community": 432,
+      "community": 427,
       "norm_label": ".__construct()"
     },
     {
@@ -31070,7 +31100,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_open",
-      "community": 432,
+      "community": 427,
       "norm_label": ".open()"
     },
     {
@@ -31080,7 +31110,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_read",
-      "community": 432,
+      "community": 427,
       "norm_label": ".read()"
     },
     {
@@ -31090,7 +31120,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_get_lock",
-      "community": 432,
+      "community": 427,
       "norm_label": "._get_lock()"
     },
     {
@@ -31100,7 +31130,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_write",
-      "community": 432,
+      "community": 427,
       "norm_label": ".write()"
     },
     {
@@ -31110,7 +31140,7 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_release_lock",
-      "community": 432,
+      "community": 427,
       "norm_label": "._release_lock()"
     },
     {
@@ -31120,7 +31150,7 @@
       "source_location": "L299",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_close",
-      "community": 432,
+      "community": 427,
       "norm_label": ".close()"
     },
     {
@@ -31130,7 +31160,7 @@
       "source_location": "L324",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_destroy",
-      "community": 432,
+      "community": 427,
       "norm_label": ".destroy()"
     },
     {
@@ -31140,7 +31170,7 @@
       "source_location": "L345",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_gc",
-      "community": 432,
+      "community": 427,
       "norm_label": ".gc()"
     },
     {
@@ -31150,7 +31180,7 @@
       "source_location": "L362",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_validatesessionid",
-      "community": 432,
+      "community": 427,
       "norm_label": ".validatesessionid()"
     },
     {
@@ -31850,7 +31880,7 @@
       "source_location": "L293",
       "_origin": "ast",
       "id": "system_libraries_upload_ci_upload_construct",
-      "community": 422,
+      "community": 17,
       "norm_label": ".__construct()"
     },
     {
@@ -31860,7 +31890,7 @@
       "source_location": "L312",
       "_origin": "ast",
       "id": "system_libraries_upload_ci_upload_initialize",
-      "community": 422,
+      "community": 17,
       "norm_label": ".initialize()"
     },
     {
@@ -31890,7 +31920,7 @@
       "source_location": "L576",
       "_origin": "ast",
       "id": "system_libraries_upload_ci_upload_validate_upload_path",
-      "community": 423,
+      "community": 17,
       "norm_label": ".validate_upload_path()"
     },
     {
@@ -32400,7 +32430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc",
-      "community": 425,
+      "community": 156,
       "norm_label": "xmlrpc.php"
     },
     {
@@ -32500,7 +32530,7 @@
       "source_location": "L470",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_ci_xmlrpc_send_request",
-      "community": 425,
+      "community": 156,
       "norm_label": ".send_request()"
     },
     {
@@ -32550,7 +32580,7 @@
       "source_location": "L546",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client",
-      "community": 425,
+      "community": 156,
       "norm_label": "xml_rpc_client"
     },
     {
@@ -32560,7 +32590,7 @@
       "source_location": "L638",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_construct",
-      "community": 425,
+      "community": 156,
       "norm_label": ".__construct()"
     },
     {
@@ -32570,7 +32600,7 @@
       "source_location": "L664",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_send",
-      "community": 425,
+      "community": 156,
       "norm_label": ".send()"
     },
     {
@@ -32580,7 +32610,7 @@
       "source_location": "L682",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_sendpayload",
-      "community": 425,
+      "community": 156,
       "norm_label": ".sendpayload()"
     },
     {
@@ -32710,7 +32740,7 @@
       "source_location": "L1062",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_message_parseresponse",
-      "community": 120,
+      "community": 156,
       "norm_label": ".parseresponse()"
     },
     {
@@ -32870,7 +32900,7 @@
       "source_location": "L1765",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_values_scalarval",
-      "community": 120,
+      "community": 156,
       "norm_label": ".scalarval()"
     },
     {
@@ -33120,7 +33150,7 @@
       "source_location": "L347",
       "_origin": "ast",
       "id": "system_libraries_zip_ci_zip_substr",
-      "community": 13,
+      "community": 50,
       "norm_label": ".substr()"
     },
     {
@@ -37407,6 +37437,26 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/controllers/Dashboard.php",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "application_controllers_dashboard_dashboard",
+      "target": "application_controllers_dashboard_dashboard_json_error",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/controllers/Dashboard.php",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "application_controllers_dashboard_dashboard",
+      "target": "application_controllers_dashboard_dashboard_turns_by_section",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "application/controllers/Dashboard.php",
@@ -37419,12 +37469,45 @@
     {
       "relation": "calls",
       "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "application/controllers/Dashboard.php",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "application_controllers_dashboard_dashboard_index",
+      "target": "application_controllers_dashboard_dashboard_turns_by_section",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Dashboard.php",
       "source_location": "L49",
       "weight": 1.0,
       "source": "application_controllers_dashboard_dashboard_index",
+      "target": "application_helpers_app_helper_t"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "application/controllers/Dashboard.php",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "application_controllers_dashboard_dashboard_turns_by_section",
+      "target": "application_controllers_dashboard_dashboard_json_error",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "application/controllers/Dashboard.php",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "application_controllers_dashboard_dashboard_turns_by_section",
       "target": "application_helpers_app_helper_t"
     },
     {
@@ -51439,7 +51522,7 @@
       "source_location": "L26",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
-      "target": "application_models_dashboard_model_dashboard_model_turns_by_section_today",
+      "target": "application_models_dashboard_model_dashboard_model_turns_by_section",
       "confidence_score": 1.0
     },
     {
@@ -52690,7 +52773,17 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L32",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "application_models_inventory_model_inventory_model",
+      "target": "application_models_inventory_model_inventory_model_ensure_movement_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "application/models/Inventory_model.php",
+      "source_location": "L65",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model",
       "target": "application_models_inventory_model_inventory_model_get_all_stock_levels",
@@ -52700,7 +52793,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L15",
+      "source_location": "L48",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model",
       "target": "application_models_inventory_model_inventory_model_get_location_by_id",
@@ -52710,7 +52803,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L6",
+      "source_location": "L39",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model",
       "target": "application_models_inventory_model_inventory_model_get_locations",
@@ -52720,7 +52813,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L164",
+      "source_location": "L199",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model",
       "target": "application_models_inventory_model_inventory_model_get_movements",
@@ -52730,7 +52823,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L22",
+      "source_location": "L55",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model",
       "target": "application_models_inventory_model_inventory_model_get_stock_level",
@@ -52740,7 +52833,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L52",
+      "source_location": "L85",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model",
       "target": "application_models_inventory_model_inventory_model_recompute_stock_level",
@@ -52750,7 +52843,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L94",
+      "source_location": "L129",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model",
       "target": "application_models_inventory_model_inventory_model_record_movement",
@@ -52760,7 +52853,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L188",
+      "source_location": "L223",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model",
       "target": "application_models_inventory_model_inventory_model_validate_stock_available",
@@ -52771,7 +52864,18 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Inventory_model.php",
-      "source_location": "L190",
+      "source_location": "L87",
+      "weight": 1.0,
+      "source": "application_models_inventory_model_inventory_model_recompute_stock_level",
+      "target": "application_models_inventory_model_inventory_model_ensure_movement_index",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "application/models/Inventory_model.php",
+      "source_location": "L225",
       "weight": 1.0,
       "source": "application_models_inventory_model_inventory_model_validate_stock_available",
       "target": "application_models_inventory_model_inventory_model_get_stock_level",
@@ -94416,5 +94520,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "523033a26d5c99d15e9ed2611e5416acb3ea298d"
+  "built_at_commit": "6fa5f6ce417bd1651024563ea00422f6ece21d78"
 }

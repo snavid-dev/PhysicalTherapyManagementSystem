@@ -134,6 +134,19 @@
 			<div class="card">
 				<div class="card-body">
 					<h2 class="h5 mb-3"><?= t('turns_by_section_today') ?></h2>
+					<?= form_open('dashboard', array('method' => 'get', 'class' => 'row g-3 align-items-end mb-3')) ?>
+						<div class="col-md-4">
+							<label class="form-label"><?= t('From') ?></label>
+							<input type="text" name="turns_from" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($turns_by_section_from) ?>">
+						</div>
+						<div class="col-md-4">
+							<label class="form-label"><?= t('To') ?></label>
+							<input type="text" name="turns_to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($turns_by_section_to) ?>">
+						</div>
+						<div class="col-md-4">
+							<button type="submit" class="btn btn-dark btn-icon"><i class="bi bi-funnel" aria-hidden="true"></i> <?= t('Apply') ?></button>
+						</div>
+					<?= form_close() ?>
 					<?php if ($turns_by_section) : ?>
 						<div class="table-responsive">
 							<table class="table table-sm align-middle mb-0">
@@ -148,7 +161,7 @@
 							</table>
 						</div>
 					<?php else : ?>
-						<p class="text-muted mb-0"><?= t('No turns for today.') ?></p>
+						<p class="text-muted mb-0"><?= t('No data available.') ?></p>
 					<?php endif; ?>
 				</div>
 			</div>

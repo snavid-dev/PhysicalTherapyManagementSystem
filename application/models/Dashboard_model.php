@@ -23,13 +23,14 @@ class Dashboard_model extends CI_Model
 		return $this->Safe_model->get_current_balance();
 	}
 
-	public function turns_by_section_today()
+	public function turns_by_section($date_from = NULL, $date_to = NULL)
 	{
 		return $this->db
 			->select('sections.name AS section_name, COUNT(turns.id) AS turn_count', FALSE)
 			->from('turns')
 			->join('sections', 'sections.id = turns.section_id', 'left')
-			->where('turns.turn_date', date('Y-m-d'))
+			->where('turns.turn_date >=', $date_from ?: date('Y-m-d'))
+			->where('turns.turn_date <=', $date_to ?: date('Y-m-d'))
 			->group_by('turns.section_id')
 			->order_by('turn_count', 'desc')
 			->get()

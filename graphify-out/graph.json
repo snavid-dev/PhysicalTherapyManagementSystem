@@ -50,7 +50,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "application_controllers_dashboard",
-      "community": 28,
+      "community": 21,
       "norm_label": "dashboard.php"
     },
     {
@@ -60,7 +60,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "application_controllers_dashboard_dashboard",
-      "community": 28,
+      "community": 21,
       "norm_label": "dashboard"
     },
     {
@@ -70,7 +70,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "application_controllers_dashboard_dashboard_construct",
-      "community": 28,
+      "community": 21,
       "norm_label": ".__construct()"
     },
     {
@@ -80,7 +80,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "application_controllers_dashboard_dashboard_index",
-      "community": 28,
+      "community": 21,
       "norm_label": ".index()"
     },
     {
@@ -3180,7 +3180,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "application_core_my_controller_authenticated_controller",
-      "community": 28,
+      "community": 21,
       "norm_label": "authenticated_controller"
     },
     {
@@ -3190,7 +3190,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "application_core_my_controller_authenticated_controller_construct",
-      "community": 28,
+      "community": 21,
       "norm_label": ".__construct()"
     },
     {
@@ -3200,7 +3200,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "application_core_my_controller_authenticated_controller_require_permission",
-      "community": 28,
+      "community": 21,
       "norm_label": ".require_permission()"
     },
     {
@@ -6964,20 +6964,20 @@
       "norm_label": ".get_safe_balance()"
     },
     {
-      "label": ".turns_by_section_today()",
+      "label": ".turns_by_section()",
       "file_type": "code",
       "source_file": "application/models/Dashboard_model.php",
       "source_location": "L26",
       "_origin": "ast",
-      "id": "application_models_dashboard_model_dashboard_model_turns_by_section_today",
+      "id": "application_models_dashboard_model_dashboard_model_turns_by_section",
       "community": 211,
-      "norm_label": ".turns_by_section_today()"
+      "norm_label": ".turns_by_section()"
     },
     {
       "label": ".open_debt_summary()",
       "file_type": "code",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L39",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model_open_debt_summary",
       "community": 211,
@@ -6987,7 +6987,7 @@
       "label": ".staff_on_leave_today()",
       "file_type": "code",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model_staff_on_leave_today",
       "community": 211,
@@ -6997,7 +6997,7 @@
       "label": ".unpaid_salary_count_this_month()",
       "file_type": "code",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L69",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model_unpaid_salary_count_this_month",
       "community": 211,
@@ -7007,7 +7007,7 @@
       "label": ".expenses_this_month()",
       "file_type": "code",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L77",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model_expenses_this_month",
       "community": 211,
@@ -7017,7 +7017,7 @@
       "label": ".new_patients_this_month()",
       "file_type": "code",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L89",
+      "source_location": "L90",
       "_origin": "ast",
       "id": "application_models_dashboard_model_dashboard_model_new_patients_this_month",
       "community": 211,
@@ -13380,7 +13380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_core_common",
-      "community": 437,
+      "community": 88,
       "norm_label": "common.php"
     },
     {
@@ -13400,7 +13400,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "system_core_common_is_really_writable",
-      "community": 423,
+      "community": 435,
       "norm_label": "is_really_writable()"
     },
     {
@@ -13410,7 +13410,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "system_core_common_load_class",
-      "community": 437,
+      "community": 88,
       "norm_label": "load_class()"
     },
     {
@@ -13420,7 +13420,7 @@
       "source_location": "L195",
       "_origin": "ast",
       "id": "system_core_common_is_loaded",
-      "community": 437,
+      "community": 88,
       "norm_label": "is_loaded()"
     },
     {
@@ -13430,7 +13430,7 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "system_core_common_get_config",
-      "community": 437,
+      "community": 88,
       "norm_label": "get_config()"
     },
     {
@@ -13440,7 +13440,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "array",
-      "community": 437,
+      "community": 88,
       "norm_label": "array"
     },
     {
@@ -13460,7 +13460,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "system_core_common_get_mimes",
-      "community": 422,
+      "community": 432,
       "norm_label": "get_mimes()"
     },
     {
@@ -13490,7 +13490,7 @@
       "source_location": "L364",
       "_origin": "ast",
       "id": "system_core_common_show_error",
-      "community": 437,
+      "community": 88,
       "norm_label": "show_error()"
     },
     {
@@ -13500,7 +13500,7 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "system_core_common_show_404",
-      "community": 437,
+      "community": 88,
       "norm_label": "show_404()"
     },
     {
@@ -13520,7 +13520,7 @@
       "source_location": "L438",
       "_origin": "ast",
       "id": "system_core_common_set_status_header",
-      "community": 437,
+      "community": 88,
       "norm_label": "set_status_header()"
     },
     {
@@ -13530,7 +13530,7 @@
       "source_location": "L541",
       "_origin": "ast",
       "id": "system_core_common_error_handler",
-      "community": 437,
+      "community": 88,
       "norm_label": "_error_handler()"
     },
     {
@@ -13540,7 +13540,7 @@
       "source_location": "L591",
       "_origin": "ast",
       "id": "system_core_common_exception_handler",
-      "community": 437,
+      "community": 88,
       "norm_label": "_exception_handler()"
     },
     {
@@ -13550,7 +13550,7 @@
       "source_location": "L622",
       "_origin": "ast",
       "id": "system_core_common_shutdown_handler",
-      "community": 437,
+      "community": 88,
       "norm_label": "_shutdown_handler()"
     },
     {
@@ -14490,7 +14490,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "system_core_log_ci_log_construct",
-      "community": 437,
+      "community": 88,
       "norm_label": ".__construct()"
     },
     {
@@ -14600,7 +14600,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "system_core_output_ci_output_construct",
-      "community": 422,
+      "community": 432,
       "norm_label": ".__construct()"
     },
     {
@@ -15580,7 +15580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_database_db_cache",
-      "community": 136,
+      "community": 423,
       "norm_label": "db_cache.php"
     },
     {
@@ -15590,7 +15590,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache",
-      "community": 136,
+      "community": 423,
       "norm_label": "ci_db_cache"
     },
     {
@@ -15600,7 +15600,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_construct",
-      "community": 136,
+      "community": 423,
       "norm_label": ".__construct()"
     },
     {
@@ -15610,7 +15610,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_check_path",
-      "community": 136,
+      "community": 423,
       "norm_label": ".check_path()"
     },
     {
@@ -15620,7 +15620,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_read",
-      "community": 136,
+      "community": 423,
       "norm_label": ".read()"
     },
     {
@@ -15640,7 +15640,7 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_delete",
-      "community": 136,
+      "community": 423,
       "norm_label": ".delete()"
     },
     {
@@ -15650,7 +15650,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "system_database_db_cache_ci_db_cache_delete_all",
-      "community": 136,
+      "community": 423,
       "norm_label": ".delete_all()"
     },
     {
@@ -24260,7 +24260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_captcha_helper",
-      "community": 423,
+      "community": 435,
       "norm_label": "captcha_helper.php"
     },
     {
@@ -24270,7 +24270,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "system_helpers_captcha_helper_create_captcha",
-      "community": 423,
+      "community": 435,
       "norm_label": "create_captcha()"
     },
     {
@@ -24540,7 +24540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_helpers_file_helper",
-      "community": 435,
+      "community": 425,
       "norm_label": "file_helper.php"
     },
     {
@@ -24550,7 +24550,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "system_helpers_file_helper_read_file",
-      "community": 435,
+      "community": 425,
       "norm_label": "read_file()"
     },
     {
@@ -24560,7 +24560,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "system_helpers_file_helper_write_file",
-      "community": 88,
+      "community": 422,
       "norm_label": "write_file()"
     },
     {
@@ -24570,7 +24570,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "system_helpers_file_helper_delete_files",
-      "community": 136,
+      "community": 423,
       "norm_label": "delete_files()"
     },
     {
@@ -24580,7 +24580,7 @@
       "source_location": "L164",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_filenames",
-      "community": 435,
+      "community": 425,
       "norm_label": "get_filenames()"
     },
     {
@@ -24590,7 +24590,7 @@
       "source_location": "L207",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_dir_file_info",
-      "community": 435,
+      "community": 425,
       "norm_label": "get_dir_file_info()"
     },
     {
@@ -24600,7 +24600,7 @@
       "source_location": "L252",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_file_info",
-      "community": 435,
+      "community": 425,
       "norm_label": "get_file_info()"
     },
     {
@@ -24610,7 +24610,7 @@
       "source_location": "L310",
       "_origin": "ast",
       "id": "system_helpers_file_helper_get_mime_by_extension",
-      "community": 422,
+      "community": 432,
       "norm_label": "get_mime_by_extension()"
     },
     {
@@ -24620,7 +24620,7 @@
       "source_location": "L346",
       "_origin": "ast",
       "id": "system_helpers_file_helper_symbolic_permissions",
-      "community": 435,
+      "community": 425,
       "norm_label": "symbolic_permissions()"
     },
     {
@@ -24630,7 +24630,7 @@
       "source_location": "L397",
       "_origin": "ast",
       "id": "system_helpers_file_helper_octal_permissions",
-      "community": 435,
+      "community": 425,
       "norm_label": "octal_permissions()"
     },
     {
@@ -26190,7 +26190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file",
-      "community": 88,
+      "community": 422,
       "norm_label": "cache_file.php"
     },
     {
@@ -26200,7 +26200,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file",
-      "community": 88,
+      "community": 422,
       "norm_label": "ci_cache_file"
     },
     {
@@ -26210,7 +26210,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_construct",
-      "community": 88,
+      "community": 422,
       "norm_label": ".__construct()"
     },
     {
@@ -26220,7 +26220,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_get",
-      "community": 88,
+      "community": 422,
       "norm_label": ".get()"
     },
     {
@@ -26230,7 +26230,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_delete",
-      "community": 88,
+      "community": 422,
       "norm_label": ".delete()"
     },
     {
@@ -26240,7 +26240,7 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_increment",
-      "community": 88,
+      "community": 422,
       "norm_label": ".increment()"
     },
     {
@@ -26250,7 +26250,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_save",
-      "community": 88,
+      "community": 422,
       "norm_label": ".save()"
     },
     {
@@ -26260,7 +26260,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_decrement",
-      "community": 88,
+      "community": 422,
       "norm_label": ".decrement()"
     },
     {
@@ -26270,7 +26270,7 @@
       "source_location": "L209",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_clean",
-      "community": 136,
+      "community": 423,
       "norm_label": ".clean()"
     },
     {
@@ -26280,7 +26280,7 @@
       "source_location": "L224",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_cache_info",
-      "community": 435,
+      "community": 425,
       "norm_label": ".cache_info()"
     },
     {
@@ -26290,7 +26290,7 @@
       "source_location": "L237",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_get_metadata",
-      "community": 88,
+      "community": 422,
       "norm_label": ".get_metadata()"
     },
     {
@@ -26300,7 +26300,7 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "system_libraries_cache_drivers_cache_file_ci_cache_file_is_supported",
-      "community": 423,
+      "community": 435,
       "norm_label": ".is_supported()"
     },
     {
@@ -31050,7 +31050,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver",
-      "community": 432,
+      "community": 136,
       "norm_label": "session_memcached_driver.php"
     },
     {
@@ -31060,7 +31060,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver",
-      "community": 432,
+      "community": 136,
       "norm_label": "ci_session_memcached_driver"
     },
     {
@@ -31070,7 +31070,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_construct",
-      "community": 432,
+      "community": 136,
       "norm_label": ".__construct()"
     },
     {
@@ -31080,7 +31080,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_open",
-      "community": 432,
+      "community": 136,
       "norm_label": ".open()"
     },
     {
@@ -31090,7 +31090,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_read",
-      "community": 432,
+      "community": 136,
       "norm_label": ".read()"
     },
     {
@@ -31100,7 +31100,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_get_lock",
-      "community": 432,
+      "community": 136,
       "norm_label": "._get_lock()"
     },
     {
@@ -31110,7 +31110,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_write",
-      "community": 432,
+      "community": 136,
       "norm_label": ".write()"
     },
     {
@@ -31120,7 +31120,7 @@
       "source_location": "L275",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_release_lock",
-      "community": 432,
+      "community": 136,
       "norm_label": "._release_lock()"
     },
     {
@@ -31130,7 +31130,7 @@
       "source_location": "L299",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_close",
-      "community": 432,
+      "community": 136,
       "norm_label": ".close()"
     },
     {
@@ -31140,7 +31140,7 @@
       "source_location": "L324",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_destroy",
-      "community": 432,
+      "community": 136,
       "norm_label": ".destroy()"
     },
     {
@@ -31150,7 +31150,7 @@
       "source_location": "L345",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_gc",
-      "community": 432,
+      "community": 136,
       "norm_label": ".gc()"
     },
     {
@@ -31160,7 +31160,7 @@
       "source_location": "L362",
       "_origin": "ast",
       "id": "system_libraries_session_drivers_session_memcached_driver_ci_session_memcached_driver_validatesessionid",
-      "community": 432,
+      "community": 136,
       "norm_label": ".validatesessionid()"
     },
     {
@@ -31860,7 +31860,7 @@
       "source_location": "L293",
       "_origin": "ast",
       "id": "system_libraries_upload_ci_upload_construct",
-      "community": 422,
+      "community": 432,
       "norm_label": ".__construct()"
     },
     {
@@ -31870,7 +31870,7 @@
       "source_location": "L312",
       "_origin": "ast",
       "id": "system_libraries_upload_ci_upload_initialize",
-      "community": 422,
+      "community": 432,
       "norm_label": ".initialize()"
     },
     {
@@ -31900,7 +31900,7 @@
       "source_location": "L576",
       "_origin": "ast",
       "id": "system_libraries_upload_ci_upload_validate_upload_path",
-      "community": 423,
+      "community": 435,
       "norm_label": ".validate_upload_path()"
     },
     {
@@ -32410,7 +32410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc",
-      "community": 425,
+      "community": 429,
       "norm_label": "xmlrpc.php"
     },
     {
@@ -32510,7 +32510,7 @@
       "source_location": "L470",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_ci_xmlrpc_send_request",
-      "community": 425,
+      "community": 429,
       "norm_label": ".send_request()"
     },
     {
@@ -32560,7 +32560,7 @@
       "source_location": "L546",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client",
-      "community": 425,
+      "community": 429,
       "norm_label": "xml_rpc_client"
     },
     {
@@ -32570,7 +32570,7 @@
       "source_location": "L638",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_construct",
-      "community": 425,
+      "community": 429,
       "norm_label": ".__construct()"
     },
     {
@@ -32580,7 +32580,7 @@
       "source_location": "L664",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_send",
-      "community": 425,
+      "community": 429,
       "norm_label": ".send()"
     },
     {
@@ -32590,7 +32590,7 @@
       "source_location": "L682",
       "_origin": "ast",
       "id": "system_libraries_xmlrpc_xml_rpc_client_sendpayload",
-      "community": 425,
+      "community": 429,
       "norm_label": ".sendpayload()"
     },
     {
@@ -37432,7 +37432,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "application/controllers/Dashboard.php",
-      "source_location": "L49",
+      "source_location": "L67",
       "weight": 1.0,
       "source": "application_controllers_dashboard_dashboard_index",
       "target": "application_helpers_app_helper_t"
@@ -51386,7 +51386,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L77",
+      "source_location": "L78",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
       "target": "application_models_dashboard_model_dashboard_model_expenses_this_month",
@@ -51406,7 +51406,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L89",
+      "source_location": "L90",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
       "target": "application_models_dashboard_model_dashboard_model_new_patients_this_month",
@@ -51416,7 +51416,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L39",
+      "source_location": "L40",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
       "target": "application_models_dashboard_model_dashboard_model_open_debt_summary",
@@ -51426,7 +51426,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
       "target": "application_models_dashboard_model_dashboard_model_staff_on_leave_today",
@@ -51449,14 +51449,14 @@
       "source_location": "L26",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
-      "target": "application_models_dashboard_model_dashboard_model_turns_by_section_today",
+      "target": "application_models_dashboard_model_dashboard_model_turns_by_section",
       "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "application/models/Dashboard_model.php",
-      "source_location": "L69",
+      "source_location": "L70",
       "weight": 1.0,
       "source": "application_models_dashboard_model_dashboard_model",
       "target": "application_models_dashboard_model_dashboard_model_unpaid_salary_count_this_month",
@@ -94447,5 +94447,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "523033a26d5c99d15e9ed2611e5416acb3ea298d"
+  "built_at_commit": "6fa5f6ce417bd1651024563ea00422f6ece21d78"
 }

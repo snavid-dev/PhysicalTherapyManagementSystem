@@ -14,6 +14,8 @@ class Dashboard extends Authenticated_Controller
 	{
 		$safe_balance = NULL;
 		$turns_by_section = NULL;
+		$turns_by_section_from = shamsi_today();
+		$turns_by_section_to = shamsi_today();
 		$open_debt_summary = NULL;
 		$staff_on_leave = NULL;
 		$unpaid_salary_count = NULL;
@@ -25,7 +27,23 @@ class Dashboard extends Authenticated_Controller
 		}
 
 		if ($this->auth->has_permission('manage_turns')) {
-			$turns_by_section = $this->Dashboard_model->turns_by_section_today();
+			$requested_from = $this->input->get('turns_from', TRUE);
+			$requested_to = $this->input->get('turns_to', TRUE);
+
+			if ($requested_from && $requested_to) {
+				$from_gregorian = $this->gregorian_date_from_shamsi($requested_from);
+				$to_gregorian = $this->gregorian_date_from_shamsi($requested_to);
+
+				if ($from_gregorian !== '' && $to_gregorian !== '' && $from_gregorian <= $to_gregorian) {
+					$turns_by_section_from = $requested_from;
+					$turns_by_section_to = $requested_to;
+				}
+			}
+
+			$turns_by_section = $this->Dashboard_model->turns_by_section(
+				$this->gregorian_date_from_shamsi($turns_by_section_from),
+				$this->gregorian_date_from_shamsi($turns_by_section_to)
+			);
 		}
 
 		if ($this->auth->has_permission('manage_patients')) {
@@ -51,6 +69,8 @@ class Dashboard extends Authenticated_Controller
 			'stats' => $this->Dashboard_model->stats(),
 			'safe_balance' => $safe_balance,
 			'turns_by_section' => $turns_by_section,
+			'turns_by_section_from' => $turns_by_section_from,
+			'turns_by_section_to' => $turns_by_section_to,
 			'open_debt_summary' => $open_debt_summary,
 			'staff_on_leave' => $staff_on_leave,
 			'unpaid_salary_count' => $unpaid_salary_count,
