@@ -69,6 +69,26 @@ class Reference_doctor_model extends CI_Model
 			->result_array();
 	}
 
+	public function get_referral_summary($date_from, $date_to)
+	{
+		return $this->db
+			->select("
+				reference_doctors.id,
+				reference_doctors.first_name,
+				reference_doctors.last_name,
+				reference_doctors.specialty,
+				COUNT(patients.id) AS referred_count
+			", FALSE)
+			->from('reference_doctors')
+			->join('patients', "patients.referred_by = reference_doctors.id AND patients.created_at >= " . $this->db->escape($date_from) . " AND patients.created_at <= " . $this->db->escape($date_to), 'left', FALSE)
+			->where('reference_doctors.status', 'active')
+			->group_by('reference_doctors.id')
+			->order_by('referred_count', 'desc')
+			->order_by('reference_doctors.first_name', 'asc')
+			->get()
+			->result_array();
+	}
+
 	public function count_referred_patients($doctor_id, $date_from, $date_to)
 	{
 		return (int) $this->db

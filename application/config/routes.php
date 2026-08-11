@@ -145,6 +145,12 @@ $route['reports/patient-financial-summary'] = 'Reports/patient_financial_summary
 $route['reports/debtors'] = 'Reports/debtors';
 $route['reports/debtors/print'] = 'Reports/debtors_print';
 $route['reports/new-patients'] = 'Reports/new_patients';
+$route['reports/financial-summary'] = 'Reports/financial_summary';
+$route['reports/financial-summary/print'] = 'Reports/financial_summary_print';
+$route['reports/financial-summary/data'] = 'Reports/financial_summary_data';
+$route['reports/doctor-referrals'] = 'Reports/doctor_referrals';
+$route['reports/doctor-referrals/print'] = 'Reports/doctor_referrals_print';
+$route['reports/doctor-referrals/data'] = 'Reports/doctor_referrals_data';
 
 $route['leaves'] = 'Leaves/index';
 $route['leaves/create'] = 'Leaves/create';

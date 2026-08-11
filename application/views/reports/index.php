@@ -20,6 +20,26 @@
 <div class="card mb-4">
 	<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
 		<div>
+			<h2 class="h5 mb-1"><?= t('financial_summary_report') ?></h2>
+			<p class="text-muted mb-0"><?= t('financial_summary_report_hint') ?></p>
+		</div>
+		<a href="<?= base_url('reports/financial-summary') ?>" class="btn btn-dark btn-icon"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i> <?= t('Open Report') ?></a>
+	</div>
+</div>
+
+<div class="card mb-4">
+	<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+		<div>
+			<h2 class="h5 mb-1"><?= t('doctor_referral_report') ?></h2>
+			<p class="text-muted mb-0"><?= t('doctor_referral_report_hint') ?></p>
+		</div>
+		<a href="<?= base_url('reports/doctor-referrals') ?>" class="btn btn-dark btn-icon"><i class="bi bi-arrow-right-circle" aria-hidden="true"></i> <?= t('Open Report') ?></a>
+	</div>
+</div>
+
+<div class="card mb-4">
+	<div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+		<div>
 			<h2 class="h5 mb-1"><?= t('Outstanding Balances') ?></h2>
 			<p class="text-muted mb-0"><?= t('Review patients with negative wallet balances or open debt.') ?></p>
 		</div>
