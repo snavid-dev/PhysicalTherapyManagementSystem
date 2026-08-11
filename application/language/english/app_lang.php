@@ -734,6 +734,7 @@ $lang = array(
 	'all_genders' => 'All',
 	'register_title' => 'Daily Patient Register',
 	'clinic_name_print' => 'Physical Therapy Clinic',
+	'generated_at' => 'Generated At',
 	'financial_summary_report' => 'Financial Summary by Department',
 	'financial_summary_report_hint' => 'Income and patients per department, plus safe balance and expenses for the selected date range.',
 	'doctor_referral_report' => 'Doctor Referral Report',

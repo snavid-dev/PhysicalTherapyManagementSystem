@@ -734,6 +734,7 @@ $lang = array(
 	'all_genders' => 'همه',
 	'register_title' => 'دفتر ثبت روزانه مریضان',
 	'clinic_name_print' => 'کلینیک فیزیوتراپی',
+	'generated_at' => 'تاریخ تولید گزارش',
 	'financial_summary_report' => 'خلص مالی به تفکیک بخش',
 	'financial_summary_report_hint' => 'عاید و مریضان هر بخش، همراه با موجودی صندوق و مصارف در بازه تاریخ انتخاب‌شده.',
 	'doctor_referral_report' => 'گزارش راجع‌شده توسط داکتران',

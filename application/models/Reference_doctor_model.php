@@ -83,6 +83,7 @@ class Reference_doctor_model extends CI_Model
 			->join('patients', "patients.referred_by = reference_doctors.id AND patients.created_at >= " . $this->db->escape($date_from) . " AND patients.created_at <= " . $this->db->escape($date_to), 'left', FALSE)
 			->where('reference_doctors.status', 'active')
 			->group_by('reference_doctors.id')
+			->having('referred_count >', 0, FALSE)
 			->order_by('referred_count', 'desc')
 			->order_by('reference_doctors.first_name', 'asc')
 			->get()
