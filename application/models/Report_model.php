@@ -226,6 +226,37 @@ class Report_model extends CI_Model
 			->result_array();
 	}
 
+	public function get_section_income_summary($from, $to)
+	{
+		return $this->db
+			->select("
+				sections.id AS section_id,
+				sections.name AS section_name,
+				COUNT(DISTINCT turns.patient_id) AS patient_count,
+				COALESCE(SUM(turns.cash_collected + turns.topup_amount), 0) AS total_income
+			", FALSE)
+			->from('turns')
+			->join('sections', 'sections.id = turns.section_id', 'left')
+			->where('turns.turn_date >=', $from)
+			->where('turns.turn_date <=', $to)
+			->group_by('turns.section_id')
+			->order_by('sections.name', 'asc')
+			->get()
+			->result_array();
+	}
+
+	public function expenses_total($from, $to)
+	{
+		$amount = $this->db
+			->select_sum('amount')
+			->where('expense_date >=', $from)
+			->where('expense_date <=', $to)
+			->get('expenses')
+			->row('amount');
+
+		return (float) $amount;
+	}
+
 	public function summary($from, $to)
 	{
 		return array(

@@ -55,8 +55,8 @@
     "semantic_hash": ""
   },
   "application/controllers/Reports.php": {
-    "mtime": 1786385890.1734812,
-    "ast_hash": "ed80574d7a997bd654120c82fcd7db4f",
+    "mtime": 1786385991.7533736,
+    "ast_hash": "9944625c6e200106108c3d274456e536",
     "semantic_hash": ""
   },
   "application/controllers/Roles.php": {
@@ -275,8 +275,8 @@
     "semantic_hash": ""
   },
   "application/views/dashboard/index.php": {
-    "mtime": 1786385863.5992477,
-    "ast_hash": "4b7a22ea10c8622d514cc632e4d2760c",
+    "mtime": 1786386048.3578708,
+    "ast_hash": "eeb90bda6022d2d5c6c91d38a7a40a9f",
     "semantic_hash": ""
   },
   "application/views/demo5.php": {

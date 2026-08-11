@@ -128,6 +128,241 @@
 	</div>
 <?php endif; ?>
 
+<?php if ($this->auth->has_permission('view_reports')) : ?>
+	<h2 class="h5 mb-3"><?= t('Reports') ?></h2>
+	<div class="row row-cols-1 row-cols-sm-2 g-3 mb-4">
+		<div class="col">
+			<div class="card h-100">
+				<div class="card-body">
+					<h3 class="h6 mb-1"><?= t('financial_summary_report') ?></h3>
+					<p class="text-muted small mb-3"><?= t('financial_summary_report_hint') ?></p>
+					<button type="button" class="btn btn-dark btn-icon dashboard-report-card" data-report-type="financial_summary" data-report-url="<?= base_url('reports/financial-summary') ?>" data-data-url="<?= base_url('reports/financial-summary/data') ?>"><i class="bi bi-graph-up" aria-hidden="true"></i> <?= t('view_report') ?></button>
+				</div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="card h-100">
+				<div class="card-body">
+					<h3 class="h6 mb-1"><?= t('doctor_referral_report') ?></h3>
+					<p class="text-muted small mb-3"><?= t('doctor_referral_report_hint') ?></p>
+					<button type="button" class="btn btn-dark btn-icon dashboard-report-card" data-report-type="doctor_referrals" data-report-url="<?= base_url('reports/doctor-referrals') ?>" data-data-url="<?= base_url('reports/doctor-referrals/data') ?>"><i class="bi bi-person-heart" aria-hidden="true"></i> <?= t('view_report') ?></button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="dashboardReportDateModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title fs-5" id="dashboardReportModalTitle"><?= t('choose_date_range') ?></h2>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
+				</div>
+				<div class="modal-body">
+					<div id="dashboardReportError" class="alert alert-danger d-none"></div>
+					<div class="row g-3 align-items-end">
+						<div class="col-md-5">
+							<label class="form-label" for="dashboardReportFrom"><?= t('From') ?></label>
+							<input type="text" id="dashboardReportFrom" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(to_shamsi(date('Y-m-01'))) ?>">
+						</div>
+						<div class="col-md-5">
+							<label class="form-label" for="dashboardReportTo"><?= t('To') ?></label>
+							<input type="text" id="dashboardReportTo" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape(shamsi_today()) ?>">
+						</div>
+						<div class="col-md-2">
+							<button type="button" class="btn btn-dark w-100 btn-icon" id="dashboardReportSearchButton">
+								<i class="bi bi-search" aria-hidden="true"></i>
+								<span class="spinner-border spinner-border-sm ms-1 d-none" id="dashboardReportSpinner" role="status" aria-hidden="true"></span>
+							</button>
+						</div>
+					</div>
+
+					<div id="dashboardReportResults" class="mt-4 d-none"></div>
+				</div>
+				<div class="modal-footer">
+					<a href="#" target="_blank" rel="noopener" class="btn btn-outline-dark btn-icon d-none" id="dashboardReportPrintLink"><i class="bi bi-printer" aria-hidden="true"></i> <?= t('dt_print') ?></a>
+					<button type="button" class="btn btn-outline-secondary btn-icon" data-bs-dismiss="modal"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('Close') ?></button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	(function () {
+		const modalElement = document.getElementById('dashboardReportDateModal');
+
+		if (!modalElement) {
+			return;
+		}
+
+		function getModal() {
+			if (!window.bootstrap || !window.bootstrap.Modal) {
+				return null;
+			}
+
+			return window.bootstrap.Modal.getOrCreateInstance(modalElement);
+		}
+
+		const titleEl = document.getElementById('dashboardReportModalTitle');
+		const fromInput = document.getElementById('dashboardReportFrom');
+		const toInput = document.getElementById('dashboardReportTo');
+		const searchButton = document.getElementById('dashboardReportSearchButton');
+		const spinner = document.getElementById('dashboardReportSpinner');
+		const errorBox = document.getElementById('dashboardReportError');
+		const resultsBox = document.getElementById('dashboardReportResults');
+		const printLink = document.getElementById('dashboardReportPrintLink');
+		const locale = <?= json_encode($current_locale === 'farsi' ? 'fa-IR' : 'en-US') ?>;
+		let reportType = '';
+		let dataUrl = '';
+		let reportUrl = '';
+
+		const labels = {
+			financial_summary: <?= json_encode(t('financial_summary_report')) ?>,
+			doctor_referrals: <?= json_encode(t('doctor_referral_report')) ?>,
+			safe_balance_before: <?= json_encode(t('safe_balance_before')) ?>,
+			safe_balance_after: <?= json_encode(t('safe_balance_after')) ?>,
+			total_income: <?= json_encode(t('total_income')) ?>,
+			total_expenses: <?= json_encode(t('total_expenses')) ?>,
+			section: <?= json_encode(t('section')) ?>,
+			patient_count: <?= json_encode(t('patient_count')) ?>,
+			reference_doctor: <?= json_encode(t('reference_doctor')) ?>,
+			specialty: <?= json_encode(t('specialty')) ?>,
+			patients_referred: <?= json_encode(t('patients_referred')) ?>,
+			no_data: <?= json_encode(t('No data available.')) ?>,
+			search_error: <?= json_encode(t('Please choose a valid date range.')) ?>,
+		};
+
+		function formatAmount(value) {
+			return new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0));
+		}
+
+		function formatCount(value) {
+			return new Intl.NumberFormat(locale).format(Number(value || 0));
+		}
+
+		function escapeHtml(value) {
+			return String(value === null || value === undefined ? '' : value)
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#039;');
+		}
+
+		function renderFinancialSummary(data) {
+			let html = '<div class="row row-cols-2 row-cols-md-4 g-3 mb-3">';
+			[
+				[labels.safe_balance_before, data.safe_balance_before],
+				[labels.total_income, data.sections.reduce(function (sum, s) { return sum + Number(s.total_income || 0); }, 0)],
+				[labels.total_expenses, data.expenses_total],
+				[labels.safe_balance_after, data.safe_balance_after],
+			].forEach(function (pair) {
+				html += '<div class="col"><div class="card h-100"><div class="card-body p-2"><div class="stat-label small">' + escapeHtml(pair[0]) + '</div><div class="stat-value fs-6">' + formatAmount(pair[1]) + '</div></div></div></div>';
+			});
+			html += '</div>';
+
+			html += '<div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>' + escapeHtml(labels.section) + '</th><th class="text-end">' + escapeHtml(labels.patient_count) + '</th><th class="text-end">' + escapeHtml(labels.total_income) + '</th></tr></thead><tbody>';
+
+			if (!data.sections.length) {
+				html += '<tr><td colspan="3" class="text-muted">' + escapeHtml(labels.no_data) + '</td></tr>';
+			} else {
+				data.sections.forEach(function (section) {
+					html += '<tr><td>' + escapeHtml(section.section_name) + '</td><td class="text-end">' + formatCount(section.patient_count) + '</td><td class="text-end">' + formatAmount(section.total_income) + '</td></tr>';
+				});
+			}
+
+			html += '</tbody></table></div>';
+
+			return html;
+		}
+
+		function renderDoctorReferrals(data) {
+			let html = '<div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>' + escapeHtml(labels.reference_doctor) + '</th><th>' + escapeHtml(labels.specialty) + '</th><th class="text-end">' + escapeHtml(labels.patients_referred) + '</th></tr></thead><tbody>';
+
+			if (!data.doctors.length) {
+				html += '<tr><td colspan="3" class="text-muted">' + escapeHtml(labels.no_data) + '</td></tr>';
+			} else {
+				data.doctors.forEach(function (doctor) {
+					html += '<tr><td>' + escapeHtml(doctor.name) + '</td><td>' + escapeHtml(doctor.specialty || '—') + '</td><td class="text-end"><span class="badge rounded-pill bg-dark-subtle text-dark-emphasis">' + formatCount(doctor.referred_count) + '</span></td></tr>';
+				});
+			}
+
+			html += '</tbody></table></div>';
+
+			return html;
+		}
+
+		function setLoading(isLoading) {
+			searchButton.disabled = isLoading;
+			spinner.classList.toggle('d-none', !isLoading);
+		}
+
+		document.querySelectorAll('.dashboard-report-card').forEach(function (button) {
+			button.addEventListener('click', function () {
+				reportType = button.getAttribute('data-report-type');
+				dataUrl = button.getAttribute('data-data-url');
+				reportUrl = button.getAttribute('data-report-url');
+				titleEl.textContent = labels[reportType] || labels.financial_summary;
+				errorBox.classList.add('d-none');
+				resultsBox.classList.add('d-none');
+				printLink.classList.add('d-none');
+
+				const modal = getModal();
+				if (modal) {
+					modal.show();
+				}
+			});
+		});
+
+		searchButton.addEventListener('click', function () {
+			errorBox.classList.add('d-none');
+			resultsBox.classList.add('d-none');
+			printLink.classList.add('d-none');
+			setLoading(true);
+
+			const payload = new URLSearchParams();
+			payload.set('date_from', fromInput.value);
+			payload.set('date_to', toInput.value);
+
+			fetch(dataUrl, {
+				method: 'POST',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest',
+					'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+				},
+				body: payload.toString()
+			})
+				.then(function (response) {
+					return response.json().then(function (data) {
+						if (!response.ok || !data.success) {
+							throw new Error(data.message || labels.search_error);
+						}
+
+						return data;
+					});
+				})
+				.then(function (data) {
+					resultsBox.innerHTML = reportType === 'doctor_referrals' ? renderDoctorReferrals(data) : renderFinancialSummary(data);
+					resultsBox.classList.remove('d-none');
+
+					const printParams = new URLSearchParams();
+					printParams.set('from', data.date_from);
+					printParams.set('to', data.date_to);
+					printLink.href = reportUrl + '/print?' + printParams.toString();
+					printLink.classList.remove('d-none');
+				})
+				.catch(function (error) {
+					errorBox.textContent = error && error.message ? error.message : labels.search_error;
+					errorBox.classList.remove('d-none');
+				})
+				.finally(function () {
+					setLoading(false);
+				});
+		});
+	})();
+	</script>
+<?php endif; ?>
+
 <?php if ($turns_by_section !== NULL) : ?>
 	<div class="row g-3">
 		<div class="col-12">

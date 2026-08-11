@@ -9,6 +9,8 @@ class Reports extends Authenticated_Controller
 		$this->load->model('Report_model');
 		$this->load->model('Section_model');
 		$this->load->model('Staff_model');
+		$this->load->model('Safe_model');
+		$this->load->model('Reference_doctor_model');
 	}
 
 	public function index()
@@ -212,6 +214,186 @@ class Reports extends Authenticated_Controller
 				'to' => $to,
 			)),
 		));
+	}
+
+	public function financial_summary()
+	{
+		$this->require_permission('view_reports');
+
+		$data = $this->financial_summary_view_data();
+		$data['title'] = t('financial_summary_report');
+		$data['current_section'] = 'reports';
+
+		$this->render('reports/financial_summary', $data);
+	}
+
+	public function financial_summary_print()
+	{
+		$this->require_permission('view_reports');
+
+		$data = $this->financial_summary_view_data();
+		$data['title'] = t('financial_summary_report');
+
+		$this->load->view('reports/financial_summary_print', $data);
+	}
+
+	public function doctor_referrals()
+	{
+		$this->require_permission('view_reports');
+
+		$data = $this->doctor_referrals_view_data();
+		$data['title'] = t('doctor_referral_report');
+		$data['current_section'] = 'reports';
+
+		$this->render('reports/doctor_referrals', $data);
+	}
+
+	public function doctor_referrals_print()
+	{
+		$this->require_permission('view_reports');
+
+		$data = $this->doctor_referrals_view_data();
+		$data['title'] = t('doctor_referral_report');
+
+		$this->load->view('reports/doctor_referrals_print', $data);
+	}
+
+	public function financial_summary_data()
+	{
+		$this->require_permission('view_reports');
+
+		$range = $this->ajax_date_range();
+		if ($range === NULL) {
+			return $this->json_error(t('Please choose a valid date range.'), 422);
+		}
+
+		$sections = $this->Report_model->get_section_income_summary($range['from'], $range['to']);
+		$sections = array_map(static function ($section) {
+			$section['section_name'] = !empty($section['section_name']) ? t($section['section_name']) : t('section_na');
+			return $section;
+		}, $sections);
+
+		$expenses_total = $this->Report_model->expenses_total($range['from'], $range['to']);
+		$safe_summary = $this->Safe_model->get_summary($range['from'], $range['to']);
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'success' => TRUE,
+				'date_from' => $range['from_input'],
+				'date_to' => $range['to_input'],
+				'sections' => $sections,
+				'expenses_total' => (float) $expenses_total,
+				'safe_balance_before' => (float) ($safe_summary['opening_balance'] ?? 0),
+				'safe_balance_after' => (float) ($safe_summary['closing_balance'] ?? 0),
+			)));
+	}
+
+	public function doctor_referrals_data()
+	{
+		$this->require_permission('view_reports');
+
+		$range = $this->ajax_date_range();
+		if ($range === NULL) {
+			return $this->json_error(t('Please choose a valid date range.'), 422);
+		}
+
+		$doctors = $this->Reference_doctor_model->get_referral_summary($range['from'] . ' 00:00:00', $range['to'] . ' 23:59:59');
+		$doctors = array_map(static function ($doctor) {
+			return array(
+				'id' => (int) $doctor['id'],
+				'name' => trim($doctor['first_name'] . ' ' . ($doctor['last_name'] ?? '')),
+				'specialty' => $doctor['specialty'] ?? '',
+				'referred_count' => (int) $doctor['referred_count'],
+			);
+		}, $doctors);
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'success' => TRUE,
+				'date_from' => $range['from_input'],
+				'date_to' => $range['to_input'],
+				'doctors' => $doctors,
+			)));
+	}
+
+	protected function ajax_date_range()
+	{
+		if (strtolower($this->input->method()) !== 'post') {
+			show_error('Access denied.', 403);
+		}
+
+		$from_input = trim((string) $this->input->post('date_from', TRUE));
+		$to_input = trim((string) $this->input->post('date_to', TRUE));
+		$from = $from_input !== '' ? $this->gregorian_date_from_shamsi($from_input) : '';
+		$to = $to_input !== '' ? $this->gregorian_date_from_shamsi($to_input) : '';
+
+		if ($from === '' || $to === '' || $from > $to) {
+			return NULL;
+		}
+
+		return array('from' => $from, 'to' => $to, 'from_input' => $from_input, 'to_input' => $to_input);
+	}
+
+	protected function json_error($message, $status = 422)
+	{
+		return $this->output
+			->set_status_header($status)
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'success' => FALSE,
+				'message' => $message,
+			)));
+	}
+
+	protected function report_date_range()
+	{
+		$from_input = trim((string) $this->input->get('from', TRUE));
+		$to_input = trim((string) $this->input->get('to', TRUE));
+		$from = $from_input !== '' ? $this->gregorian_date_from_shamsi($from_input) : date('Y-m-01');
+		$to = $to_input !== '' ? $this->gregorian_date_from_shamsi($to_input) : date('Y-m-t');
+
+		if ($from === '' || $to === '' || $from > $to) {
+			$from = date('Y-m-01');
+			$to = date('Y-m-t');
+			$from_input = to_shamsi($from);
+			$to_input = to_shamsi($to);
+		}
+
+		if ($from_input === '') {
+			$from_input = to_shamsi($from);
+		}
+
+		if ($to_input === '') {
+			$to_input = to_shamsi($to);
+		}
+
+		return array('from' => $from, 'to' => $to, 'from_input' => $from_input, 'to_input' => $to_input);
+	}
+
+	protected function financial_summary_view_data()
+	{
+		$range = $this->report_date_range();
+
+		return array(
+			'from' => $range['from_input'],
+			'to' => $range['to_input'],
+			'sections' => $this->Report_model->get_section_income_summary($range['from'], $range['to']),
+			'expenses_total' => $this->Report_model->expenses_total($range['from'], $range['to']),
+			'safe_summary' => $this->Safe_model->get_summary($range['from'], $range['to']),
+		);
+	}
+
+	protected function doctor_referrals_view_data()
+	{
+		$range = $this->report_date_range();
+
+		return array(
+			'from' => $range['from_input'],
+			'to' => $range['to_input'],
+			'doctors' => $this->Reference_doctor_model->get_referral_summary($range['from'] . ' 00:00:00', $range['to'] . ' 23:59:59'),
+		);
 	}
 
 	protected function daily_register_view_data()
