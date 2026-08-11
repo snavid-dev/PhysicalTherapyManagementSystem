@@ -1,4 +1,4 @@
-(function (window, document, $) {
+(function (window, document) {
 	'use strict';
 
 	function normalizeDigits(value) {
@@ -67,115 +67,72 @@
 	}
 
 	/**
-	 * Jalali Datepicker global init for CANIN project.
-	 * Apply to any input with class .shamsi-date
-	 * Format: YYYY/MM/DD
-	 * Always Western digits.
+	 * Jalali Datepicker (github.com/majidh1/jalaliDatePicker) global init for CANIN project.
+	 * Applies to any input with class .shamsi-date (full date) or .shamsi-month (month only).
+	 * Format: YYYY/MM/DD (or YYYY/MM for month inputs). Always Western digits.
 	 */
-	function initJalaliDatepicker(selector) {
-		if (!$) {
-			return;
+	var watchStarted = false;
+
+	function stripToMonth(input) {
+		var normalized = normalizeDigits(input.value);
+		var match = normalized.match(/^(\d{4}\/\d{2})/);
+
+		if (match && normalized !== match[1]) {
+			input.value = match[1];
 		}
+	}
 
-		$(selector).each(function () {
-			var $input = $(this);
-
-			if ($input.hasClass('jalali-init')) {
-				return;
-			}
-
-			$input.addClass('jalali-init');
-
-			if ($.fn.datepicker) {
-				$input.datepicker({
-					format: 'yyyy/mm/dd',
-					autoclose: true,
-					calendarType: 'jalali',
-					language: 'fa-ir-la',
-					todayHighlight: true,
-					clearBtn: true
-				});
-				return;
-			}
-
-			if ($.fn.persianDatepicker) {
-				$input.persianDatepicker({
-					format: 'YYYY/MM/DD',
-					autoClose: true,
-					initialValue: false,
-					persianDigit: false,
-					calendar: {
-						persian: { locale: 'en' }
-					},
-					navigator: {
-						enabled: true,
-						scroll: { enabled: false },
-						title: { enabled: true }
-					},
-					toolbox: {
-						enabled: true,
-						todayButton: { enabled: true },
-						submitButton: { enabled: true }
-					}
-				});
+	// Bootstrap modals trap focus inside themselves (util/focustrap.js) and yank
+	// it back whenever something outside the modal is focused. The picker popup
+	// is appended to <body>, outside the modal's DOM, so without this any click
+	// on the popup gets immediately undone. Disabling per-modal focus trapping
+	// (data-bs-focus="false", read by Bootstrap when the modal instance is first
+	// created) is the documented escape hatch for third-party popups like this.
+	function disableFocusTrapForDateModals() {
+		document.querySelectorAll('.modal').forEach(function (modal) {
+			if (modal.querySelector('.shamsi-date, .shamsi-month')) {
+				modal.setAttribute('data-bs-focus', 'false');
 			}
 		});
 	}
 
-	function initShamsiMonthpicker(selector) {
-		if (!$ || !$.fn || typeof $.fn.persianDatepicker !== 'function') {
+	function startWatch() {
+		if (watchStarted || typeof window.jalaliDatepicker === 'undefined') {
 			return;
 		}
 
-		$(selector).each(function () {
-			var $input = $(this);
+		watchStarted = true;
 
-			if ($input.attr('data-shamsi-month-initialized') === '1') {
-				return;
-			}
+		disableFocusTrapForDateModals();
 
-			$input.attr('data-shamsi-month-initialized', '1');
-			$input.persianDatepicker({
-				format: 'YYYY/MM',
-				autoClose: true,
-				initialValue: false,
-				persianDigit: false,
-				calendar: {
-					persian: {
-						locale: 'en'
-					}
-				},
-				dayPicker: {
-					enabled: false
-				},
-				monthPicker: {
-					enabled: true
-				},
-				yearPicker: {
-					enabled: true
-				}
-			});
+		window.jalaliDatepicker.startWatch({
+			selector: '.shamsi-date, .shamsi-month',
+			persianDigits: false,
+			hideAfterChange: true,
+			zIndex: 1075, // above Bootstrap's .modal (1055) and .modal-backdrop (1050)
+			months: ['حمل', 'ثور', 'جوزا', 'سرطان', 'اسد', 'سنبله', 'میزان', 'عقرب', 'قوس', 'جدی', 'دلو', 'حوت']
 		});
+
+		document.addEventListener('jdp:change', function (event) {
+			if (event.target && event.target.classList && event.target.classList.contains('shamsi-month')) {
+				stripToMonth(event.target);
+			}
+		});
+	}
+
+	// Kept for backward compatibility with call sites that used to init dynamically
+	// added inputs manually; the delegated watcher above already covers them.
+	function initJalaliDatepicker() {
+		startWatch();
+	}
+
+	function initShamsiMonthpicker() {
+		startWatch();
 	}
 
 	window.initJalaliDatepicker = initJalaliDatepicker;
 	window.initShamsiMonthpicker = initShamsiMonthpicker;
 	window.formatShamsiDate = formatPersianDate;
 
-	if (!$) {
-		return;
-	}
-
-	$(document).ready(function () {
-		initJalaliDatepicker('.shamsi-date');
-		initShamsiMonthpicker('.shamsi-month');
-	});
-
-	$(document).on('focus', '.shamsi-date:not(.jalali-init)', function () {
-		initJalaliDatepicker(this);
-	});
-
-	$(document).on('focus', '.shamsi-month', function () {
-		initShamsiMonthpicker(this);
-	});
-})(window, document, window.jQuery);
+	document.addEventListener('DOMContentLoaded', startWatch);
+})(window, document);
