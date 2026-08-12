@@ -324,8 +324,10 @@ class Patients extends Authenticated_Controller
 			return $this->respond_wallet_topup_error($id, $message, 500, $wants_json);
 		}
 
-		$latest_wallet_transaction = $this->Wallet_model->get_transactions($id, 1);
-		$wallet_reference = !empty($latest_wallet_transaction[0]['id']) ? (int) $latest_wallet_transaction[0]['id'] : NULL;
+		// Capture the row we just inserted directly rather than looking up "the
+		// patient's latest transaction" — a concurrent turn/refund for the same
+		// patient landing between the insert and this lookup would tag the wrong row.
+		$wallet_reference = (int) $this->db->insert_id();
 
 		$safe_logged = $this->Safe_model->log_transaction(
 			'in',
@@ -523,19 +525,25 @@ class Patients extends Authenticated_Controller
 				return $this->respond_wallet_topup_error($id, t('Unable to record debt payment right now.'), 500, $wants_json);
 			}
 
-			$latest_wallet_tx = $this->Wallet_model->get_transactions($id, 1);
-			$wallet_ref = !empty($latest_wallet_tx[0]['id']) ? (int) $latest_wallet_tx[0]['id'] : (int) $id;
-			$wallet_ref_table = !empty($latest_wallet_tx[0]['id']) ? 'patient_wallet_transactions' : 'patients';
+			// Capture the row we just inserted directly, not "the patient's latest
+			// transaction" (fragile under concurrent activity for the same patient).
+			$wallet_ref = (int) $this->db->insert_id();
+			$wallet_ref_table = $wallet_ref ? 'patient_wallet_transactions' : 'patients';
 
+			// $payment_datetime is a business date staff can backdate; it's fine on
+			// the wallet row (wallets have no periodic physical-count reset to land
+			// on the wrong side of), but the safe ledger must use the real entry
+			// time here — a backdated safe row can end up before a later cash-drawer
+			// adjustment and get silently discarded by that reset.
 			$safe_logged = $this->Safe_model->log_transaction(
 				'in',
 				'wallet_topup',
 				$amount,
-				$wallet_ref,
+				$wallet_ref ?: (int) $id,
 				$wallet_ref_table,
 				$payment_note,
 				$this->session->userdata('user_id'),
-				$payment_datetime,
+				NULL,
 				$dimension_options
 			);
 
@@ -676,6 +684,11 @@ class Patients extends Authenticated_Controller
 		}
 
 		$safe_note = $note ?: t('Refund issued from patient profile');
+		// $refund_datetime is a business date staff can backdate; fine on the
+		// wallet row above (wallets have no periodic physical-count reset to land
+		// on the wrong side of), but the safe ledger must use the real entry time —
+		// a backdated safe row can land before a later cash-drawer adjustment and
+		// get silently discarded by that reset instead of reducing the balance.
 		$safe_logged = $this->Safe_model->log_transaction(
 			'out',
 			'patient_refund',
@@ -684,7 +697,7 @@ class Patients extends Authenticated_Controller
 			'patient_wallet_transactions',
 			$safe_note,
 			$this->session->userdata('user_id'),
-			$refund_datetime,
+			NULL,
 			$dimension_options
 		);
 
@@ -1555,6 +1568,11 @@ class Patients extends Authenticated_Controller
 		// the overflow portion (which is ALSO logged as a manual wallet topup by top_up_cash).
 		// Applied-to-debt portion → patient_debt_payment.
 		// Overflow portion → wallet_topup (matches the patient_wallet_transactions topup row).
+		// $payment_datetime is a business date staff can backdate; fine on the
+		// wallet/payments rows (no periodic physical-count reset to land on the
+		// wrong side of), but the safe ledger must use the real entry time — a
+		// backdated safe row can land before a later cash-drawer adjustment and get
+		// silently discarded by that reset instead of contributing to the balance.
 		if ($applied_to_debt > 0) {
 			$safe_logged = $this->Safe_model->log_transaction(
 				'in',
@@ -1564,7 +1582,7 @@ class Patients extends Authenticated_Controller
 				'payments',
 				$safe_note,
 				$user_id,
-				$payment_datetime,
+				NULL,
 				$safe_options
 			);
 
@@ -1585,7 +1603,7 @@ class Patients extends Authenticated_Controller
 				$wallet_ref_table,
 				$safe_note,
 				$user_id,
-				$payment_datetime,
+				NULL,
 				$safe_options
 			);
 

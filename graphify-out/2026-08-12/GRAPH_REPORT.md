@@ -1,16 +1,16 @@
-# Graph Report - test-navid.cyborgtech.co  (2026-08-12)
+# Graph Report - test-navid.cyborgtech.co  (2026-08-11)
 
 ## Corpus Check
-- 435 files · ~2,600,659 words
+- 435 files · ~2,600,420 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3759 nodes · 5557 edges · 427 communities (287 shown, 140 thin omitted)
+- 3759 nodes · 5557 edges · 427 communities (288 shown, 139 thin omitted)
 - Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 615 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fbb52d25`
+- Built from commit: `fcc64fc7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -246,7 +246,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (427 total, 140 thin omitted)
+## Communities (427 total, 139 thin omitted)
 
 ### Community 1 - "CI_Image_lib"
 Cohesion: 0.05
@@ -287,6 +287,10 @@ Nodes (22): 10. Module Overview, 28. Database Story, 2. Tech Stack, 30. Global C
 ### Community 40 - "CI_Output"
 Cohesion: 0.12
 Nodes (4): get_mimes(), CI_Output, force_download(), get_mime_by_extension()
+
+### Community 49 - "CI_Session_database_driver"
+Cohesion: 0.09
+Nodes (4): SessionHandlerInterface, CI_Session_database_driver, CI_Session_memcached_driver, CI_Session_driver
 
 ### Community 55 - "composer.json"
 Cohesion: 0.11
@@ -493,8 +497,8 @@ Cohesion: 0.22
 Nodes (9): 27. Module: Store, AI prompt example for this module, Common risky changes, Common safe changes, Data model notes, If you want to change this module, Main files, Purpose (+1 more)
 
 ### Community 427 - "log_message"
-Cohesion: 0.07
-Nodes (7): SessionHandlerInterface, log_message(), CI_Lang, CI_Session_files_driver, CI_Session_memcached_driver, CI_Session_redis_driver, CI_Session_driver
+Cohesion: 0.11
+Nodes (4): log_message(), CI_Lang, CI_Session_files_driver, CI_Session_redis_driver
 
 ### Community 428 - "24. Module: Staff"
 Cohesion: 0.25
@@ -503,7 +507,7 @@ Nodes (8): 24. Module: Staff, AI prompt example for this module, Common risky ch
 ## Knowledge Gaps
 - **369 isolated node(s):** `description`, `name`, `type`, `homepage`, `license` (+364 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **140 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **139 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
