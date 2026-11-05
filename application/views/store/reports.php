@@ -20,13 +20,13 @@
 		<div class="card-body row g-3 align-items-end">
 			<div class="col-6 col-md-2">
 				<label class="form-label small"><?= t('from') ?></label>
-				<input type="text" name="date_from" class="form-control shamsi-date" value="<?= html_escape($filters['date_from']) ?>">
+				<input type="text" name="date_from" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($filters['date_from']) ?>" autocomplete="off">
 			</div>
 			<div class="col-6 col-md-2">
 				<label class="form-label small"><?= t('to') ?></label>
-				<input type="text" name="date_to" class="form-control shamsi-date" value="<?= html_escape($filters['date_to']) ?>">
+				<input type="text" name="date_to" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($filters['date_to']) ?>" autocomplete="off">
 			</div>
-			<div class="col-6 col-md-3">
+			<div class="col-6 col-md-2">
 				<label class="form-label small"><?= t('product') ?></label>
 				<select name="product_id" class="form-select s2-select" data-placeholder="<?= html_escape(t('all')) ?>">
 					<option value=""><?= t('all') ?></option>
@@ -52,8 +52,17 @@
 					<option value="external" <?= $filters['customer_type'] === 'external' ? 'selected' : '' ?>><?= t('walk_in_customer') ?></option>
 				</select>
 			</div>
-			<div class="col-6 col-md-1">
-				<button type="submit" class="btn btn-primary w-100"><?= t('filter') ?></button>
+			<div class="col-6 col-md-2">
+				<label class="form-label small"><?= t('sale_type') ?></label>
+				<select name="sale_source" class="form-select">
+					<option value=""><?= t('all') ?></option>
+					<option value="direct" <?= ($filters['sale_source'] ?? '') === 'direct' ? 'selected' : '' ?>><?= t('direct_sale') ?></option>
+					<option value="bulk" <?= ($filters['sale_source'] ?? '') === 'bulk' ? 'selected' : '' ?>><?= t('bulk_sell') ?></option>
+				</select>
+			</div>
+			<div class="col-12 col-md-auto ms-auto d-flex gap-2">
+				<button type="submit" class="btn btn-primary btn-icon"><i class="bi bi-funnel" aria-hidden="true"></i> <?= t('filter') ?></button>
+				<a href="<?= site_url('store/reports') ?>" class="btn btn-outline-secondary btn-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> <?= t('Reset') ?></a>
 			</div>
 		</div>
 	</form>
@@ -129,6 +138,9 @@
 										<?= html_escape(trim($sale['patient_first_name'] . ' ' . $sale['patient_last_name'])) ?>
 									<?php else: ?>
 										<?= html_escape($sale['customer_name'] ?: t('walk_in_customer')) ?>
+									<?php endif; ?>
+									<?php if (!empty($sale['batch_id'])): ?>
+										<span class="badge bg-info-subtle text-info border border-info-subtle ms-1" title="<?= t('bulk_sell') ?> #<?= (int) $sale['batch_id'] ?>"><?= t('bulk_sell') ?></span>
 									<?php endif; ?>
 								</td>
 								<td>

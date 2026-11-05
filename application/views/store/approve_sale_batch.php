@@ -4,7 +4,7 @@
 	<div class="row">
 		<div class="col-md-10 offset-md-1">
 			<h2><?= t('approve_sale_batch') ?></h2>
-			<p><?= t('submitted_by') ?>: <strong><?= html_escape($batch['first_name'] . ' ' . $batch['last_name']) ?></strong> — <?= html_escape(to_shamsi($batch['created_at'])) ?></p>
+			<p><?= t('submitted_by') ?>: <strong><?= html_escape($batch['first_name'] . ' ' . $batch['last_name']) ?></strong> — <?= html_escape(to_shamsi(!empty($batch['batch_date']) ? $batch['batch_date'] : $batch['created_at'])) ?></p>
 
 			<?php if ($msg = $this->session->flashdata('error')): ?>
 				<div class="alert alert-danger alert-dismissible fade show" role="alert">

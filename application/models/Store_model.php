@@ -3,6 +3,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Store_model extends CI_Model
 {
+	protected $schema_ready = FALSE;
+
+	protected function ensure_schema()
+	{
+		if ($this->schema_ready) {
+			return;
+		}
+		$this->schema_ready = TRUE;
+
+		if (!$this->db->field_exists('batch_date', 'store_sale_batches')) {
+			$this->load->dbforge();
+			$this->dbforge->add_column('store_sale_batches', array(
+				'batch_date' => array(
+					'type' => 'DATE',
+					'null' => TRUE,
+					'after' => 'total_amount'
+				)
+			));
+			$this->db->query('UPDATE store_sale_batches SET batch_date = DATE(created_at) WHERE batch_date IS NULL');
+		}
+	}
+
 	// ===== Product Categories =====
 	public function get_all_categories()
 	{
@@ -263,7 +285,7 @@ class Store_model extends CI_Model
 	}
 
 	// ===== Sales =====
-	public function create_sale($patient_id, $location_id, $sold_by, $subtotal, $discount, $tax, $total, $payment_method, $items, $payment_id = NULL, $customer_name = NULL, $customer_phone = NULL)
+	public function create_sale($patient_id, $location_id, $sold_by, $subtotal, $discount, $tax, $total, $payment_method, $items, $payment_id = NULL, $customer_name = NULL, $customer_phone = NULL, $created_at = NULL)
 	{
 		$this->db->trans_start();
 
@@ -283,7 +305,7 @@ class Store_model extends CI_Model
 			'status' => 'completed',
 			'debt_status' => $payment_method === 'debt' ? 'open' : 'none',
 			'payment_id' => $payment_id ? (int) $payment_id : NULL,
-			'created_at' => date('Y-m-d H:i:s')
+			'created_at' => $created_at ?: date('Y-m-d H:i:s')
 		));
 
 		$sale_id = $this->db->insert_id();
@@ -305,7 +327,7 @@ class Store_model extends CI_Model
 		return $this->db->trans_status() ? $sale_id : FALSE;
 	}
 
-	public function get_sales($patient_id = NULL, $limit = 100, $offset = 0)
+	public function get_sales($patient_id = NULL, $limit = 100, $offset = 0, $filters = array())
 	{
 		$this->db
 			->select('store_sales.*, users.first_name, users.last_name')
@@ -314,6 +336,13 @@ class Store_model extends CI_Model
 
 		if ($patient_id !== NULL) {
 			$this->db->where('store_sales.patient_id', (int) $patient_id);
+		}
+
+		if (!empty($filters['date_from'])) {
+			$this->db->where('store_sales.created_at >=', $filters['date_from'] . ' 00:00:00');
+		}
+		if (!empty($filters['date_to'])) {
+			$this->db->where('store_sales.created_at <=', $filters['date_to'] . ' 23:59:59');
 		}
 
 		return $this->db
@@ -452,10 +481,11 @@ class Store_model extends CI_Model
 		}
 
 		$this->db
-			->select('store_sales.*, users.first_name, users.last_name, patients.first_name as patient_first_name, patients.last_name as patient_last_name')
+			->select('store_sales.*, users.first_name, users.last_name, patients.first_name as patient_first_name, patients.last_name as patient_last_name, store_sale_batch_customers.batch_id')
 			->from('store_sales')
 			->join('users', 'store_sales.sold_by = users.id')
-			->join('patients', 'store_sales.patient_id = patients.id', 'left');
+			->join('patients', 'store_sales.patient_id = patients.id', 'left')
+			->join('store_sale_batch_customers', 'store_sales.id = store_sale_batch_customers.sale_id', 'left');
 
 		if ($product_subquery !== NULL) {
 			$this->db->where('store_sales.id IN (' . $product_subquery . ')', NULL, FALSE);
@@ -484,14 +514,22 @@ class Store_model extends CI_Model
 				$this->db->where('store_sales.patient_id IS NULL', NULL, FALSE);
 			}
 		}
+		if (!empty($filters['sale_source'])) {
+			if ($filters['sale_source'] === 'bulk') {
+				$this->db->where('store_sales.id IN (SELECT sale_id FROM store_sale_batch_customers WHERE sale_id IS NOT NULL)', NULL, FALSE);
+			} elseif ($filters['sale_source'] === 'direct') {
+				$this->db->where('store_sales.id NOT IN (SELECT sale_id FROM store_sale_batch_customers WHERE sale_id IS NOT NULL)', NULL, FALSE);
+			}
+		}
 		if ($via_items && !empty($filters['product_id'])) {
 			$this->db->where('store_product_variants.product_id', (int) $filters['product_id']);
 		}
 	}
 
 	// ===== Sale Batches (bulk sell, manager approval) =====
-	public function create_sale_batch($created_by, $customers, $note = NULL)
+	public function create_sale_batch($created_by, $customers, $note = NULL, $batch_date = NULL)
 	{
+		$this->ensure_schema();
 		$this->db->trans_start();
 
 		$total_amount = 0;
@@ -501,12 +539,16 @@ class Store_model extends CI_Model
 			}
 		}
 
+		$batch_date_gregorian = $batch_date ? trim($batch_date) : date('Y-m-d');
+		$created_at = $batch_date_gregorian . ' ' . date('H:i:s');
+
 		$this->db->insert('store_sale_batches', array(
 			'created_by' => (int) $created_by,
 			'status' => 'pending',
 			'total_amount' => round($total_amount, 2),
+			'batch_date' => $batch_date_gregorian,
 			'note' => $note ? trim($note) : NULL,
-			'created_at' => date('Y-m-d H:i:s'),
+			'created_at' => $created_at,
 			'updated_at' => date('Y-m-d H:i:s')
 		));
 		$batch_id = $this->db->insert_id();
@@ -535,26 +577,50 @@ class Store_model extends CI_Model
 		return $this->db->trans_status() ? $batch_id : FALSE;
 	}
 
-	public function get_sale_batches($status = NULL)
+	public function get_sale_batches($status_or_filters = NULL, $date_from = NULL, $date_to = NULL)
 	{
+		$this->ensure_schema();
+
+		$status = NULL;
+		$filters = array();
+
+		if (is_array($status_or_filters)) {
+			$filters = $status_or_filters;
+			$status = $filters['status'] ?? NULL;
+			$date_from = $filters['date_from'] ?? NULL;
+			$date_to = $filters['date_to'] ?? NULL;
+		} else {
+			$status = $status_or_filters;
+		}
+
 		$this->db
 			->select('store_sale_batches.*, users.first_name, users.last_name, approved_users.first_name as approver_first, approved_users.last_name as approver_last')
 			->from('store_sale_batches')
 			->join('users', 'store_sale_batches.created_by = users.id')
 			->join('users as approved_users', 'store_sale_batches.approved_by = approved_users.id', 'left');
 
-		if ($status !== NULL) {
+		if (!empty($status)) {
 			$this->db->where('store_sale_batches.status', trim($status));
 		}
 
+		if (!empty($date_from)) {
+			$this->db->where('COALESCE(store_sale_batches.batch_date, DATE(store_sale_batches.created_at)) >=', $date_from);
+		}
+
+		if (!empty($date_to)) {
+			$this->db->where('COALESCE(store_sale_batches.batch_date, DATE(store_sale_batches.created_at)) <=', $date_to);
+		}
+
 		return $this->db
-			->order_by('store_sale_batches.created_at', 'desc')
+			->order_by('COALESCE(store_sale_batches.batch_date, DATE(store_sale_batches.created_at))', 'desc', FALSE)
+			->order_by('store_sale_batches.id', 'desc')
 			->get()
 			->result_array();
 	}
 
 	public function get_sale_batch_by_id($batch_id)
 	{
+		$this->ensure_schema();
 		return $this->db
 			->select('store_sale_batches.*, users.first_name, users.last_name, approved_users.first_name as approver_first, approved_users.last_name as approver_last')
 			->from('store_sale_batches')

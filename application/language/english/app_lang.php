@@ -1039,6 +1039,8 @@ $lang = array(
 	'debt_status_cleared' => 'Cleared',
 	'variant_label_placeholder' => 'e.g., Size L',
 	'variant_label_placeholder_alt' => 'e.g., 0.25 × 40mm',
+	'sale_type' => 'Sale Type',
+	'direct_sale' => 'Direct Sale',
 
 	// Store hub
 	'store_hub_subtitle' => 'Sell, restock, and track the clinic store from one place.',

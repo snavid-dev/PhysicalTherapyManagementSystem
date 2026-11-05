@@ -1039,6 +1039,8 @@ $lang = array(
 	'debt_status_cleared' => 'تسویه شده',
 	'variant_label_placeholder' => 'مثال: سایز L',
 	'variant_label_placeholder_alt' => 'مثال: 0.25 × 40 میلی‌متر',
+	'sale_type' => 'نوع فروش',
+	'direct_sale' => 'فروش مستقیم',
 
 	// مرکز فروشگاه
 	'store_hub_subtitle' => 'فروش، تأمین موجودی و پیگیری فروشگاه کلینیک از یک مکان.',

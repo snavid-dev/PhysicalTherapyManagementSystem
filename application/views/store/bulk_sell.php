@@ -16,6 +16,17 @@
 	<?php endif; ?>
 
 	<form method="post" id="bulk-sell-form">
+		<div class="card mb-4">
+			<div class="card-body">
+				<div class="row g-3 align-items-center">
+					<div class="col-md-4 col-lg-3">
+						<label class="form-label fw-semibold" for="bulk-sale-date"><?= t('Date') ?></label>
+						<input type="text" name="date" id="bulk-sale-date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($selected_date ?? shamsi_today()) ?>" required autocomplete="off">
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<div id="bulk-customers"></div>
 
 		<div class="d-flex justify-content-between align-items-center my-4">

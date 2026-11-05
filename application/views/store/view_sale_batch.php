@@ -10,7 +10,7 @@
 				</span>
 			</h2>
 			<p class="text-muted mb-0">
-				<?= t('submitted_by') ?>: <?= html_escape($batch['first_name'] . ' ' . $batch['last_name']) ?> — <?= html_escape(to_shamsi($batch['created_at'])) ?>
+				<?= t('submitted_by') ?>: <?= html_escape($batch['first_name'] . ' ' . $batch['last_name']) ?> — <?= html_escape(to_shamsi(!empty($batch['batch_date']) ? $batch['batch_date'] : $batch['created_at'])) ?>
 				<?php if ($batch['approver_first']): ?>
 					· <?= t('approved_by') ?>: <?= html_escape($batch['approver_first'] . ' ' . $batch['approver_last']) ?>
 				<?php endif; ?>

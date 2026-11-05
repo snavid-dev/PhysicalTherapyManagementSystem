@@ -280,16 +280,28 @@ CREATE TABLE IF NOT EXISTS `store_sale_batches` (
 	`approved_by` int unsigned NULL,
 	`reject_reason` varchar(255) NULL,
 	`total_amount` decimal(12,2) NOT NULL DEFAULT 0,
+	`batch_date` date NULL,
 	`note` varchar(255) NULL,
 	`created_at` datetime NOT NULL,
 	`updated_at` datetime NOT NULL,
 	PRIMARY KEY (`id`),
 	KEY `store_sale_batches_status_index` (`status`),
+	KEY `store_sale_batches_batch_date_index` (`batch_date`),
 	KEY `store_sale_batches_created_by_index` (`created_by`),
 	KEY `store_sale_batches_approved_by_index` (`approved_by`),
 	CONSTRAINT `store_sale_batches_created_by_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
 	CONSTRAINT `store_sale_batches_approved_by_fk` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'store_sale_batches' AND COLUMN_NAME = 'batch_date');
+SET @stmt := IF(@col = 0, 'ALTER TABLE `store_sale_batches` ADD COLUMN `batch_date` date NULL AFTER `total_amount`', 'SELECT 1');
+PREPARE stmt FROM @stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @idx := (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'store_sale_batches' AND INDEX_NAME = 'store_sale_batches_batch_date_index');
+SET @stmt := IF(@idx = 0, 'ALTER TABLE `store_sale_batches` ADD INDEX `store_sale_batches_batch_date_index` (`batch_date`)', 'SELECT 1');
+PREPARE stmt FROM @stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+UPDATE `store_sale_batches` SET `batch_date` = DATE(`created_at`) WHERE `batch_date` IS NULL;
 
 CREATE TABLE IF NOT EXISTS `store_sale_batch_customers` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,

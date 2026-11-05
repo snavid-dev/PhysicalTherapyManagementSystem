@@ -1238,7 +1238,8 @@ class Store extends Authenticated_Controller
 			'date_to' => $date_to,
 			'product_id' => $this->input->get('product_id', TRUE) ?: NULL,
 			'payment_method' => $this->input->get('payment_method', TRUE) ?: NULL,
-			'customer_type' => $this->input->get('customer_type', TRUE) ?: NULL
+			'customer_type' => $this->input->get('customer_type', TRUE) ?: NULL,
+			'sale_source' => $this->input->get('sale_source', TRUE) ?: NULL
 		);
 
 		$rows = $this->Store_model->get_sales_report_rows($filters);
@@ -1281,7 +1282,8 @@ class Store extends Authenticated_Controller
 			'date_to' => to_shamsi($date_to),
 			'product_id' => $filters['product_id'],
 			'payment_method' => $filters['payment_method'],
-			'customer_type' => $filters['customer_type']
+			'customer_type' => $filters['customer_type'],
+			'sale_source' => $filters['sale_source']
 		);
 		$data['current_section'] = 'store';
 
@@ -1301,8 +1303,16 @@ class Store extends Authenticated_Controller
 		}
 		unset($product);
 		$data['current_section'] = 'store';
+		$data['selected_date'] = shamsi_today();
 
 		if ($this->input->method() === 'post') {
+			$date_input = trim((string) $this->input->post('date', TRUE));
+			$data['selected_date'] = $date_input !== '' ? $date_input : shamsi_today();
+			$batch_date = $date_input !== '' ? $this->gregorian_date_from_shamsi($date_input) : date('Y-m-d');
+			if ($batch_date === '') {
+				$batch_date = date('Y-m-d');
+			}
+
 			$customers_raw = $this->input->post('customers') ?? array();
 			$customers = array();
 
@@ -1349,7 +1359,7 @@ class Store extends Authenticated_Controller
 				redirect('store/bulk_sell');
 			}
 
-			$batch_id = $this->Store_model->create_sale_batch($this->auth->user_id(), $customers);
+			$batch_id = $this->Store_model->create_sale_batch($this->auth->user_id(), $customers, NULL, $batch_date);
 
 			if ($batch_id) {
 				$this->session->set_flashdata('success', t('bulk_sell_submitted'));
@@ -1364,7 +1374,31 @@ class Store extends Authenticated_Controller
 
 	public function sale_batches()
 	{
-		$data['batches'] = $this->Store_model->get_sale_batches();
+		$from_input = trim((string) $this->input->get('date_from', TRUE));
+		$to_input = trim((string) $this->input->get('date_to', TRUE));
+		$status = trim((string) $this->input->get('status', TRUE));
+
+		$date_from = $from_input !== '' ? $this->gregorian_date_from_shamsi($from_input) : '';
+		$date_to = $to_input !== '' ? $this->gregorian_date_from_shamsi($to_input) : '';
+
+		if ($date_from !== '' && $date_to !== '' && $date_from > $date_to) {
+			$tmp = $date_from;
+			$date_from = $date_to;
+			$date_to = $tmp;
+		}
+
+		$filters = array(
+			'date_from' => $date_from,
+			'date_to' => $date_to,
+			'status' => in_array($status, array('pending', 'approved', 'rejected'), TRUE) ? $status : NULL
+		);
+
+		$data['batches'] = $this->Store_model->get_sale_batches($filters);
+		$data['filters'] = array(
+			'date_from' => $from_input,
+			'date_to' => $to_input,
+			'status' => $status
+		);
 		$data['current_section'] = 'store';
 		$this->render('store/sale_batches', $data);
 	}
@@ -1439,6 +1473,10 @@ class Store extends Authenticated_Controller
 					}
 				}
 
+				$batch = $data['batch'];
+				$batch_date = !empty($batch['batch_date']) ? $batch['batch_date'] : date('Y-m-d', strtotime($batch['created_at']));
+				$sale_created_at = $batch_date . ' ' . date('H:i:s');
+
 				foreach ($data['customers'] as $customer) {
 					$subtotal = 0;
 					$items = array();
@@ -1467,7 +1505,8 @@ class Store extends Authenticated_Controller
 						$items,
 						NULL,
 						$customer['patient_id'] ? NULL : $customer['customer_name'],
-						$customer['patient_id'] ? NULL : $customer['customer_phone']
+						$customer['patient_id'] ? NULL : $customer['customer_phone'],
+						$sale_created_at
 					);
 
 					if (!$sale_id) {
@@ -1505,7 +1544,8 @@ class Store extends Authenticated_Controller
 							$sale_id,
 							'store_sales',
 							'Bulk store sale: ' . count($items) . ' item(s)',
-							$this->auth->user_id()
+							$this->auth->user_id(),
+							$sale_created_at
 						);
 					} elseif ($customer['payment_method'] === 'wallet') {
 						$this->Wallet_model->deduct($customer['patient_id'], $subtotal, NULL, 'Store purchase (bulk sell)');
