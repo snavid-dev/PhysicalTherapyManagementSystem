@@ -94,6 +94,11 @@ $staff_payload = array_map(static function ($staff_member) {
 											<option value="<?= $patient['id'] ?>" <?= $selected_patient_id === (int) $patient['id'] ? 'selected' : '' ?>><?= html_escape($patient_display_name($patient)) ?></option>
 										<?php endforeach; ?>
 									</select>
+									<?php if (!empty($can_manage_patients)) : ?>
+										<div class="mt-2">
+											<button type="button" class="btn btn-sm btn-outline-dark btn-icon" id="turnCreatePatientButton"><i class="bi bi-plus-lg" aria-hidden="true"></i> <?= t('Create Patient') ?></button>
+										</div>
+									<?php endif; ?>
 								<?php endif; ?>
 								<small class="text-danger"><?= form_error('patient_id') ?></small>
 							</div>
@@ -199,7 +204,7 @@ $staff_payload = array_map(static function ($staff_member) {
 							</div>
 							<div class="col-md-4">
 								<label class="form-label"><?= t('Date') ?></label>
-								<input type="text" name="turn_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($selected_date) ?>">
+								<input type="text" name="turn_date" id="turnDateInput" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= html_escape($selected_date) ?>">
 								<small class="text-danger"><?= form_error('turn_date') ?></small>
 							</div>
 							<div class="col-md-4">
@@ -330,6 +335,127 @@ $staff_payload = array_map(static function ($staff_member) {
 	</div>
 </div>
 
+<?php if (!$is_edit && !empty($can_manage_patients)) : ?>
+	<div class="modal fade turn-create-patient-modal" id="turnCreatePatientModal" tabindex="-1" aria-hidden="true" data-bs-focus="false">
+		<div class="modal-dialog modal-lg modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title h5 mb-0"><?= t('Create Patient') ?></h2>
+					<button type="button" class="btn-close turn-create-patient-close" data-bs-dismiss="modal" aria-label="<?= t('Close') ?>"></button>
+				</div>
+				<div class="modal-body">
+					<div class="alert alert-danger d-none" id="turnCreatePatientAlert"></div>
+					<div class="row g-4">
+						<div class="col-12">
+							<div class="patient-form-section">
+								<div class="patient-form-section-head">
+									<h3 class="h5 mb-1"><?= t('Patient Profile') ?></h3>
+									<p class="text-muted mb-0"><?= t('Keep the patient record simple and reusable.') ?></p>
+								</div>
+								<div class="row g-3">
+									<div class="col-lg-4 col-md-6">
+										<label class="form-label"><?= t('First Name') ?> <span class="text-danger">*</span></label>
+										<input type="text" class="form-control" name="first_name" required>
+										<small class="text-danger d-block mt-1 turn-create-patient-field-error" data-field="first_name"></small>
+									</div>
+									<div class="col-lg-4 col-md-6">
+										<label class="form-label"><?= t('Last Name') ?></label>
+										<input type="text" class="form-control" name="last_name">
+										<small class="text-danger d-block mt-1 turn-create-patient-field-error" data-field="last_name"></small>
+									</div>
+									<div class="col-lg-4 col-md-6">
+										<label class="form-label"><?= t('father_name') ?></label>
+										<input type="text" class="form-control" name="father_name">
+									</div>
+									<div class="col-lg-3 col-md-6">
+										<label class="form-label"><?= t('Gender') ?> <span class="text-danger">*</span></label>
+										<select class="form-select" name="gender">
+											<option value=""><?= t('Select') ?></option>
+											<option value="Male"><?= t('Male') ?></option>
+											<option value="Female"><?= t('Female') ?></option>
+										</select>
+										<small class="text-danger d-block mt-1 turn-create-patient-field-error" data-field="gender"></small>
+									</div>
+									<div class="col-lg-3 col-md-6">
+										<label class="form-label"><?= t('age') ?></label>
+										<input type="number" class="form-control" name="age" min="0" max="120">
+										<small class="text-danger d-block mt-1 turn-create-patient-field-error" data-field="age"></small>
+									</div>
+									<div class="col-lg-3 col-md-6">
+										<label class="form-label"><?= t('visit_date') ?></label>
+										<input type="text" class="form-control shamsi-date" name="visit_date" placeholder="1403/01/01" value="<?= html_escape($selected_date ?: shamsi_today()) ?>">
+										<small class="text-danger d-block mt-1 turn-create-patient-field-error" data-field="visit_date"></small>
+									</div>
+									<div class="col-lg-3 col-md-6">
+										<label class="form-label"><?= t('Referred By') ?></label>
+										<select name="referred_by" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_ref_doctor')) ?>">
+											<option value=""><?= t('-- None --') ?></option>
+											<?php if (!empty($reference_doctors)) : foreach ($reference_doctors as $reference_doctor) : ?>
+												<option value="<?= $reference_doctor['id'] ?>"><?= html_escape($reference_doctor['full_name']) ?></option>
+											<?php endforeach; endif; ?>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-5">
+							<div class="patient-form-section h-100">
+								<div class="patient-form-section-head">
+									<h3 class="h5 mb-1"><?= t('Phone') ?></h3>
+									<p class="text-muted mb-0"><?= t('Address') ?></p>
+								</div>
+								<div class="row g-3">
+									<div class="col-md-6">
+										<label class="form-label"><?= t('Phone 1') ?></label>
+										<input type="text" class="form-control" name="phone">
+										<small class="text-danger d-block mt-1 turn-create-patient-field-error" data-field="phone"></small>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label"><?= t('phone2') ?></label>
+										<input type="text" class="form-control" name="phone2">
+										<small class="text-danger d-block mt-1 turn-create-patient-field-error" data-field="phone2"></small>
+									</div>
+									<div class="col-12">
+										<label class="form-label"><?= t('Address') ?></label>
+										<textarea class="form-control" name="address" rows="5"></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-7">
+							<div class="patient-form-section h-100">
+								<div class="patient-form-section-head">
+									<h3 class="h5 mb-1"><?= t('Medical Notes') ?></h3>
+									<p class="text-muted mb-0"><?= t('diagnoses') ?></p>
+								</div>
+								<div class="row g-3">
+									<div class="col-12">
+										<label class="form-label"><?= t('Medical Notes') ?></label>
+										<textarea class="form-control patient-notes-field" name="medical_notes" rows="5"></textarea>
+									</div>
+									<div class="col-12">
+										<label class="form-label"><?= t('diagnoses') ?></label>
+										<select name="diagnosis_ids[]" class="form-select diagnosis-multiselect s2-select-multiple" multiple size="8" data-placeholder="<?= html_escape(t('select_diagnoses')) ?>">
+											<?php if (!empty($diagnoses)) : foreach ($diagnoses as $diagnosis) : ?>
+												<?php $label = $is_rtl && !empty($diagnosis['name_fa']) ? $diagnosis['name_fa'] : $diagnosis['name']; ?>
+												<option value="<?= $diagnosis['id'] ?>"><?= html_escape($label) ?></option>
+											<?php endforeach; endif; ?>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-secondary btn-icon turn-create-patient-close" data-bs-dismiss="modal"><i class="bi bi-x-lg" aria-hidden="true"></i> <?= t('Close') ?></button>
+					<button type="button" class="btn btn-dark btn-icon" id="turnCreatePatientSubmit"><i class="bi bi-check-lg" aria-hidden="true"></i> <?= t('Save Patient') ?></button>
+				</div>
+			</div>
+		</div>
+	</div>
+<?php endif; ?>
+
 <script>
 (function () {
 	const form = document.getElementById('turnForm');
@@ -344,6 +470,13 @@ $staff_payload = array_map(static function ($staff_member) {
 	const staffSelect = document.getElementById('staffSelect');
 	const turnNumberInput = document.getElementById('turnNumberInput');
 	const feeInput = document.getElementById('feeInput');
+	const canManagePatients = <?= !empty($can_manage_patients) ? 'true' : 'false' ?>;
+	const createPatientModalElement = document.getElementById('turnCreatePatientModal');
+	const createPatientAlert = document.getElementById('turnCreatePatientAlert');
+	const createPatientSubmitButton = document.getElementById('turnCreatePatientSubmit');
+	const createPatientButton = document.getElementById('turnCreatePatientButton');
+	const createPatientCloseButtons = createPatientModalElement ? Array.from(createPatientModalElement.querySelectorAll('.turn-create-patient-close')) : [];
+	const turnDateInput = document.getElementById('turnDateInput');
 	const discountPercentInput = document.getElementById('discountPercentInput');
 	const discountAmountInput = document.getElementById('discountAmountInput');
 	const discountInfoWrap = document.getElementById('discountInfoWrap');
@@ -408,6 +541,234 @@ $staff_payload = array_map(static function ($staff_member) {
 		saving: <?= json_encode(t('saving')) ?>,
 		discountedFee: <?= json_encode(t('discounted_fee')) ?>,
 	};
+
+	function escapeHtml(value) {
+		return String(value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
+
+	function getCreatePatientModal() {
+		if (!createPatientModalElement) {
+			return null;
+		}
+		if (window.bootstrap && window.bootstrap.Modal) {
+			return window.bootstrap.Modal.getOrCreateInstance(createPatientModalElement);
+		}
+		return null;
+	}
+
+	function modalFieldElements() {
+		if (!createPatientModalElement) {
+			return {};
+		}
+
+		return {
+			first_name: createPatientModalElement.querySelector('[name="first_name"]'),
+			last_name: createPatientModalElement.querySelector('[name="last_name"]'),
+			father_name: createPatientModalElement.querySelector('[name="father_name"]'),
+			gender: createPatientModalElement.querySelector('[name="gender"]'),
+			age: createPatientModalElement.querySelector('[name="age"]'),
+			visit_date: createPatientModalElement.querySelector('[name="visit_date"]'),
+			referred_by: createPatientModalElement.querySelector('[name="referred_by"]'),
+			phone: createPatientModalElement.querySelector('[name="phone"]'),
+			phone2: createPatientModalElement.querySelector('[name="phone2"]'),
+			address: createPatientModalElement.querySelector('[name="address"]'),
+			medical_notes: createPatientModalElement.querySelector('[name="medical_notes"]'),
+			diagnosis_ids: createPatientModalElement.querySelector('[name="diagnosis_ids[]"]')
+		};
+	}
+
+	function clearCreatePatientFieldErrors() {
+		if (!createPatientModalElement) {
+			return;
+		}
+
+		createPatientModalElement.querySelectorAll('.turn-create-patient-field-error').forEach(function (errorElement) {
+			errorElement.textContent = '';
+		});
+	}
+
+	function showCreatePatientAlert(message, isDuplicate, duplicatePatient) {
+		if (!createPatientAlert) {
+			return;
+		}
+
+		if (!message) {
+			createPatientAlert.className = 'alert alert-danger d-none';
+			createPatientAlert.innerHTML = '';
+			return;
+		}
+
+		createPatientAlert.className = isDuplicate ? 'alert alert-warning' : 'alert alert-danger';
+		createPatientAlert.innerHTML = escapeHtml(message);
+
+		if (isDuplicate && duplicatePatient && duplicatePatient.profile_url) {
+			createPatientAlert.innerHTML += ' <a class="alert-link" href="' + escapeHtml(duplicatePatient.profile_url) + '">' + escapeHtml(<?= json_encode(t('Go to patient profile')) ?>) + '</a>';
+		}
+	}
+
+	function resetCreatePatientModal() {
+		if (!createPatientModalElement) {
+			return;
+		}
+
+		const fields = modalFieldElements();
+		Object.keys(fields).forEach(function (key) {
+			if (!fields[key]) {
+				return;
+			}
+
+			if (key === 'diagnosis_ids') {
+				fields[key].value = [];
+				if (window.jQuery) {
+					window.jQuery(fields[key]).val([]).trigger('change');
+				}
+				return;
+			}
+
+			if (key === 'visit_date') {
+				fields[key].value = (turnDateInput && turnDateInput.value) ? turnDateInput.value : <?= json_encode(shamsi_today()) ?>;
+				return;
+			}
+
+			fields[key].value = '';
+			if (window.jQuery && (key === 'referred_by' || key === 'gender')) {
+				window.jQuery(fields[key]).val('').trigger('change');
+			}
+		});
+
+		clearCreatePatientFieldErrors();
+		showCreatePatientAlert('', false);
+	}
+
+	function openCreatePatientModal() {
+		if (!canManagePatients || !createPatientModalElement) {
+			return;
+		}
+
+		resetCreatePatientModal();
+		if (window.initSelect2) {
+			window.initSelect2(createPatientModalElement);
+		}
+
+		const modal = getCreatePatientModal();
+		if (modal) {
+			modal.show();
+			const firstNameInput = createPatientModalElement.querySelector('[name="first_name"]');
+			if (firstNameInput) {
+				window.setTimeout(function () {
+					firstNameInput.focus();
+				}, 150);
+			}
+		}
+	}
+
+	function closeCreatePatientModal() {
+		if (!createPatientModalElement) {
+			return;
+		}
+
+		const modal = getCreatePatientModal();
+		if (modal) {
+			modal.hide();
+		}
+		resetCreatePatientModal();
+	}
+
+	function submitCreatePatient() {
+		if (!canManagePatients || !createPatientSubmitButton) {
+			return;
+		}
+
+		createPatientSubmitButton.disabled = true;
+		showCreatePatientAlert('', false);
+		clearCreatePatientFieldErrors();
+
+		const fields = modalFieldElements();
+		const params = new URLSearchParams();
+		const diagnosisIds = fields.diagnosis_ids
+			? Array.from(fields.diagnosis_ids.selectedOptions).map(function (option) { return option.value; }).filter(Boolean)
+			: [];
+
+		params.set('first_name', fields.first_name ? fields.first_name.value.trim() : '');
+		params.set('last_name', fields.last_name ? fields.last_name.value.trim() : '');
+		params.set('father_name', fields.father_name ? fields.father_name.value.trim() : '');
+		params.set('gender', fields.gender ? fields.gender.value : '');
+		params.set('age', fields.age ? fields.age.value : '');
+		params.set('visit_date', fields.visit_date ? fields.visit_date.value.trim() : '');
+		params.set('referred_by', fields.referred_by ? fields.referred_by.value : '');
+		params.set('phone', fields.phone ? fields.phone.value.trim() : '');
+		params.set('phone2', fields.phone2 ? fields.phone2.value.trim() : '');
+		params.set('address', fields.address ? fields.address.value.trim() : '');
+		params.set('medical_notes', fields.medical_notes ? fields.medical_notes.value.trim() : '');
+
+		diagnosisIds.forEach(function (diagnosisId) {
+			params.append('diagnosis_ids[]', diagnosisId);
+		});
+
+		fetch(<?= json_encode(base_url('patients/store')) ?>, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+				'Accept': 'application/json'
+			},
+			body: params
+		})
+			.then(function (response) {
+				return response.json()
+					.catch(function () {
+						return {};
+					})
+					.then(function (data) {
+						if (!response.ok || !data.success) {
+							throw data;
+						}
+						return data;
+					});
+			})
+			.then(function (data) {
+				if (patientSelect && data.patient && data.patient.id) {
+					const stringId = String(data.patient.id);
+					const patientName = data.patient.name || (data.patient.first_name + ' ' + (data.patient.last_name || '')).trim();
+					if (window.jQuery) {
+						const $patientSelect = window.jQuery(patientSelect);
+						const newOption = new Option(patientName, stringId, true, true);
+						$patientSelect.append(newOption).trigger('change');
+					} else {
+						const option = document.createElement('option');
+						option.value = stringId;
+						option.textContent = patientName;
+						option.selected = true;
+						patientSelect.appendChild(option);
+						patientSelect.value = stringId;
+						patientSelect.dispatchEvent(new Event('change', { bubbles: true }));
+					}
+				}
+				closeCreatePatientModal();
+			})
+			.catch(function (errorData) {
+				if (errorData.field_errors && createPatientModalElement) {
+					Object.keys(errorData.field_errors).forEach(function (field) {
+						const target = createPatientModalElement.querySelector('.turn-create-patient-field-error[data-field="' + field + '"]');
+						if (target) {
+							target.textContent = errorData.field_errors[field];
+						}
+					});
+				}
+				showCreatePatientAlert(
+					errorData.message || <?= json_encode(t('Unable to save record right now.')) ?>,
+					Boolean(errorData.duplicate_patient),
+					errorData.duplicate_patient || null
+				);
+			})
+			.finally(function () {
+				createPatientSubmitButton.disabled = false;
+			});
+	}
 
 	function paymentType() {
 		const checked = form.querySelector('input[name="payment_type"]:checked');
@@ -943,6 +1304,27 @@ $staff_payload = array_map(static function ($staff_member) {
 			setFeeValue(isEdit ? state.storedDiscountedFee : state.discountedFee);
 			state.feeManuallyOverridden = false;
 			refreshSummary();
+		});
+	}
+
+	if (createPatientButton) {
+		createPatientButton.addEventListener('click', openCreatePatientModal);
+	}
+
+	if (createPatientSubmitButton) {
+		createPatientSubmitButton.addEventListener('click', submitCreatePatient);
+	}
+
+	createPatientCloseButtons.forEach(function (button) {
+		button.addEventListener('click', function (event) {
+			event.preventDefault();
+			closeCreatePatientModal();
+		});
+	});
+
+	if (createPatientModalElement) {
+		createPatientModalElement.addEventListener('hidden.bs.modal', function () {
+			resetCreatePatientModal();
 		});
 	}
 

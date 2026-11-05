@@ -115,7 +115,7 @@ $initial_rows = array_map(static function ($row) {
 <?= form_close() ?>
 
 <?php if ($can_manage_patients) : ?>
-	<div class="modal fade bulk-create-patient-modal" id="bulkCreatePatientModal" tabindex="-1" aria-hidden="true">
+	<div class="modal fade bulk-create-patient-modal" id="bulkCreatePatientModal" tabindex="-1" aria-hidden="true" data-bs-focus="false">
 		<div class="modal-dialog modal-lg modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -411,6 +411,7 @@ $initial_rows = array_map(static function ($row) {
 	const rowsContainer = document.getElementById('bulkRows');
 	const template = document.getElementById('bulkTurnRowTemplate');
 	const sectionSelect = document.getElementById('bulkSectionSelect');
+	const sharedDateInput = document.getElementById('bulkDateInput');
 	const addRowButton = document.getElementById('addBulkRowButton');
 	const addRowsButton = document.getElementById('addBulkRowsButton');
 	const addCountInput = document.getElementById('bulkRowAddCount');
@@ -427,10 +428,19 @@ $initial_rows = array_map(static function ($row) {
 	const createPatientModalElement = document.getElementById('bulkCreatePatientModal');
 	const createPatientAlert = document.getElementById('bulkCreatePatientAlert');
 	const createPatientSubmitButton = document.getElementById('bulkCreatePatientSubmit');
-	const createPatientModal = createPatientModalElement && window.bootstrap ? new window.bootstrap.Modal(createPatientModalElement) : null;
 	const createPatientCloseButtons = createPatientModalElement ? Array.from(createPatientModalElement.querySelectorAll('.bulk-create-patient-close')) : [];
 	let activePatientRow = null;
 	let fallbackModalBackdrop = null;
+
+	function getCreatePatientModal() {
+		if (!createPatientModalElement) {
+			return null;
+		}
+		if (window.bootstrap && window.bootstrap.Modal) {
+			return window.bootstrap.Modal.getOrCreateInstance(createPatientModalElement);
+		}
+		return null;
+	}
 	const messages = {
 		select: <?= json_encode(t('Select')) ?>,
 		noSessionNumber: <?= json_encode('—') ?>,
@@ -1183,8 +1193,9 @@ $initial_rows = array_map(static function ($row) {
 			window.initSelect2(createPatientModalElement);
 		}
 
-		if (createPatientModal) {
-			createPatientModal.show();
+		const modal = getCreatePatientModal();
+		if (modal) {
+			modal.show();
 			const firstNameInput = createPatientModalElement.querySelector('[name="first_name"]');
 			if (firstNameInput) {
 				window.setTimeout(function () {
@@ -1198,9 +1209,11 @@ $initial_rows = array_map(static function ($row) {
 		createPatientModalElement.style.display = 'block';
 		createPatientModalElement.removeAttribute('aria-hidden');
 		document.body.classList.add('modal-open');
-		fallbackModalBackdrop = document.createElement('div');
-		fallbackModalBackdrop.className = 'modal-backdrop fade show';
-		document.body.appendChild(fallbackModalBackdrop);
+		if (!fallbackModalBackdrop) {
+			fallbackModalBackdrop = document.createElement('div');
+			fallbackModalBackdrop.className = 'modal-backdrop fade show';
+			document.body.appendChild(fallbackModalBackdrop);
+		}
 
 		const firstNameInput = createPatientModalElement.querySelector('[name="first_name"]');
 		if (firstNameInput) {
@@ -1213,8 +1226,9 @@ $initial_rows = array_map(static function ($row) {
 			return;
 		}
 
-		if (createPatientModal) {
-			createPatientModal.hide();
+		const modal = getCreatePatientModal();
+		if (modal) {
+			modal.hide();
 			return;
 		}
 
@@ -1264,13 +1278,24 @@ $initial_rows = array_map(static function ($row) {
 		}
 
 		const select = row.querySelector('.bulk-patient-select');
-		select.value = String(patientId);
-
-		if (window.jQuery) {
-			window.jQuery(select).trigger('change');
+		if (!select) {
 			return;
 		}
 
+		const stringId = String(patientId);
+
+		if (window.jQuery) {
+			const $select = window.jQuery(select);
+			if (!$select.find('option[value="' + stringId + '"]').length) {
+				const patient = patients.find(function (p) { return String(p.id) === stringId; });
+				const text = patient ? patient.name : stringId;
+				$select.append(new Option(text, stringId, true, true));
+			}
+			$select.val(stringId).trigger('change');
+			return;
+		}
+
+		select.value = stringId;
 		select.dispatchEvent(new Event('change', { bubbles: true }));
 	}
 
@@ -1305,10 +1330,11 @@ $initial_rows = array_map(static function ($row) {
 					});
 			})
 			.then(function (data) {
+				const targetRow = activePatientRow;
 				upsertPatient(data.patient || {});
 
-				if (activePatientRow && data.patient && data.patient.id) {
-					selectPatientForRow(activePatientRow, data.patient.id);
+				if (targetRow && data.patient && data.patient.id) {
+					selectPatientForRow(targetRow, data.patient.id);
 				}
 
 				closeCreatePatientModal();
@@ -1480,7 +1506,7 @@ $initial_rows = array_map(static function ($row) {
 		});
 
 		createPatientModalElement.addEventListener('click', function (event) {
-			if (event.target === createPatientModalElement && !createPatientModal) {
+			if (event.target === createPatientModalElement && !getCreatePatientModal()) {
 				closeCreatePatientModal();
 			}
 		});
