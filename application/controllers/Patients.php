@@ -1104,12 +1104,34 @@ class Patients extends Authenticated_Controller
 		$this->form_validation->set_rules('age', 'Age', 'trim|integer|greater_than_equal_to[0]|less_than_equal_to[120]');
 		$this->form_validation->set_rules('phone', 'Phone 1', 'trim');
 		$this->form_validation->set_rules('phone2', 'Phone 2', 'trim');
+		$this->form_validation->set_rules('visit_date', 'Date of Visit', 'trim|callback__valid_visit_date');
+	}
+
+	public function _valid_visit_date($value)
+	{
+		$value = trim((string) $value);
+		if ($value === '' || $this->is_valid_shamsi_date_input($value) || preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+			return TRUE;
+		}
+
+		$this->form_validation->set_message('_valid_visit_date', t('Please choose a valid date.'));
+		return FALSE;
 	}
 
 	protected function patient_payload()
 	{
 		$referred_by = $this->input->post('referred_by', TRUE);
 		$age = $this->input->post('age', TRUE);
+		$visit_date_raw = $this->input->post('visit_date', TRUE);
+		$visit_date = NULL;
+		if ($visit_date_raw !== NULL && trim($visit_date_raw) !== '') {
+			$gregorian = $this->gregorian_date_from_shamsi($visit_date_raw);
+			if ($gregorian !== '') {
+				$visit_date = $gregorian;
+			} elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($visit_date_raw))) {
+				$visit_date = trim($visit_date_raw);
+			}
+		}
 
 		return array(
 			'first_name' => $this->input->post('first_name', TRUE),
@@ -1121,6 +1143,7 @@ class Patients extends Authenticated_Controller
 			'phone2' => $this->null_if_empty($this->input->post('phone2', TRUE)),
 			'address' => $this->null_if_empty($this->input->post('address', TRUE)),
 			'medical_notes' => $this->null_if_empty($this->input->post('medical_notes', TRUE)),
+			'visit_date' => $visit_date,
 			'referred_by' => $referred_by === '' || $referred_by === NULL ? NULL : (int) $referred_by,
 		);
 	}
@@ -1173,7 +1196,7 @@ class Patients extends Authenticated_Controller
 
 	protected function patient_validation_errors()
 	{
-		$fields = array('first_name', 'last_name', 'gender', 'age', 'phone', 'phone2');
+		$fields = array('first_name', 'last_name', 'gender', 'age', 'phone', 'phone2', 'visit_date');
 		$errors = array();
 
 		foreach ($fields as $field) {

@@ -13,13 +13,13 @@ class Report_model extends CI_Model
 		}
 
 		return $this->db
-			->select("patients.id, patients.first_name, patients.last_name, patients.father_name, patients.gender, patients.phone, patients.phone2, patients.created_at,
+			->select("patients.id, patients.first_name, patients.last_name, patients.father_name, patients.gender, patients.phone, patients.phone2, patients.visit_date, patients.created_at,
 				TRIM(CONCAT(reference_doctors.first_name, ' ', COALESCE(reference_doctors.last_name, ''))) AS referred_by_name", FALSE)
 			->from('patients')
 			->join('reference_doctors', 'reference_doctors.id = patients.referred_by', 'left')
-			->where('DATE(patients.created_at) >=', $from)
-			->where('DATE(patients.created_at) <=', $to)
-			->order_by('patients.created_at', 'desc')
+			->where('COALESCE(patients.visit_date, DATE(patients.created_at)) >=', $from)
+			->where('COALESCE(patients.visit_date, DATE(patients.created_at)) <=', $to)
+			->order_by('COALESCE(patients.visit_date, DATE(patients.created_at))', 'desc', FALSE)
 			->order_by('patients.id', 'desc')
 			->get()
 			->result_array();

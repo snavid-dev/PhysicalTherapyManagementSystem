@@ -130,6 +130,9 @@ class Reference_doctors extends Authenticated_Controller
 		$patients = $this->Reference_doctor_model->get_referred_patients($id, $date_from_start, $date_to_end);
 		$count = $this->Reference_doctor_model->count_referred_patients($id, $date_from_start, $date_to_end);
 		$patients = array_map(static function ($patient) {
+			$raw_visit_date = !empty($patient['visit_date']) ? $patient['visit_date'] : NULL;
+			$patient['visit_date_formatted'] = $raw_visit_date ? to_shamsi($raw_visit_date, 'Y/m/d') : to_shamsi($patient['created_at'], 'Y/m/d');
+			$patient['visit_date'] = $patient['visit_date_formatted'];
 			$patient['created_at'] = to_shamsi($patient['created_at'], 'Y/m/d H:i');
 			return $patient;
 		}, $patients);

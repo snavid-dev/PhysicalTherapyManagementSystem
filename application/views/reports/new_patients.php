@@ -51,7 +51,7 @@ $can_open_patient = $this->auth->has_permission('manage_patients');
 						<th><?= t('father_name') ?></th>
 						<th><?= t('Gender') ?></th>
 						<th><?= t('Phone') ?></th>
-						<th class="col-date"><?= t('date_added') ?></th>
+						<th class="col-date"><?= t('visit_date') ?></th>
 						<th><?= t('Referred By') ?></th>
 						<th class="no-export text-end"><?= t('Actions') ?></th>
 					</tr>
@@ -64,7 +64,10 @@ $can_open_patient = $this->auth->has_permission('manage_patients');
 						<td><?= !empty($row['father_name']) ? html_escape($row['father_name']) : '&mdash;' ?></td>
 						<td><?= !empty($row['gender']) ? html_escape($row['gender']) : '&mdash;' ?></td>
 						<td><?= !empty($row['phone']) ? html_escape($row['phone']) : '&mdash;' ?></td>
-						<td class="col-date"><?= html_escape(to_shamsi(substr((string) ($row['created_at'] ?? ''), 0, 10))) ?></td>
+						<td class="col-date">
+							<?php $display_date = !empty($row['visit_date']) ? $row['visit_date'] : substr((string) ($row['created_at'] ?? ''), 0, 10); ?>
+							<span title="<?= t('date_registered') ?>: <?= html_escape(to_shamsi($row['created_at'], 'Y/m/d H:i')) ?>"><?= html_escape(to_shamsi($display_date)) ?></span>
+						</td>
 						<td><?= !empty($row['referred_by_name']) ? html_escape($row['referred_by_name']) : '&mdash;' ?></td>
 						<td class="no-export text-end">
 							<?php if ($can_open_patient) : ?>

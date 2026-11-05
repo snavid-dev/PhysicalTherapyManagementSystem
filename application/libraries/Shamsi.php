@@ -240,120 +240,107 @@ class Shamsi
 
 	protected function gregorian_to_jalali($gy, $gm, $gd)
 	{
-		$g_days_in_month = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+		$g_days_in_month = array(31, $this->is_gregorian_leap($gy) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 
-		if ($this->is_gregorian_leap($gy)) {
-			$g_days_in_month[1] = 29;
+		$gy = (int) $gy - 1600;
+		$gm = (int) $gm - 1;
+		$gd = (int) $gd - 1;
+
+		$g_day_no = (365 * $gy)
+			+ intdiv($gy + 3, 4)
+			- intdiv($gy + 99, 100)
+			+ intdiv($gy + 399, 400);
+
+		for ($i = 0; $i < $gm; $i++) {
+			$g_day_no += $g_days_in_month[$i];
 		}
 
-		if ($gy > 1600) {
-			$jy = 979;
-			$gy -= 1600;
-		} else {
-			$jy = 0;
-			$gy -= 621;
+		$g_day_no += $gd;
+		$j_day_no = $g_day_no - 79;
+		$j_np = intdiv($j_day_no, 12053);
+		$j_day_no %= 12053;
+		$jy = 979 + (33 * $j_np) + (4 * intdiv($j_day_no, 1461));
+		$j_day_no %= 1461;
+
+		if ($j_day_no >= 366) {
+			$jy += intdiv($j_day_no - 1, 365);
+			$j_day_no = ($j_day_no - 1) % 365;
 		}
 
-		$gy2 = $gm > 2 ? $gy + 1 : $gy;
-		$days = (365 * $gy)
-			+ intdiv($gy2 + 3, 4)
-			- intdiv($gy2 + 99, 100)
-			+ intdiv($gy2 + 399, 400)
-			- 80
-			+ $gd;
-
-		for ($i = 0; $i < $gm - 1; $i++) {
-			$days += $g_days_in_month[$i];
-		}
-
-		$jy += 33 * intdiv($days, 12053);
-		$days %= 12053;
-		$jy += 4 * intdiv($days, 1461);
-		$days %= 1461;
-
-		if ($days > 365) {
-			$jy += intdiv($days - 1, 365);
-			$days = ($days - 1) % 365;
-		}
-
-		if ($days < 186) {
-			$jm = 1 + intdiv($days, 31);
-			$jd = 1 + ($days % 31);
-		} else {
-			$jm = 7 + intdiv($days - 186, 30);
-			$jd = 1 + (($days - 186) % 30);
+		for ($i = 0; $i < 11; $i++) {
+			$dim = $i < 6 ? 31 : 30;
+			if ($j_day_no < $dim) {
+				return array(
+					'year' => $jy,
+					'month' => $i + 1,
+					'day' => $j_day_no + 1,
+				);
+			}
+			$j_day_no -= $dim;
 		}
 
 		return array(
 			'year' => $jy,
-			'month' => $jm,
-			'day' => $jd,
+			'month' => 12,
+			'day' => $j_day_no + 1,
 		);
 	}
 
 	protected function jalali_to_gregorian($jy, $jm, $jd)
 	{
-		$jy = (int) $jy;
-		$jm = (int) $jm;
-		$jd = (int) $jd;
+		$jy = (int) $jy - 979;
+		$jm = (int) $jm - 1;
+		$jd = (int) $jd - 1;
 
-		if ($jy > 979) {
-			$gy = 1600;
-			$jy -= 979;
-		} else {
-			$gy = 621;
-		}
-
-		$days = (365 * $jy)
+		$j_day_no = (365 * $jy)
 			+ (intdiv($jy, 33) * 8)
-			+ intdiv(($jy % 33) + 3, 4)
-			+ 78
-			+ $jd;
+			+ intdiv(($jy % 33) + 3, 4);
 
-		if ($jm < 7) {
-			$days += ($jm - 1) * 31;
-		} else {
-			$days += (($jm - 7) * 30) + 186;
+		for ($i = 0; $i < $jm; $i++) {
+			$j_day_no += $i < 6 ? 31 : 30;
 		}
 
-		$gy += 400 * intdiv($days, 146097);
-		$days %= 146097;
+		$j_day_no += $jd;
+		$g_day_no = $j_day_no + 79;
 
-		if ($days > 36524) {
-			$days--;
-			$gy += 100 * intdiv($days, 36524);
-			$days %= 36524;
+		$gy = 1600 + (400 * intdiv($g_day_no, 146097));
+		$g_day_no %= 146097;
 
-			if ($days >= 365) {
-				$days++;
+		$leap = TRUE;
+		if ($g_day_no >= 36525) {
+			$g_day_no--;
+			$gy += 100 * intdiv($g_day_no, 36524);
+			$g_day_no %= 36524;
+
+			if ($g_day_no >= 365) {
+				$g_day_no++;
+			} else {
+				$leap = FALSE;
 			}
 		}
 
-		$gy += 4 * intdiv($days, 1461);
-		$days %= 1461;
+		$gy += 4 * intdiv($g_day_no, 1461);
+		$g_day_no %= 1461;
 
-		if ($days > 365) {
-			$gy += intdiv($days - 1, 365);
-			$days = ($days - 1) % 365;
+		if ($g_day_no >= 366) {
+			$leap = FALSE;
+			$g_day_no--;
+			$gy += intdiv($g_day_no, 365);
+			$g_day_no %= 365;
 		}
 
-		$gd = $days + 1;
-		$g_days_in_month = array(31, $this->is_gregorian_leap($gy) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
-		$gm = 1;
+		$g_days_in_month = array(31, $leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+		$gm = 0;
 
-		foreach ($g_days_in_month as $days_in_month) {
-			if ($gd <= $days_in_month) {
-				break;
-			}
-
-			$gd -= $days_in_month;
+		while ($g_day_no >= $g_days_in_month[$gm]) {
+			$g_day_no -= $g_days_in_month[$gm];
 			$gm++;
 		}
 
 		return array(
 			'year' => $gy,
-			'month' => $gm,
-			'day' => $gd,
+			'month' => $gm + 1,
+			'day' => $g_day_no + 1,
 		);
 	}
 }

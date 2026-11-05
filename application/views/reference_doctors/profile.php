@@ -92,7 +92,7 @@
 								<th><?= t('Full Name') ?></th>
 								<th><?= t('Gender') ?></th>
 								<th><?= t('Phone') ?></th>
-								<th class="col-date"><?= t('date_registered') ?></th>
+								<th class="col-date"><?= t('visit_date') ?></th>
 								<th class="no-export text-end"><?= t('Actions') ?></th>
 							</tr>
 						</thead>
@@ -102,7 +102,10 @@
 								<td><?= html_escape($patient['full_name']) ?></td>
 								<td><?= html_escape($patient['gender']) ?></td>
 								<td><?= html_escape($patient['phone']) ?></td>
-								<td class="col-date"><?= html_escape(to_shamsi($patient['created_at'], 'Y/m/d H:i')) ?></td>
+								<td class="col-date">
+									<?php $display_visit_date = !empty($patient['visit_date']) ? to_shamsi($patient['visit_date'], 'Y/m/d') : to_shamsi($patient['created_at'], 'Y/m/d'); ?>
+									<span title="<?= t('date_registered') ?>: <?= html_escape(to_shamsi($patient['created_at'], 'Y/m/d H:i')) ?>"><?= html_escape($display_visit_date) ?></span>
+								</td>
 								<td class="no-export text-end">
 									<a href="<?= base_url('patients/' . $patient['id']) ?>" class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Profile') ?></a>
 								</td>
@@ -152,7 +155,7 @@
 									<th><?= t('Full Name') ?></th>
 									<th><?= t('Gender') ?></th>
 									<th><?= t('Phone') ?></th>
-									<th><?= t('date_registered') ?></th>
+									<th><?= t('visit_date') ?></th>
 									<th class="text-end"><?= t('Actions') ?></th>
 								</tr>
 							</thead>
@@ -217,11 +220,12 @@
 		}
 
 		return patients.map(function (patient) {
+			const displayDate = patient.visit_date || patient.created_at;
 			return '<tr>'
 				+ '<td>' + escapeHtml(patient.full_name) + '</td>'
 				+ '<td>' + escapeHtml(patient.gender) + '</td>'
 				+ '<td>' + escapeHtml(patient.phone) + '</td>'
-				+ '<td>' + escapeHtml(patient.created_at) + '</td>'
+				+ '<td>' + escapeHtml(displayDate) + '</td>'
 				+ '<td class="text-end"><a href=' + JSON.stringify(<?= json_encode(base_url('patients/')) ?> + patient.id) + ' class="btn btn-sm btn-outline-dark btn-icon"><i class="bi bi-person-vcard" aria-hidden="true"></i> <?= t('Profile') ?></a></td>'
 				+ '</tr>';
 		}).join('');

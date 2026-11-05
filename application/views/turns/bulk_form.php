@@ -146,7 +146,7 @@ $initial_rows = array_map(static function ($row) {
 										<label class="form-label"><?= t('father_name') ?></label>
 										<input type="text" class="form-control" name="father_name">
 									</div>
-									<div class="col-lg-4 col-md-4">
+									<div class="col-lg-3 col-md-6">
 										<label class="form-label"><?= t('Gender') ?></label>
 										<select class="form-select" name="gender">
 											<option value=""><?= t('Select') ?></option>
@@ -155,12 +155,17 @@ $initial_rows = array_map(static function ($row) {
 										</select>
 										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="gender"></small>
 									</div>
-									<div class="col-lg-4 col-md-4">
+									<div class="col-lg-3 col-md-6">
 										<label class="form-label"><?= t('age') ?></label>
 										<input type="number" class="form-control" name="age" min="0" max="120">
 										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="age"></small>
 									</div>
-									<div class="col-lg-4 col-md-4">
+									<div class="col-lg-3 col-md-6">
+										<label class="form-label"><?= t('visit_date') ?></label>
+										<input type="text" class="form-control shamsi-date" name="visit_date" placeholder="1403/01/01" value="<?= html_escape(shamsi_today()) ?>">
+										<small class="text-danger d-block mt-1 bulk-create-patient-field-error" data-field="visit_date"></small>
+									</div>
+									<div class="col-lg-3 col-md-6">
 										<label class="form-label"><?= t('Referred By') ?></label>
 										<select name="referred_by" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_ref_doctor')) ?>">
 											<option value=""><?= t('-- None --') ?></option>
@@ -460,6 +465,7 @@ $initial_rows = array_map(static function ($row) {
 			father_name: createPatientModalElement.querySelector('[name="father_name"]'),
 			gender: createPatientModalElement.querySelector('[name="gender"]'),
 			age: createPatientModalElement.querySelector('[name="age"]'),
+			visit_date: createPatientModalElement.querySelector('[name="visit_date"]'),
 			referred_by: createPatientModalElement.querySelector('[name="referred_by"]'),
 			phone: createPatientModalElement.querySelector('[name="phone"]'),
 			phone2: createPatientModalElement.querySelector('[name="phone2"]'),
@@ -1136,6 +1142,11 @@ $initial_rows = array_map(static function ($row) {
 				return;
 			}
 
+			if (key === 'visit_date') {
+				fields[key].value = (sharedDateInput && sharedDateInput.value) ? sharedDateInput.value : <?= json_encode(shamsi_today()) ?>;
+				return;
+			}
+
 			fields[key].value = '';
 			if (window.jQuery && (key === 'referred_by' || key === 'gender')) {
 				window.jQuery(fields[key]).val('').trigger('change');
@@ -1233,6 +1244,7 @@ $initial_rows = array_map(static function ($row) {
 		params.set('father_name', fields.father_name ? fields.father_name.value.trim() : '');
 		params.set('gender', fields.gender ? fields.gender.value : '');
 		params.set('age', fields.age ? fields.age.value : '');
+		params.set('visit_date', fields.visit_date ? fields.visit_date.value.trim() : '');
 		params.set('referred_by', fields.referred_by ? fields.referred_by.value : '');
 		params.set('phone', fields.phone ? fields.phone.value.trim() : '');
 		params.set('phone2', fields.phone2 ? fields.phone2.value.trim() : '');

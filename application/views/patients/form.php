@@ -42,7 +42,7 @@
 								<label class="form-label"><?= t('father_name') ?></label>
 								<input type="text" name="father_name" class="form-control" value="<?= set_value('father_name', $patient['father_name'] ?? '') ?>">
 							</div>
-							<div class="col-lg-4 col-md-4">
+							<div class="col-lg-3 col-md-6">
 								<label class="form-label"><?= t('Gender') ?></label>
 								<select name="gender" class="form-select">
 									<option value=""><?= t('Select') ?></option>
@@ -51,12 +51,17 @@
 								</select>
 								<small class="text-danger"><?= form_error('gender') ?></small>
 							</div>
-							<div class="col-lg-4 col-md-4">
+							<div class="col-lg-3 col-md-6">
 								<label class="form-label"><?= t('age') ?></label>
 								<input type="number" name="age" class="form-control" min="0" max="120" value="<?= set_value('age', $patient['age'] ?? '') ?>">
 								<small class="text-danger"><?= form_error('age') ?></small>
 							</div>
-							<div class="col-lg-4 col-md-4">
+							<div class="col-lg-3 col-md-6">
+								<label class="form-label"><?= t('visit_date') ?></label>
+								<input type="text" name="visit_date" class="form-control shamsi-date" placeholder="1403/01/01" value="<?= set_value('visit_date', !empty($patient['visit_date']) ? to_shamsi($patient['visit_date']) : (empty($patient['id']) ? shamsi_today() : '')) ?>">
+								<small class="text-danger"><?= form_error('visit_date') ?></small>
+							</div>
+							<div class="col-lg-3 col-md-6">
 								<label class="form-label"><?= t('Referred By') ?></label>
 								<select name="referred_by" class="form-select s2-select" data-placeholder="<?= html_escape(t('select_ref_doctor')) ?>">
 									<option value=""><?= t('-- None --') ?></option>

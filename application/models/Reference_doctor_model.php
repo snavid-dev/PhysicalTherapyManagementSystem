@@ -57,13 +57,16 @@ class Reference_doctor_model extends CI_Model
 
 	public function get_referred_patients($doctor_id, $date_from, $date_to)
 	{
+		$from_date = substr($date_from, 0, 10);
+		$to_date = substr($date_to, 0, 10);
+
 		return $this->db
-			->select("id, CONCAT(first_name, ' ', last_name) AS full_name, gender, phone, created_at", FALSE)
+			->select("id, CONCAT(first_name, ' ', last_name) AS full_name, gender, phone, visit_date, created_at", FALSE)
 			->from('patients')
 			->where('referred_by', (int) $doctor_id)
-			->where('created_at >=', $date_from)
-			->where('created_at <=', $date_to)
-			->order_by('created_at', 'desc')
+			->where('COALESCE(patients.visit_date, DATE(patients.created_at)) >=', $from_date)
+			->where('COALESCE(patients.visit_date, DATE(patients.created_at)) <=', $to_date)
+			->order_by('COALESCE(patients.visit_date, DATE(patients.created_at))', 'desc', FALSE)
 			->order_by('id', 'desc')
 			->get()
 			->result_array();
@@ -71,6 +74,9 @@ class Reference_doctor_model extends CI_Model
 
 	public function get_referral_summary($date_from, $date_to)
 	{
+		$from_date = substr($date_from, 0, 10);
+		$to_date = substr($date_to, 0, 10);
+
 		return $this->db
 			->select("
 				reference_doctors.id,
@@ -80,7 +86,7 @@ class Reference_doctor_model extends CI_Model
 				COUNT(patients.id) AS referred_count
 			", FALSE)
 			->from('reference_doctors')
-			->join('patients', "patients.referred_by = reference_doctors.id AND patients.created_at >= " . $this->db->escape($date_from) . " AND patients.created_at <= " . $this->db->escape($date_to), 'left', FALSE)
+			->join('patients', "patients.referred_by = reference_doctors.id AND COALESCE(patients.visit_date, DATE(patients.created_at)) >= " . $this->db->escape($from_date) . " AND COALESCE(patients.visit_date, DATE(patients.created_at)) <= " . $this->db->escape($to_date), 'left', FALSE)
 			->where('reference_doctors.status', 'active')
 			->group_by('reference_doctors.id')
 			->having('referred_count >', 0, FALSE)
@@ -92,11 +98,14 @@ class Reference_doctor_model extends CI_Model
 
 	public function count_referred_patients($doctor_id, $date_from, $date_to)
 	{
+		$from_date = substr($date_from, 0, 10);
+		$to_date = substr($date_to, 0, 10);
+
 		return (int) $this->db
 			->from('patients')
 			->where('referred_by', (int) $doctor_id)
-			->where('created_at >=', $date_from)
-			->where('created_at <=', $date_to)
+			->where('COALESCE(patients.visit_date, DATE(patients.created_at)) >=', $from_date)
+			->where('COALESCE(patients.visit_date, DATE(patients.created_at)) <=', $to_date)
 			->count_all_results();
 	}
 }

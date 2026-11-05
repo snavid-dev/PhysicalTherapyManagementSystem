@@ -178,11 +178,13 @@ CREATE TABLE `patients` (
 	`age` tinyint unsigned DEFAULT NULL,
 	`address` varchar(255) DEFAULT NULL,
 	`medical_notes` text,
+	`visit_date` date DEFAULT NULL,
 	`referred_by` int unsigned DEFAULT NULL,
 	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`),
 	KEY `patients_referred_by_index` (`referred_by`),
+	KEY `patients_visit_date_index` (`visit_date`),
 	CONSTRAINT `fk_patients_referred_by` FOREIGN KEY (`referred_by`) REFERENCES `reference_doctors` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

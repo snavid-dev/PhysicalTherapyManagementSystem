@@ -3,10 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Patient_model extends CI_Model
 {
+	protected static $schema_ready = FALSE;
+
 	public function __construct()
 	{
 		parent::__construct();
 		$this->load->model('Safe_model');
+		$this->ensure_schema();
 	}
 
 	protected function diagnoses_tables_ready()
@@ -96,15 +99,26 @@ class Patient_model extends CI_Model
 		}
 	}
 
-	protected function ensure_schema()
+	public function ensure_schema()
 	{
+		if (self::$schema_ready) {
+			return;
+		}
+
 		if (!$this->db->table_exists('patients')) {
 			return;
+		}
+
+		if (!$this->db->field_exists('visit_date', 'patients')) {
+			$this->db->query("ALTER TABLE `patients` ADD COLUMN `visit_date` DATE NULL AFTER `medical_notes`");
 		}
 
 		// Backs the default name-sorted listing (get_datatable()'s default order);
 		// the leading-wildcard search itself can't use a btree index either way.
 		$this->add_index_if_missing('patients', 'patients_first_last_name_index', '(`first_name`, `last_name`)');
+		$this->add_index_if_missing('patients', 'patients_visit_date_index', '(`visit_date`)');
+
+		self::$schema_ready = TRUE;
 	}
 
 	protected function add_index_if_missing($table, $index_name, $columns_sql)
@@ -142,7 +156,11 @@ class Patient_model extends CI_Model
 
 	public function create($data)
 	{
-		$this->db->insert('patients', $this->normalize_patient_payload($data));
+		$data = $this->normalize_patient_payload($data);
+		if (empty($data['visit_date'])) {
+			$data['visit_date'] = date('Y-m-d');
+		}
+		$this->db->insert('patients', $data);
 		return $this->db->insert_id();
 	}
 
@@ -329,6 +347,10 @@ class Patient_model extends CI_Model
 
 		if (array_key_exists('phone2', $data)) {
 			$data['phone2'] = $this->normalize_nullable_string($data['phone2']);
+		}
+
+		if (array_key_exists('visit_date', $data)) {
+			$data['visit_date'] = $this->normalize_nullable_string($data['visit_date']);
 		}
 
 		return $data;

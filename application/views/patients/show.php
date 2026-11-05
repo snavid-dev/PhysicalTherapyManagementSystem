@@ -129,6 +129,7 @@ $can_edit_turn = $this->auth->has_permission('manage_turns');
 					<dt class="col-5"><?= t('phone2') ?></dt><dd class="col-7"><?= $phone2 ? html_escape($phone2) : '&mdash;' ?></dd>
 					<dt class="col-5"><?= t('Address') ?></dt><dd class="col-7"><?= $address ? nl2br(html_escape($address)) : '&mdash;' ?></dd>
 					<dt class="col-5"><?= t('Medical Notes') ?></dt><dd class="col-7"><?= $medical_notes ? nl2br(html_escape($medical_notes)) : '&mdash;' ?></dd>
+					<dt class="col-5"><?= t('visit_date') ?></dt><dd class="col-7"><?= !empty($patient['visit_date']) ? html_escape(to_shamsi($patient['visit_date'])) : '&mdash;' ?></dd>
 					<dt class="col-5"><?= t('Referred By') ?></dt><dd class="col-7"><?= $referred_by ? html_escape($referred_by_name) : '&mdash;' ?></dd>
 					<dt class="col-5"><?= t('diagnoses') ?></dt>
 					<dd class="col-7">
